@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/themes.dart';
-import 'package:locus/screens/InitializationScreen.dart';
+import 'package:locus/screens/WelcomeScreen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,18 +24,20 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return PlatformApp(
         title: 'Locus',
-        material: (_, __) => MaterialAppData(
+        material: (_, __) =>
+            MaterialAppData(
               theme: LIGHT_THEME_MATERIAL,
               darkTheme: DARK_THEME_MATERIAL,
               themeMode: ThemeMode.system,
             ),
-        cupertino: (_, __) => CupertinoAppData(
+        cupertino: (_, __) =>
+            CupertinoAppData(
               theme: LIGHT_THEME_CUPERTINO,
             ),
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         routes: {
-          "/": (context) => const InitializationScreen(),
+          "/": (context) => const WelcomeScreen(),
         });
   }
 }
