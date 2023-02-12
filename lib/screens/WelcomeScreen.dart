@@ -25,7 +25,7 @@ class WelcomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: MEDIUM_SPACE),
             Text(
-              l10n.initialization_description,
+              l10n.welcome_description,
               style: getCaptionTextStyle(context),
             ),
             const SizedBox(height: LARGE_SPACE),
@@ -39,7 +39,7 @@ class WelcomeScreen extends StatelessWidget {
                   children: <Widget>[
                     Icon(context.platformIcons.person),
                     Text(
-                      l10n.initialization_explanation_endToEndEncrypted,
+                      l10n.welcome_explanation_endToEndEncrypted,
                       style: theme.textTheme.bodyText1,
                     ),
                   ],
@@ -50,7 +50,7 @@ class WelcomeScreen extends StatelessWidget {
                   children: <Widget>[
                     Icon(context.platformIcons.share),
                     Text(
-                      l10n.initialization_explanation_decentralized,
+                      l10n.welcome_explanation_decentralized,
                       style: theme.textTheme.bodyText1,
                     ),
                   ],
@@ -60,7 +60,7 @@ class WelcomeScreen extends StatelessWidget {
             const SizedBox(height: LARGE_SPACE),
             PlatformElevatedButton(
                 child: Text(
-                  l10n.initialization_continue,
+                  l10n.welcome_continue,
                   style: theme.textTheme.button,
                 ),
                 // Navigate to "/createKeys
