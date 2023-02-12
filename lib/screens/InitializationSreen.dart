@@ -6,6 +6,8 @@ import 'package:locus/constants/spacing.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:openpgp/openpgp.dart';
 
+import 'ExchangeScreen.dart';
+
 final storage = FlutterSecureStorage();
 
 class InitializationScreen extends StatefulWidget {
@@ -33,11 +35,24 @@ class _InitializationScreenState extends State<InitializationScreen> {
     });
 
     try {
-      var keyOptions = KeyOptions()..rsaBits = 4096;
+      var keyOptions = KeyOptions()..rsaBits = 2048;
       var keyPair =
           await OpenPGP.generate(options: Options()..keyOptions = keyOptions);
 
       await storage.write(key: "PGP_PRIVATE_KEY", value: keyPair.privateKey);
+      await storage.write(key: "NAME", value: _controller.text);
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ExchangeScreen(
+            privateKey: keyPair.privateKey,
+            publicKey: keyPair.publicKey,
+            name: _controller.text,
+          ),
+        ),
+      );
+      return;
 
       Navigator.of(context).pushReplacementNamed("/home");
     } catch (error) {
