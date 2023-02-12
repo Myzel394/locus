@@ -59,12 +59,15 @@ class WelcomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: LARGE_SPACE),
             PlatformElevatedButton(
-                child: Text(
-                  l10n.welcome_continue,
-                  style: theme.textTheme.button,
-                ),
-                // Navigate to "/createKeys
-                onPressed: () {}),
+              child: Text(
+                l10n.welcome_continue,
+                style: theme.textTheme.button,
+              ),
+              // Navigate to "/createKeys
+              onPressed: () {
+                Navigator.pushReplacementNamed(context, "/initialize");
+              },
+            ),
           ],
         ),
       ),

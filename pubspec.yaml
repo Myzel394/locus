@@ -42,6 +42,7 @@ dependencies:
   flutter_platform_widgets: ^2.2.6
   intl: any
   location: ^4.4.0
+  openpgp: 3.4.0
 
 dev_dependencies:
   flutter_test:

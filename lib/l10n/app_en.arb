@@ -3,5 +3,9 @@
   "welcome_description": "Share your location with your friends and family.",
   "welcome_explanation_endToEndEncrypted": "Data is end-to-end encrypted",
   "welcome_explanation_decentralized": "Data is stored decentralized",
-  "welcome_continue": "Start"
+  "welcome_continue": "Start",
+  "initialization_title": "Get started",
+  "initialization_description": "Enter a name you would like to be called by your friends and family. After this, we will create your cryptographic key so that your data gets encrypted correctly.",
+  "initialization_form_field_name_label": "Name",
+  "initialization_continue": "Done"
 }

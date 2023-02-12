@@ -50,6 +50,20 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.3.1"
+  ffi:
+    dependency: transitive
+    description:
+      name: ffi
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.1"
+  flat_buffers:
+    dependency: transitive
+    description:
+      name: flat_buffers
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.5"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -196,6 +210,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.8.0"
+  openpgp:
+    dependency: "direct main"
+    description:
+      name: openpgp
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.4.0"
   path:
     dependency: transitive
     description:
