@@ -4,11 +4,10 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/utils/theme.dart';
+import 'package:locus/widgets/RelaySelect.dart';
 import 'package:openpgp/openpgp.dart';
 
-import 'ExchangeScreen.dart';
-
-final storage = FlutterSecureStorage();
+final storage = const FlutterSecureStorage();
 
 class InitializationScreen extends StatefulWidget {
   const InitializationScreen({Key? key}) : super(key: key);
@@ -18,15 +17,17 @@ class InitializationScreen extends StatefulWidget {
 }
 
 class _InitializationScreenState extends State<InitializationScreen> {
-  final TextEditingController _controller = TextEditingController();
-
+  List<String> _relays = [];
   bool _isCreatingKeys = false;
 
   @override
   void dispose() {
-    _controller.dispose();
-
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
   }
 
   void createKeys() async {
@@ -40,18 +41,9 @@ class _InitializationScreenState extends State<InitializationScreen> {
           await OpenPGP.generate(options: Options()..keyOptions = keyOptions);
 
       await storage.write(key: "PGP_PRIVATE_KEY", value: keyPair.privateKey);
-      await storage.write(key: "NAME", value: _controller.text);
+      await storage.write(key: "PGP_PUBLIC_KEY", value: keyPair.publicKey);
+      await storage.write(key: "RELAYS", value: _relays.join(","));
 
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ExchangeScreen(
-            privateKey: keyPair.privateKey,
-            publicKey: keyPair.publicKey,
-            name: _controller.text,
-          ),
-        ),
-      );
       return;
 
       Navigator.of(context).pushReplacementNamed("/home");
@@ -83,16 +75,15 @@ class _InitializationScreenState extends State<InitializationScreen> {
                 style: getBodyTextTextStyle(context),
               ),
               const SizedBox(height: LARGE_SPACE),
-              PlatformTextField(
-                controller: _controller,
-                keyboardType: TextInputType.name,
-                material: (_, __) => MaterialTextFieldData(
-                  decoration: InputDecoration(
-                    labelText: l10n.initialization_form_field_name_label,
-                  ),
-                ),
-                cupertino: (_, __) => CupertinoTextFieldData(
-                  placeholder: l10n.initialization_form_field_name_label,
+              Expanded(
+                child: RelaySelect(
+                  multiple: true,
+                  value: _relays,
+                  onChanged: (value) {
+                    setState(() {
+                      _relays = value;
+                    });
+                  },
                 ),
               ),
               const SizedBox(height: LARGE_SPACE),

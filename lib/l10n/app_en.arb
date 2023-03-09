@@ -5,7 +5,7 @@
   "welcome_explanation_decentralized": "Data is stored decentralized",
   "welcome_continue": "Start",
   "initialization_title": "Get started",
-  "initialization_description": "Enter a name you would like to be called by your friends and family. After this, we will create your cryptographic key so that your data gets encrypted correctly.",
+  "initialization_description": "Select on which relays you want to store your data. After that we will create your encryption keys.",
   "initialization_form_field_name_label": "Name",
   "initialization_continue": "Done"
 }

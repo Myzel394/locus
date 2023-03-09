@@ -44,6 +44,7 @@ dependencies:
   location: ^4.4.0
   openpgp: 3.4.0
   flutter_webrtc: ^0.9.21
+  http: ^0.13.5
 
 dev_dependencies:
   flutter_test:
