@@ -13,6 +13,7 @@ const uuid = Uuid();
 
 class Task {
   final String id;
+  final DateTime createdAt;
   String name;
   String privateKey;
   Duration frequency;
@@ -22,6 +23,7 @@ class Task {
     required this.name,
     required this.frequency,
     required this.privateKey,
+    required this.createdAt,
   });
 
   static Task fromJson(Map<String, dynamic> json) {
@@ -30,6 +32,7 @@ class Task {
       name: json["name"],
       privateKey: json["privateKey"],
       frequency: Duration(seconds: json["frequency"]),
+      createdAt: DateTime.parse(json["createdAt"]),
     );
   }
 
@@ -41,6 +44,7 @@ class Task {
       "name": name,
       "frequency": frequency.inSeconds,
       "privateKey": privateKey,
+      "createdAt": createdAt.toIso8601String(),
     };
   }
 
@@ -57,6 +61,7 @@ class Task {
       name: name,
       frequency: frequency,
       privateKey: keyPair.privateKey,
+      createdAt: DateTime.now(),
     );
   }
 

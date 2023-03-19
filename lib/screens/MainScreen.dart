@@ -58,6 +58,16 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => CreateTaskScreen(),
+            ),
+          );
+        },
+        child: Icon(context.platformIcons.add),
+      ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -73,6 +83,7 @@ class _MainScreenState extends State<MainScreen> {
                         final task = snapshot.data!.tasks[index];
 
                         return ListTile(
+                          onTap: () {},
                           title: Text(task.name),
                           subtitle: Text(task.frequency.toString()),
                           leading: FutureBuilder<bool>(
@@ -102,18 +113,6 @@ class _MainScreenState extends State<MainScreen> {
                   return PlatformCircularProgressIndicator();
                 },
               ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                // Navigate to CreateTaskScreen
-
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => CreateTaskScreen(),
-                  ),
-                );
-              },
-              child: Text("Send event"),
             ),
           ],
         ),

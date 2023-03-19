@@ -6,8 +6,10 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:locus/constants/themes.dart';
 import 'package:locus/screens/InitializationSreen.dart';
 import 'package:locus/screens/MainScreen.dart';
+import 'package:locus/screens/PermissionsScreen.dart';
 import 'package:locus/screens/WelcomeScreen.dart';
 import 'package:locus/services/manager_service.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:workmanager/workmanager.dart';
 
 const storage = FlutterSecureStorage();
@@ -26,11 +28,14 @@ void main() async {
   final nostrPrivateKey = await storage.read(key: "NOSTR_PRIVATE_KEY");
   final relays = (await storage.read(key: "RELAYS") ?? "").split(",");
 
+  final hasLocationAlwaysGranted = await Permission.locationAlways.isGranted;
+
   runApp(MyApp(
     pgpPublicKey: pgpPublicKey,
     pgpPrivateKey: pgpPrivateKey,
     nostrPrivateKey: nostrPrivateKey,
     relays: relays,
+    hasLocationAlwaysGranted: hasLocationAlwaysGranted,
   ));
 }
 
@@ -39,12 +44,14 @@ class MyApp extends StatelessWidget {
   final String? pgpPrivateKey;
   final String? nostrPrivateKey;
   final List<String> relays;
+  final bool hasLocationAlwaysGranted;
 
   const MyApp({
     required this.pgpPublicKey,
     required this.pgpPrivateKey,
     required this.nostrPrivateKey,
     required this.relays,
+    required this.hasLocationAlwaysGranted,
     super.key,
   });
 
@@ -72,8 +79,13 @@ class MyApp extends StatelessWidget {
               nostrPrivateKey: nostrPrivateKey!,
               relays: relays,
             ),
+        "/permission": (context) => PermissionsScreen(),
       },
-      initialRoute: pgpPublicKey != null ? "/home" : "/initialize",
+      initialRoute: pgpPublicKey != null
+          ? hasLocationAlwaysGranted
+              ? "/home"
+              : "/permission"
+          : "/initialize",
     );
   }
 }
