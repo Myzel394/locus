@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+import 'package:locus/services/task_service.dart';
 import 'package:nostr/nostr.dart';
 
 import 'CreateTaskScreen.dart';
@@ -60,15 +62,54 @@ class _MainScreenState extends State<MainScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            Expanded(
+              child: FutureBuilder<TaskService>(
+                future: TaskService.restore(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    return ListView.builder(
+                      itemCount: snapshot.data!.tasks.length,
+                      itemBuilder: (context, index) {
+                        final task = snapshot.data!.tasks[index];
+
+                        return ListTile(
+                          title: Text(task.name),
+                          subtitle: Text(task.frequency.toString()),
+                          leading: FutureBuilder<bool>(
+                            future: task.isRunning(),
+                            builder: (context, snapshot) {
+                              if (snapshot.hasData) {
+                                return PlatformSwitch(
+                                  value: snapshot.data!,
+                                  onChanged: (value) async {
+                                    if (value) {
+                                      await task.start();
+                                    } else {
+                                      await task.stop();
+                                    }
+                                  },
+                                );
+                              }
+
+                              return const SizedBox();
+                            },
+                          ),
+                        );
+                      },
+                    );
+                  }
+
+                  return PlatformCircularProgressIndicator();
+                },
+              ),
+            ),
             ElevatedButton(
               onPressed: () {
                 // Navigate to CreateTaskScreen
 
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (context) =>
-                        CreateTaskScreen(
-                        ),
+                    builder: (context) => CreateTaskScreen(),
                   ),
                 );
               },
