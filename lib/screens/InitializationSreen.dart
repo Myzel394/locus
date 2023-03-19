@@ -5,6 +5,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/RelaySelect.dart';
+import 'package:nostr/nostr.dart';
 import 'package:openpgp/openpgp.dart';
 
 final storage = const FlutterSecureStorage();
@@ -39,9 +40,13 @@ class _InitializationScreenState extends State<InitializationScreen> {
       var keyOptions = KeyOptions()..rsaBits = 2048;
       var keyPair =
           await OpenPGP.generate(options: Options()..keyOptions = keyOptions);
+      var nostrKeyPair = Keychain.generate();
 
       await storage.write(key: "PGP_PRIVATE_KEY", value: keyPair.privateKey);
       await storage.write(key: "PGP_PUBLIC_KEY", value: keyPair.publicKey);
+      await storage.write(
+          key: "NOSTR_PRIVATE_KEY", value: nostrKeyPair.private);
+      await storage.write(key: "NOSTR_PUBLIC_KEY", value: nostrKeyPair.public);
       await storage.write(key: "RELAYS", value: _relays.join(","));
 
       return;

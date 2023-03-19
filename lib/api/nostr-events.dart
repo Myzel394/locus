@@ -1,0 +1,42 @@
+import 'dart:io';
+
+import 'package:nostr/nostr.dart';
+
+class NostrEventsManager {
+  final List<String> relays;
+  final String _privateKey;
+  final WebSocket? _socket;
+
+  NostrEventsManager({
+    required this.relays,
+    required String privateKey,
+    WebSocket? socket,
+  })  : _privateKey = privateKey,
+        _socket = socket;
+
+  Future<void> _sendEvent(Event event, String url) async {
+    if (_socket != null) {
+      _socket!.add(event.serialize());
+      return;
+    }
+
+    final socket = await WebSocket.connect(url);
+
+    socket.add(event.serialize());
+
+    await socket.close();
+  }
+
+  Future<void> publishEvent(String message) async {
+    final event = Event.from(
+      kind: 1000,
+      tags: [],
+      content: message,
+      privkey: _privateKey,
+    );
+
+    for (final relay in relays) {
+      await _sendEvent(event, relay);
+    }
+  }
+}
