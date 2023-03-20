@@ -40,6 +40,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
       final task = await Task.create(
         _nameController.text,
         Duration(minutes: int.parse(_frequencyController.text)),
+        _relays,
       );
 
       taskService.add(task);

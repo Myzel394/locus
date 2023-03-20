@@ -21,6 +21,7 @@ class Task extends ChangeNotifier {
   String? pgpPrivateKey;
   String nostrPrivateKey;
   Duration frequency;
+  List<String> relays = [];
 
   Task({
     required this.id,
@@ -29,6 +30,7 @@ class Task extends ChangeNotifier {
     required this.pgpPrivateKey,
     required this.nostrPrivateKey,
     required this.createdAt,
+    this.relays = const [],
   });
 
   static Task fromJson(Map<String, dynamic> json) {
@@ -39,6 +41,7 @@ class Task extends ChangeNotifier {
       nostrPrivateKey: json["nostrPrivateKey"],
       frequency: Duration(seconds: json["frequency"]),
       createdAt: DateTime.parse(json["createdAt"]),
+      relays: json["relays"],
     );
   }
 
@@ -52,15 +55,17 @@ class Task extends ChangeNotifier {
       "pgpPrivateKey": pgpPrivateKey,
       "nostrPrivateKey": nostrPrivateKey,
       "createdAt": createdAt.toIso8601String(),
+      "relays": relays,
     };
   }
 
-  static Future<Task> create(String name,
-      Duration frequency,) async {
+  static Future<Task> create(
+    String name,
+    Duration frequency,
+    List<String> relays,
+  ) async {
     final keyPair = await OpenPGP.generate(
-      options: Options()
-        ..keyOptions = (KeyOptions()
-          ..rsaBits = 4096),
+      options: Options()..keyOptions = (KeyOptions()..rsaBits = 4096),
     );
 
     final nostrKeyPair = Keychain.generate();
@@ -71,6 +76,7 @@ class Task extends ChangeNotifier {
       frequency: frequency,
       pgpPrivateKey: keyPair.privateKey,
       nostrPrivateKey: nostrKeyPair.private,
+      relays: relays,
       createdAt: DateTime.now(),
     );
   }
@@ -135,6 +141,12 @@ class TaskService extends ChangeNotifier {
     return List<Map<String, dynamic>>.from(jsonDecode(tasks))
         .map((e) => Task.fromJson(e))
         .toList();
+  }
+
+  static Future<Task> getTask(final String taskID) async {
+    final tasks = await get();
+
+    return tasks.firstWhere((element) => element.id == taskID);
   }
 
   static Future<TaskService> restore() async {

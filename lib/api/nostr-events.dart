@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:nostr/nostr.dart';
 
+import '../services/task_service.dart';
+
 class NostrEventsManager {
   final List<String> relays;
   final String _privateKey;
@@ -13,6 +15,13 @@ class NostrEventsManager {
     WebSocket? socket,
   })  : _privateKey = privateKey,
         _socket = socket;
+
+  static NostrEventsManager fromTask(final Task task) {
+    return NostrEventsManager(
+      relays: task.relays,
+      privateKey: task.nostrPrivateKey,
+    );
+  }
 
   Future<void> _sendEvent(Event event, String url) async {
     if (_socket != null) {
@@ -27,7 +36,7 @@ class NostrEventsManager {
     await socket.close();
   }
 
-  Future<void> publishEvent(String message) async {
+  Future<void> publishMessage(String message) async {
     final event = Event.from(
       kind: 1000,
       tags: [],
