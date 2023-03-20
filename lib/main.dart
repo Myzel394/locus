@@ -5,7 +5,6 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:locus/constants/themes.dart';
-import 'package:locus/screens/InitializationSreen.dart';
 import 'package:locus/screens/MainScreen.dart';
 import 'package:locus/screens/PermissionsScreen.dart';
 import 'package:locus/services/manager_service.dart';
@@ -27,12 +26,6 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
 
-  final pgpPublicKey = await storage.read(key: "PGP_PUBLIC_KEY");
-  final pgpPrivateKey = await storage.read(key: "PGP_PRIVATE_KEY");
-  final nostrPrivateKey = await storage.read(key: "NOSTR_PRIVATE_KEY");
-  final nostrPublicKey = await storage.read(key: "NOSTR_PUBLIC_KEY");
-  final relays = (await storage.read(key: "RELAYS") ?? "").split(",");
-
   final hasLocationAlwaysGranted = await Permission.locationAlways.isGranted;
   final taskService = await TaskService.restore();
 
@@ -40,11 +33,6 @@ void main() async {
     ChangeNotifierProvider(
       create: (_) => taskService,
       child: MyApp(
-        pgpPublicKey: pgpPublicKey,
-        pgpPrivateKey: pgpPrivateKey,
-        nostrPrivateKey: nostrPrivateKey,
-        nostrPublicKey: nostrPublicKey,
-        relays: relays,
         hasLocationAlwaysGranted: hasLocationAlwaysGranted,
       ),
     ),
@@ -52,19 +40,9 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
-  final String? pgpPublicKey;
-  final String? pgpPrivateKey;
-  final String? nostrPrivateKey;
-  final String? nostrPublicKey;
-  final List<String> relays;
   final bool hasLocationAlwaysGranted;
 
   const MyApp({
-    required this.pgpPublicKey,
-    required this.pgpPrivateKey,
-    required this.nostrPrivateKey,
-    required this.nostrPublicKey,
-    required this.relays,
     required this.hasLocationAlwaysGranted,
     super.key,
   });
@@ -109,21 +87,11 @@ class MyApp extends StatelessWidget {
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: (() {
-          if (pgpPublicKey == null) {
-            return const InitializationScreen();
-          }
-
           if (!hasLocationAlwaysGranted) {
             return const PermissionsScreen();
           }
 
-          return MainScreen(
-            pgpPublicKey: pgpPublicKey!,
-            pgpPrivateKey: pgpPrivateKey!,
-            nostrPrivateKey: nostrPrivateKey!,
-            nostrPublicKey: nostrPublicKey!,
-            relays: relays,
-          );
+          return const MainScreen();
         })(),
       ),
     );
