@@ -50,6 +50,7 @@ dependencies:
   uuid: ^3.0.7
   permission_handler: ^10.2.0
   provider: ^6.0.5
+  dynamic_color: ^1.5.4
 
 dev_dependencies:
   flutter_test:

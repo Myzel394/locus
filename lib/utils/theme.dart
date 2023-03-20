@@ -19,6 +19,12 @@ TextStyle getTitleTextStyle(final BuildContext context) => platformThemeData(
       cupertino: (data) => data.textTheme.navLargeTitleTextStyle,
     );
 
+TextStyle getTitle2TextStyle(final BuildContext context) => platformThemeData(
+      context,
+      material: (data) => data.textTheme.headline2!,
+      cupertino: (data) => data.textTheme.navTitleTextStyle,
+    );
+
 TextStyle getSubTitleTextStyle(final BuildContext context) => platformThemeData(
       context,
       material: (data) => data.textTheme.subtitle1!,
@@ -42,4 +48,10 @@ double getIconSizeForBodyText(final BuildContext context) => platformThemeData(
       context,
       material: (data) => data.textTheme.bodyText1!.fontSize ?? 16,
       cupertino: (data) => data.textTheme.textStyle.fontSize ?? 16,
+    );
+
+double getActionButtonSize(final BuildContext context) => platformThemeData(
+      context,
+      material: (data) => data.textTheme.headline6!.fontSize ?? 16,
+      cupertino: (data) => data.textTheme.actionTextStyle.fontSize ?? 16,
     );

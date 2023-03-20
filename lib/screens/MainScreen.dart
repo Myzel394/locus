@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -5,17 +6,22 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:nostr/nostr.dart';
+import 'package:openpgp/openpgp.dart';
+import 'package:provider/provider.dart';
 
+import '../api/nostr-events.dart';
 import 'CreateTaskScreen.dart';
 
 class MainScreen extends StatefulWidget {
   final String nostrPrivateKey;
+  final String nostrPublicKey;
   final String pgpPrivateKey;
   final String pgpPublicKey;
   final List<String> relays;
 
   const MainScreen({
     required this.nostrPrivateKey,
+    required this.nostrPublicKey,
     required this.pgpPublicKey,
     required this.pgpPrivateKey,
     required this.relays,
@@ -43,20 +49,31 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   registerListener() async {
+    final request = Request(generate64RandomHexChars(), [
+      Filter(
+        kinds: [1000],
+        authors: [widget.nostrPublicKey],
+        since: 1679242255,
+      ),
+    ]);
+
     socket = await WebSocket.connect(
       widget.relays[0],
     );
 
-    await Future.delayed(Duration(seconds: 10));
+    socket.add(request.serialize());
+
+    await Future.delayed(Duration(seconds: 1));
 
     socket.listen((rawEvent) async {
       final event = Message.deserialize(rawEvent);
-      print(event);
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final taskService = context.watch<TaskService>();
+
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -72,47 +89,24 @@ class _MainScreenState extends State<MainScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Expanded(
-              child: FutureBuilder<TaskService>(
-                future: TaskService.restore(),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    return ListView.builder(
-                      itemCount: snapshot.data!.tasks.length,
-                      itemBuilder: (context, index) {
-                        final task = snapshot.data!.tasks[index];
+            ElevatedButton(
+              onPressed: () async {
+                final data = {
+                  "time": DateTime.now().toIso8601String(),
+                };
+                final encryptedData = await OpenPGP.encrypt(
+                  jsonEncode(data),
+                  widget.pgpPublicKey,
+                );
 
-                        return ListTile(
-                          onTap: () {},
-                          title: Text(task.name),
-                          subtitle: Text(task.frequency.toString()),
-                          leading: FutureBuilder<bool>(
-                            future: task.isRunning(),
-                            builder: (context, snapshot) {
-                              if (snapshot.hasData) {
-                                return PlatformSwitch(
-                                  value: snapshot.data!,
-                                  onChanged: (value) async {
-                                    if (value) {
-                                      await task.start();
-                                    } else {
-                                      await task.stop();
-                                    }
-                                  },
-                                );
-                              }
-
-                              return const SizedBox();
-                            },
-                          ),
-                        );
-                      },
-                    );
-                  }
-
-                  return PlatformCircularProgressIndicator();
-                },
-              ),
+                final manager = NostrEventsManager(
+                  privateKey: widget.nostrPrivateKey,
+                  relays: widget.relays,
+                  socket: socket,
+                );
+                await manager.publishEvent(encryptedData);
+              },
+              child: Text("Send event"),
             ),
           ],
         ),

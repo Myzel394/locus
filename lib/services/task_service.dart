@@ -1,7 +1,10 @@
+import 'dart:collection';
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:locus/services/manager_service.dart';
+import 'package:nostr/nostr.dart';
 import 'package:openpgp/openpgp.dart';
 import 'package:uuid/uuid.dart';
 import 'package:workmanager/workmanager.dart';
@@ -15,14 +18,16 @@ class Task {
   final String id;
   final DateTime createdAt;
   String name;
-  String privateKey;
+  String? pgpPrivateKey;
+  String nostrPrivateKey;
   Duration frequency;
 
   Task({
     required this.id,
     required this.name,
     required this.frequency,
-    required this.privateKey,
+    required this.pgpPrivateKey,
+    required this.nostrPrivateKey,
     required this.createdAt,
   });
 
@@ -30,7 +35,8 @@ class Task {
     return Task(
       id: json["id"],
       name: json["name"],
-      privateKey: json["privateKey"],
+      pgpPrivateKey: json["pgpPrivateKey"],
+      nostrPrivateKey: json["nostrPrivateKey"],
       frequency: Duration(seconds: json["frequency"]),
       createdAt: DateTime.parse(json["createdAt"]),
     );
@@ -43,7 +49,8 @@ class Task {
       "id": id,
       "name": name,
       "frequency": frequency.inSeconds,
-      "privateKey": privateKey,
+      "pgpPrivateKey": pgpPrivateKey,
+      "nostrPrivateKey": nostrPrivateKey,
       "createdAt": createdAt.toIso8601String(),
     };
   }
@@ -53,14 +60,17 @@ class Task {
     Duration frequency,
   ) async {
     final keyPair = await OpenPGP.generate(
-      options: Options()..keyOptions = (KeyOptions()..rsaBits = 2048),
+      options: Options()..keyOptions = (KeyOptions()..rsaBits = 4096),
     );
+
+    final nostrKeyPair = Keychain.generate();
 
     return Task(
       id: uuid.v4(),
       name: name,
       frequency: frequency,
-      privateKey: keyPair.privateKey,
+      pgpPrivateKey: keyPair.privateKey,
+      nostrPrivateKey: nostrKeyPair.private,
       createdAt: DateTime.now(),
     );
   }
@@ -104,10 +114,12 @@ class Task {
   }
 }
 
-class TaskService {
-  List<Task> tasks;
+class TaskService extends ChangeNotifier {
+  List<Task> _tasks;
 
-  TaskService(this.tasks);
+  TaskService(List<Task> tasks) : _tasks = tasks;
+
+  UnmodifiableListView<Task> get tasks => UnmodifiableListView(_tasks);
 
   static Future<List<Task>> get() async {
     final tasks = await storage.read(key: KEY);
@@ -131,5 +143,15 @@ class TaskService {
     final data = jsonEncode(tasks.map((e) => e.toJson()).toList());
 
     await storage.write(key: KEY, value: data);
+  }
+
+  void add(Task task) {
+    _tasks.add(task);
+
+    notifyListeners();
+  }
+
+  void update() {
+    notifyListeners();
   }
 }

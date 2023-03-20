@@ -1,3 +1,4 @@
+import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -7,10 +8,13 @@ import 'package:locus/constants/themes.dart';
 import 'package:locus/screens/InitializationSreen.dart';
 import 'package:locus/screens/MainScreen.dart';
 import 'package:locus/screens/PermissionsScreen.dart';
-import 'package:locus/screens/WelcomeScreen.dart';
 import 'package:locus/services/manager_service.dart';
+import 'package:locus/services/task_service.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart';
 import 'package:workmanager/workmanager.dart';
+
+import 'constants/spacing.dart';
 
 const storage = FlutterSecureStorage();
 
@@ -26,23 +30,32 @@ void main() async {
   final pgpPublicKey = await storage.read(key: "PGP_PUBLIC_KEY");
   final pgpPrivateKey = await storage.read(key: "PGP_PRIVATE_KEY");
   final nostrPrivateKey = await storage.read(key: "NOSTR_PRIVATE_KEY");
+  final nostrPublicKey = await storage.read(key: "NOSTR_PUBLIC_KEY");
   final relays = (await storage.read(key: "RELAYS") ?? "").split(",");
 
   final hasLocationAlwaysGranted = await Permission.locationAlways.isGranted;
+  final taskService = await TaskService.restore();
 
-  runApp(MyApp(
-    pgpPublicKey: pgpPublicKey,
-    pgpPrivateKey: pgpPrivateKey,
-    nostrPrivateKey: nostrPrivateKey,
-    relays: relays,
-    hasLocationAlwaysGranted: hasLocationAlwaysGranted,
-  ));
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => taskService,
+      child: MyApp(
+        pgpPublicKey: pgpPublicKey,
+        pgpPrivateKey: pgpPrivateKey,
+        nostrPrivateKey: nostrPrivateKey,
+        nostrPublicKey: nostrPublicKey,
+        relays: relays,
+        hasLocationAlwaysGranted: hasLocationAlwaysGranted,
+      ),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
   final String? pgpPublicKey;
   final String? pgpPrivateKey;
   final String? nostrPrivateKey;
+  final String? nostrPublicKey;
   final List<String> relays;
   final bool hasLocationAlwaysGranted;
 
@@ -50,6 +63,7 @@ class MyApp extends StatelessWidget {
     required this.pgpPublicKey,
     required this.pgpPrivateKey,
     required this.nostrPrivateKey,
+    required this.nostrPublicKey,
     required this.relays,
     required this.hasLocationAlwaysGranted,
     super.key,
@@ -58,34 +72,60 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return PlatformApp(
-      title: 'Locus',
-      material: (_, __) => MaterialAppData(
-        theme: LIGHT_THEME_MATERIAL,
-        darkTheme: DARK_THEME_MATERIAL,
-        themeMode: ThemeMode.system,
+    return DynamicColorBuilder(
+      builder: (ColorScheme? lightColorScheme, ColorScheme? darkColorScheme) =>
+          PlatformApp(
+        title: 'Locus',
+        material: (_, __) => MaterialAppData(
+          theme: lightColorScheme != null
+              ? LIGHT_THEME_MATERIAL.copyWith(
+                  colorScheme: lightColorScheme,
+                  scaffoldBackgroundColor:
+                      lightColorScheme.background.withAlpha(200),
+                  inputDecorationTheme: InputDecorationTheme(
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(MEDIUM_SPACE),
+                    ),
+                  ),
+                )
+              : LIGHT_THEME_MATERIAL,
+          darkTheme: darkColorScheme != null
+              ? DARK_THEME_MATERIAL.copyWith(
+                  colorScheme: darkColorScheme,
+                  inputDecorationTheme: InputDecorationTheme(
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(MEDIUM_SPACE),
+                    ),
+                  ),
+                  scaffoldBackgroundColor:
+                      darkColorScheme.background.withAlpha(200),
+                )
+              : DARK_THEME_MATERIAL,
+          themeMode: ThemeMode.system,
+        ),
+        cupertino: (_, __) => CupertinoAppData(
+          theme: LIGHT_THEME_CUPERTINO,
+        ),
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: (() {
+          if (pgpPublicKey == null) {
+            return const InitializationScreen();
+          }
+
+          if (!hasLocationAlwaysGranted) {
+            return const PermissionsScreen();
+          }
+
+          return MainScreen(
+            pgpPublicKey: pgpPublicKey!,
+            pgpPrivateKey: pgpPrivateKey!,
+            nostrPrivateKey: nostrPrivateKey!,
+            nostrPublicKey: nostrPublicKey!,
+            relays: relays,
+          );
+        })(),
       ),
-      cupertino: (_, __) => CupertinoAppData(
-        theme: LIGHT_THEME_CUPERTINO,
-      ),
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: AppLocalizations.supportedLocales,
-      routes: {
-        "/": (context) => const WelcomeScreen(),
-        "/initialize": (context) => const InitializationScreen(),
-        "/home": (context) => MainScreen(
-              pgpPublicKey: pgpPublicKey!,
-              pgpPrivateKey: pgpPrivateKey!,
-              nostrPrivateKey: nostrPrivateKey!,
-              relays: relays,
-            ),
-        "/permission": (context) => PermissionsScreen(),
-      },
-      initialRoute: pgpPublicKey != null
-          ? hasLocationAlwaysGranted
-              ? "/home"
-              : "/permission"
-          : "/initialize",
     );
   }
 }
