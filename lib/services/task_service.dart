@@ -14,7 +14,7 @@ const KEY = "tasks_settings";
 
 const uuid = Uuid();
 
-class Task {
+class Task extends ChangeNotifier {
   final String id;
   final DateTime createdAt;
   String name;
@@ -55,12 +55,12 @@ class Task {
     };
   }
 
-  static Future<Task> create(
-    String name,
-    Duration frequency,
-  ) async {
+  static Future<Task> create(String name,
+      Duration frequency,) async {
     final keyPair = await OpenPGP.generate(
-      options: Options()..keyOptions = (KeyOptions()..rsaBits = 4096),
+      options: Options()
+        ..keyOptions = (KeyOptions()
+          ..rsaBits = 4096),
     );
 
     final nostrKeyPair = Keychain.generate();
@@ -105,12 +105,16 @@ class Task {
         "startedAt": DateTime.now().toIso8601String(),
       }),
     );
+
+    notifyListeners();
   }
 
   Future<void> stop() async {
     Workmanager().cancelByUniqueName(id);
 
     await storage.delete(key: taskKey);
+
+    notifyListeners();
   }
 }
 

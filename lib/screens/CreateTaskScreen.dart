@@ -136,23 +136,25 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                 ? "Select Relays"
                                 : "Selected ${_relays.length} Relay${_relays.length == 1 ? "" : "s"}",
                           ),
-                          onPressed: () async {
-                            final relays = await showPlatformModalSheet(
-                              context: context,
-                              material: MaterialModalSheetData(
-                                backgroundColor: Colors.transparent,
-                                isScrollControlled: true,
-                                isDismissible: true,
-                              ),
-                              builder: (_) => RelaySelectSheet(),
-                            );
+                          onPressed: _isCreatingTask
+                              ? null
+                              : () async {
+                                  final relays = await showPlatformModalSheet(
+                                    context: context,
+                                    material: MaterialModalSheetData(
+                                      backgroundColor: Colors.transparent,
+                                      isScrollControlled: true,
+                                      isDismissible: true,
+                                    ),
+                                    builder: (_) => RelaySelectSheet(),
+                                  );
 
-                            if (relays != null) {
-                              setState(() {
-                                _relays = relays;
-                              });
-                            }
-                          },
+                                  if (relays != null) {
+                                    setState(() {
+                                      _relays = relays;
+                                    });
+                                  }
+                                },
                         ),
                       ],
                     ),
