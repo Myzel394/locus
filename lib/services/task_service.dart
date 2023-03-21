@@ -18,7 +18,12 @@ class Task extends ChangeNotifier {
   final String id;
   final DateTime createdAt;
   String name;
-  String? pgpPrivateKey;
+  String pgpPrivateKey;
+
+  // Deriving the public key from the private key doesn't work with encryption.
+  // I guess this is a bug in OpenPGP, but if you know how to fix it, please
+  // let me know.
+  String pgpPublicKey;
   String nostrPrivateKey;
   Duration frequency;
   List<String> relays = [];
@@ -28,6 +33,7 @@ class Task extends ChangeNotifier {
     required this.name,
     required this.frequency,
     required this.pgpPrivateKey,
+    required this.pgpPublicKey,
     required this.nostrPrivateKey,
     required this.createdAt,
     this.relays = const [],
@@ -38,10 +44,11 @@ class Task extends ChangeNotifier {
       id: json["id"],
       name: json["name"],
       pgpPrivateKey: json["pgpPrivateKey"],
+      pgpPublicKey: json["pgpPublicKey"],
       nostrPrivateKey: json["nostrPrivateKey"],
       frequency: Duration(seconds: json["frequency"]),
       createdAt: DateTime.parse(json["createdAt"]),
-      relays: json["relays"],
+      relays: List<String>.from(json["relays"]),
     );
   }
 
@@ -53,6 +60,7 @@ class Task extends ChangeNotifier {
       "name": name,
       "frequency": frequency.inSeconds,
       "pgpPrivateKey": pgpPrivateKey,
+      "pgpPublicKey": pgpPublicKey,
       "nostrPrivateKey": nostrPrivateKey,
       "createdAt": createdAt.toIso8601String(),
       "relays": relays,
@@ -64,8 +72,13 @@ class Task extends ChangeNotifier {
     Duration frequency,
     List<String> relays,
   ) async {
+    final keyOptions = KeyOptions()..rsaBits = 4096;
+    final options = Options()
+      ..keyOptions = keyOptions
+      ..name = "Locus"
+      ..email = "user@locus.example";
     final keyPair = await OpenPGP.generate(
-      options: Options()..keyOptions = (KeyOptions()..rsaBits = 4096),
+      options: options,
     );
 
     final nostrKeyPair = Keychain.generate();
@@ -75,6 +88,7 @@ class Task extends ChangeNotifier {
       name: name,
       frequency: frequency,
       pgpPrivateKey: keyPair.privateKey,
+      pgpPublicKey: keyPair.publicKey,
       nostrPrivateKey: nostrKeyPair.private,
       relays: relays,
       createdAt: DateTime.now(),
@@ -101,6 +115,9 @@ class Task extends ChangeNotifier {
       constraints: Constraints(
         networkType: NetworkType.connected,
       ),
+      inputData: {
+        "taskID": id,
+      },
       existingWorkPolicy: ExistingWorkPolicy.replace,
     );
 
@@ -146,7 +163,7 @@ class TaskService extends ChangeNotifier {
   static Future<Task> getTask(final String taskID) async {
     final tasks = await get();
 
-    return tasks.firstWhere((element) => element.id == taskID);
+    return tasks.firstWhere((task) => task.id == taskID);
   }
 
   static Future<TaskService> restore() async {

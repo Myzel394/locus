@@ -44,6 +44,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
       );
 
       taskService.add(task);
+      await taskService.save();
 
       if (mounted) {
         Navigator.of(context).pop();
