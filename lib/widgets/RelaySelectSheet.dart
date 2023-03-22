@@ -1,6 +1,5 @@
+import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/widgets/ModalSheet.dart';
 
@@ -9,7 +8,8 @@ import '../api/nostr-relays.dart';
 class RelaySelectSheet extends StatefulWidget {
   List<String> selectedRelays;
 
-  RelaySelectSheet({this.selectedRelays = const [], Key? key}) : super(key: key);
+  RelaySelectSheet({this.selectedRelays = const [], Key? key})
+      : super(key: key);
 
   @override
   State<RelaySelectSheet> createState() => _RelaySelectSheetState();
@@ -43,7 +43,7 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
                       itemBuilder: (context, index) {
                         final relay = snapshot.data![index];
 
-                        return CheckboxListTile(
+                        return PlatformCheckboxListTile(
                           title: Text(
                             relay.substring(6),
                           ),

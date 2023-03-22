@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/services/task_service.dart';
@@ -61,12 +60,16 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
   Widget build(BuildContext context) {
     final isKeyboardVisible = MediaQuery.of(context).viewInsets.bottom != 0;
 
-    return Scaffold(
-      appBar: AppBar(
+    return PlatformScaffold(
+      appBar: PlatformAppBar(
         title: Text("Create Task"),
-        centerTitle: true,
+        material: (_, __) => MaterialAppBarData(
+          centerTitle: true,
+        ),
       ),
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      material: (_, __) => MaterialScaffoldData(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(MEDIUM_SPACE),
         child: Center(
@@ -132,7 +135,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                           ),
                         ),
                         const SizedBox(height: MEDIUM_SPACE),
-                        ElevatedButton(
+                        PlatformElevatedButton(
                           child: Text(
                             _relays.isEmpty
                                 ? "Select Relays"

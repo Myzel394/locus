@@ -39,7 +39,6 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
   flutter_secure_storage: ^8.0.0
-  flutter_platform_widgets: ^3.2.0
   intl: any
   openpgp: 3.4.0
   http: ^0.13.5
@@ -53,6 +52,7 @@ dependencies:
   location: ^4.4.0
   geolocator: ^9.0.2
   flutter_osm_plugin: ^0.51.0
+  enough_platform_widgets: ^0.6.0
 
 dev_dependencies:
   flutter_test:
