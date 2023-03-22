@@ -47,5 +47,14 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>We need to access the location to store it.</string>
+    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+    <string>We need to access the location to store it.</string>
+    <key>NSLocationUsageDescription</key>
+    <string>We need to access the location to store it.</string>
+    <key>NSLocationAlwaysUsageDescription</key>
+    <string>We need to always access the location to store it in the background.</string>
 </dict>
 </plist>
