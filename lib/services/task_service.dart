@@ -96,15 +96,25 @@ class Task extends ChangeNotifier {
   }
 
   Future<bool> isRunning() async {
-    final value = await storage.read(key: taskKey);
+    final status = await getStatus();
 
-    if (value == null) {
-      return false;
+    return status != null;
+  }
+
+  Future<Map<String, dynamic>?> getStatus() async {
+    final rawData = await storage.read(key: taskKey);
+
+    if (rawData == null || rawData == "") {
+      return null;
     }
 
-    final data = jsonDecode(value);
+    final data = jsonDecode(rawData);
 
-    return data["runFrequency"] == frequency.inSeconds;
+    return {
+      ...data,
+      "runFrequency": Duration(seconds: data["runFrequency"]),
+      "startedAt": DateTime.parse(data["startedAt"]),
+    };
   }
 
   Future<void> start() async {
@@ -136,6 +146,26 @@ class Task extends ChangeNotifier {
     Workmanager().cancelByUniqueName(id);
 
     await storage.delete(key: taskKey);
+
+    notifyListeners();
+  }
+
+  Future<void> update({
+    String? name,
+    Duration? frequency,
+    List<String>? relays,
+  }) async {
+    if (name != null) {
+      this.name = name;
+    }
+
+    if (frequency != null) {
+      this.frequency = frequency;
+    }
+
+    if (relays != null) {
+      this.relays = relays;
+    }
 
     notifyListeners();
   }
@@ -184,7 +214,18 @@ class TaskService extends ChangeNotifier {
     notifyListeners();
   }
 
-  void update() {
+  void remove(final Task task) {
+    _tasks.remove(task);
+
     notifyListeners();
+  }
+
+  void update(final Task task) {
+    final index = _tasks.indexWhere((element) => element.id == task.id);
+
+    _tasks[index] = task;
+
+    notifyListeners();
+    save();
   }
 }

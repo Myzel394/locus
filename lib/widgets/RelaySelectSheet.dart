@@ -7,7 +7,10 @@ import 'package:locus/widgets/ModalSheet.dart';
 import '../api/nostr-relays.dart';
 
 class RelaySelectSheet extends StatefulWidget {
-  const RelaySelectSheet({Key? key}) : super(key: key);
+  List<String> selectedRelays;
+
+  RelaySelectSheet({this.selectedRelays = const [], Key? key})
+      : super(key: key);
 
   @override
   State<RelaySelectSheet> createState() => _RelaySelectSheetState();
@@ -15,6 +18,13 @@ class RelaySelectSheet extends StatefulWidget {
 
 class _RelaySelectSheetState extends State<RelaySelectSheet> {
   List<String> _relays = [];
+
+  @override
+  void initState() {
+    super.initState();
+
+    _relays = [...widget.selectedRelays];
+  }
 
   @override
   Widget build(BuildContext context) {

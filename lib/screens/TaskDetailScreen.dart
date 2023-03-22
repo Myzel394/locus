@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -5,8 +6,10 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
+import 'package:locus/screens/task_detail_screen_widgets/Details.dart';
 import 'package:locus/services/location_point_service.dart';
 import 'package:locus/services/task_service.dart';
+import 'package:locus/utils/theme.dart';
 import 'package:nostr/nostr.dart';
 
 class TaskDetailScreen extends StatefulWidget {
@@ -24,7 +27,9 @@ class TaskDetailScreen extends StatefulWidget {
 class _TaskDetailScreenState extends State<TaskDetailScreen> {
   late final WebSocket _socket;
   late final MapController _controller;
+  final PageController _pageController = PageController();
   bool _isLoading = true;
+  ScrollPhysics _physics = const NeverScrollableScrollPhysics();
   List<LocationPointService> _locations = [];
 
   get nostrPublicKey => Keychain(widget.task.nostrPrivateKey).public;
@@ -38,12 +43,25 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     );
 
     registerListener();
+
+    _pageController.addListener(() {
+      if (_pageController.page == 0) {
+        setState(() {
+          _physics = const NeverScrollableScrollPhysics();
+        });
+      } else {
+        setState(() {
+          _physics = const AlwaysScrollableScrollPhysics();
+        });
+      }
+    });
   }
 
   @override
   void dispose() {
     _socket.close();
     _controller.dispose();
+    _pageController.dispose();
 
     super.dispose();
   }
@@ -136,34 +154,98 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     return PlatformScaffold(
       appBar: PlatformAppBar(
         title: Text(widget.task.name),
+        material: (_, __) => MaterialAppBarData(
+          centerTitle: true,
+        ),
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(MEDIUM_SPACE),
-          child: Column(
-            children: <Widget>[
-              Expanded(
-                child: ListView.builder(
-                  itemCount: _locations.length,
-                  itemBuilder: (context, index) {
-                    final location = _locations[index];
+      body: Builder(
+        builder: (context) => Center(
+          child: _isLoading
+              ? Padding(
+                  padding: const EdgeInsets.all(MEDIUM_SPACE),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      Expanded(
+                        child: Column(
+                          children: <Widget>[
+                            Text(
+                              "Loading locations: ${_locations.length}",
+                              style: getTitleTextStyle(context),
+                            ),
+                            const SizedBox(height: MEDIUM_SPACE),
+                            Expanded(
+                              child: ListView.builder(
+                                itemCount: _locations.length,
+                                itemBuilder: (context, index) {
+                                  final location = _locations[index];
 
-                    return Text(location.accuracy.toString());
-                  },
+                                  return Text(
+                                    "${location.latitude}, ${location.longitude}",
+                                    style: getBodyTextTextStyle(context),
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      PlatformCircularProgressIndicator()
+                    ],
+                  ),
+                )
+              : PageView(
+                  physics: _physics,
+                  scrollDirection: Axis.vertical,
+                  controller: _pageController,
+                  children: <Widget>[
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        Expanded(
+                          flex: 9,
+                          child: OSMFlutter(
+                            controller: _controller,
+                            initZoom: 15,
+                          ),
+                        ),
+                        Expanded(
+                          flex: 1,
+                          child: PlatformTextButton(
+                            material: (_, __) => MaterialTextButtonData(
+                              style: ButtonStyle(
+                                // Not rounded, but square
+                                shape: MaterialStateProperty.all(
+                                  const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.zero,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            child: Text("View Details"),
+                            onPressed: () {
+                              _pageController.animateToPage(
+                                1,
+                                duration: const Duration(milliseconds: 500),
+                                curve: Curves.easeInOut,
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.all(MEDIUM_SPACE),
+                        child: Details(
+                          locations: UnmodifiableListView<LocationPointService>(
+                              _locations),
+                          task: widget.task,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              Expanded(
-                child: OSMFlutter(
-                  controller: _controller,
-                  initZoom: 12,
-                ),
-              ),
-              if (_isLoading) ...[
-                const SizedBox(height: MEDIUM_SPACE),
-                PlatformCircularProgressIndicator(),
-              ]
-            ],
-          ),
         ),
       ),
     );

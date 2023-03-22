@@ -70,13 +70,13 @@ class MyApp extends StatelessWidget {
           darkTheme: darkColorScheme != null
               ? DARK_THEME_MATERIAL.copyWith(
                   colorScheme: darkColorScheme,
+                  scaffoldBackgroundColor:
+                      darkColorScheme.background.withAlpha(200),
                   inputDecorationTheme: InputDecorationTheme(
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(MEDIUM_SPACE),
                     ),
                   ),
-                  scaffoldBackgroundColor:
-                      darkColorScheme.background.withAlpha(200),
                 )
               : DARK_THEME_MATERIAL,
           themeMode: ThemeMode.system,

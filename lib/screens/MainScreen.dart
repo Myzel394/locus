@@ -84,7 +84,7 @@ class MainScreen extends StatelessWidget {
                                 await task.stop();
                               }
 
-                              taskService.update();
+                              taskService.update(task);
                             },
                           );
                         }
