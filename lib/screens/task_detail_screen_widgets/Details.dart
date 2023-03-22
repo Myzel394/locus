@@ -178,13 +178,42 @@ class _DetailsState extends State<Details> {
             })(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.done) {
-                if (snapshot.hasData) {
-                  return Text(
-                    "Task started at ${snapshot.data!["startedAt"]} with a frequency of ${snapshot.data!["runFrequency"]}.",
-                  );
-                } else {
-                  return Text("Task is not running.");
-                }
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    if (snapshot.hasData)
+                      Text(
+                        "Task started at ${snapshot.data!["startedAt"]} with a frequency of ${snapshot.data!["runFrequency"]}.",
+                      )
+                    else
+                      Text("Task is not running."),
+                    const SizedBox(height: MEDIUM_SPACE),
+                    if (snapshot.hasData)
+                      PlatformTextButton(
+                        child: Text("Stop task"),
+                        material: (_, __) => MaterialTextButtonData(
+                          icon: const Icon(Icons.stop_rounded),
+                        ),
+                        onPressed: () async {
+                          await widget.task.stop();
+
+                          taskService.update(widget.task);
+                        },
+                      )
+                    else
+                      PlatformTextButton(
+                        child: Text("Start task"),
+                        material: (_, __) => MaterialTextButtonData(
+                          icon: const Icon(Icons.play_arrow_rounded),
+                        ),
+                        onPressed: () async {
+                          await widget.task.start();
+
+                          taskService.update(widget.task);
+                        },
+                      )
+                  ],
+                );
               }
 
               return Center(
