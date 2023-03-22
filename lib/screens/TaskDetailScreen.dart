@@ -238,8 +238,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                       child: SingleChildScrollView(
                         padding: const EdgeInsets.all(MEDIUM_SPACE),
                         child: Details(
-                          locations: UnmodifiableListView<LocationPointService>(
-                              _locations),
+                          locations: UnmodifiableListView<LocationPointService>(_locations),
                           task: widget.task,
                         ),
                       ),

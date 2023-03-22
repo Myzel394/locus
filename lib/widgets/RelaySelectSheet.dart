@@ -9,8 +9,7 @@ import '../api/nostr-relays.dart';
 class RelaySelectSheet extends StatefulWidget {
   List<String> selectedRelays;
 
-  RelaySelectSheet({this.selectedRelays = const [], Key? key})
-      : super(key: key);
+  RelaySelectSheet({this.selectedRelays = const [], Key? key}) : super(key: key);
 
   @override
   State<RelaySelectSheet> createState() => _RelaySelectSheetState();
@@ -70,7 +69,11 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
                   );
                 }
 
-                return PlatformCircularProgressIndicator();
+                return Expanded(
+                  child: Center(
+                    child: PlatformCircularProgressIndicator(),
+                  ),
+                );
               },
             ),
             const SizedBox(height: SMALL_SPACE),
