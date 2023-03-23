@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/services/task_service.dart';
@@ -8,9 +7,7 @@ import 'package:locus/widgets/RelaySelectSheet.dart';
 import 'package:provider/provider.dart';
 
 class CreateTaskScreen extends StatefulWidget {
-  const CreateTaskScreen({
-    Key? key,
-  }) : super(key: key);
+  const CreateTaskScreen({Key? key}) : super(key: key);
 
   @override
   State<CreateTaskScreen> createState() => _CreateTaskScreenState();
@@ -70,7 +67,9 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
           centerTitle: true,
         ),
       ),
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      material: (_, __) => MaterialScaffoldData(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(MEDIUM_SPACE),
         child: Center(
@@ -136,7 +135,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                           ),
                         ),
                         const SizedBox(height: MEDIUM_SPACE),
-                        ElevatedButton(
+                        PlatformElevatedButton(
                           child: Text(
                             _relays.isEmpty
                                 ? "Select Relays"

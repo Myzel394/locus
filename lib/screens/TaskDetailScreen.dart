@@ -1,10 +1,9 @@
 import 'dart:collection';
 import 'dart:io';
 
+import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
-import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/screens/task_detail_screen_widgets/Details.dart';
 import 'package:locus/services/location_point_service.dart';
@@ -241,7 +240,8 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                       child: SingleChildScrollView(
                         padding: const EdgeInsets.all(MEDIUM_SPACE),
                         child: Details(
-                          locations: UnmodifiableListView<LocationPointService>(_locations),
+                          locations: UnmodifiableListView<LocationPointService>(
+                              _locations),
                           task: widget.task,
                         ),
                       ),
