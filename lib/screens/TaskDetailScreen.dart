@@ -32,11 +32,14 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   ScrollPhysics _physics = const NeverScrollableScrollPhysics();
   List<LocationPointService> _locations = [];
 
-  get nostrPublicKey => Keychain(widget.task.nostrPrivateKey).public;
-
   @override
   void initState() {
     super.initState();
+
+    if (![TaskType.self, TaskType.share].contains(widget.task.type)) {
+      Navigator.of(context).pop();
+      return;
+    }
 
     _controller = MapController(
       initMapWithUserPosition: true,
@@ -70,7 +73,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     final request = Request(generate64RandomHexChars(), [
       Filter(
         kinds: [1000],
-        authors: [nostrPublicKey],
+        authors: [widget.task.nostrPublicKey],
       ),
     ]);
 
@@ -87,7 +90,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
         case "EVENT":
           final location = await LocationPointService.fromEncrypted(
             event.message.content,
-            widget.task.pgpPrivateKey,
+            widget.task.viewPGPPrivateKey!,
           );
 
           // We need to access `_locations` earlier than the UI updates.

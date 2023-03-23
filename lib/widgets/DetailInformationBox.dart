@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/utils/theme.dart';
+import 'package:locus/widgets/Paper.dart';
 
 class DetailInformationBox extends StatelessWidget {
   final String title;
@@ -23,15 +24,7 @@ class DetailInformationBox extends StatelessWidget {
           textAlign: TextAlign.start,
           style: getSubTitleTextStyle(context),
         ),
-        Container(
-          padding: const EdgeInsets.all(MEDIUM_SPACE),
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: Theme.of(context).dialogBackgroundColor,
-            borderRadius: BorderRadius.circular(
-              MEDIUM_SPACE,
-            ),
-          ),
+        Paper(
           child: child,
         ),
       ],

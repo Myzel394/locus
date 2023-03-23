@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
@@ -20,7 +21,7 @@ class MainScreen extends StatelessWidget {
 
     return PlatformScaffold(
       material: (_, __) => MaterialScaffoldData(
-        floatingActionButton: taskService.tasks.length == 0
+        floatingActionButton: taskService.tasks.isEmpty
             ? null
             : FloatingActionButton(
                 onPressed: () {
@@ -34,7 +35,7 @@ class MainScreen extends StatelessWidget {
               ),
       ),
       body: Center(
-        child: taskService.tasks.length == 0
+        child: taskService.tasks.isEmpty
             ? Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[

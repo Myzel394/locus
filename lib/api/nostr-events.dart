@@ -19,7 +19,7 @@ class NostrEventsManager {
   static NostrEventsManager fromTask(final Task task) {
     return NostrEventsManager(
       relays: task.relays,
-      privateKey: task.nostrPrivateKey,
+      privateKey: task.nostrPrivateKey!,
     );
   }
 

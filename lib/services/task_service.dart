@@ -12,18 +12,21 @@ import 'package:workmanager/workmanager.dart';
 const storage = FlutterSecureStorage();
 const KEY = "tasks_settings";
 
+enum TaskType {
+  share,
+  self,
+}
+
 const uuid = Uuid();
 
 class Task extends ChangeNotifier {
   final String id;
   final DateTime createdAt;
   String name;
-  String pgpPrivateKey;
-
-  // Deriving the public key from the private key doesn't work with encryption.
-  // I guess this is a bug in OpenPGP, but if you know how to fix it, please
-  // let me know.
-  String pgpPublicKey;
+  String signPGPPrivateKey;
+  String signPGPPublicKey;
+  String? viewPGPPrivateKey;
+  String viewPGPPublicKey;
   String nostrPrivateKey;
   Duration frequency;
   List<String> relays = [];
@@ -32,10 +35,12 @@ class Task extends ChangeNotifier {
     required this.id,
     required this.name,
     required this.frequency,
-    required this.pgpPrivateKey,
-    required this.pgpPublicKey,
-    required this.nostrPrivateKey,
+    required this.viewPGPPublicKey,
+    required this.signPGPPrivateKey,
+    required this.signPGPPublicKey,
     required this.createdAt,
+    required this.nostrPrivateKey,
+    this.viewPGPPrivateKey,
     this.relays = const [],
   });
 
@@ -43,8 +48,10 @@ class Task extends ChangeNotifier {
     return Task(
       id: json["id"],
       name: json["name"],
-      pgpPrivateKey: json["pgpPrivateKey"],
-      pgpPublicKey: json["pgpPublicKey"],
+      viewPGPPrivateKey: json["viewPGPPrivateKey"],
+      viewPGPPublicKey: json["viewPGPPublicKey"],
+      signPGPPrivateKey: json["signPGPPrivateKey"],
+      signPGPPublicKey: json["signPGPPublicKey"],
       nostrPrivateKey: json["nostrPrivateKey"],
       frequency: Duration(seconds: json["frequency"]),
       createdAt: DateTime.parse(json["createdAt"]),
@@ -52,44 +59,57 @@ class Task extends ChangeNotifier {
     );
   }
 
-  get taskKey => "Task:$id";
+  String get taskKey => "Task:$id";
+
+  String get nostrPublicKey => Keychain(nostrPrivateKey!).public;
+
+  TaskType get type {
+    if (viewPGPPrivateKey == null) {
+      return TaskType.share;
+    }
+
+    return TaskType.self;
+  }
 
   Map<String, dynamic> toJson() {
     return {
       "id": id,
       "name": name,
       "frequency": frequency.inSeconds,
-      "pgpPrivateKey": pgpPrivateKey,
-      "pgpPublicKey": pgpPublicKey,
+      "viewPGPPrivateKey": viewPGPPrivateKey,
+      "viewPGPPublicKey": viewPGPPublicKey,
+      "signPGPPrivateKey": signPGPPrivateKey,
+      "signPGPPublicKey": signPGPPublicKey,
       "nostrPrivateKey": nostrPrivateKey,
       "createdAt": createdAt.toIso8601String(),
       "relays": relays,
     };
   }
 
-  static Future<Task> create(
-    String name,
-    Duration frequency,
-    List<String> relays,
-  ) async {
-    final keyOptions = KeyOptions()..rsaBits = 4096;
-    final options = Options()
-      ..keyOptions = keyOptions
-      ..name = "Locus"
-      ..email = "user@locus.example";
-    final keyPair = await OpenPGP.generate(
-      options: options,
-    );
+  static Future<Task> create(final String name, final Duration frequency, final List<String> relays) async {
+    String? viewPGPPrivateKey;
 
-    final nostrKeyPair = Keychain.generate();
+    final viewKeyPair = await OpenPGP.generate(
+        options: (Options()
+          ..keyOptions = (KeyOptions()..rsaBits = 4096)
+          ..name = "Locus"
+          ..email = "user@locus.example"));
+
+    final signKeyPair = await OpenPGP.generate(
+        options: (Options()
+          ..keyOptions = (KeyOptions()..rsaBits = 4096)
+          ..name = "Locus"
+          ..email = "user@locus.example"));
 
     return Task(
       id: uuid.v4(),
       name: name,
       frequency: frequency,
-      pgpPrivateKey: keyPair.privateKey,
-      pgpPublicKey: keyPair.publicKey,
-      nostrPrivateKey: nostrKeyPair.private,
+      viewPGPPrivateKey: viewKeyPair.privateKey,
+      viewPGPPublicKey: viewKeyPair.publicKey,
+      signPGPPrivateKey: signKeyPair.privateKey,
+      signPGPPublicKey: signKeyPair.publicKey,
+      nostrPrivateKey: Keychain.generate().private,
       relays: relays,
       createdAt: DateTime.now(),
     );
@@ -185,9 +205,7 @@ class TaskService extends ChangeNotifier {
       return [];
     }
 
-    return List<Map<String, dynamic>>.from(jsonDecode(tasks))
-        .map((e) => Task.fromJson(e))
-        .toList();
+    return List<Map<String, dynamic>>.from(jsonDecode(tasks)).map((e) => Task.fromJson(e)).toList();
   }
 
   static Future<Task> getTask(final String taskID) async {
