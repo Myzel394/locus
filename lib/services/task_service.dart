@@ -87,8 +87,6 @@ class Task extends ChangeNotifier {
   }
 
   static Future<Task> create(final String name, final Duration frequency, final List<String> relays) async {
-    String? viewPGPPrivateKey;
-
     final viewKeyPair = await OpenPGP.generate(
         options: (Options()
           ..keyOptions = (KeyOptions()..rsaBits = 4096)

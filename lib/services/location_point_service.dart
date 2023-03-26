@@ -54,10 +54,15 @@ class LocationPointService {
     };
   }
 
-  Future<String> toEncryptedMessage(final String publicKey) {
+  Future<String> toEncryptedMessage({
+    required final String viewPublicKey,
+    required final String signPublicKey,
+    required final String signPrivateKey,
+  }) async {
     final message = jsonEncode(toJSON());
+    final signedMessage = await OpenPGP.sign(message, signPublicKey, signPrivateKey, "");
 
-    return OpenPGP.encrypt(message, publicKey);
+    return OpenPGP.encrypt(signedMessage, viewPublicKey);
   }
 
   static Future<LocationPointService> createUsingCurrentLocation() async {

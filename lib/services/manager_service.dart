@@ -18,7 +18,11 @@ void callbackDispatcher() {
       final eventManager = NostrEventsManager.fromTask(task);
 
       final locationPoint = await LocationPointService.createUsingCurrentLocation();
-      final message = await locationPoint.toEncryptedMessage(task.viewPGPPublicKey);
+      final message = await locationPoint.toEncryptedMessage(
+        signPrivateKey: task.signPGPPrivateKey,
+        signPublicKey: task.signPGPPublicKey,
+        viewPublicKey: task.viewPGPPublicKey,
+      );
 
       await eventManager.publishMessage(message);
     } catch (error) {
