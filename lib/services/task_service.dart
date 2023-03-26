@@ -89,13 +89,15 @@ class Task extends ChangeNotifier {
   static Future<Task> create(final String name, final Duration frequency, final List<String> relays) async {
     final viewKeyPair = await OpenPGP.generate(
         options: (Options()
-          ..keyOptions = (KeyOptions()..rsaBits = 4096)
+          ..keyOptions = (KeyOptions()
+            ..rsaBits = 4096)
           ..name = "Locus"
           ..email = "user@locus.example"));
 
     final signKeyPair = await OpenPGP.generate(
         options: (Options()
-          ..keyOptions = (KeyOptions()..rsaBits = 4096)
+          ..keyOptions = (KeyOptions()
+            ..rsaBits = 4096)
           ..name = "Locus"
           ..email = "user@locus.example"));
 
@@ -107,7 +109,9 @@ class Task extends ChangeNotifier {
       viewPGPPublicKey: viewKeyPair.publicKey,
       signPGPPrivateKey: signKeyPair.privateKey,
       signPGPPublicKey: signKeyPair.publicKey,
-      nostrPrivateKey: Keychain.generate().private,
+      nostrPrivateKey: Keychain
+          .generate()
+          .private,
       relays: relays,
       createdAt: DateTime.now(),
     );
@@ -187,6 +191,14 @@ class Task extends ChangeNotifier {
 
     notifyListeners();
   }
+
+  String generateViewKeyContent() {
+    return jsonEncode({
+      "signPublicKey": signPGPPublicKey,
+      "viewPrivateKey": viewPGPPrivateKey,
+      "nostrPublicKey": nostrPublicKey,
+    });
+  }
 }
 
 class TaskService extends ChangeNotifier {
@@ -231,6 +243,7 @@ class TaskService extends ChangeNotifier {
   }
 
   void remove(final Task task) {
+    task.stop();
     _tasks.remove(task);
 
     notifyListeners();
