@@ -37,78 +37,79 @@ class _DetailsState extends State<Details> {
       children: <Widget>[
         DetailInformationBox(
           title: "Last known location",
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              FutureBuilder<String>(
-                future: getAddress(
-                  widget.locations.last.latitude,
-                  widget.locations.last.longitude,
-                ),
-                builder: (context, snapshot) {
-                  if (snapshot.hasData) {
-                    return Text.rich(
-                      TextSpan(
-                        children: [
-                          TextSpan(
-                            text: snapshot.data!,
-                            style: getBodyTextTextStyle(context),
+          child: widget.locations.isEmpty
+              ? Text("No location available")
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    FutureBuilder<String>(
+                      future: getAddress(
+                        widget.locations.last.latitude,
+                        widget.locations.last.longitude,
+                      ),
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          return Text.rich(
+                            TextSpan(
+                              children: [
+                                TextSpan(
+                                  text: snapshot.data!,
+                                  style: getBodyTextTextStyle(context),
+                                ),
+                                TextSpan(
+                                  text: " (${widget.locations.last.latitude}, ${widget.locations.last.longitude})",
+                                  style: getCaptionTextStyle(context),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+
+                        return Row(
+                          children: <Widget>[
+                            Flexible(
+                              child: Text(
+                                "${widget.locations.last.latitude}, ${widget.locations.last.longitude}",
+                                style: getBodyTextTextStyle(context),
+                                overflow: TextOverflow.clip,
+                              ),
+                            ),
+                            const SizedBox(width: SMALL_SPACE),
+                            SizedBox.square(
+                              dimension: getIconSizeForBodyText(context),
+                              child: PlatformCircularProgressIndicator(
+                                material: (_, __) => MaterialProgressIndicatorData(
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                    const SizedBox(height: MEDIUM_SPACE),
+                    Tooltip(
+                      message: "Most recent location point",
+                      textAlign: TextAlign.center,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: <Widget>[
+                          Icon(
+                            context.platformIcons.time,
+                            size: getIconSizeForBodyText(context),
                           ),
-                          TextSpan(
-                            text:
-                                " (${widget.locations.last.latitude}, ${widget.locations.last.longitude})",
-                            style: getCaptionTextStyle(context),
+                          const SizedBox(width: TINY_SPACE),
+                          Text(
+                            widget.locations.last.createdAt.toString(),
+                            style: getBodyTextTextStyle(context),
+                            textAlign: TextAlign.start,
                           ),
                         ],
                       ),
-                    );
-                  }
-
-                  return Row(
-                    children: <Widget>[
-                      Flexible(
-                        child: Text(
-                          "${widget.locations.last.latitude}, ${widget.locations.last.longitude}",
-                          style: getBodyTextTextStyle(context),
-                          overflow: TextOverflow.clip,
-                        ),
-                      ),
-                      const SizedBox(width: SMALL_SPACE),
-                      SizedBox.square(
-                        dimension: getIconSizeForBodyText(context),
-                        child: PlatformCircularProgressIndicator(
-                          material: (_, __) => MaterialProgressIndicatorData(
-                            strokeWidth: 2,
-                          ),
-                        ),
-                      ),
-                    ],
-                  );
-                },
-              ),
-              const SizedBox(height: MEDIUM_SPACE),
-              Tooltip(
-                message: "Most recent location point",
-                textAlign: TextAlign.center,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    Icon(
-                      context.platformIcons.time,
-                      size: getIconSizeForBodyText(context),
-                    ),
-                    const SizedBox(width: TINY_SPACE),
-                    Text(
-                      widget.locations.last.createdAt.toString(),
-                      style: getBodyTextTextStyle(context),
-                      textAlign: TextAlign.start,
                     ),
                   ],
                 ),
-              ),
-            ],
-          ),
         ),
         DetailInformationBox(
           title: "Location details",

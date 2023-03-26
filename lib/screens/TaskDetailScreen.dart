@@ -29,7 +29,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   final PageController _pageController = PageController();
   bool _isLoading = true;
   ScrollPhysics _physics = const NeverScrollableScrollPhysics();
-  List<LocationPointService> _locations = [];
+  final List<LocationPointService> _locations = [];
 
   @override
   void initState() {
@@ -240,8 +240,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                       child: SingleChildScrollView(
                         padding: const EdgeInsets.all(MEDIUM_SPACE),
                         child: Details(
-                          locations: UnmodifiableListView<LocationPointService>(
-                              _locations),
+                          locations: UnmodifiableListView<LocationPointService>(_locations),
                           task: widget.task,
                         ),
                       ),
