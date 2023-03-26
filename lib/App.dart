@@ -33,6 +33,7 @@ class App extends StatelessWidget {
                       borderRadius: BorderRadius.circular(MEDIUM_SPACE),
                     ),
                   ),
+                  dialogBackgroundColor: lightColorScheme.background,
                 )
               : LIGHT_THEME_MATERIAL,
           darkTheme: darkColorScheme != null
@@ -44,6 +45,7 @@ class App extends StatelessWidget {
                       borderRadius: BorderRadius.circular(MEDIUM_SPACE),
                     ),
                   ),
+                  dialogBackgroundColor: darkColorScheme.background,
                 )
               : DARK_THEME_MATERIAL,
           themeMode: ThemeMode.system,

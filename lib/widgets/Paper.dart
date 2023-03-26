@@ -16,9 +16,7 @@ class Paper extends StatelessWidget {
       padding: const EdgeInsets.all(MEDIUM_SPACE),
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Theme
-            .of(context)
-            .dialogBackgroundColor,
+        color: Theme.of(context).dialogBackgroundColor,
         borderRadius: BorderRadius.circular(
           MEDIUM_SPACE,
         ),
