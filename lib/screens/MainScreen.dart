@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:animations/animations.dart';
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/screens/TaskDetailScreen.dart';
 import 'package:locus/services/task_service.dart';
@@ -7,6 +8,8 @@ import 'package:locus/utils/theme.dart';
 import 'package:provider/provider.dart';
 
 import 'CreateTaskScreen.dart';
+
+const FAB_DIMENSION = 56.0;
 
 class MainScreen extends StatelessWidget {
   const MainScreen({
@@ -21,15 +24,28 @@ class MainScreen extends StatelessWidget {
       material: (_, __) => MaterialScaffoldData(
         floatingActionButton: taskService.tasks.isEmpty
             ? null
-            : FloatingActionButton(
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => CreateTaskScreen(),
+            : OpenContainer(
+                transitionDuration: const Duration(milliseconds: 500),
+                transitionType: ContainerTransitionType.fade,
+                openBuilder: (context, action) => const CreateTaskScreen(),
+                closedBuilder: (context, action) => SizedBox(
+                  height: FAB_DIMENSION,
+                  width: FAB_DIMENSION,
+                  child: Center(
+                    child: Icon(
+                      context.platformIcons.add,
+                      color: Theme.of(context).colorScheme.onPrimary,
                     ),
-                  );
-                },
-                child: Icon(context.platformIcons.add),
+                  ),
+                ),
+                closedElevation: 6.0,
+                closedShape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(FAB_DIMENSION / 2),
+                  ),
+                ),
+                openColor: Theme.of(context).scaffoldBackgroundColor,
+                closedColor: Theme.of(context).colorScheme.primary,
               ),
       ),
       body: Center(

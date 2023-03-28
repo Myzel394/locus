@@ -59,6 +59,7 @@ dependencies:
   share_plus: ^6.3.1
   path_provider: ^2.0.14
   file_saver: ^0.2.1
+  animations: ^2.0.7
 
 dev_dependencies:
   flutter_test:
