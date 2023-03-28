@@ -1,5 +1,5 @@
+import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/utils/theme.dart';
@@ -18,7 +18,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
   final TextEditingController _frequencyController = TextEditingController();
   List<String> _relays = [];
 
-  bool _isCreatingTask = false;
+  TaskProgress? _taskProgress;
 
   @override
   void dispose() {
@@ -30,7 +30,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
 
   Future<void> createTask(final BuildContext context) async {
     setState(() {
-      _isCreatingTask = true;
+      _taskProgress = TaskProgress.creationStartsSoon;
     });
 
     final taskService = context.read<TaskService>();
@@ -40,10 +40,20 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
         _nameController.text,
         Duration(minutes: int.parse(_frequencyController.text)),
         _relays,
+        onProgress: (progress) {
+          setState(() {
+            _taskProgress = progress;
+          });
+        },
       );
 
       taskService.add(task);
       await taskService.save();
+
+      // Calling this explicitly so the text is cleared when leaving the screen
+      setState(() {
+        _taskProgress = null;
+      });
 
       if (mounted) {
         Navigator.of(context).pop();
@@ -51,7 +61,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
     } catch (error) {
     } finally {
       setState(() {
-        _isCreatingTask = false;
+        _taskProgress = null;
       });
     }
   }
@@ -100,7 +110,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                       children: <Widget>[
                         PlatformTextField(
                           controller: _nameController,
-                          enabled: _isCreatingTask == false,
+                          enabled: _taskProgress == null,
                           textInputAction: TextInputAction.next,
                           material: (_, __) => MaterialTextFieldData(
                             decoration: InputDecoration(
@@ -116,7 +126,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                         const SizedBox(height: MEDIUM_SPACE),
                         PlatformTextField(
                           controller: _frequencyController,
-                          enabled: _isCreatingTask == false,
+                          enabled: _taskProgress == null,
                           textInputAction: TextInputAction.done,
                           keyboardType: TextInputType.number,
                           textAlign: TextAlign.center,
@@ -141,7 +151,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                 ? "Select Relays"
                                 : "Selected ${_relays.length} Relay${_relays.length == 1 ? "" : "s"}",
                           ),
-                          onPressed: _isCreatingTask
+                          onPressed: _taskProgress != null
                               ? null
                               : () async {
                                   final relays = await showPlatformModalSheet(
@@ -166,17 +176,39 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                   ],
                 ),
               ),
-              if (!isKeyboardVisible)
-                PlatformElevatedButton(
-                  padding: const EdgeInsets.all(MEDIUM_SPACE),
-                  child: Text(
-                    "Create",
-                    style: TextStyle(
-                      fontSize: getActionButtonSize(context),
-                    ),
-                  ),
-                  onPressed: _isCreatingTask == true ? null : () => createTask(context),
+              if (_taskProgress != null) ...[
+                Center(
+                  child: PlatformCircularProgressIndicator(),
                 ),
+                Text(
+                  (() {
+                    switch (_taskProgress) {
+                      case TaskProgress.creationStartsSoon:
+                        return "Task generation started...";
+                      case TaskProgress.creatingViewKeys:
+                        return "Creating view keys...";
+                      case TaskProgress.creatingSignKeys:
+                        return "Creating sign keys...";
+                      case TaskProgress.creatingTask:
+                        return "Creating task...";
+                      default:
+                        return "";
+                    }
+                  })(),
+                  textAlign: TextAlign.center,
+                  style: getCaptionTextStyle(context),
+                ),
+              ],
+              PlatformElevatedButton(
+                padding: const EdgeInsets.all(MEDIUM_SPACE),
+                child: Text(
+                  "Create",
+                  style: TextStyle(
+                    fontSize: getActionButtonSize(context),
+                  ),
+                ),
+                onPressed: _taskProgress != null ? null : () => createTask(context),
+              ),
             ],
           ),
         ),

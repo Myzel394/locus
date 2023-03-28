@@ -17,6 +17,13 @@ enum TaskType {
   self,
 }
 
+enum TaskProgress {
+  creationStartsSoon,
+  creatingViewKeys,
+  creatingSignKeys,
+  creatingTask,
+}
+
 const uuid = Uuid();
 
 class Task extends ChangeNotifier {
@@ -86,21 +93,29 @@ class Task extends ChangeNotifier {
     };
   }
 
-  static Future<Task> create(final String name, final Duration frequency, final List<String> relays) async {
+  static Future<Task> create(
+    final String name,
+    final Duration frequency,
+    final List<String> relays, {
+    Function(TaskProgress)? onProgress,
+  }) async {
+    onProgress?.call(TaskProgress.creatingViewKeys);
     final viewKeyPair = await OpenPGP.generate(
-        options: (Options()
-          ..keyOptions = (KeyOptions()
-            ..rsaBits = 4096)
-          ..name = "Locus"
-          ..email = "user@locus.example"));
+      options: (Options()
+        ..keyOptions = (KeyOptions()..rsaBits = 4096)
+        ..name = "Locus"
+        ..email = "user@locus.example"),
+    );
 
+    onProgress?.call(TaskProgress.creatingSignKeys);
     final signKeyPair = await OpenPGP.generate(
-        options: (Options()
-          ..keyOptions = (KeyOptions()
-            ..rsaBits = 4096)
-          ..name = "Locus"
-          ..email = "user@locus.example"));
+      options: (Options()
+        ..keyOptions = (KeyOptions()..rsaBits = 4096)
+        ..name = "Locus"
+        ..email = "user@locus.example"),
+    );
 
+    onProgress?.call(TaskProgress.creatingTask);
     return Task(
       id: uuid.v4(),
       name: name,
@@ -109,9 +124,7 @@ class Task extends ChangeNotifier {
       viewPGPPublicKey: viewKeyPair.publicKey,
       signPGPPrivateKey: signKeyPair.privateKey,
       signPGPPublicKey: signKeyPair.publicKey,
-      nostrPrivateKey: Keychain
-          .generate()
-          .private,
+      nostrPrivateKey: Keychain.generate().private,
       relays: relays,
       createdAt: DateTime.now(),
     );
