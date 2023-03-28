@@ -59,10 +59,15 @@ class LocationPointService {
     required final String signPublicKey,
     required final String signPrivateKey,
   }) async {
-    final message = jsonEncode(toJSON());
-    final signedMessage = await OpenPGP.sign(message, signPublicKey, signPrivateKey, "");
+    final rawMessage = jsonEncode(toJSON());
+    final signedMessage = await OpenPGP.sign(rawMessage, signPublicKey, signPrivateKey, "");
+    final content = {
+      "message": rawMessage,
+      "signature": signedMessage,
+    };
+    final rawContent = jsonEncode(content);
 
-    return OpenPGP.encrypt(signedMessage, viewPublicKey);
+    return OpenPGP.encrypt(rawContent, viewPublicKey);
   }
 
   static Future<LocationPointService> createUsingCurrentLocation() async {
@@ -85,14 +90,24 @@ class LocationPointService {
 
   static Future<LocationPointService> fromEncrypted(
     final String encryptedMessage,
-    final String pgpPrivateKey,
+    final String viewPrivateKey,
+    final String signPublicKey,
   ) async {
-    final rawDecrypted = await OpenPGP.decrypt(
+    final rawContent = await OpenPGP.decrypt(
       encryptedMessage,
-      pgpPrivateKey,
+      viewPrivateKey,
       "",
     );
+    final content = jsonDecode(rawContent);
+    final message = content["message"];
+    final signature = content["signature"];
 
-    return LocationPointService.fromJson(jsonDecode(rawDecrypted));
+    final isSignatureValid = await OpenPGP.verify(signature, message, signPublicKey);
+
+    if (!isSignatureValid) {
+      throw Exception("Invalid signature");
+    }
+
+    return LocationPointService.fromJson(jsonDecode(message));
   }
 }

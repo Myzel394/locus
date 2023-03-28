@@ -90,6 +90,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
           final location = await LocationPointService.fromEncrypted(
             event.message.content,
             widget.task.viewPGPPrivateKey!,
+            widget.task.signPGPPublicKey,
           );
 
           // We need to access `_locations` earlier than the UI updates.
