@@ -201,13 +201,13 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
               ],
               PlatformElevatedButton(
                 padding: const EdgeInsets.all(MEDIUM_SPACE),
+                onPressed: _taskProgress != null ? null : () => createTask(context),
                 child: Text(
                   "Create",
                   style: TextStyle(
                     fontSize: getActionButtonSize(context),
                   ),
                 ),
-                onPressed: _taskProgress != null ? null : () => createTask(context),
               ),
             ],
           ),
