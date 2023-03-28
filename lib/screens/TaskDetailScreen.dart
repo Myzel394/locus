@@ -28,7 +28,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   late final MapController _controller;
   final PageController _pageController = PageController();
   bool _isLoading = true;
-  ScrollPhysics _physics = const NeverScrollableScrollPhysics();
+  bool _isShowingDetails = false;
   final List<LocationPointService> _locations = [];
 
   @override
@@ -49,11 +49,11 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     _pageController.addListener(() {
       if (_pageController.page == 0) {
         setState(() {
-          _physics = const NeverScrollableScrollPhysics();
+          _isShowingDetails = false;
         });
       } else {
         setState(() {
-          _physics = const AlwaysScrollableScrollPhysics();
+          _isShowingDetails = true;
         });
       }
     });
@@ -155,7 +155,9 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   Widget build(BuildContext context) {
     return PlatformScaffold(
       appBar: PlatformAppBar(
-        title: Text(widget.task.name),
+        title: Text(
+          _isShowingDetails ? "Details" : widget.task.name,
+        ),
         material: (_, __) => MaterialAppBarData(
           centerTitle: true,
         ),
@@ -197,7 +199,8 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                   ),
                 )
               : PageView(
-                  physics: _physics,
+                  physics:
+                      _isShowingDetails ? const AlwaysScrollableScrollPhysics() : const NeverScrollableScrollPhysics(),
                   scrollDirection: Axis.vertical,
                   controller: _pageController,
                   children: <Widget>[
@@ -238,11 +241,16 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                     ),
                     Expanded(
                       child: SingleChildScrollView(
-                        padding: const EdgeInsets.all(MEDIUM_SPACE),
                         child: Details(
-                          locations: UnmodifiableListView<LocationPointService>(_locations),
-                          task: widget.task,
-                        ),
+                            locations: UnmodifiableListView<LocationPointService>(_locations),
+                            task: widget.task,
+                            onGoBack: () {
+                              _pageController.animateToPage(
+                                0,
+                                duration: const Duration(milliseconds: 500),
+                                curve: Curves.easeInOut,
+                              );
+                            }),
                       ),
                     ),
                   ],
