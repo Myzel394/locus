@@ -10,7 +10,7 @@ packages:
     source: hosted
     version: "2.0.7"
   async:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: async
       sha256: bfe67ef28df125b7dddcea62755991f807aa39a2492a23e1550161692950bbe0
@@ -121,6 +121,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.2.1"
+  dart_levenshtein:
+    dependency: "direct main"
+    description:
+      name: dart_levenshtein
+      sha256: f38182278b774cbb0d5993de50848e65da5a9f722b7f07787f0c26de009e0322
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.1"
   dio:
     dependency: transitive
     description:

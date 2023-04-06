@@ -210,6 +210,7 @@ class Task extends ChangeNotifier {
       "signPublicKey": signPGPPublicKey,
       "viewPrivateKey": viewPGPPrivateKey,
       "nostrPublicKey": nostrPublicKey,
+      "relays": relays,
     });
   }
 }

@@ -161,7 +161,9 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                       isScrollControlled: true,
                                       isDismissible: true,
                                     ),
-                                    builder: (_) => RelaySelectSheet(),
+                                    builder: (_) => RelaySelectSheet(
+                                      selectedRelays: _relays,
+                                    ),
                                   );
 
                                   if (relays != null) {
