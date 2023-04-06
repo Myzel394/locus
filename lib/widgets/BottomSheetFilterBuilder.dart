@@ -1,6 +1,7 @@
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:locus/constants/spacing.dart';
 
 dynamic defaultExtractor(dynamic element) => element;
 
@@ -101,6 +102,7 @@ class _BottomSheetFilterBuilderState<T> extends State<BottomSheetFilterBuilder> 
               ),
             ),
           ),
+        const SizedBox(height: SMALL_SPACE),
         Expanded(
           child: widget.builder(
             context,
