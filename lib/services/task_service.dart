@@ -1,6 +1,7 @@
 import 'dart:collection';
 import 'dart:convert';
 
+import 'package:battery_plus/battery_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:locus/services/manager_service.dart';
@@ -37,6 +38,8 @@ class Task extends ChangeNotifier {
   String nostrPrivateKey;
   Duration frequency;
   List<String> relays = [];
+  double batteryLevel;
+  BatteryState batteryState;
 
   Task({
     required this.id,
@@ -47,6 +50,8 @@ class Task extends ChangeNotifier {
     required this.signPGPPublicKey,
     required this.createdAt,
     required this.nostrPrivateKey,
+    required this.batteryLevel,
+    required this.batteryState,
     this.viewPGPPrivateKey,
     this.relays = const [],
   });
@@ -63,12 +68,16 @@ class Task extends ChangeNotifier {
       frequency: Duration(seconds: json["frequency"]),
       createdAt: DateTime.parse(json["createdAt"]),
       relays: List<String>.from(json["relays"]),
+      batteryLevel: json["batteryLevel"],
+      batteryState: BatteryState.values.firstWhere(
+        (value) => value.name == json["batteryState"],
+      ),
     );
   }
 
   String get taskKey => "Task:$id";
 
-  String get nostrPublicKey => Keychain(nostrPrivateKey!).public;
+  String get nostrPublicKey => Keychain(nostrPrivateKey).public;
 
   TaskType get type {
     if (viewPGPPrivateKey == null) {
@@ -90,6 +99,8 @@ class Task extends ChangeNotifier {
       "nostrPrivateKey": nostrPrivateKey,
       "createdAt": createdAt.toIso8601String(),
       "relays": relays,
+      "batteryLevel": batteryLevel,
+      "batteryState": batteryState.name,
     };
   }
 
@@ -127,6 +138,8 @@ class Task extends ChangeNotifier {
       nostrPrivateKey: Keychain.generate().private,
       relays: relays,
       createdAt: DateTime.now(),
+      batteryLevel: (await Battery().batteryLevel) / 100,
+      batteryState: await Battery().batteryState,
     );
   }
 
