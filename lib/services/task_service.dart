@@ -9,6 +9,8 @@ import 'package:openpgp/openpgp.dart';
 import 'package:uuid/uuid.dart';
 import 'package:workmanager/workmanager.dart';
 
+import 'task_runtime_service.dart';
+
 const storage = FlutterSecureStorage();
 const KEY = "tasks_settings";
 
@@ -30,13 +32,14 @@ class Task extends ChangeNotifier {
   final String id;
   final DateTime createdAt;
   String name;
-  String signPGPPrivateKey;
-  String signPGPPublicKey;
+  final String signPGPPrivateKey;
+  final String signPGPPublicKey;
   String? viewPGPPrivateKey;
   String viewPGPPublicKey;
-  String nostrPrivateKey;
+  final String nostrPrivateKey;
   Duration frequency;
   List<String> relays = [];
+  TaskRuntimeManager? runtimeManager;
 
   Task({
     required this.id,
@@ -47,6 +50,7 @@ class Task extends ChangeNotifier {
     required this.signPGPPublicKey,
     required this.createdAt,
     required this.nostrPrivateKey,
+    this.runtimeManager,
     this.viewPGPPrivateKey,
     this.relays = const [],
   });
@@ -63,6 +67,7 @@ class Task extends ChangeNotifier {
       frequency: Duration(seconds: json["frequency"]),
       createdAt: DateTime.parse(json["createdAt"]),
       relays: List<String>.from(json["relays"]),
+      runtimeManager: json["runtimeManager"] == null ? null : TaskRuntimeManager.fromJSON(json["runtimeManager"]),
     );
   }
 
@@ -90,6 +95,7 @@ class Task extends ChangeNotifier {
       "nostrPrivateKey": nostrPrivateKey,
       "createdAt": createdAt.toIso8601String(),
       "relays": relays,
+      "runtimeManager": runtimeManager?.toJSON(),
     };
   }
 
@@ -98,6 +104,7 @@ class Task extends ChangeNotifier {
     final Duration frequency,
     final List<String> relays, {
     Function(TaskProgress)? onProgress,
+    TaskRuntimeManager? runtimeManager,
   }) async {
     onProgress?.call(TaskProgress.creatingViewKeys);
     final viewKeyPair = await OpenPGP.generate(
@@ -127,6 +134,7 @@ class Task extends ChangeNotifier {
       nostrPrivateKey: Keychain.generate().private,
       relays: relays,
       createdAt: DateTime.now(),
+      runtimeManager: runtimeManager,
     );
   }
 

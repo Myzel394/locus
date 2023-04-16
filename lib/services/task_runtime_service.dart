@@ -143,11 +143,11 @@ class TimedTimer extends TaskRuntimeTimer {
   }
 }
 
-class TaskRuntime extends ChangeNotifier {
+class TaskRuntimeManager extends ChangeNotifier {
+  final List<TaskRuntimeTimer> _timers;
   bool _deleteAfterRun;
-  List<TaskRuntimeTimer> _timers;
 
-  TaskRuntime({
+  TaskRuntimeManager({
     required List<TaskRuntimeTimer> timers,
     bool deleteAfterRun = true,
   })  : _timers = timers,
@@ -203,8 +203,8 @@ class TaskRuntime extends ChangeNotifier {
     };
   }
 
-  static TaskRuntime fromJSON(final Map<String, dynamic> json) {
-    return TaskRuntime(
+  static TaskRuntimeManager fromJSON(final Map<String, dynamic> json) {
+    return TaskRuntimeManager(
       timers: json["timers"].map((timer) {
         switch (timer["type"]) {
           case WeekdayTimer.IDENTIFIER:
