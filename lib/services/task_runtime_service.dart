@@ -1,3 +1,5 @@
+import 'package:flutter/cupertino.dart';
+
 abstract class TaskRuntimeTimer {
   // Abstract class that all timers should extend from
 
@@ -141,25 +143,26 @@ class TimedTimer extends TaskRuntimeTimer {
   }
 }
 
-class TaskRuntime {
-  bool deleteAfterRun;
-  List<TaskRuntimeTimer> timers;
+class TaskRuntime extends ChangeNotifier {
+  bool _deleteAfterRun;
+  List<TaskRuntimeTimer> _timers;
 
   TaskRuntime({
-    required this.timers,
-    this.deleteAfterRun = false,
-  });
+    required List<TaskRuntimeTimer> timers,
+    bool deleteAfterRun = true,
+  })  : _timers = timers,
+        _deleteAfterRun = deleteAfterRun;
 
   bool shouldRun(final DateTime? time) {
     final now = time ?? DateTime.now();
 
-    return timers.any((timer) => timer.shouldRun(now));
+    return _timers.any((timer) => timer.shouldRun(now));
   }
 
   DateTime? nextStartDate() {
     final now = DateTime.now();
 
-    final nextDates = List<DateTime>.from(timers.map((timer) => timer.nextRun(now)).where((date) => date != null));
+    final nextDates = List<DateTime>.from(_timers.map((timer) => timer.nextRun(now)).where((date) => date != null));
 
     if (nextDates.isEmpty) {
       return null;
@@ -170,13 +173,33 @@ class TaskRuntime {
   }
 
   bool isInfinite() {
-    return timers.any((timer) => timer.isInfinite());
+    return _timers.any((timer) => timer.isInfinite());
+  }
+
+  void addTimer(final TaskRuntimeTimer timer) {
+    _timers.add(timer);
+    notifyListeners();
+  }
+
+  void removeTimer(final TaskRuntimeTimer timer) {
+    _timers.remove(timer);
+    notifyListeners();
+  }
+
+  void resetTimers() {
+    _timers.clear();
+    notifyListeners();
+  }
+
+  void setDeleteAfterRun(final bool deleteAfterRun) {
+    _deleteAfterRun = deleteAfterRun;
+    notifyListeners();
   }
 
   Map<String, dynamic> toJSON() {
     return {
-      "timers": timers.map((timer) => timer.toJSON()).toList(),
-      "deleteAfterRun": deleteAfterRun.toString(),
+      "timers": _timers.map((timer) => timer.toJSON()).toList(),
+      "deleteAfterRun": _deleteAfterRun.toString(),
     };
   }
 
