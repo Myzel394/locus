@@ -179,54 +179,9 @@ class Task extends ChangeNotifier {
     };
   }
 
-  DateTime? nextStartDate() {
-    final now = DateTime.now();
+  DateTime? nextStartDate() => findNextStartDate(timers);
 
-    final nextDates =
-        List<DateTime>.from(timers.map((timer) => timer.nextStartDate(now)).where((date) => date != null));
-
-    if (nextDates.isEmpty) {
-      return null;
-    }
-
-    // Find earliest date
-    return nextDates.reduce((value, element) => value.isBefore(element) ? value : element);
-  }
-
-  DateTime? nextEndDate() {
-    final now = DateTime.now();
-
-    DateTime? date;
-
-    for (final timer in timers) {
-      final timerDate = timer.nextEndDate(now);
-
-      if (timerDate == null) {
-        continue;
-      }
-
-      if (date == null) {
-        date = timerDate;
-        continue;
-      }
-
-      if (timer is WeekdayTimer) {
-        if (timerDate.isAfter(date)) {
-          date = timerDate;
-        }
-
-        continue;
-      } else {
-        if (timerDate.isBefore(date)) {
-          date = timerDate;
-        }
-
-        continue;
-      }
-    }
-
-    return date;
-  }
+  DateTime? nextEndDate() => findNextEndDate(timers);
 
   bool shouldRun() {
     final now = DateTime.now();
@@ -425,4 +380,52 @@ class TaskService extends ChangeNotifier {
     notifyListeners();
     save();
   }
+}
+
+DateTime? findNextStartDate(final List<TaskRuntimeTimer> timers, {final DateTime? startDate}) {
+  final now = startDate ?? DateTime.now();
+
+  final nextDates = List<DateTime>.from(timers.map((timer) => timer.nextStartDate(now)).where((date) => date != null));
+
+  if (nextDates.isEmpty) {
+    return null;
+  }
+
+  // Find earliest date
+  return nextDates.reduce((value, element) => value.isBefore(element) ? value : element);
+}
+
+DateTime? findNextEndDate(final List<TaskRuntimeTimer> timers, {final DateTime? startDate}) {
+  final now = startDate ?? DateTime.now();
+
+  DateTime? date;
+
+  for (final timer in timers) {
+    final timerDate = timer.nextEndDate(now);
+
+    if (timerDate == null) {
+      continue;
+    }
+
+    if (date == null) {
+      date = timerDate;
+      continue;
+    }
+
+    if (timer is WeekdayTimer) {
+      if (timerDate.isAfter(date)) {
+        date = timerDate;
+      }
+
+      continue;
+    } else {
+      if (timerDate.isBefore(date)) {
+        date = timerDate;
+      }
+
+      continue;
+    }
+  }
+
+  return date;
 }

@@ -1,8 +1,8 @@
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:locus/constants/spacing.dart';
+import 'package:locus/screens/create_task_screen_widgets/TimerWidget.dart';
 import 'package:locus/services/task_service.dart';
-import 'package:locus/services/timers_service.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/RelaySelectSheet.dart';
 import 'package:provider/provider.dart';
@@ -46,16 +46,8 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
             _taskProgress = progress;
           });
         },
-        timers: [
-          WeekdayTimer.allDay(DateTime.monday),
-          WeekdayTimer.allDay(DateTime.tuesday),
-          WeekdayTimer.allDay(DateTime.wednesday),
-          WeekdayTimer.allDay(DateTime.thursday),
-          WeekdayTimer.allDay(DateTime.friday),
-        ],
+        timers: [],
       );
-      print("next start date ${task.nextStartDate()}");
-      print("next end date ${task.nextEndDate()}");
 
       taskService.add(task);
       await taskService.save();
@@ -161,6 +153,9 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                 ? "Select Relays"
                                 : "Selected ${_relays.length} Relay${_relays.length == 1 ? "" : "s"}",
                           ),
+                          material: (_, __) => MaterialElevatedButtonData(
+                            icon: Icon(Icons.dns_rounded),
+                          ),
                           onPressed: _taskProgress != null
                               ? null
                               : () async {
@@ -183,6 +178,24 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                   }
                                 },
                         ),
+                        const SizedBox(height: MEDIUM_SPACE),
+                        PlatformElevatedButton(
+                          child: Text("Select Timers"),
+                          material: (_, __) => MaterialElevatedButtonData(
+                            icon: Icon(Icons.timer_rounded),
+                          ),
+                          onPressed: () async {
+                            await showPlatformModalSheet(
+                              context: context,
+                              material: MaterialModalSheetData(
+                                backgroundColor: Colors.transparent,
+                                isScrollControlled: true,
+                                isDismissible: true,
+                              ),
+                              builder: (_) => TimerWidget(),
+                            );
+                          },
+                        )
                       ],
                     ),
                   ],

@@ -1,4 +1,7 @@
+import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:locus/extensions/date.dart';
+import 'package:locus/utils/date.dart';
 
 abstract class TaskRuntimeTimer {
   // Abstract class that all timers should extend from
@@ -14,14 +17,16 @@ abstract class TaskRuntimeTimer {
 
   DateTime? nextEndDate(final DateTime now);
 
+  String format(final BuildContext context);
+
   Map<String, dynamic> toJSON();
 }
 
 class WeekdayTimer extends TaskRuntimeTimer {
   // A timer based on weekdays and times
   final int day;
-  final DateTime startTime;
-  final DateTime endTime;
+  final TimeOfDay startTime;
+  final TimeOfDay endTime;
 
   const WeekdayTimer({
     required this.day,
@@ -29,13 +34,25 @@ class WeekdayTimer extends TaskRuntimeTimer {
     required this.endTime,
   });
 
-  static WeekdayTimer allDay(final int day) => WeekdayTimer(
+  static WeekdayTimer allDay(final int day) =>
+      WeekdayTimer(
         day: day,
-        startTime: DateTime(0, 0, 0, 0, 0),
-        endTime: DateTime(0, 0, 0, 23, 59),
+        startTime: TimeOfDay(hour: 0, minute: 0),
+        endTime: TimeOfDay(hour: 23, minute: 59),
       );
 
   static const IDENTIFIER = "weekday";
+
+  @override
+  String format(final BuildContext context) {
+    final dayString = DateFormat.EEEE().format(createDateFromWeekday(day));
+
+    if (isAllDay) {
+      return "$dayString (All Day)";
+    }
+
+    return "$dayString ${startTime.format(context)} - ${endTime.format(context)}";
+  }
 
   get isAllDay => startTime.hour == 0 && startTime.minute == 0 && endTime.hour == 23 && endTime.minute == 59;
 
@@ -63,8 +80,8 @@ class WeekdayTimer extends TaskRuntimeTimer {
     return {
       "_IDENTIFIER": IDENTIFIER,
       "day": day,
-      "startTime": startTime.toIso8601String(),
-      "endTime": endTime.toIso8601String(),
+      "startTime": startTime.toString(),
+      "endTime": endTime.toString(),
     };
   }
 
@@ -107,8 +124,8 @@ class WeekdayTimer extends TaskRuntimeTimer {
   static WeekdayTimer fromJSON(final Map<String, dynamic> json) {
     return WeekdayTimer(
       day: json["day"],
-      startTime: DateTime.parse(json["startTime"]),
-      endTime: DateTime.parse(json["endTime"]),
+      startTime: TimeOfDay.fromDateTime(DateTime.parse(json["startTime"])),
+      endTime: TimeOfDay.fromDateTime(DateTime.parse(json["endTime"])),
     );
   }
 }
@@ -124,6 +141,11 @@ class TimedTimer extends TaskRuntimeTimer {
   });
 
   static const IDENTIFIER = "timed";
+
+  @override
+  String format(final BuildContext context) {
+    return "${DateFormat.yMEd().format(startTime)} ${DateFormat.yMEd().format(endTime)}";
+  }
 
   @override
   bool isInfinite() => false;
