@@ -3,10 +3,12 @@ import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:locus/constants/spacing.dart';
+import 'package:locus/constants/timers.dart';
 import 'package:locus/screens/create_task_screen_widgets/WeekdaySelection.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/services/timers_service.dart';
 import 'package:locus/utils/theme.dart';
+import 'package:locus/widgets/LongPressPopup.dart';
 import 'package:locus/widgets/ModalSheet.dart';
 
 class TimerWidget extends StatefulWidget {
@@ -28,9 +30,25 @@ class _TimerWidgetState extends State<TimerWidget> {
       return 0;
     });
 
+  void addWeekdayTimer(final WeekdayTimer timer) {
+    setState(() {
+      // Merge the new timer if a timer for the same weekday already exists
+      final existingTimer =
+          _timers.firstWhereOrNull((currentTimer) => currentTimer is WeekdayTimer && currentTimer.day == timer.day);
+
+      if (existingTimer != null) {
+        _timers.remove(existingTimer);
+      }
+
+      _timers.add(timer);
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return DraggableScrollableSheet(
+      initialChildSize: 0.6,
+      minChildSize: 0.6,
       builder: (_, __) => ModalSheet(
         child: Column(
           children: <Widget>[
@@ -88,35 +106,48 @@ class _TimerWidgetState extends State<TimerWidget> {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
-                      PlatformElevatedButton(
-                        child: Text("Add Weekday"),
-                        material: (_, __) => MaterialElevatedButtonData(
-                          icon: Icon(Icons.date_range_rounded),
+                      LongPressPopup<String>(
+                        items: List<PopupMenuEntry<String>>.from(
+                          WEEKDAY_TIMERS.entries.map(
+                            (entry) => PopupMenuItem<String>(
+                              value: entry.key,
+                              child: Text(entry.value["name"] as String),
+                            ),
+                          ),
                         ),
-                        onPressed: () async {
-                          final data = await showPlatformDialog(
-                            context: context,
-                            builder: (_) => WeekdaySelection(),
-                          );
+                        onSelected: (final dynamic id) {
+                          setState(() {
+                            _timers.clear();
+                          });
 
-                          if (data != null) {
-                            setState(() {
-                              // Merge the new timer if a timer for the same weekday already exists
-                              final existingTimer = _timers.firstWhereOrNull(
-                                  (timer) => timer is WeekdayTimer && timer.day == data["weekday"]) as WeekdayTimer?;
+                          final timers = WEEKDAY_TIMERS[id]!["timers"] as List<TaskRuntimeTimer>;
 
-                              if (existingTimer != null) {
-                                _timers.remove(existingTimer);
-                              }
-
-                              _timers.add(WeekdayTimer(
-                                day: data["weekday"] as int,
-                                startTime: data["startTime"] as TimeOfDay,
-                                endTime: data["endTime"] as TimeOfDay,
-                              ));
-                            });
+                          for (final timer in timers) {
+                            addWeekdayTimer(timer as WeekdayTimer);
                           }
                         },
+                        child: PlatformElevatedButton(
+                          child: Text("Add Weekday"),
+                          material: (_, __) => MaterialElevatedButtonData(
+                            icon: Icon(Icons.date_range_rounded),
+                          ),
+                          onPressed: () async {
+                            final data = await showPlatformDialog(
+                              context: context,
+                              builder: (_) => WeekdaySelection(),
+                            );
+
+                            if (data != null) {
+                              addWeekdayTimer(
+                                WeekdayTimer(
+                                  day: data["day"] as int,
+                                  startTime: data["startTime"] as TimeOfDay,
+                                  endTime: data["endTime"] as TimeOfDay,
+                                ),
+                              );
+                            }
+                          },
+                        ),
                       ),
                     ],
                   ),
