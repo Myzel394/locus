@@ -1,6 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/screens/create_task_screen_widgets/WeekdaySelection.dart';
 import 'package:locus/services/task_service.dart';
@@ -57,7 +58,10 @@ class _TimerWidgetState extends State<TimerWidget> {
                       ),
                     ),
                     const SizedBox(height: SMALL_SPACE),
-                    Text("Next execution will start at ${findNextStartDate(_timers).toString()}"),
+                    // Month, date and time
+                    Text(
+                      "Next execution will start at ${DateFormat('MMMM d, HH:mm').format(findNextStartDate(_timers)!)}",
+                    ),
                   ],
                   const SizedBox(height: MEDIUM_SPACE),
                   Row(

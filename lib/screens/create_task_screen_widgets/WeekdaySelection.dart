@@ -22,45 +22,53 @@ class _WeekdaySelectionState extends State<WeekdaySelection> {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          PlatformDropdownButton(
-            value: weekday,
-            onChanged: (value) {
-              setState(() {
-                weekday = value as int;
-              });
-            },
-            dropdownColor: Theme.of(context).colorScheme.surface,
-            underline: null,
-            items: const <DropdownMenuItem>[
-              DropdownMenuItem(
-                child: Text("Monday"),
-                value: DateTime.monday,
+          Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              borderRadius: BorderRadius.circular(SMALL_SPACE),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: MEDIUM_SPACE, vertical: SMALL_SPACE),
+              child: PlatformDropdownButton(
+                value: weekday,
+                onChanged: (value) {
+                  setState(() {
+                    weekday = value as int;
+                  });
+                },
+                underline: Container(),
+                items: const <DropdownMenuItem>[
+                  DropdownMenuItem(
+                    child: Text("Monday"),
+                    value: DateTime.monday,
+                  ),
+                  DropdownMenuItem(
+                    child: Text("Tuesday"),
+                    value: DateTime.tuesday,
+                  ),
+                  DropdownMenuItem(
+                    child: Text("Wednesday"),
+                    value: DateTime.wednesday,
+                  ),
+                  DropdownMenuItem(
+                    child: Text("Thursday"),
+                    value: DateTime.thursday,
+                  ),
+                  DropdownMenuItem(
+                    child: Text("Friday"),
+                    value: DateTime.friday,
+                  ),
+                  DropdownMenuItem(
+                    child: Text("Saturday"),
+                    value: DateTime.saturday,
+                  ),
+                  DropdownMenuItem(
+                    child: Text("Sunday"),
+                    value: DateTime.sunday,
+                  ),
+                ],
               ),
-              DropdownMenuItem(
-                child: Text("Tuesday"),
-                value: DateTime.tuesday,
-              ),
-              DropdownMenuItem(
-                child: Text("Wednesday"),
-                value: DateTime.wednesday,
-              ),
-              DropdownMenuItem(
-                child: Text("Thursday"),
-                value: DateTime.thursday,
-              ),
-              DropdownMenuItem(
-                child: Text("Friday"),
-                value: DateTime.friday,
-              ),
-              DropdownMenuItem(
-                child: Text("Saturday"),
-                value: DateTime.saturday,
-              ),
-              DropdownMenuItem(
-                child: Text("Sunday"),
-                value: DateTime.sunday,
-              ),
-            ],
+            ),
           ),
           const SizedBox(height: MEDIUM_SPACE),
           Row(
