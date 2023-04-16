@@ -189,9 +189,7 @@ class Task extends ChangeNotifier {
     return timers.any((timer) => timer.shouldRun(now));
   }
 
-  bool isInfinite() {
-    return timers.any((timer) => timer.isInfinite());
-  }
+  bool isInfinite() => timers.any((timer) => timer.isInfinite());
 
   void _stopSchedule() {
     if (_nextRunWorkManagerID != null) {
