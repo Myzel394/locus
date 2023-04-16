@@ -62,6 +62,26 @@ class _TimerWidgetState extends State<TimerWidget> {
                     Text(
                       "Next execution will start at ${DateFormat('MMMM d, HH:mm').format(findNextStartDate(_timers)!)}",
                     ),
+                    if (_timers.any((timer) => timer.isInfinite())) ...[
+                      const SizedBox(height: SMALL_SPACE),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: <Widget>[
+                          const Icon(
+                            Icons.warning_rounded,
+                            color: Colors.yellow,
+                          ),
+                          const SizedBox(width: TINY_SPACE),
+                          Text(
+                            "This task will run until you stop it manually.",
+                            style: getCaptionTextStyle(context).copyWith(
+                              color: Colors.yellow,
+                            ),
+                          ),
+                        ],
+                      )
+                    ]
                   ],
                   const SizedBox(height: MEDIUM_SPACE),
                   Row(
