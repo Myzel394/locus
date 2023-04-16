@@ -80,7 +80,6 @@ class _BottomSheetFilterBuilderState<T> extends State<BottomSheetFilterBuilder> 
             material: (_, __) => MaterialTextFieldData(
               decoration: InputDecoration(
                 hintText: "Search",
-                icon: Icon(Icons.search),
                 suffixIcon: IconButton(
                   icon: Icon(Icons.clear),
                   onPressed: () {
@@ -92,7 +91,6 @@ class _BottomSheetFilterBuilderState<T> extends State<BottomSheetFilterBuilder> 
             ),
             cupertino: (_, __) => CupertinoTextFieldData(
               placeholder: "Search",
-              prefix: Icon(CupertinoIcons.search),
               suffix: IconButton(
                 icon: Icon(CupertinoIcons.clear),
                 onPressed: () {
