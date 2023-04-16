@@ -6,25 +6,42 @@ import 'package:locus/services/task_service.dart';
 import 'package:logger/logger.dart';
 import 'package:workmanager/workmanager.dart';
 
-const WORKMANAGER_KEY = "tasks_manager";
+const TASK_EXECUTION_KEY = "tasks_manager";
+const TASK_SCHEDULE_KEY = "tasks_schedule";
 
 void callbackDispatcher() {
-  Workmanager().executeTask((_, inputData) async {
+  Workmanager().executeTask((taskName, inputData) async {
     try {
       DartPluginRegistrant.ensureInitialized();
-      final taskID = inputData!["taskID"]!;
 
-      final task = await TaskService.getTask(taskID);
-      final eventManager = NostrEventsManager.fromTask(task);
+      switch (taskName) {
+        case TASK_EXECUTION_KEY:
+          final taskID = inputData!["taskID"]!;
 
-      final locationPoint = await LocationPointService.createUsingCurrentLocation();
-      final message = await locationPoint.toEncryptedMessage(
-        signPrivateKey: task.signPGPPrivateKey,
-        signPublicKey: task.signPGPPublicKey,
-        viewPublicKey: task.viewPGPPublicKey,
-      );
+          final task = await TaskService.getTask(taskID);
+          final eventManager = NostrEventsManager.fromTask(task);
 
-      await eventManager.publishMessage(message);
+          final locationPoint = await LocationPointService.createUsingCurrentLocation();
+          final message = await locationPoint.toEncryptedMessage(
+            signPrivateKey: task.signPGPPrivateKey,
+            signPublicKey: task.signPGPPublicKey,
+            viewPublicKey: task.viewPGPPublicKey,
+          );
+
+          await eventManager.publishMessage(message);
+
+          if (!task.shouldRun()) {
+            task.stopExecutionImmediately();
+          }
+          break;
+        case TASK_SCHEDULE_KEY:
+          final taskID = inputData!["taskID"]!;
+
+          final task = await TaskService.getTask(taskID);
+
+          task.startExecutionImmediately();
+          break;
+      }
     } catch (error) {
       Logger().e(error.toString());
       throw Exception(error);

@@ -44,51 +44,44 @@ class _DetailsState extends State<Details> {
   void openShareLocationDialog() async {
     final shouldShare = await showPlatformDialog(
       context: context,
-      builder: (context) =>
-          PlatformAlertDialog(
-            title: Text("Share location"),
-            content: Text(
-              "Would you like to share your location from this task? This will allow other users to see your location. A view key file will be generated which allows anyone to view your location. Makes sure to keep this file safe and only share it with people you trust.",
+      builder: (context) => PlatformAlertDialog(
+        title: Text("Share location"),
+        content: Text(
+          "Would you like to share your location from this task? This will allow other users to see your location. A view key file will be generated which allows anyone to view your location. Makes sure to keep this file safe and only share it with people you trust.",
+        ),
+        actions: <Widget>[
+          PlatformDialogAction(
+            child: Text("Cancel"),
+            cupertino: (_, __) => CupertinoDialogActionData(
+              isDestructiveAction: true,
             ),
-            actions: <Widget>[
-              PlatformDialogAction(
-                child: Text("Cancel"),
-                cupertino: (_, __) =>
-                    CupertinoDialogActionData(
-                      isDestructiveAction: true,
-                    ),
-                material: (_, __) =>
-                    MaterialDialogActionData(
-                      icon: const Icon(Icons.cancel_outlined),
-                    ),
-                onPressed: () => Navigator.of(context).pop(""),
-              ),
-              PlatformDialogAction(
-                child: Text("Save file"),
-                cupertino: (_, __) =>
-                    CupertinoDialogActionData(
-                      isDefaultAction: true,
-                    ),
-                material: (_, __) =>
-                    MaterialDialogActionData(
-                      icon: const Icon(Icons.save_alt_rounded),
-                    ),
-                onPressed: () => Navigator.of(context).pop("save"),
-              ),
-              PlatformDialogAction(
-                child: Text("Share"),
-                cupertino: (_, __) =>
-                    CupertinoDialogActionData(
-                      isDefaultAction: true,
-                    ),
-                material: (_, __) =>
-                    MaterialDialogActionData(
-                      icon: const Icon(Icons.share_rounded),
-                    ),
-                onPressed: () => Navigator.of(context).pop("share"),
-              ),
-            ],
+            material: (_, __) => MaterialDialogActionData(
+              icon: const Icon(Icons.cancel_outlined),
+            ),
+            onPressed: () => Navigator.of(context).pop(""),
           ),
+          PlatformDialogAction(
+            child: Text("Save file"),
+            cupertino: (_, __) => CupertinoDialogActionData(
+              isDefaultAction: true,
+            ),
+            material: (_, __) => MaterialDialogActionData(
+              icon: const Icon(Icons.save_alt_rounded),
+            ),
+            onPressed: () => Navigator.of(context).pop("save"),
+          ),
+          PlatformDialogAction(
+            child: Text("Share"),
+            cupertino: (_, __) => CupertinoDialogActionData(
+              isDefaultAction: true,
+            ),
+            material: (_, __) => MaterialDialogActionData(
+              icon: const Icon(Icons.share_rounded),
+            ),
+            onPressed: () => Navigator.of(context).pop("share"),
+          ),
+        ],
+      ),
     );
 
     switch (shouldShare) {
@@ -122,21 +115,20 @@ class _DetailsState extends State<Details> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         PlatformTextButton(
-          material: (_, __) =>
-              MaterialTextButtonData(
-                style: ButtonStyle(
-                  // Not rounded, but square
-                  shape: MaterialStateProperty.all(
-                    const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.zero,
-                    ),
-                  ),
-                  padding: MaterialStateProperty.all(
-                    const EdgeInsets.all(MEDIUM_SPACE),
-                  ),
+          material: (_, __) => MaterialTextButtonData(
+            style: ButtonStyle(
+              // Not rounded, but square
+              shape: MaterialStateProperty.all(
+                const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.zero,
                 ),
-                icon: const Icon(Icons.arrow_upward_rounded),
               ),
+              padding: MaterialStateProperty.all(
+                const EdgeInsets.all(MEDIUM_SPACE),
+              ),
+            ),
+            icon: const Icon(Icons.arrow_upward_rounded),
+          ),
           child: Text("Go back"),
           onPressed: widget.onGoBack,
         ),
@@ -151,78 +143,77 @@ class _DetailsState extends State<Details> {
                 child: widget.locations.isEmpty
                     ? Text("No location available")
                     : Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    FutureBuilder<String>(
-                      future: getAddress(
-                        widget.locations.last.latitude,
-                        widget.locations.last.longitude,
-                      ),
-                      builder: (context, snapshot) {
-                        if (snapshot.hasData) {
-                          return Text.rich(
-                            TextSpan(
-                              children: [
-                                TextSpan(
-                                  text: snapshot.data!,
-                                  style: getBodyTextTextStyle(context),
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          FutureBuilder<String>(
+                            future: getAddress(
+                              widget.locations.last.latitude,
+                              widget.locations.last.longitude,
+                            ),
+                            builder: (context, snapshot) {
+                              if (snapshot.hasData) {
+                                return Text.rich(
+                                  TextSpan(
+                                    children: [
+                                      TextSpan(
+                                        text: snapshot.data!,
+                                        style: getBodyTextTextStyle(context),
+                                      ),
+                                      TextSpan(
+                                        text:
+                                            " (${widget.locations.last.latitude}, ${widget.locations.last.longitude})",
+                                        style: getCaptionTextStyle(context),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }
+
+                              return Row(
+                                children: <Widget>[
+                                  Flexible(
+                                    child: Text(
+                                      "${widget.locations.last.latitude}, ${widget.locations.last.longitude}",
+                                      style: getBodyTextTextStyle(context),
+                                      overflow: TextOverflow.clip,
+                                    ),
+                                  ),
+                                  const SizedBox(width: SMALL_SPACE),
+                                  SizedBox.square(
+                                    dimension: getIconSizeForBodyText(context),
+                                    child: PlatformCircularProgressIndicator(
+                                      material: (_, __) => MaterialProgressIndicatorData(
+                                        strokeWidth: 2,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                          const SizedBox(height: MEDIUM_SPACE),
+                          Tooltip(
+                            message: "Most recent location point",
+                            textAlign: TextAlign.center,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: <Widget>[
+                                Icon(
+                                  context.platformIcons.time,
+                                  size: getIconSizeForBodyText(context),
                                 ),
-                                TextSpan(
-                                  text:
-                                  " (${widget.locations.last.latitude}, ${widget.locations.last.longitude})",
-                                  style: getCaptionTextStyle(context),
+                                const SizedBox(width: TINY_SPACE),
+                                Text(
+                                  widget.locations.last.createdAt.toString(),
+                                  style: getBodyTextTextStyle(context),
+                                  textAlign: TextAlign.start,
                                 ),
                               ],
                             ),
-                          );
-                        }
-
-                        return Row(
-                          children: <Widget>[
-                            Flexible(
-                              child: Text(
-                                "${widget.locations.last.latitude}, ${widget.locations.last.longitude}",
-                                style: getBodyTextTextStyle(context),
-                                overflow: TextOverflow.clip,
-                              ),
-                            ),
-                            const SizedBox(width: SMALL_SPACE),
-                            SizedBox.square(
-                              dimension: getIconSizeForBodyText(context),
-                              child: PlatformCircularProgressIndicator(
-                                material: (_, __) =>
-                                    MaterialProgressIndicatorData(
-                                      strokeWidth: 2,
-                                    ),
-                              ),
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                    const SizedBox(height: MEDIUM_SPACE),
-                    Tooltip(
-                      message: "Most recent location point",
-                      textAlign: TextAlign.center,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: <Widget>[
-                          Icon(
-                            context.platformIcons.time,
-                            size: getIconSizeForBodyText(context),
-                          ),
-                          const SizedBox(width: TINY_SPACE),
-                          Text(
-                            widget.locations.last.createdAt.toString(),
-                            style: getBodyTextTextStyle(context),
-                            textAlign: TextAlign.start,
                           ),
                         ],
                       ),
-                    ),
-                  ],
-                ),
               ),
               DetailInformationBox(
                 title: "Location details",
@@ -242,19 +233,18 @@ class _DetailsState extends State<Details> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: <Widget>[
-                    for (final relay in widget.task.relays)
-                      ListTile(
-                        title: Text(
-                          relay,
-                        ),
-                      ),
-                  ] +
+                        for (final relay in widget.task.relays)
+                          ListTile(
+                            title: Text(
+                              relay,
+                            ),
+                          ),
+                      ] +
                       [
                         PlatformTextButton(
-                          material: (_, __) =>
-                              MaterialTextButtonData(
-                                icon: Icon(context.platformIcons.edit),
-                              ),
+                          material: (_, __) => MaterialTextButtonData(
+                            icon: Icon(context.platformIcons.edit),
+                          ),
                           child: Text("Edit relays"),
                           onPressed: () async {
                             final newRelays = await showPlatformModalSheet(
@@ -264,10 +254,9 @@ class _DetailsState extends State<Details> {
                                 isScrollControlled: true,
                                 isDismissible: true,
                               ),
-                              builder: (context) =>
-                                  RelaySelectSheet(
-                                    selectedRelays: widget.task.relays,
-                                  ),
+                              builder: (context) => RelaySelectSheet(
+                                selectedRelays: widget.task.relays,
+                              ),
                             );
 
                             if (newRelays != null) {
@@ -299,8 +288,7 @@ class _DetailsState extends State<Details> {
                         children: <Widget>[
                           if (snapshot.hasData)
                             Text(
-                              "Task started at ${snapshot.data!["startedAt"]} with a frequency of ${snapshot
-                                  .data!["runFrequency"]}.",
+                              "Task started at ${snapshot.data!["startedAt"]} with a frequency of ${snapshot.data!["runFrequency"]}.",
                             )
                           else
                             Text("Task is not running."),
@@ -308,12 +296,11 @@ class _DetailsState extends State<Details> {
                           if (snapshot.hasData)
                             PlatformTextButton(
                               child: Text("Stop task"),
-                              material: (_, __) =>
-                                  MaterialTextButtonData(
-                                    icon: const Icon(Icons.stop_rounded),
-                                  ),
+                              material: (_, __) => MaterialTextButtonData(
+                                icon: const Icon(Icons.stop_rounded),
+                              ),
                               onPressed: () async {
-                                await widget.task.stop();
+                                await widget.task.stopExecutionImmediately();
 
                                 taskService.update(widget.task);
                               },
@@ -321,12 +308,11 @@ class _DetailsState extends State<Details> {
                           else
                             PlatformTextButton(
                               child: Text("Start task"),
-                              material: (_, __) =>
-                                  MaterialTextButtonData(
-                                    icon: const Icon(Icons.play_arrow_rounded),
-                                  ),
+                              material: (_, __) => MaterialTextButtonData(
+                                icon: const Icon(Icons.play_arrow_rounded),
+                              ),
                               onPressed: () async {
-                                await widget.task.start();
+                                await widget.task.startExecutionImmediately();
 
                                 taskService.update(widget.task);
                               },
@@ -344,67 +330,55 @@ class _DetailsState extends State<Details> {
               Center(
                 child: PlatformElevatedButton(
                   child: Text("Share location"),
-                  material: (_, __) =>
-                      MaterialElevatedButtonData(
-                        icon: Icon(Icons.share_location_rounded),
-                      ),
+                  material: (_, __) => MaterialElevatedButtonData(
+                    icon: Icon(Icons.share_location_rounded),
+                  ),
                   onPressed: openShareLocationDialog,
                 ),
               ),
               Center(
                 child: PlatformTextButton(
                   child: Text("Delete task"),
-                  material: (_, __) =>
-                      MaterialTextButtonData(
-                        icon: Icon(context.platformIcons.delete),
-                        style: TextButton.styleFrom(
-                          foregroundColor: Theme
-                              .of(context)
-                              .errorColor,
-                        ),
-                      ),
-                  cupertino: (_, __) =>
-                      CupertinoTextButtonData(
-                        color: Theme
-                            .of(context)
-                            .errorColor,
-                      ),
+                  material: (_, __) => MaterialTextButtonData(
+                    icon: Icon(context.platformIcons.delete),
+                    style: TextButton.styleFrom(
+                      foregroundColor: Theme.of(context).errorColor,
+                    ),
+                  ),
+                  cupertino: (_, __) => CupertinoTextButtonData(
+                    color: Theme.of(context).errorColor,
+                  ),
                   onPressed: () async {
                     final confirmed = await showPlatformDialog(
                       context: context,
-                      builder: (context) =>
-                          PlatformAlertDialog(
-                            title: Text("Delete task"),
-                            content: Text(
-                              "Are you sure you want to delete this task? This means that no more locations will be saved for this task. Existing locations will not be deleted. This action cannot be undone.",
-                            ),
-                            actions: <Widget>[
-                              PlatformDialogAction(
-                                child: Text("Cancel"),
-                                onPressed: () => Navigator.of(context).pop(false),
-                              ),
-                              PlatformDialogAction(
-                                child: Text("Delete"),
-                                onPressed: () => Navigator.of(context).pop(true),
-                                material: (_, __) =>
-                                    MaterialDialogActionData(
-                                      style: TextButton.styleFrom(
-                                        foregroundColor: Theme
-                                            .of(context)
-                                            .errorColor,
-                                      ),
-                                    ),
-                                cupertino: (_, __) =>
-                                    CupertinoDialogActionData(
-                                      isDestructiveAction: true,
-                                    ),
-                              ),
-                            ],
+                      builder: (context) => PlatformAlertDialog(
+                        title: Text("Delete task"),
+                        content: Text(
+                          "Are you sure you want to delete this task? This means that no more locations will be saved for this task. Existing locations will not be deleted. This action cannot be undone.",
+                        ),
+                        actions: <Widget>[
+                          PlatformDialogAction(
+                            child: Text("Cancel"),
+                            onPressed: () => Navigator.of(context).pop(false),
                           ),
+                          PlatformDialogAction(
+                            child: Text("Delete"),
+                            onPressed: () => Navigator.of(context).pop(true),
+                            material: (_, __) => MaterialDialogActionData(
+                              style: TextButton.styleFrom(
+                                foregroundColor: Theme.of(context).errorColor,
+                              ),
+                            ),
+                            cupertino: (_, __) => CupertinoDialogActionData(
+                              isDestructiveAction: true,
+                            ),
+                          ),
+                        ],
+                      ),
                     );
 
                     if (confirmed == true) {
-                      await widget.task.stop();
+                      await widget.task.stopExecutionImmediately();
                       taskService.remove(widget.task);
                       await taskService.save();
 

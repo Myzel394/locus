@@ -94,9 +94,9 @@ class MainScreen extends StatelessWidget {
                             value: snapshot.data!,
                             onChanged: (value) async {
                               if (value) {
-                                await task.start();
+                                await task.startExecutionImmediately();
                               } else {
-                                await task.stop();
+                                await task.stopExecutionImmediately();
                               }
 
                               taskService.update(task);

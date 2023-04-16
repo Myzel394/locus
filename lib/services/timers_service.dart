@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+
 
 abstract class TaskRuntimeTimer {
   // Abstract class that all timers should extend from
@@ -8,7 +8,9 @@ abstract class TaskRuntimeTimer {
 
   bool shouldRun(final DateTime now);
 
-  DateTime? nextRun(final DateTime now);
+  DateTime? nextStartDate(final DateTime now);
+
+  DateTime? nextEndDate(final DateTime now);
 
   Map<String, dynamic> toJSON();
 }
@@ -58,7 +60,7 @@ class WeekdayTimer extends TaskRuntimeTimer {
   }
 
   @override
-  DateTime nextRun(final DateTime now) {
+  DateTime nextStartDate(final DateTime now) {
     if (now.weekday != day) {
       // Find next day that matches the weekday
       final nextDay = now.add(Duration(days: day - now.weekday));
@@ -80,6 +82,17 @@ class WeekdayTimer extends TaskRuntimeTimer {
     // Find next day that matches the weekday
     final nextDay = now.add(Duration(days: day - now.weekday));
     return DateTime(nextDay.year, nextDay.month, nextDay.day, startTime.hour, startTime.minute);
+  }
+
+  @override
+  DateTime nextEndDate(final DateTime now) {
+    if (now.weekday != day) {
+      // Find next day that matches the weekday
+      final nextDay = now.add(Duration(days: day - now.weekday));
+      return DateTime(nextDay.year, nextDay.month, nextDay.day, endTime.hour, endTime.minute);
+    }
+
+    return DateTime(now.year, now.month, now.day, endTime.hour, endTime.minute);
   }
 
   static WeekdayTimer fromJSON(final Map<String, dynamic> json) {
@@ -120,7 +133,7 @@ class TimedTimer extends TaskRuntimeTimer {
   }
 
   @override
-  DateTime? nextRun(final DateTime now) {
+  DateTime? nextStartDate(final DateTime now) {
     // Check if start time is in the future, if yes, return that
     if (now.isBefore(startTime)) {
       return startTime;
@@ -141,81 +154,13 @@ class TimedTimer extends TaskRuntimeTimer {
       endTime: DateTime.parse(json["endTime"]),
     );
   }
-}
 
-class TaskRuntimeManager extends ChangeNotifier {
-  final List<TaskRuntimeTimer> _timers;
-  bool _deleteAfterRun;
-
-  TaskRuntimeManager({
-    required List<TaskRuntimeTimer> timers,
-    bool deleteAfterRun = true,
-  })  : _timers = timers,
-        _deleteAfterRun = deleteAfterRun;
-
-  bool shouldRun(final DateTime? time) {
-    final now = time ?? DateTime.now();
-
-    return _timers.any((timer) => timer.shouldRun(now));
-  }
-
-  DateTime? nextStartDate() {
-    final now = DateTime.now();
-
-    final nextDates = List<DateTime>.from(_timers.map((timer) => timer.nextRun(now)).where((date) => date != null));
-
-    if (nextDates.isEmpty) {
-      return null;
+  @override
+  DateTime? nextEndDate(final DateTime now) {
+    if (now.isBefore(endTime)) {
+      return endTime;
     }
 
-    // Find earliest date
-    return nextDates.reduce((value, element) => value.isBefore(element) ? value : element);
-  }
-
-  bool isInfinite() {
-    return _timers.any((timer) => timer.isInfinite());
-  }
-
-  void addTimer(final TaskRuntimeTimer timer) {
-    _timers.add(timer);
-    notifyListeners();
-  }
-
-  void removeTimer(final TaskRuntimeTimer timer) {
-    _timers.remove(timer);
-    notifyListeners();
-  }
-
-  void resetTimers() {
-    _timers.clear();
-    notifyListeners();
-  }
-
-  void setDeleteAfterRun(final bool deleteAfterRun) {
-    _deleteAfterRun = deleteAfterRun;
-    notifyListeners();
-  }
-
-  Map<String, dynamic> toJSON() {
-    return {
-      "timers": _timers.map((timer) => timer.toJSON()).toList(),
-      "deleteAfterRun": _deleteAfterRun.toString(),
-    };
-  }
-
-  static TaskRuntimeManager fromJSON(final Map<String, dynamic> json) {
-    return TaskRuntimeManager(
-      timers: json["timers"].map((timer) {
-        switch (timer["type"]) {
-          case WeekdayTimer.IDENTIFIER:
-            return WeekdayTimer.fromJSON(timer);
-          case TimedTimer.IDENTIFIER:
-            return TimedTimer.fromJSON(timer);
-          default:
-            throw Exception("Unknown timer type");
-        }
-      }).toList(),
-      deleteAfterRun: json["deleteAfterRun"] == "true",
-    );
+    return null;
   }
 }

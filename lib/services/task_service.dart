@@ -9,7 +9,7 @@ import 'package:openpgp/openpgp.dart';
 import 'package:uuid/uuid.dart';
 import 'package:workmanager/workmanager.dart';
 
-import 'task_runtime_service.dart';
+import 'timers_service.dart';
 
 const storage = FlutterSecureStorage();
 const KEY = "tasks_settings";
@@ -39,7 +39,9 @@ class Task extends ChangeNotifier {
   final String nostrPrivateKey;
   Duration frequency;
   List<String> relays = [];
-  TaskRuntimeManager? runtimeManager;
+  final List<TaskRuntimeTimer> timers;
+  bool deleteAfterRun;
+  String? _nextRunWorkManagerID;
 
   Task({
     required this.id,
@@ -50,10 +52,12 @@ class Task extends ChangeNotifier {
     required this.signPGPPublicKey,
     required this.createdAt,
     required this.nostrPrivateKey,
-    this.runtimeManager,
     this.viewPGPPrivateKey,
     this.relays = const [],
-  });
+    this.timers = const [],
+    this.deleteAfterRun = false,
+    String? nextRunWorkManagerID,
+  }) : _nextRunWorkManagerID = nextRunWorkManagerID;
 
   static Task fromJson(Map<String, dynamic> json) {
     return Task(
@@ -67,7 +71,18 @@ class Task extends ChangeNotifier {
       frequency: Duration(seconds: json["frequency"]),
       createdAt: DateTime.parse(json["createdAt"]),
       relays: List<String>.from(json["relays"]),
-      runtimeManager: json["runtimeManager"] == null ? null : TaskRuntimeManager.fromJSON(json["runtimeManager"]),
+      deleteAfterRun: json["deleteAfterRun"] == "true",
+      timers: json["timers"].map((timer) {
+        switch (timer["type"]) {
+          case WeekdayTimer.IDENTIFIER:
+            return WeekdayTimer.fromJSON(timer);
+          case TimedTimer.IDENTIFIER:
+            return TimedTimer.fromJSON(timer);
+          default:
+            throw Exception("Unknown timer type");
+        }
+      }).toList(),
+      nextRunWorkManagerID: json["nextRunWorkManagerID"],
     );
   }
 
@@ -95,7 +110,9 @@ class Task extends ChangeNotifier {
       "nostrPrivateKey": nostrPrivateKey,
       "createdAt": createdAt.toIso8601String(),
       "relays": relays,
-      "runtimeManager": runtimeManager?.toJSON(),
+      "timers": timers.map((timer) => timer.toJSON()).toList(),
+      "deleteAfterRun": deleteAfterRun.toString(),
+      "nextRunWorkManagerID": _nextRunWorkManagerID,
     };
   }
 
@@ -104,7 +121,8 @@ class Task extends ChangeNotifier {
     final Duration frequency,
     final List<String> relays, {
     Function(TaskProgress)? onProgress,
-    TaskRuntimeManager? runtimeManager,
+    List<TaskRuntimeTimer> timers = const [],
+    bool deleteAfterRun = false,
   }) async {
     onProgress?.call(TaskProgress.creatingViewKeys);
     final viewKeyPair = await OpenPGP.generate(
@@ -134,7 +152,8 @@ class Task extends ChangeNotifier {
       nostrPrivateKey: Keychain.generate().private,
       relays: relays,
       createdAt: DateTime.now(),
-      runtimeManager: runtimeManager,
+      timers: timers,
+      deleteAfterRun: deleteAfterRun,
     );
   }
 
@@ -160,10 +179,102 @@ class Task extends ChangeNotifier {
     };
   }
 
-  Future<void> start() async {
+  DateTime? nextStartDate() {
+    final now = DateTime.now();
+
+    final nextDates =
+        List<DateTime>.from(timers.map((timer) => timer.nextStartDate(now)).where((date) => date != null));
+
+    if (nextDates.isEmpty) {
+      return null;
+    }
+
+    // Find earliest date
+    return nextDates.reduce((value, element) => value.isBefore(element) ? value : element);
+  }
+
+  DateTime? nextEndDate() {
+    final now = DateTime.now();
+
+    final nextDates = List<DateTime>.from(timers.map((timer) => timer.nextEndDate(now)).where((date) => date != null));
+
+    if (nextDates.isEmpty) {
+      return null;
+    }
+
+    // Find earliest date
+    return nextDates.reduce((value, element) => value.isBefore(element) ? value : element);
+  }
+
+  bool shouldRun() {
+    final now = DateTime.now();
+
+    return timers.any((timer) => timer.shouldRun(now));
+  }
+
+  bool isInfinite() {
+    return timers.any((timer) => timer.isInfinite());
+  }
+
+  void _stopSchedule() {
+    if (_nextRunWorkManagerID != null) {
+      Workmanager().cancelByUniqueName(_nextRunWorkManagerID!);
+      _nextRunWorkManagerID = null;
+    }
+  }
+
+  // Returns the delay until the next expected run of the task. This is used to schedule the task to run at the next
+  // expected time. If the task is not scheduled to run, this will return null.
+  // If the task is scheduled to run in the past, this will return `Duration.zero`.
+  Duration? _getScheduleDelay() {
+    final nextStartDate = this.nextStartDate();
+
+    if (nextStartDate == null) {
+      return null;
+    }
+
+    final initialDelay = nextStartDate.difference(DateTime.now());
+
+    return initialDelay > Duration.zero ? initialDelay : Duration.zero;
+  }
+
+  // Starts the task. This will schedule the task to run at the next expected time.
+  // You can find out when the task will run by calling `nextStartDate`.
+  void startSchedule({final bool startNowIfNextRunIsUnknown = false}) {
+    _stopSchedule();
+
+    var initialDelay = _getScheduleDelay();
+
+    if (initialDelay == null) {
+      if (startNowIfNextRunIsUnknown) {
+        initialDelay = Duration.zero;
+      } else {
+        throw Exception("No next start date found. Task will not be scheduled to run.");
+      }
+    }
+
+    _nextRunWorkManagerID = uuid.v4();
+
+    Workmanager().registerOneOffTask(
+      _nextRunWorkManagerID!,
+      TASK_SCHEDULE_KEY,
+      initialDelay: initialDelay,
+      constraints: Constraints(
+        networkType: NetworkType.connected,
+      ),
+      inputData: {
+        "taskID": id,
+      },
+      existingWorkPolicy: ExistingWorkPolicy.replace,
+    );
+  }
+
+  // Starts the actual execution of the task. You should only call this if either the user wants to manually start the
+  // task or if the task is scheduled to run.
+  Future<void> startExecutionImmediately() async {
     Workmanager().registerPeriodicTask(
       id,
-      WORKMANAGER_KEY,
+      TASK_EXECUTION_KEY,
       frequency: frequency,
       constraints: Constraints(
         networkType: NetworkType.connected,
@@ -185,7 +296,9 @@ class Task extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> stop() async {
+  // Stops the actual execution of the task. You should only call this if either the user wants to manually stop the
+  // task or if the task is scheduled to stop.
+  Future<void> stopExecutionImmediately() async {
     Workmanager().cancelByUniqueName(id);
 
     await storage.delete(key: taskKey);
@@ -197,6 +310,8 @@ class Task extends ChangeNotifier {
     String? name,
     Duration? frequency,
     List<String>? relays,
+    List<TaskRuntimeTimer>? timers,
+    bool? deleteAfterRun,
   }) async {
     if (name != null) {
       this.name = name;
@@ -208,6 +323,15 @@ class Task extends ChangeNotifier {
 
     if (relays != null) {
       this.relays = relays;
+    }
+
+    if (timers != null) {
+      this.timers.clear();
+      this.timers.addAll(timers);
+    }
+
+    if (deleteAfterRun != null) {
+      this.deleteAfterRun = deleteAfterRun;
     }
 
     notifyListeners();
@@ -265,7 +389,7 @@ class TaskService extends ChangeNotifier {
   }
 
   void remove(final Task task) {
-    task.stop();
+    task.stopExecutionImmediately();
     _tasks.remove(task);
 
     notifyListeners();
