@@ -2,6 +2,7 @@ import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/services/task_service.dart';
+import 'package:locus/services/timers_service.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/RelaySelectSheet.dart';
 import 'package:provider/provider.dart';
@@ -45,7 +46,16 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
             _taskProgress = progress;
           });
         },
+        timers: [
+          WeekdayTimer.allDay(DateTime.monday),
+          WeekdayTimer.allDay(DateTime.tuesday),
+          WeekdayTimer.allDay(DateTime.wednesday),
+          WeekdayTimer.allDay(DateTime.thursday),
+          WeekdayTimer.allDay(DateTime.friday),
+        ],
       );
+      print("next start date ${task.nextStartDate()}");
+      print("next end date ${task.nextEndDate()}");
 
       taskService.add(task);
       await taskService.save();

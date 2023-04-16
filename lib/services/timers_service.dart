@@ -1,7 +1,9 @@
-
+import 'package:locus/extensions/date.dart';
 
 abstract class TaskRuntimeTimer {
   // Abstract class that all timers should extend from
+
+  const TaskRuntimeTimer();
 
   // A static value that should return whether the timer can potentially run forever
   bool isInfinite();
@@ -21,11 +23,17 @@ class WeekdayTimer extends TaskRuntimeTimer {
   final DateTime startTime;
   final DateTime endTime;
 
-  WeekdayTimer({
+  const WeekdayTimer({
     required this.day,
     required this.startTime,
     required this.endTime,
   });
+
+  static WeekdayTimer allDay(final int day) => WeekdayTimer(
+        day: day,
+        startTime: DateTime(0, 0, 0, 0, 0),
+        endTime: DateTime(0, 0, 0, 23, 59),
+      );
 
   static const IDENTIFIER = "weekday";
 
@@ -53,6 +61,7 @@ class WeekdayTimer extends TaskRuntimeTimer {
   @override
   Map<String, dynamic> toJSON() {
     return {
+      "_IDENTIFIER": IDENTIFIER,
       "day": day,
       "startTime": startTime.toIso8601String(),
       "endTime": endTime.toIso8601String(),
@@ -63,7 +72,7 @@ class WeekdayTimer extends TaskRuntimeTimer {
   DateTime nextStartDate(final DateTime now) {
     if (now.weekday != day) {
       // Find next day that matches the weekday
-      final nextDay = now.add(Duration(days: day - now.weekday));
+      final nextDay = now.next(day);
       return DateTime(nextDay.year, nextDay.month, nextDay.day, startTime.hour, startTime.minute);
     }
 
@@ -80,7 +89,7 @@ class WeekdayTimer extends TaskRuntimeTimer {
     }
 
     // Find next day that matches the weekday
-    final nextDay = now.add(Duration(days: day - now.weekday));
+    final nextDay = now.next(day);
     return DateTime(nextDay.year, nextDay.month, nextDay.day, startTime.hour, startTime.minute);
   }
 
@@ -88,7 +97,7 @@ class WeekdayTimer extends TaskRuntimeTimer {
   DateTime nextEndDate(final DateTime now) {
     if (now.weekday != day) {
       // Find next day that matches the weekday
-      final nextDay = now.add(Duration(days: day - now.weekday));
+      final nextDay = now.next(day);
       return DateTime(nextDay.year, nextDay.month, nextDay.day, endTime.hour, endTime.minute);
     }
 
@@ -109,7 +118,7 @@ class TimedTimer extends TaskRuntimeTimer {
   final DateTime startTime;
   final DateTime endTime;
 
-  TimedTimer({
+  const TimedTimer({
     required this.startTime,
     required this.endTime,
   });
@@ -127,6 +136,7 @@ class TimedTimer extends TaskRuntimeTimer {
   @override
   Map<String, dynamic> toJSON() {
     return {
+      "_IDENTIFIER": IDENTIFIER,
       "startTime": startTime.toIso8601String(),
       "endTime": endTime.toIso8601String(),
     };

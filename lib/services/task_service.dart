@@ -72,8 +72,8 @@ class Task extends ChangeNotifier {
       createdAt: DateTime.parse(json["createdAt"]),
       relays: List<String>.from(json["relays"]),
       deleteAfterRun: json["deleteAfterRun"] == "true",
-      timers: json["timers"].map((timer) {
-        switch (timer["type"]) {
+      timers: List<TaskRuntimeTimer>.from(json["timers"].map((timer) {
+        switch (timer["_IDENTIFIER"]) {
           case WeekdayTimer.IDENTIFIER:
             return WeekdayTimer.fromJSON(timer);
           case TimedTimer.IDENTIFIER:
@@ -81,7 +81,7 @@ class Task extends ChangeNotifier {
           default:
             throw Exception("Unknown timer type");
         }
-      }).toList(),
+      })),
       nextRunWorkManagerID: json["nextRunWorkManagerID"],
     );
   }
@@ -196,14 +196,36 @@ class Task extends ChangeNotifier {
   DateTime? nextEndDate() {
     final now = DateTime.now();
 
-    final nextDates = List<DateTime>.from(timers.map((timer) => timer.nextEndDate(now)).where((date) => date != null));
+    DateTime? date;
 
-    if (nextDates.isEmpty) {
-      return null;
+    for (final timer in timers) {
+      final timerDate = timer.nextEndDate(now);
+
+      if (timerDate == null) {
+        continue;
+      }
+
+      if (date == null) {
+        date = timerDate;
+        continue;
+      }
+
+      if (timer is WeekdayTimer) {
+        if (timerDate.isAfter(date)) {
+          date = timerDate;
+        }
+
+        continue;
+      } else {
+        if (timerDate.isBefore(date)) {
+          date = timerDate;
+        }
+
+        continue;
+      }
     }
 
-    // Find earliest date
-    return nextDates.reduce((value, element) => value.isBefore(element) ? value : element);
+    return date;
   }
 
   bool shouldRun() {
