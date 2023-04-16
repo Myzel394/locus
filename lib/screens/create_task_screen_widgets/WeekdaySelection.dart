@@ -2,6 +2,8 @@ import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:locus/constants/spacing.dart';
+import 'package:locus/extensions/date.dart';
+import 'package:locus/utils/theme.dart';
 
 class WeekdaySelection extends StatefulWidget {
   const WeekdaySelection({Key? key}) : super(key: key);
@@ -14,6 +16,8 @@ class _WeekdaySelectionState extends State<WeekdaySelection> {
   int weekday = DateTime.monday;
   TimeOfDay startTime = TimeOfDay(hour: 8, minute: 0);
   TimeOfDay endTime = TimeOfDay(hour: 20, minute: 0);
+
+  bool get isValid => startTime.toDateTime().isBefore(endTime.toDateTime());
 
   @override
   Widget build(BuildContext context) {
@@ -80,9 +84,13 @@ class _WeekdaySelectionState extends State<WeekdaySelection> {
                     padding: MaterialStateProperty.all<EdgeInsets>(
                       const EdgeInsets.all(MEDIUM_SPACE),
                     ),
-                    backgroundColor: MaterialStateProperty.all<Color>(Theme.of(context).colorScheme.surface),
+                    backgroundColor: MaterialStateProperty.all<Color>(
+                      Theme.of(context).colorScheme.surface,
+                    ),
                     shape: MaterialStateProperty.all<OutlinedBorder>(
-                      RoundedRectangleBorder(borderRadius: BorderRadius.circular(SMALL_SPACE)),
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(SMALL_SPACE),
+                      ),
                     ),
                   ),
                 ),
@@ -109,7 +117,9 @@ class _WeekdaySelectionState extends State<WeekdaySelection> {
                     ),
                     backgroundColor: MaterialStateProperty.all<Color>(Theme.of(context).colorScheme.surface),
                     shape: MaterialStateProperty.all<OutlinedBorder>(
-                      RoundedRectangleBorder(borderRadius: BorderRadius.circular(SMALL_SPACE)),
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(SMALL_SPACE),
+                      ),
                     ),
                   ),
                 ),
@@ -130,6 +140,13 @@ class _WeekdaySelectionState extends State<WeekdaySelection> {
               ),
             ],
           ),
+          if (!isValid) ...[
+            const SizedBox(height: SMALL_SPACE),
+            Text(
+              "Start time must be before end time",
+              style: getErrorTextStyle(context),
+            ),
+          ]
         ],
       ),
       actions: <Widget>[
@@ -151,11 +168,13 @@ class _WeekdaySelectionState extends State<WeekdaySelection> {
           material: (_, __) => MaterialDialogActionData(
             icon: const Icon(Icons.chevron_right_rounded),
           ),
-          onPressed: () => Navigator.of(context).pop({
-            "weekday": weekday,
-            "startTime": startTime,
-            "endTime": endTime,
-          }),
+          onPressed: isValid
+              ? () => Navigator.of(context).pop({
+                    "weekday": weekday,
+                    "startTime": startTime,
+                    "endTime": endTime,
+                  })
+              : null,
         )
       ],
     );

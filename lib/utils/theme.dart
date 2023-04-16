@@ -7,6 +7,10 @@ TextStyle getBodyTextTextStyle(final BuildContext context) => platformThemeData(
       cupertino: (data) => data.textTheme.textStyle,
     );
 
+TextStyle getErrorTextStyle(final BuildContext context) => getBodyTextTextStyle(context).copyWith(
+      color: Colors.red,
+    );
+
 Color getBodyTextColor(final BuildContext context) => platformThemeData(
       context,
       material: (data) => data.textTheme.bodyText1!.color!,
@@ -39,8 +43,7 @@ TextStyle getCaptionTextStyle(final BuildContext context) => platformThemeData(
 
 Color getSheetColor(final BuildContext context) => platformThemeData(
       context,
-      material: (data) =>
-          data.bottomSheetTheme.modalBackgroundColor ?? data.bottomAppBarColor,
+      material: (data) => data.bottomSheetTheme.modalBackgroundColor ?? data.bottomAppBarColor,
       cupertino: (data) => data.barBackgroundColor,
     );
 
