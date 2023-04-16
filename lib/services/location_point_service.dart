@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:battery_plus/battery_plus.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:openpgp/openpgp.dart';
 
@@ -13,6 +14,8 @@ class LocationPointService {
   final double? speedAccuracy;
   final double? heading;
   final double? headingAccuracy;
+  final double? batteryLevel;
+  final BatteryState? batteryState;
 
   LocationPointService({
     required this.createdAt,
@@ -24,6 +27,8 @@ class LocationPointService {
     this.speedAccuracy,
     this.heading,
     this.headingAccuracy,
+    this.batteryLevel,
+    this.batteryState,
   });
 
   static LocationPointService fromJson(Map<String, dynamic> json) {
@@ -37,6 +42,10 @@ class LocationPointService {
       speedAccuracy: json["speedAccuracy"],
       heading: json["heading"],
       headingAccuracy: json["headingAccuracy"],
+      batteryLevel: json["batteryLevel"],
+      batteryState: BatteryState.values.firstWhere(
+        (value) => value.name == json["batteryState"],
+      ),
     );
   }
 
@@ -51,6 +60,8 @@ class LocationPointService {
       "speedAccuracy": speedAccuracy,
       "heading": heading,
       "headingAccuracy": headingAccuracy,
+      "batteryLevel": batteryLevel,
+      "batteryState": batteryState?.name,
     };
   }
 
@@ -85,6 +96,8 @@ class LocationPointService {
       speed: locationData.speed,
       speedAccuracy: locationData.speedAccuracy,
       heading: locationData.heading,
+      batteryLevel: (await Battery().batteryLevel) / 100,
+      batteryState: await Battery().batteryState,
     );
   }
 
