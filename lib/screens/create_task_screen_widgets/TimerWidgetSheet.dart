@@ -61,9 +61,8 @@ class _TimerWidgetSheetState extends State<TimerWidgetSheet> {
   @override
   Widget build(BuildContext context) {
     return DraggableScrollableSheet(
-      initialChildSize: 0.4,
-      controller: _sheetController,
-      minChildSize: 0.4,
+      initialChildSize: 0.6,
+      minChildSize: 0.6,
       maxChildSize: 0.6,
       expand: false,
       builder: (_, __) => ModalSheet(
@@ -143,9 +142,9 @@ class _TimerWidgetSheetState extends State<TimerWidgetSheet> {
                             addWeekdayTimer(timer as WeekdayTimer);
                           }
                         },
-                        child: PlatformElevatedButton(
+                        child: PlatformTextButton(
                           child: Text("Add Weekday"),
-                          material: (_, __) => MaterialElevatedButtonData(
+                          material: (_, __) => MaterialTextButtonData(
                             icon: Icon(Icons.date_range_rounded),
                           ),
                           onPressed: () async {
@@ -168,6 +167,18 @@ class _TimerWidgetSheetState extends State<TimerWidgetSheet> {
                       ),
                     ],
                   ),
+                  if (_timers.isNotEmpty) ...[
+                    const SizedBox(height: MEDIUM_SPACE),
+                    PlatformElevatedButton(
+                      child: Text("Save"),
+                      material: (_, __) => MaterialElevatedButtonData(
+                        icon: Icon(Icons.check),
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pop(_timers);
+                      },
+                    ),
+                  ]
                 ],
               ),
             ),

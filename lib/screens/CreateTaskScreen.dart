@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/screens/create_task_screen_widgets/TimerWidgetSheet.dart';
 import 'package:locus/services/task_service.dart';
+import 'package:locus/services/timers_service.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/RelaySelectSheet.dart';
 import 'package:provider/provider.dart';
@@ -18,6 +19,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _frequencyController = TextEditingController();
   List<String> _relays = [];
+  List<TaskRuntimeTimer> _timers = [];
 
   TaskProgress? _taskProgress;
 
@@ -46,7 +48,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
             _taskProgress = progress;
           });
         },
-        timers: [],
+        timers: _timers,
       );
 
       taskService.add(task);
@@ -181,21 +183,33 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                         ),
                         const SizedBox(height: MEDIUM_SPACE),
                         PlatformElevatedButton(
-                          child: Text("Select Timers"),
+                          child: Text(
+                            _timers.isEmpty
+                                ? "Select Timers"
+                                : "Selected ${_timers.length} Timer${_timers.length == 1 ? "" : "s"}",
+                          ),
                           material: (_, __) => MaterialElevatedButtonData(
                             icon: Icon(Icons.timer_rounded),
                           ),
-                          onPressed: () async {
-                            await showPlatformModalSheet(
-                              context: context,
-                              material: MaterialModalSheetData(
-                                backgroundColor: Colors.transparent,
-                                isScrollControlled: true,
-                                isDismissible: true,
-                              ),
-                              builder: (_) => TimerWidgetSheet(),
-                            );
-                          },
+                          onPressed: _taskProgress != null
+                              ? null
+                              : () async {
+                                  final timers = await showPlatformModalSheet(
+                                    context: context,
+                                    material: MaterialModalSheetData(
+                                      backgroundColor: Colors.transparent,
+                                      isScrollControlled: true,
+                                      isDismissible: true,
+                                    ),
+                                    builder: (_) => TimerWidgetSheet(),
+                                  );
+
+                                  if (timers != null) {
+                                    setState(() {
+                                      _timers = timers;
+                                    });
+                                  }
+                                },
                         )
                       ],
                     ),
