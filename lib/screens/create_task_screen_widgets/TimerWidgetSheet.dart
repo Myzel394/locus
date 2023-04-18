@@ -30,13 +30,6 @@ class _TimerWidgetSheetState extends State<TimerWidgetSheet> {
   }
 
   @override
-  void didUpdateWidget(a) {
-    super.didUpdateWidget(a);
-
-    print("asdads");
-  }
-
-  @override
   void dispose() {
     _sheetController.dispose();
     super.dispose();

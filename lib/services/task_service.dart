@@ -179,7 +179,7 @@ class Task extends ChangeNotifier {
     };
   }
 
-  DateTime? nextStartDate() => findNextStartDate(timers);
+  DateTime? nextStartDate({final DateTime? date}) => findNextStartDate(timers, startDate: date);
 
   DateTime? nextEndDate() => findNextEndDate(timers);
 
@@ -201,32 +201,30 @@ class Task extends ChangeNotifier {
   // Returns the delay until the next expected run of the task. This is used to schedule the task to run at the next
   // expected time. If the task is not scheduled to run, this will return null.
   // If the task is scheduled to run in the past, this will return `Duration.zero`.
-  Duration? _getScheduleDelay() {
-    final nextStartDate = this.nextStartDate();
-
-    if (nextStartDate == null) {
-      return null;
-    }
-
-    final initialDelay = nextStartDate.difference(DateTime.now());
+  Duration _getScheduleDelay(final DateTime date) {
+    final initialDelay = date.difference(DateTime.now());
 
     return initialDelay > Duration.zero ? initialDelay : Duration.zero;
   }
 
   // Starts the task. This will schedule the task to run at the next expected time.
   // You can find out when the task will run by calling `nextStartDate`.
-  void startSchedule({final bool startNowIfNextRunIsUnknown = false}) {
-    _stopSchedule();
+  // Returns the next start date of the task OR `null` if the task is not scheduled to run.
+  DateTime? startSchedule({final bool startNowIfNextRunIsUnknown = false, final DateTime? startDate}) {
+    final now = startDate ?? DateTime.now();
+    DateTime? nextStartDate = this.nextStartDate(date: now);
 
-    var initialDelay = _getScheduleDelay();
-
-    if (initialDelay == null) {
+    if (nextStartDate == null) {
       if (startNowIfNextRunIsUnknown) {
-        initialDelay = Duration.zero;
+        nextStartDate = now;
       } else {
-        throw Exception("No next start date found. Task will not be scheduled to run.");
+        return null;
       }
     }
+
+    final initialDelay = _getScheduleDelay(nextStartDate);
+
+    _stopSchedule();
 
     _nextRunWorkManagerID = uuid.v4();
 
@@ -242,11 +240,26 @@ class Task extends ChangeNotifier {
       },
       existingWorkPolicy: ExistingWorkPolicy.replace,
     );
+
+    return nextStartDate;
+  }
+
+  // Starts the schedule tomorrow night. This should be used when the user manually stops the execution of the task, but
+  // still wants the task to run at the next expected time. If `startSchedule` is used, the schedule might start,
+  // immediately, which is not what the user wants.
+  // Returns the next date the task will run OR `null` if the task is not scheduled to run.
+  DateTime? startScheduleTomorrow() {
+    final tomorrow = DateTime.now().add(const Duration(days: 1));
+    final nextDate = DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 6, 0, 0);
+
+    return startSchedule(startDate: DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 6, 0, 0));
   }
 
   // Starts the actual execution of the task. You should only call this if either the user wants to manually start the
   // task or if the task is scheduled to run.
   Future<void> startExecutionImmediately() async {
+    _stopSchedule();
+
     Workmanager().registerPeriodicTask(
       id,
       TASK_EXECUTION_KEY,
@@ -411,6 +424,10 @@ DateTime? findNextEndDate(final List<TaskRuntimeTimer> timers, {final DateTime? 
     }
 
     if (timer is WeekdayTimer) {
+      if (timer.day < now.weekday) {
+        continue;
+      }
+
       if (timerDate.isAfter(date)) {
         date = timerDate;
       }
