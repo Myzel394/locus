@@ -414,6 +414,12 @@ DateTime? findNextEndDate(final List<TaskRuntimeTimer> timers, {final DateTime? 
   for (final timer in timers) {
     final timerDate = timer.nextEndDate(now);
 
+    if (timer is WeekdayTimer) {
+      if (timer.day < now.weekday) {
+        continue;
+      }
+    }
+
     if (timerDate == null) {
       continue;
     }
@@ -424,10 +430,6 @@ DateTime? findNextEndDate(final List<TaskRuntimeTimer> timers, {final DateTime? 
     }
 
     if (timer is WeekdayTimer) {
-      if (timer.day < now.weekday) {
-        continue;
-      }
-
       if (timerDate.isAfter(date)) {
         date = timerDate;
       }

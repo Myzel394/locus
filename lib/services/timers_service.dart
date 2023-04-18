@@ -34,8 +34,7 @@ class WeekdayTimer extends TaskRuntimeTimer {
     required this.endTime,
   });
 
-  static WeekdayTimer allDay(final int day) =>
-      WeekdayTimer(
+  static WeekdayTimer allDay(final int day) => WeekdayTimer(
         day: day,
         startTime: TimeOfDay(hour: 0, minute: 0),
         endTime: TimeOfDay(hour: 23, minute: 59),
@@ -80,8 +79,8 @@ class WeekdayTimer extends TaskRuntimeTimer {
     return {
       "_IDENTIFIER": IDENTIFIER,
       "day": day,
-      "startTime": startTime.toString(),
-      "endTime": endTime.toString(),
+      "startTime": startTime.toDateTime().toIso8601String(),
+      "endTime": endTime.toDateTime().toIso8601String(),
     };
   }
 
