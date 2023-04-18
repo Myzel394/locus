@@ -11,15 +11,36 @@ import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/LongPressPopup.dart';
 import 'package:locus/widgets/ModalSheet.dart';
 
-class TimerWidget extends StatefulWidget {
-  const TimerWidget({Key? key}) : super(key: key);
+class TimerWidgetSheet extends StatefulWidget {
+  const TimerWidgetSheet({Key? key}) : super(key: key);
 
   @override
-  State<TimerWidget> createState() => _TimerWidgetState();
+  State<TimerWidgetSheet> createState() => _TimerWidgetSheetState();
 }
 
-class _TimerWidgetState extends State<TimerWidget> {
+class _TimerWidgetSheetState extends State<TimerWidgetSheet> {
   final List<TaskRuntimeTimer> _timers = <TaskRuntimeTimer>[];
+  late final _sheetController;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _sheetController = DraggableScrollableController();
+  }
+
+  @override
+  void didUpdateWidget(a) {
+    super.didUpdateWidget(a);
+
+    print("asdads");
+  }
+
+  @override
+  void dispose() {
+    _sheetController.dispose();
+    super.dispose();
+  }
 
   List<TaskRuntimeTimer> get sortedTimers => _timers.toList()
     ..sort((a, b) {
@@ -47,8 +68,11 @@ class _TimerWidgetState extends State<TimerWidget> {
   @override
   Widget build(BuildContext context) {
     return DraggableScrollableSheet(
-      initialChildSize: 0.6,
-      minChildSize: 0.6,
+      initialChildSize: 0.4,
+      controller: _sheetController,
+      minChildSize: 0.4,
+      maxChildSize: 0.6,
+      expand: false,
       builder: (_, __) => ModalSheet(
         child: Column(
           children: <Widget>[
@@ -140,7 +164,7 @@ class _TimerWidgetState extends State<TimerWidget> {
                             if (data != null) {
                               addWeekdayTimer(
                                 WeekdayTimer(
-                                  day: data["day"] as int,
+                                  day: data["weekday"] as int,
                                   startTime: data["startTime"] as TimeOfDay,
                                   endTime: data["endTime"] as TimeOfDay,
                                 ),
