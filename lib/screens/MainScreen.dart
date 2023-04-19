@@ -130,7 +130,7 @@ class _MainScreenState extends State<MainScreen> {
                                 );
                               } else {
                                 await task.stopExecutionImmediately();
-                                final nextStartDate = task.startScheduleTomorrow();
+                                final nextStartDate = await task.startScheduleTomorrow();
 
                                 if (!mounted) {
                                   return;

@@ -88,6 +88,8 @@ class Task extends ChangeNotifier {
 
   String get taskKey => "Task:$id";
 
+  String get scheduleKey => "Task:$id:Schedule";
+
   String get nostrPublicKey => Keychain(nostrPrivateKey).public;
 
   TaskType get type {
@@ -158,12 +160,12 @@ class Task extends ChangeNotifier {
   }
 
   Future<bool> isRunning() async {
-    final status = await getStatus();
+    final status = await getExecutionStatus();
 
     return status != null;
   }
 
-  Future<Map<String, dynamic>?> getStatus() async {
+  Future<Map<String, dynamic>?> getExecutionStatus() async {
     final rawData = await storage.read(key: taskKey);
 
     if (rawData == null || rawData == "") {
@@ -179,6 +181,22 @@ class Task extends ChangeNotifier {
     };
   }
 
+  Future<Map<String, dynamic>?> getScheduleStatus() async {
+    final rawData = await storage.read(key: scheduleKey);
+
+    if (rawData == null || rawData == "") {
+      return null;
+    }
+
+    final data = jsonDecode(rawData);
+
+    return {
+      ...data,
+      "startedAt": DateTime.parse(data["startedAt"]),
+      "startsAt": DateTime.parse(data["startsAt"]),
+    };
+  }
+
   DateTime? nextStartDate({final DateTime? date}) => findNextStartDate(timers, startDate: date);
 
   DateTime? nextEndDate() => findNextEndDate(timers);
@@ -191,7 +209,9 @@ class Task extends ChangeNotifier {
 
   bool isInfinite() => timers.any((timer) => timer.isInfinite());
 
-  void _stopSchedule() {
+  Future<void> stopSchedule() async {
+    await storage.delete(key: scheduleKey);
+
     if (_nextRunWorkManagerID != null) {
       Workmanager().cancelByUniqueName(_nextRunWorkManagerID!);
       _nextRunWorkManagerID = null;
@@ -210,7 +230,7 @@ class Task extends ChangeNotifier {
   // Starts the task. This will schedule the task to run at the next expected time.
   // You can find out when the task will run by calling `nextStartDate`.
   // Returns the next start date of the task OR `null` if the task is not scheduled to run.
-  DateTime? startSchedule({final bool startNowIfNextRunIsUnknown = false, final DateTime? startDate}) {
+  Future<DateTime?> startSchedule({final bool startNowIfNextRunIsUnknown = false, final DateTime? startDate}) async {
     final now = startDate ?? DateTime.now();
     DateTime? nextStartDate = this.nextStartDate(date: now);
 
@@ -224,7 +244,7 @@ class Task extends ChangeNotifier {
 
     final initialDelay = _getScheduleDelay(nextStartDate);
 
-    _stopSchedule();
+    await stopSchedule();
 
     _nextRunWorkManagerID = uuid.v4();
 
@@ -241,6 +261,14 @@ class Task extends ChangeNotifier {
       existingWorkPolicy: ExistingWorkPolicy.replace,
     );
 
+    await storage.write(
+      key: scheduleKey,
+      value: jsonEncode({
+        "startedAt": DateTime.now().toIso8601String(),
+        "startsAt": nextStartDate.toIso8601String(),
+      }),
+    );
+
     return nextStartDate;
   }
 
@@ -248,7 +276,7 @@ class Task extends ChangeNotifier {
   // still wants the task to run at the next expected time. If `startSchedule` is used, the schedule might start,
   // immediately, which is not what the user wants.
   // Returns the next date the task will run OR `null` if the task is not scheduled to run.
-  DateTime? startScheduleTomorrow() {
+  Future<DateTime?> startScheduleTomorrow() {
     final tomorrow = DateTime.now().add(const Duration(days: 1));
     final nextDate = DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 6, 0, 0);
 
@@ -258,7 +286,7 @@ class Task extends ChangeNotifier {
   // Starts the actual execution of the task. You should only call this if either the user wants to manually start the
   // task or if the task is scheduled to run.
   Future<void> startExecutionImmediately() async {
-    _stopSchedule();
+    await stopSchedule();
 
     Workmanager().registerPeriodicTask(
       id,
@@ -393,10 +421,12 @@ class TaskService extends ChangeNotifier {
   }
 }
 
-DateTime? findNextStartDate(final List<TaskRuntimeTimer> timers, {final DateTime? startDate}) {
+DateTime? findNextStartDate(final List<TaskRuntimeTimer> timers,
+    {final DateTime? startDate, final bool onlyFuture = true}) {
   final now = startDate ?? DateTime.now();
 
-  final nextDates = List<DateTime>.from(timers.map((timer) => timer.nextStartDate(now)).where((date) => date != null));
+  final nextDates = List<DateTime>.from(
+      timers.map((timer) => timer.nextStartDate(now)).where((date) => date != null && date.isAfter(now)));
 
   if (nextDates.isEmpty) {
     return null;

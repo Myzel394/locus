@@ -46,9 +46,13 @@ class TimerController extends ChangeNotifier {
 
 class TimerWidget extends StatefulWidget {
   final TimerController? controller;
+  final List<TaskRuntimeTimer> timers;
+  final bool allowEdit;
 
   const TimerWidget({
     this.controller,
+    this.timers = const [],
+    this.allowEdit = true,
     Key? key,
   }) : super(key: key);
 
@@ -65,7 +69,9 @@ class _TimerWidgetState extends State<TimerWidget> {
 
     _controller = widget.controller ?? TimerController();
 
-    if (widget.controller != null) {
+    if (widget.controller == null) {
+      _controller.addAll(widget.timers);
+    } else {
       widget.controller!.addListener(rebuild);
     }
   }
@@ -95,36 +101,25 @@ class _TimerWidgetState extends State<TimerWidget> {
       return 0;
     });
 
-  void addWeekdayTimer(final WeekdayTimer timer) {
-    setState(() {
-      // Merge the new timer if a timer for the same weekday already exists
-      final existingTimer = _controller.timers
-          .firstWhereOrNull((currentTimer) => currentTimer is WeekdayTimer && currentTimer.day == timer.day);
-
-      if (existingTimer != null) {
-        _controller.remove(existingTimer);
-      }
-
-      _controller.add(timer);
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
+      shrinkWrap: true,
       itemCount: _controller.timers.length,
       itemBuilder: (_, index) {
         final timer = sortedTimers[index];
 
         return ListTile(
             title: Text(timer.format(context)),
-            trailing: PlatformIconButton(
-              icon: Icon(Icons.cancel),
-              onPressed: () {
-                _controller.removeAt(index);
-              },
-            ),
-            onTap: timer is WeekdayTimer
+            trailing: widget.allowEdit
+                ? PlatformIconButton(
+                    icon: Icon(Icons.cancel),
+                    onPressed: () {
+                      _controller.removeAt(index);
+                    },
+                  )
+                : null,
+            onTap: (widget.allowEdit && timer is WeekdayTimer)
                 ? () async {
                     final data = await showPlatformDialog(
                       context: context,
@@ -137,7 +132,7 @@ class _TimerWidgetState extends State<TimerWidget> {
                     );
 
                     if (data != null) {
-                      addWeekdayTimer(
+                      _controller.timers.add(
                         WeekdayTimer(
                           day: data["weekday"] as int,
                           startTime: data["startTime"] as TimeOfDay,
