@@ -41,20 +41,21 @@ class _TimerWidgetSheetState extends State<TimerWidgetSheet> {
     super.dispose();
   }
 
-  List<TaskRuntimeTimer> get sortedTimers => _timers.toList()
-    ..sort((a, b) {
-      if (a is WeekdayTimer && b is WeekdayTimer) {
-        return a.day.compareTo(b.day);
-      }
+  List<TaskRuntimeTimer> get sortedTimers =>
+      _timers.toList()
+        ..sort((a, b) {
+          if (a is WeekdayTimer && b is WeekdayTimer) {
+            return a.day.compareTo(b.day);
+          }
 
-      return 0;
-    });
+          return 0;
+        });
 
   void addWeekdayTimer(final WeekdayTimer timer) {
     setState(() {
       // Merge the new timer if a timer for the same weekday already exists
       final existingTimer =
-          _timers.firstWhereOrNull((currentTimer) => currentTimer is WeekdayTimer && currentTimer.day == timer.day);
+      _timers.firstWhereOrNull((currentTimer) => currentTimer is WeekdayTimer && currentTimer.day == timer.day);
 
       if (existingTimer != null) {
         _timers.remove(existingTimer);
@@ -71,126 +72,158 @@ class _TimerWidgetSheetState extends State<TimerWidgetSheet> {
       minChildSize: 0.6,
       maxChildSize: 0.6,
       expand: false,
-      builder: (_, __) => ModalSheet(
-        child: Column(
-          children: <Widget>[
-            Text("Timers", style: getTitleTextStyle(context)),
-            const SizedBox(height: MEDIUM_SPACE),
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  if (_timers.isNotEmpty) ...[
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: _timers.length,
-                        itemBuilder: (_, index) => ListTile(
-                          title: Text(sortedTimers[index].format(context)),
-                          trailing: PlatformIconButton(
-                            icon: Icon(Icons.cancel),
-                            onPressed: () {
-                              setState(() {
-                                _timers.removeAt(index);
-                              });
+      builder: (_, __) =>
+          ModalSheet(
+            child: Column(
+              children: <Widget>[
+                Text("Timers", style: getTitleTextStyle(context)),
+                const SizedBox(height: MEDIUM_SPACE),
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      if (_timers.isNotEmpty) ...[
+                        Expanded(
+                          child: ListView.builder(
+                            itemCount: _timers.length,
+                            itemBuilder: (_, index) {
+                              final timer = sortedTimers[index];
+
+                              return ListTile(
+                                  title: Text(timer.format(context)),
+                                  trailing: PlatformIconButton(
+                                    icon: Icon(Icons.cancel),
+                                    onPressed: () {
+                                      setState(() {
+                                        _timers.removeAt(index);
+                                      });
+                                    },
+                                  ),
+                                  onTap: timer is WeekdayTimer
+                                      ? () async {
+                                    final data = await showPlatformDialog(
+                                      context: context,
+                                      builder: (_) =>
+                                          WeekdaySelection(
+                                            weekday: timer.day,
+                                            startTime: timer.startTime,
+                                            endTime: timer.endTime,
+                                            lockWeekday: true,
+                                          ),
+                                    );
+
+                                    if (data != null) {
+                                      addWeekdayTimer(
+                                        WeekdayTimer(
+                                          day: data["weekday"] as int,
+                                          startTime: data["startTime"] as TimeOfDay,
+                                          endTime: data["endTime"] as TimeOfDay,
+                                        ),
+                                      );
+                                    }
+                                  }
+                                      : null);
                             },
                           ),
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: SMALL_SPACE),
-                    // Month, date and time
-                    Text(
-                      "Next execution will start at ${DateFormat('MMMM d, HH:mm').format(findNextStartDate(_timers)!)}",
-                    ),
-                    if (_timers.any((timer) => timer.isInfinite())) ...[
-                      const SizedBox(height: SMALL_SPACE),
+                        const SizedBox(height: SMALL_SPACE),
+                        // Month, date and time
+                        Text(
+                          "Next execution will start at ${DateFormat('MMMM d, HH:mm').format(findNextStartDate(
+                              _timers)!)}",
+                        ),
+                        if (_timers.any((timer) => timer.isInfinite())) ...[
+                          const SizedBox(height: SMALL_SPACE),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: <Widget>[
+                              const Icon(
+                                Icons.warning_rounded,
+                                color: Colors.yellow,
+                              ),
+                              const SizedBox(width: TINY_SPACE),
+                              Text(
+                                "This task will run until you stop it manually.",
+                                style: getCaptionTextStyle(context).copyWith(
+                                  color: Colors.yellow,
+                                ),
+                              ),
+                            ],
+                          )
+                        ]
+                      ],
+                      const SizedBox(height: MEDIUM_SPACE),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: <Widget>[
-                          const Icon(
-                            Icons.warning_rounded,
-                            color: Colors.yellow,
-                          ),
-                          const SizedBox(width: TINY_SPACE),
-                          Text(
-                            "This task will run until you stop it manually.",
-                            style: getCaptionTextStyle(context).copyWith(
-                              color: Colors.yellow,
+                          LongPressPopup<String>(
+                            items: List<PopupMenuEntry<String>>.from(
+                              WEEKDAY_TIMERS.entries.map(
+                                    (entry) =>
+                                    PopupMenuItem<String>(
+                                      value: entry.key,
+                                      child: Text(entry.value["name"] as String),
+                                    ),
+                              ),
+                            ),
+                            onSelected: (final dynamic id) {
+                              setState(() {
+                                _timers.clear();
+                              });
+
+                              final timers = WEEKDAY_TIMERS[id]!["timers"] as List<TaskRuntimeTimer>;
+
+                              for (final timer in timers) {
+                                addWeekdayTimer(timer as WeekdayTimer);
+                              }
+                            },
+                            child: PlatformTextButton(
+                              child: Text("Add Weekday"),
+                              material: (_, __) =>
+                                  MaterialTextButtonData(
+                                    icon: Icon(Icons.date_range_rounded),
+                                  ),
+                              onPressed: () async {
+                                final data = await showPlatformDialog(
+                                  context: context,
+                                  builder: (_) => WeekdaySelection(),
+                                );
+
+                                if (data != null) {
+                                  addWeekdayTimer(
+                                    WeekdayTimer(
+                                      day: data["weekday"] as int,
+                                      startTime: data["startTime"] as TimeOfDay,
+                                      endTime: data["endTime"] as TimeOfDay,
+                                    ),
+                                  );
+                                }
+                              },
                             ),
                           ),
                         ],
-                      )
-                    ]
-                  ],
-                  const SizedBox(height: MEDIUM_SPACE),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: <Widget>[
-                      LongPressPopup<String>(
-                        items: List<PopupMenuEntry<String>>.from(
-                          WEEKDAY_TIMERS.entries.map(
-                            (entry) => PopupMenuItem<String>(
-                              value: entry.key,
-                              child: Text(entry.value["name"] as String),
-                            ),
-                          ),
-                        ),
-                        onSelected: (final dynamic id) {
-                          setState(() {
-                            _timers.clear();
-                          });
-
-                          final timers = WEEKDAY_TIMERS[id]!["timers"] as List<TaskRuntimeTimer>;
-
-                          for (final timer in timers) {
-                            addWeekdayTimer(timer as WeekdayTimer);
-                          }
-                        },
-                        child: PlatformTextButton(
-                          child: Text("Add Weekday"),
-                          material: (_, __) => MaterialTextButtonData(
-                            icon: Icon(Icons.date_range_rounded),
-                          ),
-                          onPressed: () async {
-                            final data = await showPlatformDialog(
-                              context: context,
-                              builder: (_) => WeekdaySelection(),
-                            );
-
-                            if (data != null) {
-                              addWeekdayTimer(
-                                WeekdayTimer(
-                                  day: data["weekday"] as int,
-                                  startTime: data["startTime"] as TimeOfDay,
-                                  endTime: data["endTime"] as TimeOfDay,
-                                ),
-                              );
-                            }
+                      ),
+                      if (_timers.isNotEmpty) ...[
+                        const SizedBox(height: MEDIUM_SPACE),
+                        PlatformElevatedButton(
+                          child: Text("Save"),
+                          material: (_, __) =>
+                              MaterialElevatedButtonData(
+                                icon: Icon(Icons.check),
+                              ),
+                          onPressed: () {
+                            Navigator.of(context).pop(_timers);
                           },
                         ),
-                      ),
+                      ]
                     ],
                   ),
-                  if (_timers.isNotEmpty) ...[
-                    const SizedBox(height: MEDIUM_SPACE),
-                    PlatformElevatedButton(
-                      child: Text("Save"),
-                      material: (_, __) => MaterialElevatedButtonData(
-                        icon: Icon(Icons.check),
-                      ),
-                      onPressed: () {
-                        Navigator.of(context).pop(_timers);
-                      },
-                    ),
-                  ]
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
     );
   }
 }

@@ -6,18 +6,38 @@ import 'package:locus/extensions/date.dart';
 import 'package:locus/utils/theme.dart';
 
 class WeekdaySelection extends StatefulWidget {
-  const WeekdaySelection({Key? key}) : super(key: key);
+  final int weekday;
+  final TimeOfDay startTime;
+  final TimeOfDay endTime;
+  final bool lockWeekday;
+
+  const WeekdaySelection({
+    this.weekday = DateTime.monday,
+    this.startTime = const TimeOfDay(hour: 8, minute: 0),
+    this.endTime = const TimeOfDay(hour: 20, minute: 0),
+    this.lockWeekday = false,
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<WeekdaySelection> createState() => _WeekdaySelectionState();
 }
 
 class _WeekdaySelectionState extends State<WeekdaySelection> {
-  int weekday = DateTime.monday;
-  TimeOfDay startTime = TimeOfDay(hour: 8, minute: 0);
-  TimeOfDay endTime = TimeOfDay(hour: 20, minute: 0);
+  late int weekday;
+  late TimeOfDay startTime;
+  late TimeOfDay endTime;
 
   bool get isValid => startTime.toDateTime().isBefore(endTime.toDateTime());
+
+  @override
+  void initState() {
+    super.initState();
+
+    weekday = widget.weekday;
+    startTime = widget.startTime;
+    endTime = widget.endTime;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,15 +53,17 @@ class _WeekdaySelectionState extends State<WeekdaySelection> {
             ),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: MEDIUM_SPACE, vertical: SMALL_SPACE),
-              child: PlatformDropdownButton(
+              child: PlatformDropdownButton<int>(
                 value: weekday,
-                onChanged: (value) {
-                  setState(() {
-                    weekday = value as int;
-                  });
-                },
+                onChanged: widget.lockWeekday
+                    ? null
+                    : ((value) {
+                        setState(() {
+                          weekday = value as int;
+                        });
+                      }),
                 underline: Container(),
-                items: const <DropdownMenuItem>[
+                items: const <DropdownMenuItem<int>>[
                   DropdownMenuItem(
                     child: Text("Monday"),
                     value: DateTime.monday,
