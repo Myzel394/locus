@@ -43,7 +43,7 @@ TextStyle getCaptionTextStyle(final BuildContext context) => platformThemeData(
 
 Color getSheetColor(final BuildContext context) => platformThemeData(
       context,
-      material: (data) => data.bottomSheetTheme.modalBackgroundColor ?? data.bottomAppBarColor,
+      material: (data) => HSLColor.fromColor(data.scaffoldBackgroundColor.withAlpha(255)).withLightness(.18).toColor(),
       cupertino: (data) => data.barBackgroundColor,
     );
 
