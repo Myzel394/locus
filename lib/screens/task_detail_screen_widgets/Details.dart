@@ -327,6 +327,12 @@ class _DetailsState extends State<Details> {
                   },
                 ),
               ),
+              DetailInformationBox(
+                title: "Schedule",
+                child: Column(
+                  children: <Widget>[ListView.builder()],
+                ),
+              ),
               Center(
                 child: PlatformElevatedButton(
                   child: Text("Share location"),
