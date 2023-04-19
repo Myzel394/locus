@@ -8,15 +8,12 @@ import 'WeekdaySelection.dart';
 class TimerController extends ChangeNotifier {
   final List<TaskRuntimeTimer> _timers = [];
 
-  UnmodifiableListView<TaskRuntimeTimer> get timers =>
-      UnmodifiableListView(_timers);
+  UnmodifiableListView<TaskRuntimeTimer> get timers => UnmodifiableListView(_timers);
 
   void add(final TaskRuntimeTimer timer) {
     // Merge the new timer if a timer for the same weekday already exists
-    final existingTimer = _timers.firstWhereOrNull((currentTimer) =>
-        currentTimer is WeekdayTimer &&
-        timer is WeekdayTimer &&
-        currentTimer.day == timer.day);
+    final existingTimer = _timers.firstWhereOrNull(
+        (currentTimer) => currentTimer is WeekdayTimer && timer is WeekdayTimer && currentTimer.day == timer.day);
 
     if (existingTimer != null) {
       _timers.remove(existingTimer);
@@ -67,12 +64,23 @@ class _TimerWidgetState extends State<TimerWidget> {
     super.initState();
 
     _controller = widget.controller ?? TimerController();
+
+    if (widget.controller != null) {
+      widget.controller!.addListener(rebuild);
+    }
+  }
+
+  void rebuild() {
+    // Rebuild the widget when the controller changes
+    setState(() {});
   }
 
   @override
   void dispose() {
     if (widget.controller == null) {
       _controller.dispose();
+    } else {
+      widget.controller!.addListener(rebuild);
     }
 
     super.dispose();
@@ -90,9 +98,8 @@ class _TimerWidgetState extends State<TimerWidget> {
   void addWeekdayTimer(final WeekdayTimer timer) {
     setState(() {
       // Merge the new timer if a timer for the same weekday already exists
-      final existingTimer = _controller.timers.firstWhereOrNull(
-          (currentTimer) =>
-              currentTimer is WeekdayTimer && currentTimer.day == timer.day);
+      final existingTimer = _controller.timers
+          .firstWhereOrNull((currentTimer) => currentTimer is WeekdayTimer && currentTimer.day == timer.day);
 
       if (existingTimer != null) {
         _controller.remove(existingTimer);
