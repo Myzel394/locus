@@ -4,6 +4,8 @@ import 'package:locus/constants/spacing.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/RelaySelectSheet.dart';
+import 'package:locus/widgets/TimerWidget.dart';
+import 'package:locus/widgets/TimerWidgetSheet.dart';
 import 'package:provider/provider.dart';
 
 class CreateTaskScreen extends StatefulWidget {
@@ -16,6 +18,7 @@ class CreateTaskScreen extends StatefulWidget {
 class _CreateTaskScreenState extends State<CreateTaskScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _frequencyController = TextEditingController();
+  final TimerController _timers = TimerController();
   List<String> _relays = [];
 
   TaskProgress? _taskProgress;
@@ -24,6 +27,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
   void dispose() {
     _nameController.dispose();
     _frequencyController.dispose();
+    _timers.dispose();
 
     super.dispose();
   }
@@ -45,10 +49,12 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
             _taskProgress = progress;
           });
         },
+        timers: _timers.timers,
       );
 
       taskService.add(task);
       await taskService.save();
+      task.startSchedule();
 
       // Calling this explicitly so the text is cleared when leaving the screen
       setState(() {
@@ -145,31 +151,67 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                           ),
                         ),
                         const SizedBox(height: MEDIUM_SPACE),
-                        PlatformElevatedButton(
-                          child: Text(
-                            _relays.isEmpty
-                                ? "Select Relays"
-                                : "Selected ${_relays.length} Relay${_relays.length == 1 ? "" : "s"}",
-                          ),
-                          onPressed: _taskProgress != null
-                              ? null
-                              : () async {
-                                  final relays = await showPlatformModalSheet(
-                                    context: context,
-                                    material: MaterialModalSheetData(
-                                      backgroundColor: Colors.transparent,
-                                      isScrollControlled: true,
-                                      isDismissible: true,
-                                    ),
-                                    builder: (_) => RelaySelectSheet(),
-                                  );
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: <Widget>[
+                            PlatformElevatedButton(
+                              child: Text(
+                                _relays.isEmpty
+                                    ? "Select Relays"
+                                    : "Selected ${_relays.length} Relay${_relays.length == 1 ? "" : "s"}",
+                              ),
+                              material: (_, __) => MaterialElevatedButtonData(
+                                icon: Icon(Icons.dns_rounded),
+                              ),
+                              onPressed: _taskProgress != null
+                                  ? null
+                                  : () async {
+                                      final relays =
+                                          await showPlatformModalSheet(
+                                        context: context,
+                                        material: MaterialModalSheetData(
+                                          backgroundColor: Colors.transparent,
+                                          isScrollControlled: true,
+                                          isDismissible: true,
+                                        ),
+                                        builder: (_) => RelaySelectSheet(
+                                          selectedRelays: _relays,
+                                        ),
+                                      );
 
-                                  if (relays != null) {
-                                    setState(() {
-                                      _relays = relays;
-                                    });
-                                  }
-                                },
+                                      if (relays != null) {
+                                        setState(() {
+                                          _relays = relays;
+                                        });
+                                      }
+                                    },
+                            ),
+                            PlatformElevatedButton(
+                              child: Text(
+                                _timers.timers.isEmpty
+                                    ? "Select Timers"
+                                    : "Selected ${_timers.timers.length} Timer${_timers.timers.length == 1 ? "" : "s"}",
+                              ),
+                              material: (_, __) => MaterialElevatedButtonData(
+                                icon: Icon(Icons.timer_rounded),
+                              ),
+                              onPressed: _taskProgress != null
+                                  ? null
+                                  : () async {
+                                      await showPlatformModalSheet(
+                                        context: context,
+                                        material: MaterialModalSheetData(
+                                          backgroundColor: Colors.transparent,
+                                          isScrollControlled: true,
+                                          isDismissible: true,
+                                        ),
+                                        builder: (_) => TimerWidgetSheet(
+                                          controller: _timers,
+                                        ),
+                                      );
+                                    },
+                            )
+                          ],
                         ),
                       ],
                     ),
@@ -201,7 +243,8 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
               ],
               PlatformElevatedButton(
                 padding: const EdgeInsets.all(MEDIUM_SPACE),
-                onPressed: _taskProgress != null ? null : () => createTask(context),
+                onPressed:
+                    _taskProgress != null ? null : () => createTask(context),
                 child: Text(
                   "Create",
                   style: TextStyle(
