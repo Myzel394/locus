@@ -150,67 +150,71 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                           ),
                         ),
                         const SizedBox(height: MEDIUM_SPACE),
-                        PlatformElevatedButton(
-                          child: Text(
-                            _relays.isEmpty
-                                ? "Select Relays"
-                                : "Selected ${_relays.length} Relay${_relays.length == 1 ? "" : "s"}",
-                          ),
-                          material: (_, __) => MaterialElevatedButtonData(
-                            icon: Icon(Icons.dns_rounded),
-                          ),
-                          onPressed: _taskProgress != null
-                              ? null
-                              : () async {
-                                  final relays = await showPlatformModalSheet(
-                                    context: context,
-                                    material: MaterialModalSheetData(
-                                      backgroundColor: Colors.transparent,
-                                      isScrollControlled: true,
-                                      isDismissible: true,
-                                    ),
-                                    builder: (_) => RelaySelectSheet(
-                                      selectedRelays: _relays,
-                                    ),
-                                  );
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: <Widget>[
+                            PlatformElevatedButton(
+                              child: Text(
+                                _relays.isEmpty
+                                    ? "Select Relays"
+                                    : "Selected ${_relays.length} Relay${_relays.length == 1 ? "" : "s"}",
+                              ),
+                              material: (_, __) => MaterialElevatedButtonData(
+                                icon: Icon(Icons.dns_rounded),
+                              ),
+                              onPressed: _taskProgress != null
+                                  ? null
+                                  : () async {
+                                      final relays = await showPlatformModalSheet(
+                                        context: context,
+                                        material: MaterialModalSheetData(
+                                          backgroundColor: Colors.transparent,
+                                          isScrollControlled: true,
+                                          isDismissible: true,
+                                        ),
+                                        builder: (_) => RelaySelectSheet(
+                                          selectedRelays: _relays,
+                                        ),
+                                      );
 
-                                  if (relays != null) {
-                                    setState(() {
-                                      _relays = relays;
-                                    });
-                                  }
-                                },
+                                      if (relays != null) {
+                                        setState(() {
+                                          _relays = relays;
+                                        });
+                                      }
+                                    },
+                            ),
+                            PlatformElevatedButton(
+                              child: Text(
+                                _timers.isEmpty
+                                    ? "Select Timers"
+                                    : "Selected ${_timers.length} Timer${_timers.length == 1 ? "" : "s"}",
+                              ),
+                              material: (_, __) => MaterialElevatedButtonData(
+                                icon: Icon(Icons.timer_rounded),
+                              ),
+                              onPressed: _taskProgress != null
+                                  ? null
+                                  : () async {
+                                      final timers = await showPlatformModalSheet(
+                                        context: context,
+                                        material: MaterialModalSheetData(
+                                          backgroundColor: Colors.transparent,
+                                          isScrollControlled: true,
+                                          isDismissible: true,
+                                        ),
+                                        builder: (_) => TimerWidgetSheet(),
+                                      );
+
+                                      if (timers != null) {
+                                        setState(() {
+                                          _timers = timers;
+                                        });
+                                      }
+                                    },
+                            )
+                          ],
                         ),
-                        const SizedBox(height: MEDIUM_SPACE),
-                        PlatformElevatedButton(
-                          child: Text(
-                            _timers.isEmpty
-                                ? "Select Timers"
-                                : "Selected ${_timers.length} Timer${_timers.length == 1 ? "" : "s"}",
-                          ),
-                          material: (_, __) => MaterialElevatedButtonData(
-                            icon: Icon(Icons.timer_rounded),
-                          ),
-                          onPressed: _taskProgress != null
-                              ? null
-                              : () async {
-                                  final timers = await showPlatformModalSheet(
-                                    context: context,
-                                    material: MaterialModalSheetData(
-                                      backgroundColor: Colors.transparent,
-                                      isScrollControlled: true,
-                                      isDismissible: true,
-                                    ),
-                                    builder: (_) => TimerWidgetSheet(),
-                                  );
-
-                                  if (timers != null) {
-                                    setState(() {
-                                      _timers = timers;
-                                    });
-                                  }
-                                },
-                        )
                       ],
                     ),
                   ],
