@@ -2,9 +2,9 @@ import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/services/task_service.dart';
-import 'package:locus/services/timers_service.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/RelaySelectSheet.dart';
+import 'package:locus/widgets/TimerWidget.dart';
 import 'package:locus/widgets/TimerWidgetSheet.dart';
 import 'package:provider/provider.dart';
 
@@ -18,8 +18,8 @@ class CreateTaskScreen extends StatefulWidget {
 class _CreateTaskScreenState extends State<CreateTaskScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _frequencyController = TextEditingController();
+  final TimerController _timers = TimerController();
   List<String> _relays = [];
-  List<TaskRuntimeTimer> _timers = [];
 
   TaskProgress? _taskProgress;
 
@@ -27,6 +27,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
   void dispose() {
     _nameController.dispose();
     _frequencyController.dispose();
+    _timers.dispose();
 
     super.dispose();
   }
@@ -48,7 +49,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
             _taskProgress = progress;
           });
         },
-        timers: _timers,
+        timers: _timers.timers,
       );
 
       taskService.add(task);
@@ -165,7 +166,8 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                               onPressed: _taskProgress != null
                                   ? null
                                   : () async {
-                                      final relays = await showPlatformModalSheet(
+                                      final relays =
+                                          await showPlatformModalSheet(
                                         context: context,
                                         material: MaterialModalSheetData(
                                           backgroundColor: Colors.transparent,
@@ -186,9 +188,9 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                             ),
                             PlatformElevatedButton(
                               child: Text(
-                                _timers.isEmpty
+                                _timers.timers.isEmpty
                                     ? "Select Timers"
-                                    : "Selected ${_timers.length} Timer${_timers.length == 1 ? "" : "s"}",
+                                    : "Selected ${_timers.timers.length} Timer${_timers.timers.length == 1 ? "" : "s"}",
                               ),
                               material: (_, __) => MaterialElevatedButtonData(
                                 icon: Icon(Icons.timer_rounded),
@@ -196,7 +198,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                               onPressed: _taskProgress != null
                                   ? null
                                   : () async {
-                                      final timers = await showPlatformModalSheet(
+                                      await showPlatformModalSheet(
                                         context: context,
                                         material: MaterialModalSheetData(
                                           backgroundColor: Colors.transparent,
@@ -204,15 +206,9 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                           isDismissible: true,
                                         ),
                                         builder: (_) => TimerWidgetSheet(
-                                          selectedTimers: _timers,
+                                          controller: _timers,
                                         ),
                                       );
-
-                                      if (timers != null) {
-                                        setState(() {
-                                          _timers = timers;
-                                        });
-                                      }
                                     },
                             )
                           ],
@@ -247,7 +243,8 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
               ],
               PlatformElevatedButton(
                 padding: const EdgeInsets.all(MEDIUM_SPACE),
-                onPressed: _taskProgress != null ? null : () => createTask(context),
+                onPressed:
+                    _taskProgress != null ? null : () => createTask(context),
                 child: Text(
                   "Create",
                   style: TextStyle(

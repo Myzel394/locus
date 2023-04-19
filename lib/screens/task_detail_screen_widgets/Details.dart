@@ -92,7 +92,8 @@ class _DetailsState extends State<Details> {
 
         await FileSaver.instance.saveFile(
           name: "viewkey.json",
-          bytes: const Utf8Encoder().convert(widget.task.generateViewKeyContent()),
+          bytes:
+              const Utf8Encoder().convert(widget.task.generateViewKeyContent()),
         );
         break;
       case "share":
@@ -182,7 +183,8 @@ class _DetailsState extends State<Details> {
                                   SizedBox.square(
                                     dimension: getIconSizeForBodyText(context),
                                     child: PlatformCircularProgressIndicator(
-                                      material: (_, __) => MaterialProgressIndicatorData(
+                                      material: (_, __) =>
+                                          MaterialProgressIndicatorData(
                                         strokeWidth: 2,
                                       ),
                                     ),
@@ -330,7 +332,7 @@ class _DetailsState extends State<Details> {
               DetailInformationBox(
                 title: "Schedule",
                 child: Column(
-                  children: <Widget>[ListView.builder()],
+                  children: <Widget>[],
                 ),
               ),
               Center(
