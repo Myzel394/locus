@@ -36,7 +36,7 @@ class NostrEventsManager {
     await socket.close();
   }
 
-  Future<void> publishMessage(String message) async {
+  Future<Event> publishMessage(String message) async {
     final event = Event.from(
       kind: 1000,
       tags: [],
@@ -47,5 +47,7 @@ class NostrEventsManager {
     for (final relay in relays) {
       await _sendEvent(event, relay);
     }
+
+    return event;
   }
 }
