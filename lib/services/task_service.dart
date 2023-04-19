@@ -252,7 +252,7 @@ class Task extends ChangeNotifier {
     final tomorrow = DateTime.now().add(const Duration(days: 1));
     final nextDate = DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 6, 0, 0);
 
-    return startSchedule(startDate: DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 6, 0, 0));
+    return startSchedule(startDate: nextDate);
   }
 
   // Starts the actual execution of the task. You should only call this if either the user wants to manually start the

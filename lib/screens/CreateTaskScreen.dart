@@ -203,7 +203,9 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                           isScrollControlled: true,
                                           isDismissible: true,
                                         ),
-                                        builder: (_) => TimerWidgetSheet(),
+                                        builder: (_) => TimerWidgetSheet(
+                                          selectedTimers: _timers,
+                                        ),
                                       );
 
                                       if (timers != null) {

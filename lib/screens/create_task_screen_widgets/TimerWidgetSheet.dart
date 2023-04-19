@@ -12,14 +12,19 @@ import 'package:locus/widgets/LongPressPopup.dart';
 import 'package:locus/widgets/ModalSheet.dart';
 
 class TimerWidgetSheet extends StatefulWidget {
-  const TimerWidgetSheet({Key? key}) : super(key: key);
+  final List<TaskRuntimeTimer> selectedTimers;
+
+  const TimerWidgetSheet({
+    this.selectedTimers = const [],
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<TimerWidgetSheet> createState() => _TimerWidgetSheetState();
 }
 
 class _TimerWidgetSheetState extends State<TimerWidgetSheet> {
-  final List<TaskRuntimeTimer> _timers = <TaskRuntimeTimer>[];
+  final List<TaskRuntimeTimer> _timers = [];
   late final _sheetController;
 
   @override
@@ -27,6 +32,7 @@ class _TimerWidgetSheetState extends State<TimerWidgetSheet> {
     super.initState();
 
     _sheetController = DraggableScrollableController();
+    _timers.addAll(widget.selectedTimers);
   }
 
   @override
