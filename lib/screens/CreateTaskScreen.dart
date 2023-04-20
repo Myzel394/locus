@@ -21,7 +21,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
   final TimerController _timers = TimerController();
   List<String> _relays = [];
 
-  TaskProgress? _taskProgress;
+  TaskCreationProgress? _taskProgress;
 
   @override
   void dispose() {
@@ -34,7 +34,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
 
   Future<void> createTask(final BuildContext context) async {
     setState(() {
-      _taskProgress = TaskProgress.creationStartsSoon;
+      _taskProgress = TaskCreationProgress.startsSoon;
     });
 
     final taskService = context.read<TaskService>();
@@ -225,13 +225,13 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                 Text(
                   (() {
                     switch (_taskProgress) {
-                      case TaskProgress.creationStartsSoon:
+                      case TaskCreationProgress.startsSoon:
                         return "Task generation started...";
-                      case TaskProgress.creatingViewKeys:
+                      case TaskCreationProgress.creatingViewKeys:
                         return "Creating view keys...";
-                      case TaskProgress.creatingSignKeys:
+                      case TaskCreationProgress.creatingSignKeys:
                         return "Creating sign keys...";
-                      case TaskProgress.creatingTask:
+                      case TaskCreationProgress.creatingTask:
                         return "Creating task...";
                       default:
                         return "";

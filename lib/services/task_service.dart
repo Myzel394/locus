@@ -1,8 +1,13 @@
 import 'dart:collection';
 import 'dart:convert';
+import 'dart:math';
+import 'dart:typed_data';
 
+import 'package:cryptography/cryptography.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:locus/api/nostr-events.dart';
+import 'package:locus/constants/app.dart';
 import 'package:locus/services/manager_service.dart';
 import 'package:nostr/nostr.dart';
 import 'package:openpgp/openpgp.dart';
@@ -19,11 +24,19 @@ enum TaskType {
   self,
 }
 
-enum TaskProgress {
-  creationStartsSoon,
+enum TaskCreationProgress {
+  startsSoon,
   creatingViewKeys,
   creatingSignKeys,
   creatingTask,
+}
+
+enum TaskLinkPublishProgress {
+  startsSoon,
+  encrypting,
+  publishing,
+  creatingURI,
+  done,
 }
 
 const uuid = Uuid();
@@ -122,11 +135,11 @@ class Task extends ChangeNotifier {
     final String name,
     final Duration frequency,
     final List<String> relays, {
-    Function(TaskProgress)? onProgress,
+    Function(TaskCreationProgress)? onProgress,
     List<TaskRuntimeTimer> timers = const [],
     bool deleteAfterRun = false,
   }) async {
-    onProgress?.call(TaskProgress.creatingViewKeys);
+    onProgress?.call(TaskCreationProgress.creatingViewKeys);
     final viewKeyPair = await OpenPGP.generate(
       options: (Options()
         ..keyOptions = (KeyOptions()..rsaBits = 4096)
@@ -134,7 +147,7 @@ class Task extends ChangeNotifier {
         ..email = "user@locus.example"),
     );
 
-    onProgress?.call(TaskProgress.creatingSignKeys);
+    onProgress?.call(TaskCreationProgress.creatingSignKeys);
     final signKeyPair = await OpenPGP.generate(
       options: (Options()
         ..keyOptions = (KeyOptions()..rsaBits = 4096)
@@ -142,7 +155,7 @@ class Task extends ChangeNotifier {
         ..email = "user@locus.example"),
     );
 
-    onProgress?.call(TaskProgress.creatingTask);
+    onProgress?.call(TaskCreationProgress.creatingTask);
     return Task(
       id: uuid.v4(),
       name: name,
@@ -360,6 +373,73 @@ class Task extends ChangeNotifier {
       "nostrPublicKey": nostrPublicKey,
       "relays": relays,
     });
+  }
+
+  // Generates a link that can be used to retrieve the task
+  // This link is primarily used for sharing the task to the web app
+  // Here's the process:
+  // 1. Generate a random password
+  // 2. Encrypt the task with the password
+  // 3. Publish the encrypted task to a random Nostr relay
+  // 4. Generate a link that contains the password and the Nostr relay ID
+  Future<String> generateLink({
+    final void Function(TaskLinkPublishProgress progress)? onProgress,
+  }) async {
+    onProgress?.call(TaskLinkPublishProgress.startsSoon);
+
+    final message = generateViewKeyContent();
+
+    onProgress?.call(TaskLinkPublishProgress.encrypting);
+
+    final algorithm = AesCbc.with256bits(
+      macAlgorithm: Hmac.sha256(),
+    );
+    final secretKey = await algorithm.newSecretKey();
+
+    final encrypted = await algorithm.encrypt(
+      Uint8List.fromList(const Utf8Encoder().convert(message)),
+      secretKey: secretKey,
+    );
+
+    onProgress?.call(TaskLinkPublishProgress.publishing);
+
+    final password = await secretKey.extractBytes();
+
+    final relay = relays[Random().nextInt(relays.length)];
+    final manager = NostrEventsManager(
+      relays: [relay],
+      privateKey: nostrPrivateKey,
+    );
+    final nostrMessage = jsonEncode(encrypted.cipherText);
+    final publishedEvent = await manager.publishMessage(nostrMessage, kind: 1001);
+
+    onProgress?.call(TaskLinkPublishProgress.creatingURI);
+
+    final parameters = {
+      // Password
+      "p": password,
+      // Key
+      "k": nostrPublicKey,
+      // ID
+      "i": publishedEvent.id,
+      // Relay
+      "r": relay,
+      // Initial vector
+      "v": encrypted.nonce,
+    };
+
+    final fragment = base64Url.encode(jsonEncode(parameters).codeUnits);
+    final uri = Uri(
+      scheme: "https",
+      host: APP_URL_DOMAIN,
+      path: "",
+      fragment: fragment,
+    );
+
+    onProgress?.call(TaskLinkPublishProgress.done);
+    secretKey.destroy();
+
+    return uri.toString();
   }
 }
 
