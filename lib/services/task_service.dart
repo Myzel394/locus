@@ -387,8 +387,7 @@ class Task extends ChangeNotifier {
   }) async {
     onProgress?.call(TaskLinkPublishProgress.startsSoon);
 
-    final data = generateViewKeyContent();
-    final message = data.toString();
+    final message = generateViewKeyContent();
 
     onProgress?.call(TaskLinkPublishProgress.encrypting);
 
@@ -404,15 +403,15 @@ class Task extends ChangeNotifier {
 
     onProgress?.call(TaskLinkPublishProgress.publishing);
 
-    final password = base64Url.encode(await secretKey.extractBytes());
+    final password = await secretKey.extractBytes();
 
     final relay = relays[Random().nextInt(relays.length)];
     final manager = NostrEventsManager(
       relays: [relay],
       privateKey: nostrPrivateKey,
     );
-    final nostrMessage = base64Url.encode(encrypted.cipherText);
-    final publishedEvent = await manager.publishMessage(nostrMessage);
+    final nostrMessage = jsonEncode(encrypted.cipherText);
+    final publishedEvent = await manager.publishMessage(nostrMessage, kind: 1001);
 
     onProgress?.call(TaskLinkPublishProgress.creatingURI);
 
@@ -425,9 +424,11 @@ class Task extends ChangeNotifier {
       "i": publishedEvent.id,
       // Relay
       "r": relay,
+      // Initial vector
+      "v": encrypted.nonce,
     };
 
-    final fragment = parameters.toString();
+    final fragment = base64Url.encode(jsonEncode(parameters).codeUnits);
     final uri = Uri(
       scheme: "https",
       host: APP_URL_DOMAIN,
@@ -436,6 +437,7 @@ class Task extends ChangeNotifier {
     );
 
     onProgress?.call(TaskLinkPublishProgress.done);
+    secretKey.destroy();
 
     return uri.toString();
   }
