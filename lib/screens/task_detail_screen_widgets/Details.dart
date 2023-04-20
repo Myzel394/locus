@@ -2,9 +2,10 @@ import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+import 'package:intl/intl.dart';
 import 'package:locus/api/get-address.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/services/location_point_service.dart';
@@ -13,6 +14,7 @@ import 'package:locus/utils/file.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/DetailInformationBox.dart';
 import 'package:locus/widgets/RelaySelectSheet.dart';
+import 'package:locus/widgets/TimerWidget.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -285,7 +287,7 @@ class _DetailsState extends State<Details> {
                 title: "Task status",
                 child: FutureBuilder<Map<String, dynamic>>(
                   future: (() async {
-                    final status = await widget.task.getStatus();
+                    final status = await widget.task.getExecutionStatus();
 
                     if (status == null) {
                       return {} as Map<String, dynamic>;
@@ -305,14 +307,16 @@ class _DetailsState extends State<Details> {
                           else
                             Text("Task is not running."),
                           const SizedBox(height: MEDIUM_SPACE),
-                          if (snapshot.hasData)
-                            PlatformTextButton(
-                              child: Text("Stop task"),
-                              material: (_, __) => MaterialTextButtonData(
+                          Row(
+                            children: <Widget>[
+                              if (snapshot.hasData)
+                                PlatformTextButton(
+                                  child: Text("Stop task"),
+                                  material: (_, __) => MaterialTextButtonData(
                                 icon: const Icon(Icons.stop_rounded),
                               ),
-                              onPressed: () async {
-                                await widget.task.stop();
+                                  onPressed: () async {
+                                    await widget.task.stopExecutionImmediately();
 
                                 taskService.update(widget.task);
                               },
@@ -320,15 +324,119 @@ class _DetailsState extends State<Details> {
                           else
                             PlatformTextButton(
                               child: Text("Start task"),
-                              material: (_, __) => MaterialTextButtonData(
-                                icon: const Icon(Icons.play_arrow_rounded),
+                              material: (_, __) =>MaterialTextButtonData(
+                                    icon: const Icon(Icons.play_arrow_rounded),
+                                  ),
+                                  onPressed: () async {
+                                    await widget.task.startExecutionImmediately();
+
+                                    taskService.update(widget.task);
+                                  },
+                                ),
+                              const SizedBox(width: MEDIUM_SPACE),
+                              FutureBuilder<Map<String, dynamic>>(
+                                future: (() async {
+                                  final status = await widget.task.getScheduleStatus();
+
+                                  if (status == null) {
+                                    return {} as Map<String, dynamic>;
+                                  }
+
+                                  return status;
+                                })(),
+                                builder: (context, scheduleSnapshot) {
+                                  if (scheduleSnapshot.connectionState == ConnectionState.done) {
+                                    if (scheduleSnapshot.hasData) {
+                                      return PlatformTextButton(
+                                        child: Text("Stop scheduling"),
+                                        material: (_, __) => MaterialTextButtonData(
+                                icon: const Icon(Icons.stop_outlined),
                               ),
                               onPressed: () async {
-                                await widget.task.start();
+                                await widget.task.stopSchedule();
 
-                                taskService.update(widget.task);
-                              },
-                            )
+                                          taskService.update(widget.task);
+
+                                          await showPlatformDialog(
+                                            context: context,
+                                            builder: (context) => PlatformAlertDialog(
+                                              title: Text("Task unscheduled"),
+                                              content: Text(
+                                                "The task has been unscheduled. It will no longer be executed automatically. To start it again, you can either schedule it again or start it manually",
+                                              ),
+                                              actions: <Widget>[
+                                                PlatformDialogAction(
+                                                  child: Text("OK"),
+                                                  onPressed: () {
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        },
+                                      );
+                                    } else {
+                                      return PlatformTextButton(
+                                        child: Text("Start scheduling"),
+                                        material: (_, __) => MaterialTextButtonData(
+                                          icon: const Icon(Icons.schedule_rounded),
+                                        ),
+                                        onPressed: () async {
+                                          final startDate = await widget.task.startSchedule();
+
+                                          taskService.update(widget.task);
+
+                                          if (startDate == null) {
+                                            await showPlatformDialog(
+                                              context: context,
+                                              builder: (context) => PlatformAlertDialog(
+                                                title: Text("Task not scheduled"),
+                                                content: Text(
+                                                  "The task has not been started because there is no schedule set for the future.",
+                                                ),
+                                                actions: <Widget>[
+                                                  PlatformDialogAction(
+                                                    child: Text("OK"),
+                                                    onPressed: () {
+                                                      Navigator.of(context).pop();
+                                                    },
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+                                          }
+                                          await showPlatformDialog(
+                                            context: context,
+                                            builder: (context) => PlatformAlertDialog(
+                                              title: Text("Task scheduled"),
+                                              content: Text(
+                                                "The task has been scheduled to start at ${DateFormat('MMMM d, HH:mm').format(startDate!)}.",
+                                              ),
+                                              actions: <Widget>[
+                                                PlatformDialogAction(
+                                                  child: Text("OK"),
+                                                  onPressed: () {
+                                                    Navigator.of(context).pop();
+                                                  },
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        },
+                                      );
+                                    }
+                                  }
+
+                                  return PlatformCircularProgressIndicator(
+                                    material: (_, __) => MaterialProgressIndicatorData(
+                                      strokeWidth: 2,
+                                    ),
+                                  );
+                                },
+                              ),
+                            ],
+                          )
                         ],
                       );
                     }
@@ -337,6 +445,18 @@ class _DetailsState extends State<Details> {
                       child: PlatformCircularProgressIndicator(),
                     );
                   },
+                ),
+              ),
+              DetailInformationBox(
+                title: "Timers",
+                child: Container(
+                  constraints: BoxConstraints(
+                    maxHeight: 500,
+                  ),
+                  child: TimerWidget(
+                    timers: widget.task.timers,
+                    allowEdit: false,
+                  ),
                 ),
               ),
               Center(
@@ -390,9 +510,13 @@ class _DetailsState extends State<Details> {
                     );
 
                     if (confirmed == true) {
-                      await widget.task.stop();
+                      await widget.task.stopExecutionImmediately();
                       taskService.remove(widget.task);
                       await taskService.save();
+
+                      if (!mounted) {
+                        return;
+                      }
 
                       Navigator.of(context).pop();
                     }

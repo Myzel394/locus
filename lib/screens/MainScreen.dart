@@ -1,6 +1,7 @@
 import 'package:animations/animations.dart';
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/screens/TaskDetailScreen.dart';
 import 'package:locus/services/task_service.dart';
@@ -11,11 +12,16 @@ import 'CreateTaskScreen.dart';
 
 const FAB_DIMENSION = 56.0;
 
-class MainScreen extends StatelessWidget {
+class MainScreen extends StatefulWidget {
   const MainScreen({
     Key? key,
   }) : super(key: key);
 
+  @override
+  State<MainScreen> createState() => _MainScreenState();
+}
+
+class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     final taskService = context.watch<TaskService>();
@@ -94,9 +100,63 @@ class MainScreen extends StatelessWidget {
                             value: snapshot.data!,
                             onChanged: (value) async {
                               if (value) {
-                                await task.start();
+                                await task.startExecutionImmediately();
+                                final nextEndDate = task.nextEndDate();
+
+                                if (!mounted) {
+                                  return;
+                                }
+
+                                if (nextEndDate == null) {
+                                  return;
+                                }
+
+                                await showPlatformDialog(
+                                  context: context,
+                                  builder: (_) => PlatformAlertDialog(
+                                    title: Text("Task started"),
+                                    content: Text(
+                                      "The task has been started and will run until ${DateFormat('MMMM d, HH:mm').format(nextEndDate)}",
+                                    ),
+                                    actions: <Widget>[
+                                      PlatformDialogActionButton(
+                                        child: Text("OK"),
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                      )
+                                    ],
+                                  ),
+                                );
                               } else {
-                                await task.stop();
+                                await task.stopExecutionImmediately();
+                                final nextStartDate = await task.startScheduleTomorrow();
+
+                                if (!mounted) {
+                                  return;
+                                }
+
+                                if (nextStartDate == null) {
+                                  return;
+                                }
+
+                                await showPlatformDialog(
+                                  context: context,
+                                  builder: (_) => PlatformAlertDialog(
+                                    title: Text("Task stopped"),
+                                    content: Text(
+                                      "The task has been stopped and will run again on ${DateFormat('MMMM d, HH:mm').format(nextStartDate)}",
+                                    ),
+                                    actions: <Widget>[
+                                      PlatformDialogActionButton(
+                                        child: Text("OK"),
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                      )
+                                    ],
+                                  ),
+                                );
                               }
 
                               taskService.update(task);
