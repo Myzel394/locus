@@ -75,32 +75,36 @@ class TaskView {
       switch (event.type) {
         case "EVENT":
           hasEventReceived = true;
-          final String encryptedMessage = event.message;
+          try {
+            final encryptedMessage = List<int>.from(jsonDecode(event.message.content));
 
-          final algorithm = AesCbc.with256bits(
-            macAlgorithm: Hmac.sha256(),
-          );
-          final secretBox = SecretBox(
-            encryptedMessage.codeUnits,
-            nonce: parameters.initialVector,
-            mac: Mac(parameters.mac),
-          );
-          final secretKey = SecretKey(parameters.password);
-          final rawMessage = await algorithm.decryptString(secretBox, secretKey: secretKey);
+            final algorithm = AesCbc.with256bits(
+              macAlgorithm: Hmac.sha256(),
+            );
+            final secretBox = SecretBox(
+              encryptedMessage,
+              nonce: parameters.initialVector,
+              mac: Mac(parameters.mac),
+            );
+            final secretKey = SecretKey(parameters.password);
+            final rawMessage = await algorithm.decryptString(secretBox, secretKey: secretKey);
 
-          final data = jsonDecode(rawMessage);
+            final data = jsonDecode(rawMessage);
 
-          if (data["nostrPublicKey"] != parameters.nostrPublicKey) {
-            completer.completeError("Invalid Nostr public key");
-            return;
+            if (data["nostrPublicKey"] != parameters.nostrPublicKey) {
+              completer.completeError("Invalid Nostr public key");
+              return;
+            }
+
+            completer.complete(TaskView(
+              signPublicKey: data['signPublicKey'],
+              viewPrivateKey: data['viewPrivateKey'],
+              nostrPublicKey: data['nostrPublicKey'],
+              relays: List<String>.from(data['relays']),
+            ));
+          } catch (error) {
+            completer.completeError(error);
           }
-
-          completer.complete(TaskView(
-            signPublicKey: data['signPublicKey'],
-            viewPrivateKey: data['viewPrivateKey'],
-            nostrPublicKey: data['nostrPublicKey'],
-            relays: data['relays'],
-          ));
           break;
         case "EOSE":
           socket.close();

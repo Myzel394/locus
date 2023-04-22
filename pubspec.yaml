@@ -40,7 +40,7 @@ dependencies:
   cupertino_icons: ^1.0.2
   flutter_secure_storage: ^8.0.0
   intl: any
-  openpgp: 3.4.0
+  openpgp: ^3.5.4
   http: ^0.13.5
   nostr: ^1.3.4
   workmanager: ^0.5.1
@@ -67,6 +67,7 @@ dependencies:
   lottie: ^2.3.2
   visibility_detector: ^0.4.0+2
   clipboard_watcher: ^0.2.0
+  file_picker: ^5.2.10
 
 dev_dependencies:
   flutter_test:
