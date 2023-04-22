@@ -4,7 +4,7 @@ import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:locus/constants/spacing.dart';
-import 'package:locus/screens/import_task_screen_widgets/URLImporter.dart';
+import 'package:locus/screens/main_screen_widgets/URLImporter.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:lottie/lottie.dart';
@@ -30,8 +30,9 @@ class ImportTaskSheet extends StatefulWidget {
 class _ImportTaskSheetState extends State<ImportTaskSheet> with TickerProviderStateMixin {
   final TextEditingController _urlController = TextEditingController();
   late final AnimationController _lottieController;
-  ImportScreen _screen = ImportScreen.done;
+  ImportScreen _screen = ImportScreen.ask;
   TaskView? _taskView;
+  String? errorMessage;
 
   @override
   void initState() {
@@ -86,6 +87,13 @@ class _ImportTaskSheetState extends State<ImportTaskSheet> with TickerProviderSt
                       style: getBodyTextTextStyle(context),
                     ),
                     const SizedBox(height: MEDIUM_SPACE),
+                    if (errorMessage != null) ...[
+                      Text(
+                        errorMessage!,
+                        style: getBodyTextTextStyle(context).copyWith(color: Colors.red),
+                      ),
+                      const SizedBox(height: MEDIUM_SPACE),
+                    ],
                     Row(
                       children: <Widget>[
                         Expanded(
@@ -93,6 +101,7 @@ class _ImportTaskSheetState extends State<ImportTaskSheet> with TickerProviderSt
                             padding: const EdgeInsets.all(MEDIUM_SPACE),
                             onPressed: () {
                               setState(() {
+                                errorMessage = null;
                                 _screen = ImportScreen.url;
                               });
                             },
@@ -110,27 +119,42 @@ class _ImportTaskSheetState extends State<ImportTaskSheet> with TickerProviderSt
                               icon: const Icon(Icons.file_open_rounded),
                             ),
                             onPressed: () async {
-                              final result = await FilePicker.platform.pickFiles(
-                                type: FileType.custom,
-                                allowedExtensions: ["json"],
-                                dialogTitle: "Select a viewkey file",
-                                withData: true,
-                              );
+                              FilePickerResult? result;
 
-                              if (result != null) {
-                                final rawData = const Utf8Decoder().convert(result.files[0].bytes!);
-                                final data = jsonDecode(rawData);
-
-                                final taskView = TaskView(
-                                  relays: List<String>.from(data["relays"]),
-                                  nostrPublicKey: data["nostrPublicKey"],
-                                  signPublicKey: data["signPublicKey"],
-                                  viewPrivateKey: data["viewPrivateKey"],
+                              try {
+                                result = await FilePicker.platform.pickFiles(
+                                  type: FileType.custom,
+                                  allowedExtensions: ["json"],
+                                  dialogTitle: "Select a viewkey file",
+                                  withData: true,
                                 );
-
+                              } catch (_) {
                                 setState(() {
-                                  _screen = ImportScreen.present;
-                                  _taskView = taskView;
+                                  errorMessage = "An error occurred while importing the task.";
+                                });
+                              }
+
+                              try {
+                                if (result != null) {
+                                  final rawData = const Utf8Decoder().convert(result.files[0].bytes!);
+                                  final data = jsonDecode(rawData);
+
+                                  final taskView = TaskView(
+                                    relays: List<String>.from(data["relays"]),
+                                    nostrPublicKey: data["nostrPublicKey"],
+                                    signPublicKey: data["signPublicKey"],
+                                    viewPrivateKey: data["viewPrivateKey"],
+                                  );
+
+                                  setState(() {
+                                    errorMessage = null;
+                                    _screen = ImportScreen.present;
+                                    _taskView = taskView;
+                                  });
+                                }
+                              } catch (_) {
+                                setState(() {
+                                  errorMessage = "This does not seem to be a valid viewkey file.";
                                 });
                               }
                             },
@@ -159,6 +183,13 @@ class _ImportTaskSheetState extends State<ImportTaskSheet> with TickerProviderSt
                       const LinearProgressIndicator(),
                       const SizedBox(height: MEDIUM_SPACE),
                     ],
+                    if (errorMessage != null) ...[
+                      Text(
+                        errorMessage!,
+                        style: getBodyTextTextStyle(context).copyWith(color: Colors.red),
+                      ),
+                      const SizedBox(height: MEDIUM_SPACE),
+                    ],
                     PlatformElevatedButton(
                       padding: const EdgeInsets.all(MEDIUM_SPACE),
                       onPressed: _screen == ImportScreen.url
@@ -166,6 +197,7 @@ class _ImportTaskSheetState extends State<ImportTaskSheet> with TickerProviderSt
                               try {
                                 setState(() {
                                   _screen = ImportScreen.fetching;
+                                  errorMessage = null;
                                 });
 
                                 final parameters = TaskView.parseLink(_urlController.text);
@@ -178,6 +210,7 @@ class _ImportTaskSheetState extends State<ImportTaskSheet> with TickerProviderSt
                                 });
                               } catch (_) {
                                 setState(() {
+                                  errorMessage = "An error occurred while importing the task";
                                   _screen = ImportScreen.url;
                                 });
 

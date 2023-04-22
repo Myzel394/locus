@@ -2,14 +2,14 @@ import 'package:animations/animations.dart';
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:locus/constants/spacing.dart';
-import 'package:locus/screens/main_screen_widgets/import_task.dart';
-import 'package:locus/screens/main_screen_widgets/task_tile.dart';
+import 'package:locus/screens/main_screen_widgets/ImportTask.dart';
+import 'package:locus/screens/main_screen_widgets/TaskTile.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/widgets/Paper.dart';
 import 'package:provider/provider.dart';
 
 import 'CreateTaskScreen.dart';
-import 'main_screen_widgets/create_task.dart';
+import 'main_screen_widgets/CreateTask.dart';
 
 const FAB_DIMENSION = 56.0;
 

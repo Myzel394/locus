@@ -50,39 +50,42 @@ class _ImportTaskState extends State<ImportTask> with TickerProviderStateMixin {
               _controller.forward();
             }
           },
-          child: Lottie.asset("assets/lotties/url-link.json",
-              frameRate: FrameRate.max,
-              width: 250,
-              controller: _controller,
-              delegates: LottieDelegates(values: [
-                ValueDelegate.strokeColor(
-                  const ["linkTop 3", "Shape 1", "Stroke 1"],
-                  value: topColor,
-                ),
-                ValueDelegate.strokeColor(
-                  const ["linkTop 2", "Shape 1", "Stroke 1"],
-                  value: topColor2,
-                ),
-                ValueDelegate.strokeColor(
-                  const ["linkTop", "Shape 1", "Stroke 1"],
-                  value: topColor3,
-                ),
-                // `linkBottom 2` coming before `linkBottom 3` is correct (lottie file is probably wrong)
-                ValueDelegate.strokeColor(
-                  const ["linkBottom 2", "Shape 1", "Stroke 1"],
-                  value: topColor,
-                ),
-                ValueDelegate.strokeColor(
-                  const ["linkBottom 3", "Shape 1", "Stroke 1"],
-                  value: topColor2,
-                ),
-                ValueDelegate.strokeColor(
-                  const ["linkBottom", "Shape 1", "Stroke 1"],
-                  value: topColor3,
-                ),
-              ]), onLoaded: (composition) {
-            _controller.duration = composition.duration;
-          }),
+          child: Lottie.asset(
+            "assets/lotties/url-link.json",
+            frameRate: FrameRate.max,
+            width: 250,
+            controller: _controller,
+            delegates: LottieDelegates(values: [
+              ValueDelegate.strokeColor(
+                const ["linkTop 3", "Shape 1", "Stroke 1"],
+                value: topColor,
+              ),
+              ValueDelegate.strokeColor(
+                const ["linkTop 2", "Shape 1", "Stroke 1"],
+                value: topColor2,
+              ),
+              ValueDelegate.strokeColor(
+                const ["linkTop", "Shape 1", "Stroke 1"],
+                value: topColor3,
+              ),
+              // `linkBottom 2` coming before `linkBottom 3` is correct (lottie file is probably wrong)
+              ValueDelegate.strokeColor(
+                const ["linkBottom 2", "Shape 1", "Stroke 1"],
+                value: topColor,
+              ),
+              ValueDelegate.strokeColor(
+                const ["linkBottom 3", "Shape 1", "Stroke 1"],
+                value: topColor2,
+              ),
+              ValueDelegate.strokeColor(
+                const ["linkBottom", "Shape 1", "Stroke 1"],
+                value: topColor3,
+              ),
+            ]),
+            onLoaded: (composition) {
+              _controller.duration = composition.duration;
+            },
+          ),
         ),
         const SizedBox(height: MEDIUM_SPACE),
         Text(
@@ -96,8 +99,9 @@ class _ImportTaskState extends State<ImportTask> with TickerProviderStateMixin {
         ),
         const SizedBox(height: LARGE_SPACE),
         PlatformElevatedButton(
-          child: Text("Import Task"),
           onPressed: () async {
+            _controller.reverse();
+
             await showPlatformModalSheet(
               context: context,
               material: MaterialModalSheetData(
@@ -107,7 +111,13 @@ class _ImportTaskState extends State<ImportTask> with TickerProviderStateMixin {
               ),
               builder: (context) => ImportTaskSheet(),
             );
+
+            _controller.forward();
           },
+          material: (_, __) => MaterialElevatedButtonData(
+            icon: Icon(Icons.file_download_outlined),
+          ),
+          child: Text("Import Task"),
         ),
       ],
     );
