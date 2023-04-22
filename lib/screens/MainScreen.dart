@@ -1,9 +1,11 @@
 import 'package:animations/animations.dart';
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:locus/constants/spacing.dart';
 import 'package:locus/screens/main_screen_widgets/import_task.dart';
 import 'package:locus/screens/main_screen_widgets/task_tile.dart';
 import 'package:locus/services/task_service.dart';
+import 'package:locus/widgets/Paper.dart';
 import 'package:provider/provider.dart';
 
 import 'CreateTaskScreen.dart';
@@ -149,9 +151,9 @@ class _MainScreenState extends State<MainScreen> {
                         key: listViewKey,
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
-                        itemCount: taskService.tasks.length * 9,
+                        itemCount: taskService.tasks.length,
                         itemBuilder: (context, index) {
-                          final task = taskService.tasks[index % 3];
+                          final task = taskService.tasks[index];
 
                           return TaskTile(
                             task: task,
@@ -159,10 +161,15 @@ class _MainScreenState extends State<MainScreen> {
                         },
                       ),
                     ),
-                    SizedBox(
+                    Container(
                       height: shouldUseScreenHeight ? windowHeight : windowHeight - listViewHeight,
-                      child: Center(
-                        child: ImportTask(),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: MEDIUM_SPACE, vertical: LARGE_SPACE),
+                        child: Center(
+                          child: Paper(
+                            child: ImportTask(),
+                          ),
+                        ),
                       ),
                     ),
                   ],

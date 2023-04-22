@@ -24,12 +24,23 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
   TaskCreationProgress? _taskProgress;
 
   @override
+  void initState() {
+    super.initState();
+
+    _timers.addListener(rebuild);
+  }
+
+  @override
   void dispose() {
     _nameController.dispose();
     _frequencyController.dispose();
     _timers.dispose();
 
     super.dispose();
+  }
+
+  void rebuild() {
+    setState(() {});
   }
 
   Future<void> createTask(final BuildContext context) async {
@@ -68,8 +79,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
       if (mounted) {
         Navigator.of(context).pop();
       }
-    } catch (error) {
-    } finally {
+    } catch (error) {} finally {
       setState(() {
         _taskProgress = null;
       });
@@ -78,18 +88,25 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isKeyboardVisible = MediaQuery.of(context).viewInsets.bottom != 0;
+    final isKeyboardVisible = MediaQuery
+        .of(context)
+        .viewInsets
+        .bottom != 0;
 
     return PlatformScaffold(
       appBar: PlatformAppBar(
         title: Text("Create Task"),
-        material: (_, __) => MaterialAppBarData(
-          centerTitle: true,
-        ),
+        material: (_, __) =>
+            MaterialAppBarData(
+              centerTitle: true,
+            ),
       ),
-      material: (_, __) => MaterialScaffoldData(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      ),
+      material: (_, __) =>
+          MaterialScaffoldData(
+            backgroundColor: Theme
+                .of(context)
+                .scaffoldBackgroundColor,
+          ),
       body: Padding(
         padding: const EdgeInsets.all(MEDIUM_SPACE),
         child: Center(
@@ -122,16 +139,18 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                           controller: _nameController,
                           enabled: _taskProgress == null,
                           textInputAction: TextInputAction.next,
-                          material: (_, __) => MaterialTextFieldData(
-                            decoration: InputDecoration(
-                              labelText: "Name",
-                              prefixIcon: Icon(context.platformIcons.tag),
-                            ),
-                          ),
-                          cupertino: (_, __) => CupertinoTextFieldData(
-                            placeholder: "Name",
-                            prefix: Icon(context.platformIcons.tag),
-                          ),
+                          material: (_, __) =>
+                              MaterialTextFieldData(
+                                decoration: InputDecoration(
+                                  labelText: "Name",
+                                  prefixIcon: Icon(context.platformIcons.tag),
+                                ),
+                              ),
+                          cupertino: (_, __) =>
+                              CupertinoTextFieldData(
+                                placeholder: "Name",
+                                prefix: Icon(context.platformIcons.tag),
+                              ),
                         ),
                         const SizedBox(height: MEDIUM_SPACE),
                         PlatformTextField(
@@ -140,19 +159,21 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                           textInputAction: TextInputAction.done,
                           keyboardType: TextInputType.number,
                           textAlign: TextAlign.center,
-                          material: (_, __) => MaterialTextFieldData(
-                            decoration: InputDecoration(
-                              prefixIcon: Icon(context.platformIcons.time),
-                              labelText: "Frequency",
-                              prefixText: "Every",
-                              suffix: Text("Minutes"),
-                            ),
-                          ),
-                          cupertino: (_, __) => CupertinoTextFieldData(
-                            placeholder: "Frequency",
-                            prefix: Text("Every"),
-                            suffix: Text("Minutes"),
-                          ),
+                          material: (_, __) =>
+                              MaterialTextFieldData(
+                                decoration: InputDecoration(
+                                  prefixIcon: Icon(context.platformIcons.time),
+                                  labelText: "Frequency",
+                                  prefixText: "Every",
+                                  suffix: Text("Minutes"),
+                                ),
+                              ),
+                          cupertino: (_, __) =>
+                              CupertinoTextFieldData(
+                                placeholder: "Frequency",
+                                prefix: Text("Every"),
+                                suffix: Text("Minutes"),
+                              ),
                         ),
                         const SizedBox(height: MEDIUM_SPACE),
                         Row(
@@ -164,30 +185,32 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                     ? "Select Relays"
                                     : "Selected ${_relays.length} Relay${_relays.length == 1 ? "" : "s"}",
                               ),
-                              material: (_, __) => MaterialElevatedButtonData(
-                                icon: Icon(Icons.dns_rounded),
-                              ),
+                              material: (_, __) =>
+                                  MaterialElevatedButtonData(
+                                    icon: Icon(Icons.dns_rounded),
+                                  ),
                               onPressed: _taskProgress != null
                                   ? null
                                   : () async {
-                                      final relays = await showPlatformModalSheet(
-                                        context: context,
-                                        material: MaterialModalSheetData(
-                                          backgroundColor: Colors.transparent,
-                                          isScrollControlled: true,
-                                          isDismissible: true,
-                                        ),
-                                        builder: (_) => RelaySelectSheet(
-                                          selectedRelays: _relays,
-                                        ),
-                                      );
+                                final relays = await showPlatformModalSheet(
+                                  context: context,
+                                  material: MaterialModalSheetData(
+                                    backgroundColor: Colors.transparent,
+                                    isScrollControlled: true,
+                                    isDismissible: true,
+                                  ),
+                                  builder: (_) =>
+                                      RelaySelectSheet(
+                                        selectedRelays: _relays,
+                                      ),
+                                );
 
-                                      if (relays != null) {
-                                        setState(() {
-                                          _relays = relays;
-                                        });
-                                      }
-                                    },
+                                if (relays != null) {
+                                  setState(() {
+                                    _relays = relays;
+                                  });
+                                }
+                              },
                             ),
                             PlatformElevatedButton(
                               child: Text(
@@ -195,24 +218,26 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                     ? "Select Timers"
                                     : "Selected ${_timers.timers.length} Timer${_timers.timers.length == 1 ? "" : "s"}",
                               ),
-                              material: (_, __) => MaterialElevatedButtonData(
-                                icon: Icon(Icons.timer_rounded),
-                              ),
+                              material: (_, __) =>
+                                  MaterialElevatedButtonData(
+                                    icon: Icon(Icons.timer_rounded),
+                                  ),
                               onPressed: _taskProgress != null
                                   ? null
                                   : () async {
-                                      await showPlatformModalSheet(
-                                        context: context,
-                                        material: MaterialModalSheetData(
-                                          backgroundColor: Colors.transparent,
-                                          isScrollControlled: true,
-                                          isDismissible: true,
-                                        ),
-                                        builder: (_) => TimerWidgetSheet(
-                                          controller: _timers,
-                                        ),
-                                      );
-                                    },
+                                await showPlatformModalSheet(
+                                  context: context,
+                                  material: MaterialModalSheetData(
+                                    backgroundColor: Colors.transparent,
+                                    isScrollControlled: true,
+                                    isDismissible: true,
+                                  ),
+                                  builder: (_) =>
+                                      TimerWidgetSheet(
+                                        controller: _timers,
+                                      ),
+                                );
+                              },
                             )
                           ],
                         ),

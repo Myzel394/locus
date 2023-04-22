@@ -92,7 +92,7 @@ class _ImportTaskState extends State<ImportTask> with TickerProviderStateMixin {
         ),
         const SizedBox(height: SMALL_SPACE),
         Text(
-          "Import a task from a link you have received",
+          "Import a task from a link or file you have received",
           style: getCaptionTextStyle(context),
         ),
         const SizedBox(height: LARGE_SPACE),

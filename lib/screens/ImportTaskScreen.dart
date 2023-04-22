@@ -3,8 +3,21 @@ import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:locus/constants/spacing.dart';
+import 'package:locus/services/view_service.dart';
 
 import '../utils/theme.dart';
+
+enum TaskImportProgress {
+  fetchingFromNostr,
+  parsing,
+  done,
+}
+
+const Map<TaskImportProgress, String> TASK_IMPORT_PROGRESS_TEXT_MAP = {
+  TaskImportProgress.fetchingFromNostr: "Fetching data from Nostr",
+  TaskImportProgress.parsing: "Parsing data",
+  TaskImportProgress.done: "Done",
+};
 
 class ImportTaskScreen extends StatefulWidget {
   const ImportTaskScreen({Key? key}) : super(key: key);
@@ -17,6 +30,8 @@ class _ImportTaskScreenState extends State<ImportTaskScreen> with ClipboardListe
   final TextEditingController _urlController = TextEditingController();
   final PageController _pageController = PageController();
   String? _clipboard;
+  TaskImportProgress? _progress;
+  TaskView? _taskView;
 
   @override
   void initState() {
@@ -50,7 +65,43 @@ class _ImportTaskScreenState extends State<ImportTaskScreen> with ClipboardListe
 
     if (result?.hasAbsolutePath ?? false) {
       setState(() {
-        _clipboard = newClipboardData?.text;
+        _clipboard = result!.toString();
+      });
+    }
+  }
+
+  Future<void> importFromLink() async {
+    try {
+      final parameters = TaskView.parseLink(_urlController.text);
+
+      setState(() {
+        _progress = TaskImportProgress.fetchingFromNostr;
+      });
+
+      final task = await TaskView.fetchFromNostr(parameters);
+
+      setState(() {
+        _progress = TaskImportProgress.done;
+        _taskView = task;
+      });
+
+      _pageController.animateTo(
+        1,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeOut,
+      );
+    } catch (error) {
+      final scaffold = ScaffoldMessenger.of(context);
+
+      scaffold.showSnackBar(
+        SnackBar(
+          content: Text("An error occurred while importing the task"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() {
+        _progress = null;
       });
     }
   }
@@ -72,12 +123,12 @@ class _ImportTaskScreenState extends State<ImportTaskScreen> with ClipboardListe
                 Column(
                   children: <Widget>[
                     Text(
-                      "Import a task from an URL",
+                      "Import a task",
                       style: getSubTitleTextStyle(context),
                     ),
                     const SizedBox(height: SMALL_SPACE),
                     Text(
-                      "Enter the URL of the task you want to import or paste it",
+                      "If you have an url of an task you want to import, enter it or paste it; If you have a viewkey file, you can import it from the file manager",
                       style: getCaptionTextStyle(context),
                     ),
                   ],
@@ -88,24 +139,26 @@ class _ImportTaskScreenState extends State<ImportTaskScreen> with ClipboardListe
                     Flexible(
                       child: PlatformTextField(
                         controller: _urlController,
+                        enabled: _progress == null,
                         textInputAction: TextInputAction.done,
                         keyboardType: TextInputType.url,
                         hintText: "https://locus.app#",
-                        material: (_, __) => MaterialTextFieldData(
-                          decoration: InputDecoration(
-                            labelText: "URL",
-                            border: _clipboard == null
-                                ? OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(MEDIUM_SPACE),
-                                  )
-                                : OutlineInputBorder(
-                                    borderRadius: BorderRadius.only(
-                                      topLeft: Radius.circular(MEDIUM_SPACE),
-                                      bottomLeft: Radius.circular(MEDIUM_SPACE),
-                                    ),
+                        material: (_, __) =>
+                            MaterialTextFieldData(
+                              decoration: InputDecoration(
+                                labelText: "URL",
+                                border: _clipboard == null
+                                    ? OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(MEDIUM_SPACE),
+                                )
+                                    : OutlineInputBorder(
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(MEDIUM_SPACE),
+                                    bottomLeft: Radius.circular(MEDIUM_SPACE),
                                   ),
-                          ),
-                        ),
+                                ),
+                              ),
+                            ),
                       ),
                     ),
                     if (_clipboard != null)
@@ -115,28 +168,34 @@ class _ImportTaskScreenState extends State<ImportTaskScreen> with ClipboardListe
                           _urlController.text = _clipboard!;
                         },
                         child: Icon(Icons.paste_rounded),
-                        material: (_, __) => MaterialElevatedButtonData(
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.all(MEDIUM_SPACE - 1),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.only(
-                                topRight: Radius.circular(MEDIUM_SPACE),
-                                bottomRight: Radius.circular(MEDIUM_SPACE),
+                        material: (_, __) =>
+                            MaterialElevatedButtonData(
+                              style: ElevatedButton.styleFrom(
+                                padding: const EdgeInsets.all(MEDIUM_SPACE - 1),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.only(
+                                    topRight: Radius.circular(MEDIUM_SPACE),
+                                    bottomRight: Radius.circular(MEDIUM_SPACE),
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
-                        ),
                       ),
                   ],
                 ),
+                if (_progress != null) ...[
+                  Center(
+                    child: PlatformCircularProgressIndicator(),
+                  ),
+                  Text(
+                    TASK_IMPORT_PROGRESS_TEXT_MAP[_progress]!,
+                    textAlign: TextAlign.center,
+                    style: getCaptionTextStyle(context),
+                  ),
+                ],
                 PlatformElevatedButton(
                   padding: const EdgeInsets.all(MEDIUM_SPACE),
-                  onPressed: () {
-                    _pageController.nextPage(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                    );
-                  },
+                  onPressed: _progress == null ? importFromLink : null,
                   child: Text("Import"),
                 ),
               ],
