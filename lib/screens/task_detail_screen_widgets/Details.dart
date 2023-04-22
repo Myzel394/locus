@@ -113,7 +113,6 @@ class _DetailsState extends State<Details> {
       case "link":
         final url = await widget.task.generateLink();
 
-        print(url);
         await Share.share(
           url,
           subject: "Here's my Locus link to see my location",
@@ -313,18 +312,18 @@ class _DetailsState extends State<Details> {
                                 PlatformTextButton(
                                   child: Text("Stop task"),
                                   material: (_, __) => MaterialTextButtonData(
-                                icon: const Icon(Icons.stop_rounded),
-                              ),
+                                    icon: const Icon(Icons.stop_rounded),
+                                  ),
                                   onPressed: () async {
                                     await widget.task.stopExecutionImmediately();
 
-                                taskService.update(widget.task);
-                              },
-                            )
-                          else
-                            PlatformTextButton(
-                              child: Text("Start task"),
-                              material: (_, __) =>MaterialTextButtonData(
+                                    taskService.update(widget.task);
+                                  },
+                                )
+                              else
+                                PlatformTextButton(
+                                  child: Text("Start task"),
+                                  material: (_, __) => MaterialTextButtonData(
                                     icon: const Icon(Icons.play_arrow_rounded),
                                   ),
                                   onPressed: () async {
@@ -350,10 +349,10 @@ class _DetailsState extends State<Details> {
                                       return PlatformTextButton(
                                         child: Text("Stop scheduling"),
                                         material: (_, __) => MaterialTextButtonData(
-                                icon: const Icon(Icons.stop_outlined),
-                              ),
-                              onPressed: () async {
-                                await widget.task.stopSchedule();
+                                          icon: const Icon(Icons.stop_outlined),
+                                        ),
+                                        onPressed: () async {
+                                          await widget.task.stopSchedule();
 
                                           taskService.update(widget.task);
 

@@ -1,14 +1,16 @@
 import 'package:animations/animations.dart';
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:locus/constants/spacing.dart';
-import 'package:locus/screens/TaskDetailScreen.dart';
+import 'package:locus/screens/main_screen_widgets/ImportTask.dart';
+import 'package:locus/screens/main_screen_widgets/TaskTile.dart';
 import 'package:locus/services/task_service.dart';
-import 'package:locus/utils/theme.dart';
+import 'package:locus/widgets/Paper.dart';
 import 'package:provider/provider.dart';
 
+import '../utils/theme.dart';
 import 'CreateTaskScreen.dart';
+import 'main_screen_widgets/CreateTask.dart';
 
 const FAB_DIMENSION = 56.0;
 
@@ -22,163 +24,188 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
+  final listViewKey = GlobalKey();
+  late final TaskService taskService;
+  bool shouldUseScreenHeight = false;
+  bool listViewShouldFillUp = false;
+  double listViewHeight = 0;
+
+  double get windowHeight =>
+      MediaQuery
+          .of(context)
+          .size
+          .height - kToolbarHeight;
+
+  // If the ListView covers more than 75% of the screen, then actions get a whole screen of space.
+  // Otherwise fill up the remaining space.
+  bool getShouldUseScreenHeight(final BuildContext context) {
+    // Initial app screen, no tasks have been created yet. Use the full screen.
+    if (listViewKey.currentContext == null) {
+      return true;
+    }
+
+    final listViewHeight = listViewKey.currentContext?.size?.height ?? 0;
+    return listViewHeight > windowHeight * 0.6;
+  }
+
+  // Checks if the ListView should fill up the remaining space. This means that the listView is smaller than the
+  // remaining height.
+  bool getListViewShouldFillUp(final BuildContext context) {
+    final listViewHeight = listViewKey.currentContext?.size?.height ?? 0;
+
+    return listViewHeight < windowHeight;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      updateView();
+    });
+
+    final taskService = context.read<TaskService>();
+
+    taskService.addListener(updateView);
+  }
+
+  @override
+  void dispose() {
+    taskService.removeListener(updateView);
+
+    super.dispose();
+  }
+
+  void updateView() {
+    final height = listViewKey.currentContext?.size?.height ?? 0;
+
+    setState(() {
+      shouldUseScreenHeight = getShouldUseScreenHeight(context);
+      listViewShouldFillUp = getListViewShouldFillUp(context);
+      listViewHeight = height;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final taskService = context.watch<TaskService>();
 
     return PlatformScaffold(
-      material: (_, __) => MaterialScaffoldData(
-        floatingActionButton: taskService.tasks.isEmpty
-            ? null
-            : OpenContainer(
-                transitionDuration: const Duration(milliseconds: 500),
-                transitionType: ContainerTransitionType.fade,
-                openBuilder: (context, action) => const CreateTaskScreen(),
-                closedBuilder: (context, action) => SizedBox(
-                  height: FAB_DIMENSION,
-                  width: FAB_DIMENSION,
-                  child: Center(
-                    child: Icon(
-                      context.platformIcons.add,
-                      color: Theme.of(context).colorScheme.onPrimary,
+      material: (_, __) =>
+          MaterialScaffoldData(
+            floatingActionButton: taskService.tasks.isEmpty
+                ? null
+                : OpenContainer(
+              transitionDuration: const Duration(milliseconds: 500),
+              transitionType: ContainerTransitionType.fade,
+              openBuilder: (context, action) => const CreateTaskScreen(),
+              closedBuilder: (context, action) =>
+                  SizedBox(
+                    height: FAB_DIMENSION,
+                    width: FAB_DIMENSION,
+                    child: Center(
+                      child: Icon(
+                        context.platformIcons.add,
+                        color: Theme
+                            .of(context)
+                            .colorScheme
+                            .onPrimary,
+                      ),
                     ),
                   ),
+              closedElevation: 6.0,
+              closedShape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(
+                  Radius.circular(FAB_DIMENSION / 2),
                 ),
-                closedElevation: 6.0,
-                closedShape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(FAB_DIMENSION / 2),
-                  ),
-                ),
-                openColor: Theme.of(context).scaffoldBackgroundColor,
-                closedColor: Theme.of(context).colorScheme.primary,
               ),
-      ),
-      body: Center(
-        child: taskService.tasks.length == 0
-            ? Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text(
-                    "No tasks yet",
-                    style: getSubTitleTextStyle(context),
-                  ),
-                  const SizedBox(height: SMALL_SPACE),
-                  Text(
-                    "Create a task to get started",
-                    style: getCaptionTextStyle(context),
-                  ),
-                  const SizedBox(height: MEDIUM_SPACE),
-                  PlatformElevatedButton(
-                    material: (_, __) => MaterialElevatedButtonData(
-                      icon: Icon(context.platformIcons.add),
-                    ),
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => CreateTaskScreen(),
-                        ),
-                      );
-                    },
-                    child: Text("Create task"),
-                  ),
-                ],
-              )
-            : ListView.builder(
-                itemCount: taskService.tasks.length,
-                itemBuilder: (context, index) {
-                  final task = taskService.tasks[index];
+              openColor: Theme
+                  .of(context)
+                  .scaffoldBackgroundColor,
+              closedColor: Theme
+                  .of(context)
+                  .colorScheme
+                  .primary,
+            ),
+          ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: taskService.tasks.isEmpty
+              ? Column(
+            children: <Widget>[
+              SizedBox(
+                height: windowHeight,
+                child: Center(
+                  child: CreateTask(),
+                ),
+              ),
+              SizedBox(
+                height: windowHeight,
+                child: Center(
+                  child: ImportTask(),
+                ),
+              ),
+            ],
+          )
+              : Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                SizedBox(
+                  height: (() {
+                    if (shouldUseScreenHeight) {
+                      if (listViewShouldFillUp) {
+                        return windowHeight;
+                      }
+                    }
 
-                  return ListTile(
-                    title: Text(task.name),
-                    subtitle: Text(task.frequency.toString()),
-                    leading: FutureBuilder<bool>(
-                      future: task.isRunning(),
-                      builder: (context, snapshot) {
-                        if (snapshot.hasData) {
-                          return PlatformSwitch(
-                            value: snapshot.data!,
-                            onChanged: (value) async {
-                              if (value) {
-                                await task.startExecutionImmediately();
-                                final nextEndDate = task.nextEndDate();
-
-                                if (!mounted) {
-                                  return;
-                                }
-
-                                if (nextEndDate == null) {
-                                  return;
-                                }
-
-                                await showPlatformDialog(
-                                  context: context,
-                                  builder: (_) => PlatformAlertDialog(
-                                    title: Text("Task started"),
-                                    content: Text(
-                                      "The task has been started and will run until ${DateFormat('MMMM d, HH:mm').format(nextEndDate)}",
-                                    ),
-                                    actions: <Widget>[
-                                      PlatformDialogActionButton(
-                                        child: Text("OK"),
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-                                        },
-                                      )
-                                    ],
-                                  ),
-                                );
-                              } else {
-                                await task.stopExecutionImmediately();
-                                final nextStartDate = await task.startScheduleTomorrow();
-
-                                if (!mounted) {
-                                  return;
-                                }
-
-                                if (nextStartDate == null) {
-                                  return;
-                                }
-
-                                await showPlatformDialog(
-                                  context: context,
-                                  builder: (_) => PlatformAlertDialog(
-                                    title: Text("Task stopped"),
-                                    content: Text(
-                                      "The task has been stopped and will run again on ${DateFormat('MMMM d, HH:mm').format(nextStartDate)}",
-                                    ),
-                                    actions: <Widget>[
-                                      PlatformDialogActionButton(
-                                        child: Text("OK"),
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-                                        },
-                                      )
-                                    ],
-                                  ),
-                                );
-                              }
-
-                              taskService.update(task);
-                            },
-                          );
-                        }
-
-                        return const SizedBox();
-                      },
-                    ),
-                    onTap: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => TaskDetailScreen(
-                            task: task,
+                    return null;
+                  })(),
+                  child: Container(
+                    key: listViewKey,
+                    child: Padding(
+                      padding: const EdgeInsets.all(MEDIUM_SPACE),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Text(
+                            "TASKS",
+                            style: getTitleTextStyle(context),
                           ),
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
+                          ListView.builder(
+                            shrinkWrap: true,
+                            padding: const EdgeInsets.only(top: MEDIUM_SPACE),
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: taskService.tasks.length,
+                            itemBuilder: (context, index) {
+                              final task = taskService.tasks[index];
+
+                              return TaskTile(
+                                task: task,
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                Container(
+                  height: shouldUseScreenHeight ? windowHeight : windowHeight - listViewHeight,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: MEDIUM_SPACE, vertical: LARGE_SPACE),
+                    child: Center(
+                      child: Paper(
+                        child: ImportTask(),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

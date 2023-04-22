@@ -9,6 +9,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.7"
+  archive:
+    dependency: transitive
+    description:
+      name: archive
+      sha256: "0c8368c9b3f0abbc193b9d6133649a614204b528982bebc7026372d61677ce3a"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.3.7"
   args:
     dependency: transitive
     description:
@@ -73,6 +81,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.1.3"
+  clipboard_watcher:
+    dependency: "direct main"
+    description:
+      name: clipboard_watcher
+      sha256: "2fa9c728f46962668dbc1c07870695c9163524f8dbea25dc176277d1ef1cc2bd"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.0"
   clock:
     dependency: transitive
     description:
@@ -217,6 +233,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.1.4"
+  file_picker:
+    dependency: "direct main"
+    description:
+      name: file_picker
+      sha256: b85eb92b175767fdaa0c543bf3b0d1f610fe966412ea72845fe5ba7801e763ff
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.2.10"
   file_saver:
     dependency: "direct main"
     description:
@@ -477,6 +501,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.0"
+  lottie:
+    dependency: "direct main"
+    description:
+      name: lottie
+      sha256: "23522951540d20a57a60202ed7022e6376bed206a4eee1c347a91f58bd57eb9f"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.3.2"
   matcher:
     dependency: transitive
     description:
@@ -529,10 +561,10 @@ packages:
     dependency: "direct main"
     description:
       name: openpgp
-      sha256: "90fbfc2a36977d98a12964e94bd61bbae9fa50b072810fedbd7088b8e7cf5082"
+      sha256: "21ef06692edb2eab33f7f70b402f25a08ddf62c8a172a71e447b2f0b76ab0cb0"
       url: "https://pub.dev"
     source: hosted
-    version: "3.4.0"
+    version: "3.5.4"
   path:
     dependency: transitive
     description:
@@ -882,6 +914,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.4"
+  visibility_detector:
+    dependency: "direct main"
+    description:
+      name: visibility_detector
+      sha256: dd5cc11e13494f432d15939c3aa8ae76844c42b723398643ce9addb88a5ed420
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.4.0+2"
   win32:
     dependency: transitive
     description:

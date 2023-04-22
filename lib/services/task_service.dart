@@ -426,13 +426,14 @@ class Task extends ChangeNotifier {
       "r": relay,
       // Initial vector
       "v": encrypted.nonce,
+      "m": encrypted.mac.bytes,
     };
 
     final fragment = base64Url.encode(jsonEncode(parameters).codeUnits);
     final uri = Uri(
       scheme: "https",
       host: APP_URL_DOMAIN,
-      path: "",
+      path: "/",
       fragment: fragment,
     );
 
