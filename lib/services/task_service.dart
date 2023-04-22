@@ -445,38 +445,34 @@ class Task extends ChangeNotifier {
 }
 
 class TaskService extends ChangeNotifier {
-  List<Task> _tasks;
+  final List<Task> _tasks;
 
-  TaskService(List<Task> tasks) : _tasks = tasks;
+  TaskService({
+    List<Task> tasks = const [],
+  }) : _tasks = tasks;
 
   UnmodifiableListView<Task> get tasks => UnmodifiableListView(_tasks);
 
-  static Future<List<Task>> get() async {
-    final tasks = await storage.read(key: KEY);
+  static Future<TaskService> restore() async {
+    final rawTasks = await storage.read(key: KEY);
 
-    if (tasks == null) {
-      return [];
+    if (rawTasks == null) {
+      return TaskService();
     }
 
-    return List<Map<String, dynamic>>.from(jsonDecode(tasks)).map((e) => Task.fromJson(e)).toList();
-  }
-
-  static Future<Task> getTask(final String taskID) async {
-    final tasks = await get();
-
-    return tasks.firstWhere((task) => task.id == taskID);
-  }
-
-  static Future<TaskService> restore() async {
-    final tasks = await get();
-
-    return TaskService(tasks);
+    return TaskService(
+      tasks: List<Task>.from(List<Map<String, dynamic>>.from(jsonDecode(rawTasks)).map(Task.fromJson)),
+    );
   }
 
   Future<void> save() async {
-    final data = jsonEncode(tasks.map((e) => e.toJson()).toList());
+    final data = jsonEncode(List<Map<String, dynamic>>.from(tasks.map((task) => task.toJson())));
 
     await storage.write(key: KEY, value: data);
+  }
+
+  Task getByID(final String id) {
+    return _tasks.firstWhere((task) => task.id == id);
   }
 
   void add(Task task) {
@@ -524,12 +520,6 @@ DateTime? findNextEndDate(final List<TaskRuntimeTimer> timers, {final DateTime? 
 
   for (final timer in timers) {
     final timerDate = timer.nextEndDate(now);
-
-    if (timer is WeekdayTimer) {
-      if (timer.day < now.weekday) {
-        continue;
-      }
-    }
 
     if (timerDate == null) {
       continue;

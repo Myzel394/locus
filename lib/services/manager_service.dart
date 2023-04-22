@@ -17,8 +17,9 @@ void callbackDispatcher() {
       switch (taskName) {
         case TASK_EXECUTION_KEY:
           final taskID = inputData!["taskID"]!;
+          final taskService = await TaskService.restore();
+          final task = taskService.getByID(taskID);
 
-          final task = await TaskService.getTask(taskID);
           final eventManager = NostrEventsManager.fromTask(task);
 
           final locationPoint = await LocationPointService.createUsingCurrentLocation();
@@ -36,8 +37,8 @@ void callbackDispatcher() {
           break;
         case TASK_SCHEDULE_KEY:
           final taskID = inputData!["taskID"]!;
-
-          final task = await TaskService.getTask(taskID);
+          final taskService = await TaskService.restore();
+          final task = taskService.getByID(taskID);
 
           task.startExecutionImmediately();
           break;
