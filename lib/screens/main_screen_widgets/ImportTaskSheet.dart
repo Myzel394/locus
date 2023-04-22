@@ -1,14 +1,17 @@
 import 'dart:convert';
 
+import 'package:collection/collection.dart';
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/screens/main_screen_widgets/URLImporter.dart';
+import 'package:locus/services/task_service.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:lottie/lottie.dart';
 import 'package:openpgp/openpgp.dart';
+import 'package:provider/provider.dart';
 
 import '../../widgets/ModalSheet.dart';
 
@@ -17,6 +20,7 @@ enum ImportScreen {
   url,
   fetching,
   present,
+  error,
   done,
 }
 
@@ -62,6 +66,32 @@ class _ImportTaskSheetState extends State<ImportTaskSheet> with TickerProviderSt
     final metadata = await OpenPGP.getPublicKeyMetadata(key);
 
     return metadata.fingerprint;
+  }
+
+  Future<String?> validateTaskView(final TaskView view) async {
+    final taskService = context.read<TaskService>();
+
+    if (view.relays.isEmpty) {
+      return "No relays are present in the task.";
+    }
+
+    try {
+      await OpenPGP.getPublicKeyMetadata(view.signPublicKey);
+      await OpenPGP.getPrivateKeyMetadata(view.viewPrivateKey);
+    } catch (error) {
+      return "Invalid keys provided.";
+    }
+
+    final sameTask = taskService.tasks.firstWhereOrNull((element) =>
+        element.signPGPPublicKey == view.signPublicKey ||
+        element.nostrPublicKey == view.nostrPublicKey ||
+        element.viewPGPPrivateKey == view.viewPrivateKey);
+
+    if (sameTask != null) {
+      return "This is a task from you (name: ${sameTask.name}).";
+    }
+
+    return null;
   }
 
   @override
@@ -121,6 +151,10 @@ class _ImportTaskSheetState extends State<ImportTaskSheet> with TickerProviderSt
                             onPressed: () async {
                               FilePickerResult? result;
 
+                              setState(() {
+                                errorMessage = null;
+                              });
+
                               try {
                                 result = await FilePicker.platform.pickFiles(
                                   type: FileType.custom,
@@ -146,11 +180,21 @@ class _ImportTaskSheetState extends State<ImportTaskSheet> with TickerProviderSt
                                     viewPrivateKey: data["viewPrivateKey"],
                                   );
 
-                                  setState(() {
-                                    errorMessage = null;
-                                    _screen = ImportScreen.present;
-                                    _taskView = taskView;
-                                  });
+                                  final errorMessage = await validateTaskView(taskView);
+
+                                  if (errorMessage != null) {
+                                    setState(() {
+                                      this.errorMessage = errorMessage;
+                                      _screen = ImportScreen.error;
+                                    });
+                                    return;
+                                  } else {
+                                    setState(() {
+                                      this.errorMessage = null;
+                                      _screen = ImportScreen.present;
+                                      _taskView = taskView;
+                                    });
+                                  }
                                 }
                               } catch (_) {
                                 setState(() {
@@ -197,17 +241,25 @@ class _ImportTaskSheetState extends State<ImportTaskSheet> with TickerProviderSt
                               try {
                                 setState(() {
                                   _screen = ImportScreen.fetching;
-                                  errorMessage = null;
+                                  this.errorMessage = null;
                                 });
 
                                 final parameters = TaskView.parseLink(_urlController.text);
-
                                 final taskView = await TaskView.fetchFromNostr(parameters);
+                                final errorMessage = await validateTaskView(taskView);
 
-                                setState(() {
-                                  _screen = ImportScreen.present;
-                                  _taskView = taskView;
-                                });
+                                if (errorMessage != null) {
+                                  setState(() {
+                                    this.errorMessage = errorMessage;
+                                    _screen = ImportScreen.error;
+                                  });
+                                  return;
+                                } else {
+                                  setState(() {
+                                    _screen = ImportScreen.present;
+                                    _taskView = taskView;
+                                  });
+                                }
                               } catch (_) {
                                 setState(() {
                                   errorMessage = "An error occurred while importing the task";
@@ -316,6 +368,36 @@ class _ImportTaskSheetState extends State<ImportTaskSheet> with TickerProviderSt
                         icon: const Icon(Icons.check_rounded),
                       ),
                       child: Text("Done"),
+                    ),
+                  ],
+                )
+              else if (_screen == ImportScreen.error)
+                Column(
+                  children: <Widget>[
+                    Icon(context.platformIcons.error, size: 64, color: Colors.red),
+                    const SizedBox(height: MEDIUM_SPACE),
+                    Text(
+                      "An error occurred while importing the task",
+                      style: getSubTitleTextStyle(context),
+                    ),
+                    const SizedBox(height: SMALL_SPACE),
+                    Text(
+                      errorMessage!,
+                      style: getBodyTextTextStyle(context).copyWith(color: Colors.red),
+                    ),
+                    const SizedBox(height: LARGE_SPACE),
+                    PlatformElevatedButton(
+                      padding: const EdgeInsets.all(MEDIUM_SPACE),
+                      onPressed: () {
+                        setState(() {
+                          errorMessage = null;
+                          _screen = ImportScreen.ask;
+                        });
+                      },
+                      material: (_, __) => MaterialElevatedButtonData(
+                        icon: const Icon(Icons.arrow_back_rounded),
+                      ),
+                      child: Text("Go back"),
                     ),
                   ],
                 ),
