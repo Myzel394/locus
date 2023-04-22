@@ -1,13 +1,13 @@
 import 'package:animations/animations.dart';
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:locus/constants/spacing.dart';
+import 'package:locus/screens/main_screen_widgets/import_task.dart';
 import 'package:locus/screens/main_screen_widgets/task_tile.dart';
 import 'package:locus/services/task_service.dart';
-import 'package:locus/utils/theme.dart';
 import 'package:provider/provider.dart';
 
 import 'CreateTaskScreen.dart';
+import 'main_screen_widgets/create_task.dart';
 
 const FAB_DIMENSION = 56.0;
 
@@ -21,9 +21,68 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
+  final listViewKey = GlobalKey();
+  late final TaskService taskService;
+  bool shouldUseScreenHeight = false;
+  bool listViewShouldFillUp = false;
+  double listViewHeight = 0;
+
+  // If the ListView covers more than 75% of the screen, then actions get a whole screen of space.
+  // Otherwise fill up the remaining space.
+  bool getShouldUseScreenHeight(final BuildContext context) {
+    // Initial app screen, no tasks have been created yet. Use the full screen.
+    if (listViewKey.currentContext == null) {
+      return true;
+    }
+
+    final listViewHeight = listViewKey.currentContext?.size?.height ?? 0;
+    final screenHeight = MediaQuery.of(context).size.height;
+    return listViewHeight > screenHeight * 0.75;
+  }
+
+  // Checks if the ListView should fill up the remaining space. This means that the listView is smaller than the
+  // remaining height.
+  bool getListViewShouldFillUp(final BuildContext context) {
+    final listViewHeight = listViewKey.currentContext?.size?.height ?? 0;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    return listViewHeight < screenHeight;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      updateView();
+    });
+
+    final taskService = context.read<TaskService>();
+
+    taskService.addListener(updateView);
+  }
+
+  @override
+  void dispose() {
+    taskService.removeListener(updateView);
+
+    super.dispose();
+  }
+
+  void updateView() {
+    final height = listViewKey.currentContext?.size?.height ?? 0;
+
+    setState(() {
+      shouldUseScreenHeight = getShouldUseScreenHeight(context);
+      listViewShouldFillUp = getListViewShouldFillUp(context);
+      listViewHeight = height;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final taskService = context.watch<TaskService>();
+    final windowHeight = MediaQuery.of(context).size.height;
 
     return PlatformScaffold(
       material: (_, __) => MaterialScaffoldData(
@@ -53,45 +112,61 @@ class _MainScreenState extends State<MainScreen> {
                 closedColor: Theme.of(context).colorScheme.primary,
               ),
       ),
-      body: Center(
-        child: taskService.tasks.length == 0
+      body: SingleChildScrollView(
+        child: taskService.tasks.isEmpty
             ? Column(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  Text(
-                    "No tasks yet",
-                    style: getSubTitleTextStyle(context),
-                  ),
-                  const SizedBox(height: SMALL_SPACE),
-                  Text(
-                    "Create a task to get started",
-                    style: getCaptionTextStyle(context),
-                  ),
-                  const SizedBox(height: MEDIUM_SPACE),
-                  PlatformElevatedButton(
-                    material: (_, __) => MaterialElevatedButtonData(
-                      icon: Icon(context.platformIcons.add),
+                  SizedBox(
+                    height: windowHeight,
+                    child: Center(
+                      child: CreateTask(),
                     ),
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => CreateTaskScreen(),
-                        ),
-                      );
-                    },
-                    child: Text("Create task"),
+                  ),
+                  SizedBox(
+                    height: windowHeight,
+                    child: Center(
+                      child: ImportTask(),
+                    ),
                   ),
                 ],
               )
-            : ListView.builder(
-                itemCount: taskService.tasks.length,
-                itemBuilder: (context, index) {
-                  final task = taskService.tasks[index];
+            : Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    SizedBox(
+                      height: (() {
+                        if (shouldUseScreenHeight) {
+                          if (listViewShouldFillUp) {
+                            return windowHeight;
+                          }
+                        }
 
-                  return TaskTile(
-                    task: task,
-                  );
-                },
+                        return null;
+                      })(),
+                      child: ListView.builder(
+                        key: listViewKey,
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: taskService.tasks.length * 9,
+                        itemBuilder: (context, index) {
+                          final task = taskService.tasks[index % 3];
+
+                          return TaskTile(
+                            task: task,
+                          );
+                        },
+                      ),
+                    ),
+                    SizedBox(
+                      height: shouldUseScreenHeight ? windowHeight : windowHeight - listViewHeight,
+                      child: Center(
+                        child: ImportTask(),
+                      ),
+                    ),
+                  ],
+                ),
               ),
       ),
     );

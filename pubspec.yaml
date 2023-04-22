@@ -64,6 +64,8 @@ dependencies:
   async: ^2.10.0
   battery_plus: ^3.0.3
   cryptography: ^2.5.0
+  lottie: ^2.3.2
+  visibility_detector: ^0.4.0+2
 
 dev_dependencies:
   flutter_test:
@@ -92,6 +94,9 @@ flutter:
   # assets:
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
+
+  assets:
+    - assets/lotties/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
