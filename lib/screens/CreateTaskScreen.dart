@@ -52,6 +52,10 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
         timers: _timers.timers,
       );
 
+      if (!mounted) {
+        return;
+      }
+
       taskService.add(task);
       await taskService.save();
       task.startSchedule();
@@ -78,7 +82,10 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
 
     return PlatformScaffold(
       appBar: PlatformAppBar(
-        title: Text("Create Task"),
+        title: Hero(
+          tag: "title",
+          child: Text("Create Task"),
+        ),
         material: (_, __) => MaterialAppBarData(
           centerTitle: true,
         ),
@@ -166,8 +173,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                               onPressed: _taskProgress != null
                                   ? null
                                   : () async {
-                                      final relays =
-                                          await showPlatformModalSheet(
+                                      final relays = await showPlatformModalSheet(
                                         context: context,
                                         material: MaterialModalSheetData(
                                           backgroundColor: Colors.transparent,
@@ -243,8 +249,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
               ],
               PlatformElevatedButton(
                 padding: const EdgeInsets.all(MEDIUM_SPACE),
-                onPressed:
-                    _taskProgress != null ? null : () => createTask(context),
+                onPressed: _taskProgress != null ? null : () => createTask(context),
                 child: Text(
                   "Create",
                   style: TextStyle(

@@ -1,3 +1,4 @@
+import 'package:animations/animations.dart';
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
@@ -92,18 +93,49 @@ class _CreateTaskState extends State<CreateTask> with TickerProviderStateMixin {
           style: getCaptionTextStyle(context),
         ),
         const SizedBox(height: LARGE_SPACE),
-        PlatformElevatedButton(
-          material: (_, __) => MaterialElevatedButtonData(
-            icon: Icon(context.platformIcons.add),
+        OpenContainer(
+          transitionDuration: const Duration(milliseconds: 700),
+          transitionType: ContainerTransitionType.fade,
+          openBuilder: (context, action) => const CreateTaskScreen(),
+          closedShape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(
+              Radius.circular(HUGE_SPACE),
+            ),
           ),
-          onPressed: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => CreateTaskScreen(),
+          closedBuilder: (context, action) => PlatformInkWell(
+            onTap: () {
+              _controller.reverseDuration = const Duration(milliseconds: 150);
+              _controller.reverse();
+
+              action();
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: MEDIUM_SPACE,
+                vertical: SMALL_SPACE,
               ),
-            );
-          },
-          child: Text("Create task"),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Icon(Icons.add, color: Theme.of(context).colorScheme.primary),
+                  const SizedBox(width: SMALL_SPACE),
+                  Hero(
+                    tag: "title",
+                    child: Text(
+                      "Create Task",
+                      style: getBodyTextTextStyle(context).copyWith(
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          openColor: Theme.of(context).scaffoldBackgroundColor,
+          closedColor: Theme.of(context).colorScheme.surface.withOpacity(1),
         ),
       ],
     );
