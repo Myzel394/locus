@@ -121,13 +121,10 @@ class _CreateTaskState extends State<CreateTask> with TickerProviderStateMixin {
                 children: <Widget>[
                   Icon(Icons.add, color: Theme.of(context).colorScheme.primary),
                   const SizedBox(width: SMALL_SPACE),
-                  Hero(
-                    tag: "title",
-                    child: Text(
-                      "Create Task",
-                      style: getBodyTextTextStyle(context).copyWith(
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
+                  Text(
+                    "Create Task",
+                    style: getBodyTextTextStyle(context).copyWith(
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
                 ],

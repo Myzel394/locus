@@ -82,10 +82,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
 
     return PlatformScaffold(
       appBar: PlatformAppBar(
-        title: Hero(
-          tag: "title",
-          child: Text("Create Task"),
-        ),
+        title: Text("Create Task"),
         material: (_, __) => MaterialAppBarData(
           centerTitle: true,
         ),

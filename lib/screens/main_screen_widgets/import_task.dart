@@ -1,5 +1,7 @@
+import 'package:animations/animations.dart';
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:locus/screens/ImportTaskScreen.dart';
 import 'package:lottie/lottie.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
@@ -94,12 +96,47 @@ class _ImportTaskState extends State<ImportTask> with TickerProviderStateMixin {
           style: getCaptionTextStyle(context),
         ),
         const SizedBox(height: LARGE_SPACE),
-        PlatformElevatedButton(
-          child: Text("Import Task"),
-          material: (_, __) => MaterialElevatedButtonData(
-            icon: Icon(Icons.file_download_outlined),
+        OpenContainer(
+          transitionDuration: const Duration(milliseconds: 700),
+          transitionType: ContainerTransitionType.fade,
+          openBuilder: (context, action) => const ImportTaskScreen(),
+          closedShape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(
+              Radius.circular(HUGE_SPACE),
+            ),
           ),
-        )
+          closedBuilder: (context, action) => PlatformInkWell(
+            onTap: () {
+              _controller.reverseDuration = const Duration(milliseconds: 100);
+              _controller.reverse();
+
+              action();
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: MEDIUM_SPACE,
+                vertical: SMALL_SPACE,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Icon(Icons.file_download_outlined, color: Theme.of(context).colorScheme.primary),
+                  const SizedBox(width: SMALL_SPACE),
+                  Text(
+                    "Import Task",
+                    style: getBodyTextTextStyle(context).copyWith(
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          openColor: Theme.of(context).scaffoldBackgroundColor,
+          closedColor: Theme.of(context).colorScheme.surface.withOpacity(1),
+        ),
       ],
     );
   }
