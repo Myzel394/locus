@@ -85,6 +85,7 @@ class LocationPointService {
     final locationData = await Geolocator.getCurrentPosition(
       desiredAccuracy: LocationAccuracy.best,
       timeLimit: const Duration(minutes: 5),
+      forceAndroidLocationManager: true,
     );
 
     return LocationPointService(

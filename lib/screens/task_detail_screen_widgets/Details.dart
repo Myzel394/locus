@@ -36,6 +36,23 @@ class Details extends StatefulWidget {
 }
 
 class _DetailsState extends State<Details> {
+  late final RelayController _relaysController;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _relaysController = RelayController(
+      relays: widget.task.relays,
+    );
+  }
+
+  @override
+  void dispose() {
+    _relaysController.dispose();
+    super.dispose();
+  }
+
   Future<File> _createTempViewKeyFile() {
     return createTempFile(
       const Utf8Encoder().convert(widget.task.generateViewKeyContent()),
@@ -260,7 +277,7 @@ class _DetailsState extends State<Details> {
                           ),
                           child: Text("Edit relays"),
                           onPressed: () async {
-                            final newRelays = await showPlatformModalSheet(
+                            await showPlatformModalSheet(
                               context: context,
                               material: MaterialModalSheetData(
                                 backgroundColor: Colors.transparent,
@@ -268,15 +285,12 @@ class _DetailsState extends State<Details> {
                                 isDismissible: true,
                               ),
                               builder: (context) => RelaySelectSheet(
-                                selectedRelays: widget.task.relays,
+                                controller: _relaysController,
                               ),
                             );
 
-                            if (newRelays != null) {
-                              widget.task.update(relays: newRelays);
-
-                              taskService.update(widget.task);
-                            }
+                            widget.task.update(relays: _relaysController.relays);
+                            taskService.update(widget.task);
                           },
                         ),
                       ],
