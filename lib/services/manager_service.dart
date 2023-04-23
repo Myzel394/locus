@@ -31,9 +31,6 @@ void callbackDispatcher() {
 
           await eventManager.publishMessage(message);
 
-          if (!task.shouldRun()) {
-            task.stopExecutionImmediately();
-          }
           break;
         case TASK_SCHEDULE_KEY:
           final taskID = inputData!["taskID"]!;

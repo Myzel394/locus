@@ -2,6 +2,7 @@ import 'package:animations/animations.dart';
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:locus/constants/spacing.dart';
+import 'package:locus/screens/ViewDetailScreen.dart';
 import 'package:locus/screens/main_screen_widgets/ImportTask.dart';
 import 'package:locus/screens/main_screen_widgets/TaskTile.dart';
 import 'package:locus/services/task_service.dart';
@@ -31,7 +32,11 @@ class _MainScreenState extends State<MainScreen> {
   bool listViewShouldFillUp = false;
   double listViewHeight = 0;
 
-  double get windowHeight => MediaQuery.of(context).size.height - kToolbarHeight;
+  double get windowHeight =>
+      MediaQuery
+          .of(context)
+          .size
+          .height - kToolbarHeight;
 
   // If the ListView covers more than 75% of the screen, then actions get a whole screen of space.
   // Otherwise fill up the remaining space.
@@ -88,126 +93,161 @@ class _MainScreenState extends State<MainScreen> {
     final taskService = context.watch<TaskService>();
     final viewService = context.watch<ViewService>();
 
+    final showEmptyScreen = taskService.tasks.isEmpty && viewService.views.isEmpty;
+
     return PlatformScaffold(
-      material: (_, __) => MaterialScaffoldData(
-        floatingActionButton: taskService.tasks.isEmpty
-            ? null
-            : OpenContainer(
-                transitionDuration: const Duration(milliseconds: 500),
-                transitionType: ContainerTransitionType.fade,
-                openBuilder: (context, action) => const CreateTaskScreen(),
-                closedBuilder: (context, action) => SizedBox(
-                  height: FAB_DIMENSION,
-                  width: FAB_DIMENSION,
-                  child: Center(
-                    child: Icon(
-                      context.platformIcons.add,
-                      color: Theme.of(context).colorScheme.onPrimary,
-                    ),
-                  ),
-                ),
-                closedElevation: 6.0,
-                closedShape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(FAB_DIMENSION / 2),
-                  ),
-                ),
-                openColor: Theme.of(context).scaffoldBackgroundColor,
-                closedColor: Theme.of(context).colorScheme.primary,
-              ),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: taskService.tasks.isEmpty
-              ? Column(
-                  children: <Widget>[
-                    SizedBox(
-                      height: windowHeight,
-                      child: Center(
-                        child: CreateTask(),
+      material: (_, __) =>
+          MaterialScaffoldData(
+            floatingActionButton: showEmptyScreen
+                ? null
+                : OpenContainer(
+              transitionDuration: const Duration(milliseconds: 500),
+              transitionType: ContainerTransitionType.fade,
+              openBuilder: (context, action) => const CreateTaskScreen(),
+              closedBuilder: (context, action) =>
+                  SizedBox(
+                    height: FAB_DIMENSION,
+                    width: FAB_DIMENSION,
+                    child: Center(
+                      child: Icon(
+                        context.platformIcons.add,
+                        color: Theme
+                            .of(context)
+                            .colorScheme
+                            .onPrimary,
                       ),
                     ),
-                    SizedBox(
-                      height: windowHeight,
-                      child: Center(
+                  ),
+              closedElevation: 6.0,
+              closedShape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(
+                  Radius.circular(FAB_DIMENSION / 2),
+                ),
+              ),
+              openColor: Theme
+                  .of(context)
+                  .scaffoldBackgroundColor,
+              closedColor: Theme
+                  .of(context)
+                  .colorScheme
+                  .primary,
+            ),
+          ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: showEmptyScreen
+              ? Column(
+            children: <Widget>[
+              SizedBox(
+                height: windowHeight,
+                child: Center(
+                  child: CreateTask(),
+                ),
+              ),
+              SizedBox(
+                height: windowHeight,
+                child: Center(
+                  child: ImportTask(),
+                ),
+              ),
+            ],
+          )
+              : Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: <Widget>[
+                SizedBox(
+                  height: (() {
+                    if (shouldUseScreenHeight) {
+                      if (listViewShouldFillUp) {
+                        return windowHeight;
+                      }
+                    }
+
+                    return null;
+                  })(),
+                  child: Container(
+                    key: listViewKey,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: MEDIUM_SPACE),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: MEDIUM_SPACE),
+                            child: Text(
+                              "Tasks",
+                              style: getSubTitleTextStyle(context),
+                            ),
+                          ),
+                          ListView.builder(
+                            shrinkWrap: true,
+                            padding: const EdgeInsets.only(top: MEDIUM_SPACE),
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: taskService.tasks.length,
+                            itemBuilder: (context, index) {
+                              final task = taskService.tasks[index];
+
+                              return TaskTile(
+                                task: task,
+                              );
+                            },
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: MEDIUM_SPACE),
+                            child: Text(
+                              "Views",
+                              style: getSubTitleTextStyle(context),
+                            ),
+                          ),
+                          ListView.builder(
+                            shrinkWrap: true,
+                            padding: const EdgeInsets.only(top: MEDIUM_SPACE),
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: viewService.views.length,
+                            itemBuilder: (context, index) {
+                              final view = viewService.views[index];
+
+                              return ListTile(
+                                title: view.name == null
+                                    ? Text(
+                                  "Unnamed",
+                                  style: TextStyle(fontFamily: "Cursive"),
+                                )
+                                    : Text(view.name!),
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          ViewDetailScreen(
+                                            view: view,
+                                          ),
+                                    ),
+                                  );
+                                },
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                Container(
+                  height: shouldUseScreenHeight ? windowHeight : windowHeight - listViewHeight,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: MEDIUM_SPACE, vertical: LARGE_SPACE),
+                    child: Center(
+                      child: Paper(
                         child: ImportTask(),
                       ),
                     ),
-                  ],
-                )
-              : Expanded(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.max,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      SizedBox(
-                        height: (() {
-                          if (shouldUseScreenHeight) {
-                            if (listViewShouldFillUp) {
-                              return windowHeight;
-                            }
-                          }
-
-                          return null;
-                        })(),
-                        child: Container(
-                          key: listViewKey,
-                          child: Padding(
-                            padding: const EdgeInsets.all(MEDIUM_SPACE),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                Text(
-                                  "Tasks",
-                                  style: getSubTitleTextStyle(context),
-                                ),
-                                ListView.builder(
-                                  shrinkWrap: true,
-                                  padding: const EdgeInsets.only(top: MEDIUM_SPACE),
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  itemCount: taskService.tasks.length,
-                                  itemBuilder: (context, index) {
-                                    final task = taskService.tasks[index];
-
-                                    return TaskTile(
-                                      task: task,
-                                    );
-                                  },
-                                ),
-                                Text(
-                                  "Views",
-                                  style: getSubTitleTextStyle(context),
-                                ),
-                                ListView.builder(
-                                  shrinkWrap: true,
-                                  padding: const EdgeInsets.only(top: MEDIUM_SPACE),
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  itemCount: viewService.views.length,
-                                  itemBuilder: (context, index) {
-                                    final task = viewService.views[index];
-
-                                    return null;
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                      Container(
-                        height: shouldUseScreenHeight ? windowHeight : windowHeight - listViewHeight,
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: MEDIUM_SPACE, vertical: LARGE_SPACE),
-                          child: Center(
-                            child: Paper(
-                              child: ImportTask(),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
                   ),
                 ),
+              ],
+            ),
+          ),
         ),
       ),
     );
