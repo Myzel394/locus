@@ -48,11 +48,13 @@ class TimerWidget extends StatefulWidget {
   final TimerController? controller;
   final List<TaskRuntimeTimer> timers;
   final bool allowEdit;
+  final ScrollPhysics? physics;
 
   const TimerWidget({
     this.controller,
     this.timers = const [],
     this.allowEdit = true,
+    this.physics,
     Key? key,
   }) : super(key: key);
 
@@ -105,6 +107,7 @@ class _TimerWidgetState extends State<TimerWidget> {
   Widget build(BuildContext context) {
     return ListView.builder(
       shrinkWrap: true,
+      physics: widget.physics,
       itemCount: _controller.timers.length,
       itemBuilder: (_, index) {
         final timer = sortedTimers[index];

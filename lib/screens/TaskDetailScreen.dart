@@ -9,7 +9,8 @@ import 'package:locus/screens/task_detail_screen_widgets/Details.dart';
 import 'package:locus/services/location_point_service.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/utils/theme.dart';
-import 'package:nostr/nostr.dart';
+
+import '../api/get-locations.dart';
 
 class TaskDetailScreen extends StatefulWidget {
   final Task task;
@@ -27,6 +28,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   late final WebSocket _socket;
   late final MapController _controller;
   final PageController _pageController = PageController();
+  void Function()? _unsubscribeGetLocations;
   bool _isLoading = true;
   bool _isShowingDetails = false;
   final List<LocationPointService> _locations = [];
@@ -39,7 +41,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
       initMapWithUserPosition: true,
     );
 
-    registerListener();
+    addListener();
 
     _pageController.addListener(() {
       if (_pageController.page == 0) {
@@ -60,54 +62,31 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
     _controller.dispose();
     _pageController.dispose();
 
+    _unsubscribeGetLocations?.call();
+
     super.dispose();
   }
 
-  void registerListener() async {
-    final request = Request(generate64RandomHexChars(), [
-      Filter(
-        kinds: [1000],
-        authors: [widget.task.nostrPublicKey],
-      ),
-    ]);
-
-    _socket = await WebSocket.connect(
-      widget.task.relays.first,
+  void addListener() async {
+    _unsubscribeGetLocations = await getLocations(
+      viewPrivateKey: widget.task.viewPGPPrivateKey,
+      signPublicKey: widget.task.signPGPPublicKey,
+      nostrPublicKey: widget.task.nostrPublicKey,
+      relays: widget.task.relays,
+      onLocationFetched: (final LocationPointService location) {
+        _locations.add(location);
+        setState(() {});
+      },
+      onEnd: () {
+        setState(() {
+          _isLoading = false;
+        });
+      },
     );
-
-    _socket.add(request.serialize());
-
-    _socket.listen((rawEvent) async {
-      final event = Message.deserialize(rawEvent);
-
-      switch (event.type) {
-        case "EVENT":
-          final location = await LocationPointService.fromEncrypted(
-            event.message.content,
-            widget.task.viewPGPPrivateKey!,
-            widget.task.signPGPPublicKey,
-          );
-
-          // We need to access `_locations` earlier than the UI updates.
-          _locations.add(location);
-          drawPoints();
-          setState(() {});
-          break;
-        case "EOSE":
-          _socket.close();
-
-          setState(() {
-            _isLoading = false;
-          });
-          break;
-      }
-    });
   }
 
   void drawPoints() {
-    LocationPointService? previousLocation;
     _controller.removeAllCircle();
-    _controller.clearAllRoads();
 
     for (final location in _locations) {
       _controller.drawCircle(
@@ -122,28 +101,6 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
           strokeWidth: location.accuracy < 10 ? 1 : 3,
         ),
       );
-
-      /*
-      if (previousLocation != null) {
-        _controller.drawRoad(
-          GeoPoint(
-            latitude: previousLocation.latitude,
-            longitude: previousLocation.longitude,
-          ),
-          GeoPoint(
-            latitude: location.latitude,
-            longitude: location.longitude,
-          ),
-          roadType: RoadType.car,
-          roadOption: RoadOption(
-            roadWidth: 10,
-            roadColor: Colors.red,
-            zoomInto: true,
-          ),
-        );
-      }
-
-      previousLocation = location;*/
     }
   }
 

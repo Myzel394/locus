@@ -462,14 +462,10 @@ class _DetailsState extends State<Details> {
               ),
               DetailInformationBox(
                 title: "Timers",
-                child: Container(
-                  constraints: BoxConstraints(
-                    maxHeight: 500,
-                  ),
-                  child: TimerWidget(
-                    timers: widget.task.timers,
-                    allowEdit: false,
-                  ),
+                child: TimerWidget(
+                  timers: widget.task.timers,
+                  allowEdit: false,
+                  physics: const NeverScrollableScrollPhysics(),
                 ),
               ),
               Center(
