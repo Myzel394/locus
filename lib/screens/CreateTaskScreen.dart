@@ -1,6 +1,7 @@
 import 'package:basic_utils/basic_utils.dart';
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/utils/theme.dart';
@@ -179,7 +180,18 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                               placeholder: "Name",
                               prefix: Icon(context.platformIcons.tag),
                             ),
-                          ),
+                          )
+                              .animate()
+                              .slide(
+                                duration: 1.seconds,
+                                curve: Curves.easeOut,
+                                begin: Offset(0, 0.2),
+                              )
+                              .fadeIn(
+                                delay: 100.ms,
+                                duration: 1.seconds,
+                                curve: Curves.easeOut,
+                              ),
                           if (anotherTaskAlreadyExists) ...[
                             const SizedBox(height: SMALL_SPACE),
                             Row(
@@ -235,7 +247,19 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                             cupertino: (_, __) => CupertinoTextFormFieldData(
                               placeholder: "Frequency",
                             ),
-                          ),
+                          )
+                              .animate()
+                              .then(delay: 200.ms)
+                              .slide(
+                                duration: 1.seconds,
+                                curve: Curves.easeOut,
+                                begin: Offset(0, 0.2),
+                              )
+                              .fadeIn(
+                                delay: 100.ms,
+                                duration: 1.seconds,
+                                curve: Curves.easeOut,
+                              ),
                           const SizedBox(height: MEDIUM_SPACE),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -264,7 +288,19 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                       ? "Select Relays"
                                       : "Selected ${_relaysController.relays.length} Relay${_relaysController.relays.length == 1 ? "" : "s"}",
                                 ),
-                              ),
+                              )
+                                  .animate()
+                                  .then(delay: 400.ms)
+                                  .slide(
+                                    duration: 1.seconds,
+                                    curve: Curves.easeOut,
+                                    begin: Offset(0.2, 0),
+                                  )
+                                  .fadeIn(
+                                    delay: 100.ms,
+                                    duration: 1.seconds,
+                                    curve: Curves.easeOut,
+                                  ),
                               PlatformElevatedButton(
                                 material: (_, __) => MaterialElevatedButtonData(
                                   icon: const Icon(Icons.timer_rounded),
@@ -290,6 +326,18 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                       : "Selected ${_timersController.timers.length} Timer${_timersController.timers.length == 1 ? "" : "s"}",
                                 ),
                               )
+                                  .animate()
+                                  .then(delay: 600.ms)
+                                  .slide(
+                                    duration: 1.seconds,
+                                    curve: Curves.easeOut,
+                                    begin: Offset(-0.2, 0),
+                                  )
+                                  .fadeIn(
+                                    delay: 100.ms,
+                                    duration: 1.seconds,
+                                    curve: Curves.easeOut,
+                                  ),
                             ],
                           ),
                         ],
@@ -354,7 +402,11 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                       fontSize: getActionButtonSize(context),
                     ),
                   ),
-                ),
+                ).animate().then(delay: 800.ms).slide(
+                      duration: 500.ms,
+                      curve: Curves.easeOut,
+                      begin: Offset(0, 1.3),
+                    ),
               ],
             ),
           ),
