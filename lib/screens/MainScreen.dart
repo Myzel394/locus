@@ -145,18 +145,9 @@ class _MainScreenState extends State<MainScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       SizedBox(
-                        height: (() {
-                          if (shouldUseScreenHeight) {
-                            if (listViewShouldFillUp) {
-                              return windowHeight;
-                            }
-                          }
-
-                          return null;
-                        })(),
+                        height: windowHeight,
                         child: Container(
-                          key: listViewKey,
-                          child: Padding(
+                          child: SingleChildScrollView(
                             padding: const EdgeInsets.symmetric(vertical: MEDIUM_SPACE),
                             child: Wrap(
                               runSpacing: LARGE_SPACE,
@@ -255,10 +246,12 @@ class _MainScreenState extends State<MainScreen> {
                         ),
                       ),
                       SizedBox(
-                        height: shouldUseScreenHeight ? windowHeight : windowHeight - listViewHeight,
+                        height: windowHeight,
                         child: Padding(
                           padding: EdgeInsets.symmetric(
-                              horizontal: MEDIUM_SPACE, vertical: shouldUseScreenHeight ? HUGE_SPACE : SMALL_SPACE),
+                            horizontal: MEDIUM_SPACE,
+                            vertical: HUGE_SPACE,
+                          ),
                           child: const Center(
                             child: Paper(
                               child: ImportTask(),
