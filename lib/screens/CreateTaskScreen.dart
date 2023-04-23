@@ -23,6 +23,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
   final RelayController _relaysController = RelayController();
   final _formKey = GlobalKey<FormState>();
   String? errorMessage;
+  bool anotherTaskAlreadyExists = false;
 
   TaskCreationProgress? _taskProgress;
 
@@ -30,6 +31,15 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
   void initState() {
     super.initState();
 
+    _nameController.addListener(() {
+      final taskService = context.read<TaskService>();
+      final lowerCasedName = _nameController.text.toLowerCase();
+      final alreadyExists = taskService.tasks.any((element) => element.name.toLowerCase() == lowerCasedName);
+
+      setState(() {
+        anotherTaskAlreadyExists = alreadyExists;
+      });
+    });
     _timersController.addListener(() {
       setState(() {
         errorMessage = null;
@@ -170,6 +180,26 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                               prefix: Icon(context.platformIcons.tag),
                             ),
                           ),
+                          if (anotherTaskAlreadyExists) ...[
+                            const SizedBox(height: SMALL_SPACE),
+                            Row(
+                              children: <Widget>[
+                                const Icon(
+                                  Icons.warning_rounded,
+                                  color: Colors.yellow,
+                                ),
+                                const SizedBox(width: TINY_SPACE),
+                                Flexible(
+                                  child: Text(
+                                    "A task with this name already exists. You can create the task, but you will have to tasks with the same name.",
+                                    style: getCaptionTextStyle(context).copyWith(
+                                      color: Colors.yellow,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                           const SizedBox(height: MEDIUM_SPACE),
                           PlatformTextFormField(
                             controller: _frequencyController,
