@@ -113,7 +113,7 @@ class Task extends ChangeNotifier {
     return TaskType.self;
   }
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toJSON() {
     return {
       "id": id,
       "name": name,
@@ -448,7 +448,7 @@ class TaskService extends ChangeNotifier {
   final List<Task> _tasks;
 
   TaskService({
-    List<Task> tasks = const [],
+    required List<Task> tasks,
   }) : _tasks = tasks;
 
   UnmodifiableListView<Task> get tasks => UnmodifiableListView(_tasks);
@@ -457,16 +457,30 @@ class TaskService extends ChangeNotifier {
     final rawTasks = await storage.read(key: KEY);
 
     if (rawTasks == null) {
-      return TaskService();
+      return TaskService(
+        tasks: [],
+      );
     }
 
     return TaskService(
-      tasks: List<Task>.from(List<Map<String, dynamic>>.from(jsonDecode(rawTasks)).map(Task.fromJson)),
+      tasks: List<Task>.from(
+        List<Map<String, dynamic>>.from(
+          jsonDecode(rawTasks),
+        ).map(
+          Task.fromJson,
+        ),
+      ).toList(),
     );
   }
 
   Future<void> save() async {
-    final data = jsonEncode(List<Map<String, dynamic>>.from(tasks.map((task) => task.toJson())));
+    final data = jsonEncode(
+      List<Map<String, dynamic>>.from(
+        _tasks.map(
+          (task) => task.toJSON(),
+        ),
+      ),
+    );
 
     await storage.write(key: KEY, value: data);
   }

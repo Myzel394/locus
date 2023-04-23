@@ -1,12 +1,14 @@
 import 'dart:async';
-import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:collection/collection.dart';
 import 'package:cryptography/cryptography.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:locus/services/task_service.dart';
 import 'package:nostr/nostr.dart';
+import 'package:openpgp/openpgp.dart';
 
 const storage = FlutterSecureStorage();
 const KEY = "view_service";
@@ -157,13 +159,49 @@ class TaskView extends ChangeNotifier {
       "name": name,
     };
   }
+
+  Future<String?> validate({
+    required final TaskService taskService,
+    required final ViewService viewService,
+  }) async {
+    if (relays.isEmpty) {
+      return "No relays are present in the task.";
+    }
+
+    try {
+      await OpenPGP.getPublicKeyMetadata(signPublicKey);
+      await OpenPGP.getPrivateKeyMetadata(viewPrivateKey);
+    } catch (error) {
+      return "Invalid keys provided.";
+    }
+
+    final sameTask = taskService.tasks.firstWhereOrNull((element) =>
+        element.signPGPPublicKey == signPublicKey ||
+        element.nostrPublicKey == nostrPublicKey ||
+        element.viewPGPPrivateKey == viewPrivateKey);
+
+    if (sameTask != null) {
+      return "This is a task from you (name: ${sameTask.name}).";
+    }
+
+    final sameView = viewService.views.firstWhereOrNull((element) =>
+        element.signPublicKey == signPublicKey ||
+        element.nostrPublicKey == nostrPublicKey ||
+        element.viewPrivateKey == viewPrivateKey);
+
+    if (sameView != null) {
+      return "This is a view from you (name: ${sameView.name}).";
+    }
+
+    return null;
+  }
 }
 
 class ViewService extends ChangeNotifier {
   final List<TaskView> _views;
 
   ViewService({
-    List<TaskView> views = const [],
+    required List<TaskView> views,
   }) : _views = views;
 
   UnmodifiableListView<TaskView> get views => UnmodifiableListView(_views);
@@ -172,22 +210,28 @@ class ViewService extends ChangeNotifier {
     final rawViews = await storage.read(key: KEY);
 
     if (rawViews == null) {
-      return ViewService();
+      return ViewService(
+        views: [],
+      );
     }
 
     return ViewService(
       views: List<TaskView>.from(
-        jsonDecode(rawViews).map(
+        List<Map<String, dynamic>>.from(
+          jsonDecode(rawViews),
+        ).map(
           TaskView.fromJSON,
         ),
-      ),
+      ).toList(),
     );
   }
 
   Future<void> save() async {
     final data = jsonEncode(
-      _views.map(
-        (view) => view.toJSON(),
+      List<Map<String, dynamic>>.from(
+        _views.map(
+          (view) => view.toJSON(),
+        ),
       ),
     );
 
