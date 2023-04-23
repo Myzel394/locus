@@ -35,11 +35,6 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   void initState() {
     super.initState();
 
-    if (![TaskType.self, TaskType.share].contains(widget.task.type)) {
-      Navigator.of(context).pop();
-      return;
-    }
-
     _controller = MapController(
       initMapWithUserPosition: true,
     );

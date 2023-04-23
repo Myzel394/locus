@@ -19,11 +19,6 @@ import 'timers_service.dart';
 const storage = FlutterSecureStorage();
 const KEY = "tasks_settings";
 
-enum TaskType {
-  share,
-  self,
-}
-
 enum TaskCreationProgress {
   startsSoon,
   creatingViewKeys,
@@ -44,15 +39,15 @@ const uuid = Uuid();
 class Task extends ChangeNotifier {
   final String id;
   final DateTime createdAt;
-  String name;
   final String signPGPPrivateKey;
   final String signPGPPublicKey;
-  String? viewPGPPrivateKey;
-  String viewPGPPublicKey;
+  final String viewPGPPrivateKey;
+  final String viewPGPPublicKey;
   final String nostrPrivateKey;
-  Duration frequency;
-  List<String> relays = [];
+  final List<String> relays;
   final List<TaskRuntimeTimer> timers;
+  String name;
+  Duration frequency;
   bool deleteAfterRun;
   String? _nextRunWorkManagerID;
 
@@ -65,9 +60,9 @@ class Task extends ChangeNotifier {
     required this.signPGPPublicKey,
     required this.createdAt,
     required this.nostrPrivateKey,
-    this.viewPGPPrivateKey,
-    this.relays = const [],
-    this.timers = const [],
+    required this.viewPGPPrivateKey,
+    required this.relays,
+    required this.timers,
     this.deleteAfterRun = false,
     String? nextRunWorkManagerID,
   }) : _nextRunWorkManagerID = nextRunWorkManagerID;
@@ -104,14 +99,6 @@ class Task extends ChangeNotifier {
   String get scheduleKey => "Task:$id:Schedule";
 
   String get nostrPublicKey => Keychain(nostrPrivateKey).public;
-
-  TaskType get type {
-    if (viewPGPPrivateKey == null) {
-      return TaskType.share;
-    }
-
-    return TaskType.self;
-  }
 
   Map<String, dynamic> toJSON() {
     return {
@@ -351,7 +338,8 @@ class Task extends ChangeNotifier {
     }
 
     if (relays != null) {
-      this.relays = relays;
+      this.relays.clear();
+      this.relays.addAll(relays);
     }
 
     if (timers != null) {
