@@ -69,6 +69,7 @@ dependencies:
   clipboard_watcher: ^0.2.0
   file_picker: ^5.2.10
   basic_utils: ^5.5.4
+  flutter_animate: ^4.1.1+1
 
 dev_dependencies:
   flutter_test:

@@ -1,6 +1,7 @@
 import 'package:animations/animations.dart';
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/screens/ViewDetailScreen.dart';
 import 'package:locus/screens/main_screen_widgets/ImportTask.dart';
@@ -43,7 +44,7 @@ class _MainScreenState extends State<MainScreen> {
     }
 
     final listViewHeight = listViewKey.currentContext?.size?.height ?? 0;
-    return listViewHeight > windowHeight * 0.6;
+    return listViewHeight >= windowHeight * 0.5;
   }
 
   // Checks if the ListView should fill up the remaining space. This means that the listView is smaller than the
@@ -117,7 +118,7 @@ class _MainScreenState extends State<MainScreen> {
                 ),
                 openColor: Theme.of(context).scaffoldBackgroundColor,
                 closedColor: Theme.of(context).colorScheme.primary,
-              ),
+              ).animate().scale(duration: 500.ms, delay: 1.seconds, curve: Curves.bounceOut),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -168,7 +169,7 @@ class _MainScreenState extends State<MainScreen> {
                                       const Padding(
                                         padding: EdgeInsets.symmetric(horizontal: MEDIUM_SPACE),
                                         child: ChipCaption("Tasks", icon: Icons.task_rounded),
-                                      ),
+                                      ).animate().fadeIn(duration: 1.seconds),
                                       ListView.builder(
                                         shrinkWrap: true,
                                         padding: const EdgeInsets.only(top: MEDIUM_SPACE),
@@ -179,7 +180,19 @@ class _MainScreenState extends State<MainScreen> {
 
                                           return TaskTile(
                                             task: task,
-                                          );
+                                          )
+                                              .animate()
+                                              .then(delay: 100.ms * index)
+                                              .slide(
+                                                duration: 1.seconds,
+                                                curve: Curves.easeOut,
+                                                begin: Offset(0, 0.2),
+                                              )
+                                              .fadeIn(
+                                                delay: 100.ms,
+                                                duration: 1.seconds,
+                                                curve: Curves.easeOut,
+                                              );
                                         },
                                       ),
                                     ],
@@ -194,7 +207,7 @@ class _MainScreenState extends State<MainScreen> {
                                           "Views",
                                           icon: context.platformIcons.eyeSolid,
                                         ),
-                                      ),
+                                      ).animate().fadeIn(duration: 1.seconds),
                                       ListView.builder(
                                         shrinkWrap: true,
                                         padding: const EdgeInsets.only(top: MEDIUM_SPACE),
@@ -219,7 +232,19 @@ class _MainScreenState extends State<MainScreen> {
                                                 ),
                                               );
                                             },
-                                          );
+                                          )
+                                              .animate()
+                                              .then(delay: 100.ms * index)
+                                              .slide(
+                                                duration: 1.seconds,
+                                                curve: Curves.easeOut,
+                                                begin: Offset(0, 0.2),
+                                              )
+                                              .fadeIn(
+                                                delay: 100.ms,
+                                                duration: 1.seconds,
+                                                curve: Curves.easeOut,
+                                              );
                                         },
                                       ),
                                     ],
@@ -231,9 +256,10 @@ class _MainScreenState extends State<MainScreen> {
                       ),
                       SizedBox(
                         height: shouldUseScreenHeight ? windowHeight : windowHeight - listViewHeight,
-                        child: const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: MEDIUM_SPACE),
-                          child: Center(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: MEDIUM_SPACE, vertical: shouldUseScreenHeight ? HUGE_SPACE : SMALL_SPACE),
+                          child: const Center(
                             child: Paper(
                               child: ImportTask(),
                             ),

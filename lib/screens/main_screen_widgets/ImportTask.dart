@@ -97,7 +97,7 @@ class _ImportTaskState extends State<ImportTask> with TickerProviderStateMixin {
           "Import a task from a link or file you have received",
           style: getCaptionTextStyle(context),
         ),
-        const SizedBox(height: LARGE_SPACE),
+        const SizedBox(height: MEDIUM_SPACE),
         PlatformElevatedButton(
           onPressed: () async {
             _controller.reverse();
