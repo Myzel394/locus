@@ -31,7 +31,7 @@ class LocationPointService {
     this.batteryState,
   });
 
-  static LocationPointService fromJson(Map<String, dynamic> json) {
+  static LocationPointService fromJSON(Map<String, dynamic> json) {
     return LocationPointService(
       createdAt: DateTime.parse(json["createdAt"]),
       latitude: json["latitude"],
@@ -121,6 +121,6 @@ class LocationPointService {
       throw Exception("Invalid signature");
     }
 
-    return LocationPointService.fromJson(jsonDecode(message));
+    return LocationPointService.fromJSON(jsonDecode(message));
   }
 }

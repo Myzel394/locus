@@ -72,7 +72,7 @@ class Task extends ChangeNotifier {
     String? nextRunWorkManagerID,
   }) : _nextRunWorkManagerID = nextRunWorkManagerID;
 
-  static Task fromJson(Map<String, dynamic> json) {
+  static Task fromJSON(Map<String, dynamic> json) {
     return Task(
       id: json["id"],
       name: json["name"],
@@ -467,7 +467,7 @@ class TaskService extends ChangeNotifier {
         List<Map<String, dynamic>>.from(
           jsonDecode(rawTasks),
         ).map(
-          Task.fromJson,
+          Task.fromJSON,
         ),
       ).toList(),
     );
