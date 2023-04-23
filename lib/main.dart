@@ -4,6 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:locus/App.dart';
 import 'package:locus/services/manager_service.dart';
 import 'package:locus/services/task_service.dart';
+import 'package:locus/services/view_service.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:workmanager/workmanager.dart';
@@ -21,10 +22,14 @@ void main() async {
 
   final hasLocationAlwaysGranted = await Permission.locationAlways.isGranted;
   final taskService = await TaskService.restore();
+  final viewService = await ViewService.restore();
 
   runApp(
-    ChangeNotifierProvider(
-      create: (_) => taskService,
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider<TaskService>(create: (_) => taskService),
+        ChangeNotifierProvider<ViewService>(create: (_) => viewService),
+      ],
       child: App(
         hasLocationAlwaysGranted: hasLocationAlwaysGranted,
       ),

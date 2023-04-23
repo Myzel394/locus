@@ -1,9 +1,15 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:cryptography/cryptography.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:nostr/nostr.dart';
+
+const storage = FlutterSecureStorage();
+const KEY = "view_service";
 
 class ViewServiceLinkParameters {
   final List<int> password;
@@ -23,24 +29,26 @@ class ViewServiceLinkParameters {
   });
 }
 
-class TaskView {
+class TaskView extends ChangeNotifier {
   final String signPublicKey;
   final String viewPrivateKey;
   final String nostrPublicKey;
   final List<String> relays;
+  String? name;
 
-  const TaskView({
+  TaskView({
     required this.signPublicKey,
     required this.viewPrivateKey,
     required this.nostrPublicKey,
     required this.relays,
+    this.name,
   });
 
   static ViewServiceLinkParameters parseLink(final String url) {
     final uri = Uri.parse(url);
     final fragment = uri.fragment;
 
-    final rawParameters = Utf8Decoder().convert(base64Url.decode(fragment));
+    final rawParameters = const Utf8Decoder().convert(base64Url.decode(fragment));
     final parameters = jsonDecode(rawParameters);
 
     return ViewServiceLinkParameters(
@@ -50,6 +58,16 @@ class TaskView {
         relay: parameters['r'],
         initialVector: List<int>.from(parameters['v']),
         mac: List<int>.from(parameters["m"]));
+  }
+
+  static TaskView fromJSON(final Map<String, dynamic> json) {
+    return TaskView(
+      signPublicKey: json["signPublicKey"],
+      viewPrivateKey: json["viewPrivateKey"],
+      nostrPublicKey: json["nostrPublicKey"],
+      relays: List<String>.from(json["relays"]),
+      name: json["name"],
+    );
   }
 
   static Future<TaskView> fetchFromNostr(final ViewServiceLinkParameters parameters) async {
@@ -118,5 +136,73 @@ class TaskView {
     });
 
     return completer.future;
+  }
+
+  void update({
+    final String? name,
+  }) {
+    if (name != null) {
+      this.name = name;
+    }
+
+    notifyListeners();
+  }
+
+  Map<String, dynamic> toJSON() {
+    return {
+      "signPublicKey": signPublicKey,
+      "viewPrivateKey": viewPrivateKey,
+      "nostrPublicKey": nostrPublicKey,
+      "relays": relays,
+      "name": name,
+    };
+  }
+}
+
+class ViewService extends ChangeNotifier {
+  final List<TaskView> _views;
+
+  ViewService({
+    List<TaskView> views = const [],
+  }) : _views = views;
+
+  UnmodifiableListView<TaskView> get views => UnmodifiableListView(_views);
+
+  static Future<ViewService> restore() async {
+    final rawViews = await storage.read(key: KEY);
+
+    if (rawViews == null) {
+      return ViewService();
+    }
+
+    return ViewService(
+      views: List<TaskView>.from(
+        jsonDecode(rawViews).map(
+          TaskView.fromJSON,
+        ),
+      ),
+    );
+  }
+
+  Future<void> save() async {
+    final data = jsonEncode(
+      _views.map(
+        (view) => view.toJSON(),
+      ),
+    );
+
+    await storage.write(key: KEY, value: data);
+  }
+
+  void add(final TaskView view) {
+    _views.add(view);
+
+    notifyListeners();
+  }
+
+  void remove(final TaskView view) {
+    _views.remove(view);
+
+    notifyListeners();
   }
 }

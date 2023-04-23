@@ -19,6 +19,7 @@ enum ImportScreen {
   ask,
   url,
   fetching,
+  name,
   present,
   error,
   done,
@@ -33,6 +34,7 @@ class ImportTaskSheet extends StatefulWidget {
 
 class _ImportTaskSheetState extends State<ImportTaskSheet> with TickerProviderStateMixin {
   final TextEditingController _urlController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
   late final AnimationController _lottieController;
   ImportScreen _screen = ImportScreen.ask;
   TaskView? _taskView;
@@ -57,6 +59,7 @@ class _ImportTaskSheetState extends State<ImportTaskSheet> with TickerProviderSt
   @override
   void dispose() {
     _urlController.dispose();
+    _nameController.dispose();
     _lottieController.dispose();
 
     super.dispose();
@@ -70,6 +73,7 @@ class _ImportTaskSheetState extends State<ImportTaskSheet> with TickerProviderSt
 
   Future<String?> validateTaskView(final TaskView view) async {
     final taskService = context.read<TaskService>();
+    final viewService = context.read<ViewService>();
 
     if (view.relays.isEmpty) {
       return "No relays are present in the task.";
@@ -83,7 +87,7 @@ class _ImportTaskSheetState extends State<ImportTaskSheet> with TickerProviderSt
     }
 
     final sameTask = taskService.tasks.firstWhereOrNull((element) =>
-        element.signPGPPublicKey == view.signPublicKey ||
+    element.signPGPPublicKey == view.signPublicKey ||
         element.nostrPublicKey == view.nostrPublicKey ||
         element.viewPGPPrivateKey == view.viewPrivateKey);
 
@@ -91,11 +95,22 @@ class _ImportTaskSheetState extends State<ImportTaskSheet> with TickerProviderSt
       return "This is a task from you (name: ${sameTask.name}).";
     }
 
+    final sameView = viewService.views.firstWhereOrNull((element) =>
+    element.signPublicKey == view.signPublicKey ||
+        element.nostrPublicKey == view.nostrPublicKey ||
+        element.viewPrivateKey == view.viewPrivateKey);
+
+    if (sameView != null) {
+      return "This is a view from you (name: ${sameView.name}).";
+    }
+
     return null;
   }
 
   @override
   Widget build(BuildContext context) {
+    final viewService = context.watch<ViewService>();
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -135,9 +150,10 @@ class _ImportTaskSheetState extends State<ImportTaskSheet> with TickerProviderSt
                                 _screen = ImportScreen.url;
                               });
                             },
-                            material: (_, __) => MaterialElevatedButtonData(
-                              icon: const Icon(Icons.link_rounded),
-                            ),
+                            material: (_, __) =>
+                                MaterialElevatedButtonData(
+                                  icon: const Icon(Icons.link_rounded),
+                                ),
                             child: Text("Import URL"),
                           ),
                         ),
@@ -145,9 +161,10 @@ class _ImportTaskSheetState extends State<ImportTaskSheet> with TickerProviderSt
                         Expanded(
                           child: PlatformElevatedButton(
                             padding: const EdgeInsets.all(MEDIUM_SPACE),
-                            material: (_, __) => MaterialElevatedButtonData(
-                              icon: const Icon(Icons.file_open_rounded),
-                            ),
+                            material: (_, __) =>
+                                MaterialElevatedButtonData(
+                                  icon: const Icon(Icons.file_open_rounded),
+                                ),
                             onPressed: () async {
                               FilePickerResult? result;
 
@@ -209,198 +226,215 @@ class _ImportTaskSheetState extends State<ImportTaskSheet> with TickerProviderSt
                     ),
                   ],
                 )
-              else if (_screen == ImportScreen.url || _screen == ImportScreen.fetching)
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    Text(
-                      "Enter the URL of your task",
-                      style: getBodyTextTextStyle(context),
-                    ),
-                    const SizedBox(height: MEDIUM_SPACE),
-                    URLImporter(
-                      controller: _urlController,
-                      enabled: _screen == ImportScreen.url,
-                    ),
-                    const SizedBox(height: MEDIUM_SPACE),
-                    if (_screen == ImportScreen.fetching) ...[
-                      const LinearProgressIndicator(),
-                      const SizedBox(height: MEDIUM_SPACE),
-                    ],
-                    if (errorMessage != null) ...[
+              else
+                if (_screen == ImportScreen.url || _screen == ImportScreen.fetching)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
                       Text(
-                        errorMessage!,
-                        style: getBodyTextTextStyle(context).copyWith(color: Colors.red),
+                        "Enter the URL of your task",
+                        style: getBodyTextTextStyle(context),
                       ),
                       const SizedBox(height: MEDIUM_SPACE),
-                    ],
-                    PlatformElevatedButton(
-                      padding: const EdgeInsets.all(MEDIUM_SPACE),
-                      onPressed: _screen == ImportScreen.url
-                          ? () async {
-                              try {
-                                setState(() {
-                                  _screen = ImportScreen.fetching;
-                                  this.errorMessage = null;
-                                });
-
-                                final parameters = TaskView.parseLink(_urlController.text);
-                                final taskView = await TaskView.fetchFromNostr(parameters);
-                                final errorMessage = await validateTaskView(taskView);
-
-                                if (errorMessage != null) {
-                                  setState(() {
-                                    this.errorMessage = errorMessage;
-                                    _screen = ImportScreen.error;
-                                  });
-                                  return;
-                                } else {
-                                  setState(() {
-                                    _screen = ImportScreen.present;
-                                    _taskView = taskView;
-                                  });
-                                }
-                              } catch (_) {
-                                setState(() {
-                                  errorMessage = "An error occurred while importing the task";
-                                  _screen = ImportScreen.url;
-                                });
-
-                                final scaffold = ScaffoldMessenger.of(context);
-
-                                scaffold.showSnackBar(
-                                  SnackBar(
-                                    content: Text("An error occurred while importing the task"),
-                                    backgroundColor: Colors.red,
-                                  ),
-                                );
-                              }
-                            }
-                          : null,
-                      material: (_, __) => MaterialElevatedButtonData(
-                        icon: const Icon(Icons.link_rounded),
+                      URLImporter(
+                        controller: _urlController,
+                        enabled: _screen == ImportScreen.url,
                       ),
-                      child: Text("Import URL"),
-                    ),
-                  ],
-                )
-              else if (_screen == ImportScreen.present)
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    Text(
-                      "Do you want to import this task?",
-                      style: getBodyTextTextStyle(context),
-                    ),
-                    const SizedBox(height: MEDIUM_SPACE),
-                    ListView(
-                      shrinkWrap: true,
-                      children: <Widget>[
-                        ListTile(
-                          title: Text(_taskView!.relays.join(", ")),
-                          subtitle: const Text("Relays"),
-                          leading: const Icon(Icons.dns_rounded),
-                        ),
-                        ListTile(
-                          title: Text(_taskView!.nostrPublicKey),
-                          subtitle: const Text("Public Nostr Key"),
-                          leading: const Icon(Icons.key),
-                        ),
-                        ListTile(
-                          title: FutureBuilder<String>(
-                              future: getFingerprintFromKey(_taskView!.signPublicKey),
-                              builder: (context, snapshot) {
-                                if (snapshot.hasData) {
-                                  return Text(snapshot.data!);
-                                } else {
-                                  return Center(
-                                    child: CircularProgressIndicator(),
-                                  );
-                                }
-                              }),
-                          subtitle: const Text("Public Sign Key"),
-                          leading: const Icon(Icons.edit),
-                        )
+                      const SizedBox(height: MEDIUM_SPACE),
+                      if (_screen == ImportScreen.fetching) ...[
+                        const LinearProgressIndicator(),
+                        const SizedBox(height: MEDIUM_SPACE),
                       ],
-                    ),
-                    const SizedBox(height: MEDIUM_SPACE),
-                    PlatformElevatedButton(
-                      padding: const EdgeInsets.all(MEDIUM_SPACE),
-                      onPressed: () {
-                        setState(() {
-                          _screen = ImportScreen.done;
-                        });
-                      },
-                      material: (_, __) => MaterialElevatedButtonData(
-                        icon: const Icon(Icons.file_download_outlined),
+                      if (errorMessage != null) ...[
+                        Text(
+                          errorMessage!,
+                          style: getBodyTextTextStyle(context).copyWith(color: Colors.red),
+                        ),
+                        const SizedBox(height: MEDIUM_SPACE),
+                      ],
+                      PlatformElevatedButton(
+                        padding: const EdgeInsets.all(MEDIUM_SPACE),
+                        onPressed: _screen == ImportScreen.url
+                            ? () async {
+                          try {
+                            setState(() {
+                              _screen = ImportScreen.fetching;
+                              this.errorMessage = null;
+                            });
+
+                            final parameters = TaskView.parseLink(_urlController.text);
+                            final taskView = await TaskView.fetchFromNostr(parameters);
+                            final errorMessage = await validateTaskView(taskView);
+
+                            if (errorMessage != null) {
+                              setState(() {
+                                this.errorMessage = errorMessage;
+                                _screen = ImportScreen.error;
+                              });
+                              return;
+                            } else {
+                              setState(() {
+                                _screen = ImportScreen.present;
+                                _taskView = taskView;
+                              });
+                            }
+                          } catch (_) {
+                            setState(() {
+                              errorMessage = "An error occurred while importing the task";
+                              _screen = ImportScreen.url;
+                            });
+
+                            final scaffold = ScaffoldMessenger.of(context);
+
+                            scaffold.showSnackBar(
+                              SnackBar(
+                                content: Text("An error occurred while importing the task"),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        }
+                            : null,
+                        material: (_, __) =>
+                            MaterialElevatedButtonData(
+                              icon: const Icon(Icons.link_rounded),
+                            ),
+                        child: Text("Import URL"),
                       ),
-                      child: Text("Import"),
-                    ),
-                  ],
-                )
-              else if (_screen == ImportScreen.done)
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: <Widget>[
-                    Lottie.asset(
-                      "assets/lotties/success.json",
-                      frameRate: FrameRate.max,
-                      controller: _lottieController,
-                      onLoaded: (composition) {
-                        _lottieController
-                          ..duration = composition.duration
-                          ..forward();
-                      },
-                    ),
-                    const SizedBox(height: MEDIUM_SPACE),
-                    Text(
-                      "Task imported successfully!",
-                      textAlign: TextAlign.center,
-                      style: getSubTitleTextStyle(context),
-                    ),
-                    const SizedBox(height: MEDIUM_SPACE),
-                    PlatformElevatedButton(
-                      padding: const EdgeInsets.all(MEDIUM_SPACE),
-                      onPressed: () {
-                        Navigator.of(context).pop(_taskView);
-                      },
-                      material: (_, __) => MaterialElevatedButtonData(
-                        icon: const Icon(Icons.check_rounded),
-                      ),
-                      child: Text("Done"),
-                    ),
-                  ],
-                )
-              else if (_screen == ImportScreen.error)
-                Column(
-                  children: <Widget>[
-                    Icon(context.platformIcons.error, size: 64, color: Colors.red),
-                    const SizedBox(height: MEDIUM_SPACE),
-                    Text(
-                      "An error occurred while importing the task",
-                      style: getSubTitleTextStyle(context),
-                    ),
-                    const SizedBox(height: SMALL_SPACE),
-                    Text(
-                      errorMessage!,
-                      style: getBodyTextTextStyle(context).copyWith(color: Colors.red),
-                    ),
-                    const SizedBox(height: LARGE_SPACE),
-                    PlatformElevatedButton(
-                      padding: const EdgeInsets.all(MEDIUM_SPACE),
-                      onPressed: () {
-                        setState(() {
-                          errorMessage = null;
-                          _screen = ImportScreen.ask;
-                        });
-                      },
-                      material: (_, __) => MaterialElevatedButtonData(
-                        icon: const Icon(Icons.arrow_back_rounded),
-                      ),
-                      child: Text("Go back"),
-                    ),
-                  ],
-                ),
+                    ],
+                  )
+                else
+                  if (_screen == ImportScreen.name)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+
+                    )
+                  else
+                    if (_screen == ImportScreen.present)
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: <Widget>[
+                          Text(
+                            "Do you want to import this task?",
+                            style: getBodyTextTextStyle(context),
+                          ),
+                          const SizedBox(height: MEDIUM_SPACE),
+                          ListView(
+                            shrinkWrap: true,
+                            children: <Widget>[
+                              ListTile(
+                                title: Text(_taskView!.relays.join(", ")),
+                                subtitle: const Text("Relays"),
+                                leading: const Icon(Icons.dns_rounded),
+                              ),
+                              ListTile(
+                                title: Text(_taskView!.nostrPublicKey),
+                                subtitle: const Text("Public Nostr Key"),
+                                leading: const Icon(Icons.key),
+                              ),
+                              ListTile(
+                                title: FutureBuilder<String>(
+                                    future: getFingerprintFromKey(_taskView!.signPublicKey),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.hasData) {
+                                        return Text(snapshot.data!);
+                                      } else {
+                                        return Center(
+                                          child: CircularProgressIndicator(),
+                                        );
+                                      }
+                                    }),
+                                subtitle: const Text("Public Sign Key"),
+                                leading: const Icon(Icons.edit),
+                              )
+                            ],
+                          ),
+                          const SizedBox(height: MEDIUM_SPACE),
+                          PlatformElevatedButton(
+                            padding: const EdgeInsets.all(MEDIUM_SPACE),
+                            onPressed: () async {
+                              viewService.add(_taskView!);
+                              await viewService.save();
+
+                              setState(() {
+                                _screen = ImportScreen.done;
+                              });
+                            },
+                            material: (_, __) =>
+                                MaterialElevatedButtonData(
+                                  icon: const Icon(Icons.file_download_outlined),
+                                ),
+                            child: Text("Import"),
+                          ),
+                        ],
+                      )
+                    else
+                      if (_screen == ImportScreen.done)
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: <Widget>[
+                            Lottie.asset(
+                              "assets/lotties/success.json",
+                              frameRate: FrameRate.max,
+                              controller: _lottieController,
+                              onLoaded: (composition) {
+                                _lottieController
+                                  ..duration = composition.duration
+                                  ..forward();
+                              },
+                            ),
+                            const SizedBox(height: MEDIUM_SPACE),
+                            Text(
+                              "Task imported successfully!",
+                              textAlign: TextAlign.center,
+                              style: getSubTitleTextStyle(context),
+                            ),
+                            const SizedBox(height: MEDIUM_SPACE),
+                            PlatformElevatedButton(
+                              padding: const EdgeInsets.all(MEDIUM_SPACE),
+                              onPressed: () {
+                                Navigator.of(context).pop(_taskView);
+                              },
+                              material: (_, __) =>
+                                  MaterialElevatedButtonData(
+                                    icon: const Icon(Icons.check_rounded),
+                                  ),
+                              child: Text("Done"),
+                            ),
+                          ],
+                        )
+                      else
+                        if (_screen == ImportScreen.error)
+                          Column(
+                            children: <Widget>[
+                              Icon(context.platformIcons.error, size: 64, color: Colors.red),
+                              const SizedBox(height: MEDIUM_SPACE),
+                              Text(
+                                "An error occurred while importing the task",
+                                style: getSubTitleTextStyle(context),
+                              ),
+                              const SizedBox(height: SMALL_SPACE),
+                              Text(
+                                errorMessage!,
+                                style: getBodyTextTextStyle(context).copyWith(color: Colors.red),
+                              ),
+                              const SizedBox(height: LARGE_SPACE),
+                              PlatformElevatedButton(
+                                padding: const EdgeInsets.all(MEDIUM_SPACE),
+                                onPressed: () {
+                                  setState(() {
+                                    errorMessage = null;
+                                    _screen = ImportScreen.ask;
+                                  });
+                                },
+                                material: (_, __) =>
+                                    MaterialElevatedButtonData(
+                                      icon: const Icon(Icons.arrow_back_rounded),
+                                    ),
+                                child: Text("Go back"),
+                              ),
+                            ],
+                          ),
               const SizedBox(height: LARGE_SPACE),
             ],
           ),
