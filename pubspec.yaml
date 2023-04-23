@@ -68,6 +68,7 @@ dependencies:
   visibility_detector: ^0.4.0+2
   clipboard_watcher: ^0.2.0
   file_picker: ^5.2.10
+  basic_utils: ^5.5.4
 
 dev_dependencies:
   flutter_test:

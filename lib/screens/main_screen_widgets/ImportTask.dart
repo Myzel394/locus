@@ -1,6 +1,6 @@
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:locus/screens/main_screen_widgets/ImportTaskSheet.dart';
+import 'package:locus/screens/ImportTaskSheet.dart';
 import 'package:lottie/lottie.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 

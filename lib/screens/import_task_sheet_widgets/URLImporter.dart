@@ -62,20 +62,37 @@ class _URLImporterState extends State<URLImporter> with ClipboardListener {
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
         Flexible(
-          child: PlatformTextField(
+          child: PlatformTextFormField(
             controller: widget.controller,
             enabled: widget.enabled,
             textInputAction: TextInputAction.done,
             keyboardType: TextInputType.url,
-            hintText: "https://locus.app#",
-            material: (_, __) => MaterialTextFieldData(
+            hintText: "https://locus.app/#",
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return "Please enter a URL";
+              }
+
+              final result = Uri.tryParse(value);
+
+              if (result == null) {
+                return "Please enter a valid URL";
+              }
+
+              if (!result.hasAbsolutePath) {
+                return "Please enter a valid URL";
+              }
+
+              return null;
+            },
+            material: (_, __) => MaterialTextFormFieldData(
               decoration: InputDecoration(
                 labelText: "URL",
                 border: _clipboard == null
                     ? OutlineInputBorder(
                         borderRadius: BorderRadius.circular(MEDIUM_SPACE),
                       )
-                    : OutlineInputBorder(
+                    : const OutlineInputBorder(
                         borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(MEDIUM_SPACE),
                           bottomLeft: Radius.circular(MEDIUM_SPACE),
@@ -91,11 +108,11 @@ class _URLImporterState extends State<URLImporter> with ClipboardListener {
             onPressed: () {
               widget.controller.text = _clipboard!;
             },
-            child: Icon(Icons.paste_rounded),
+            child: const Icon(Icons.paste_rounded),
             material: (_, __) => MaterialElevatedButtonData(
               style: ElevatedButton.styleFrom(
                 padding: const EdgeInsets.all(MEDIUM_SPACE - 1),
-                shape: RoundedRectangleBorder(
+                shape: const RoundedRectangleBorder(
                   borderRadius: BorderRadius.only(
                     topRight: Radius.circular(MEDIUM_SPACE),
                     bottomRight: Radius.circular(MEDIUM_SPACE),
