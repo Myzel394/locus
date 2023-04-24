@@ -10,6 +10,9 @@ import 'package:locus/widgets/TimerWidget.dart';
 import 'package:locus/widgets/TimerWidgetSheet.dart';
 import 'package:provider/provider.dart';
 
+final IN_DURATION = 700.ms;
+final IN_DELAY = 80.ms;
+
 class CreateTaskScreen extends StatefulWidget {
   const CreateTaskScreen({Key? key}) : super(key: key);
 
@@ -183,13 +186,13 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                           )
                               .animate()
                               .slide(
-                                duration: 1.seconds,
+                                duration: IN_DURATION,
                                 curve: Curves.easeOut,
                                 begin: Offset(0, 0.2),
                               )
                               .fadeIn(
-                                delay: 100.ms,
-                                duration: 1.seconds,
+                                delay: IN_DELAY,
+                                duration: IN_DURATION,
                                 curve: Curves.easeOut,
                               ),
                           if (anotherTaskAlreadyExists) ...[
@@ -249,15 +252,15 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                             ),
                           )
                               .animate()
-                              .then(delay: 200.ms)
+                              .then(delay: IN_DELAY * 2)
                               .slide(
-                                duration: 1.seconds,
+                                duration: IN_DURATION,
                                 curve: Curves.easeOut,
                                 begin: Offset(0, 0.2),
                               )
                               .fadeIn(
-                                delay: 100.ms,
-                                duration: 1.seconds,
+                                delay: IN_DELAY,
+                                duration: IN_DURATION,
                                 curve: Curves.easeOut,
                               ),
                           const SizedBox(height: MEDIUM_SPACE),
@@ -290,15 +293,15 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                 ),
                               )
                                   .animate()
-                                  .then(delay: 400.ms)
+                                  .then(delay: IN_DELAY * 4)
                                   .slide(
-                                    duration: 1.seconds,
+                                    duration: IN_DURATION,
                                     curve: Curves.easeOut,
                                     begin: Offset(0.2, 0),
                                   )
                                   .fadeIn(
-                                    delay: 100.ms,
-                                    duration: 1.seconds,
+                                    delay: IN_DELAY,
+                                    duration: IN_DURATION,
                                     curve: Curves.easeOut,
                                   ),
                               PlatformElevatedButton(
@@ -327,15 +330,15 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                 ),
                               )
                                   .animate()
-                                  .then(delay: 600.ms)
+                                  .then(delay: IN_DELAY * 5)
                                   .slide(
-                                    duration: 1.seconds,
+                                    duration: IN_DURATION,
                                     curve: Curves.easeOut,
                                     begin: Offset(-0.2, 0),
                                   )
                                   .fadeIn(
-                                    delay: 100.ms,
-                                    duration: 1.seconds,
+                                    delay: IN_DELAY,
+                                    duration: IN_DURATION,
                                     curve: Curves.easeOut,
                                   ),
                             ],
@@ -402,7 +405,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                       fontSize: getActionButtonSize(context),
                     ),
                   ),
-                ).animate().then(delay: 800.ms).slide(
+                ).animate().then(delay: IN_DELAY * 8).slide(
                       duration: 500.ms,
                       curve: Curves.easeOut,
                       begin: Offset(0, 1.3),
