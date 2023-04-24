@@ -58,3 +58,22 @@ double getActionButtonSize(final BuildContext context) => platformThemeData(
       material: (data) => data.textTheme.headline6!.fontSize ?? 16,
       cupertino: (data) => data.textTheme.actionTextStyle.fontSize ?? 16,
     );
+
+Map<int, Color> getPrimaryColorShades(final BuildContext context) {
+  final primaryColor = Theme.of(context).colorScheme.primary;
+
+  final colorShades = Map.fromEntries(
+    List.generate(
+      9,
+      (index) => MapEntry(
+        (index + 1) * 100,
+        HSLColor.fromColor(primaryColor).withLightness(1 - (index / 10)).toColor(),
+      ),
+    ),
+  );
+
+  return {
+    ...colorShades,
+    0: primaryColor,
+  };
+}

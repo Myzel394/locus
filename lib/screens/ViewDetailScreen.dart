@@ -9,6 +9,7 @@ import 'package:visibility_detector/visibility_detector.dart';
 import '../constants/spacing.dart';
 import '../services/location_point_service.dart';
 import '../utils/theme.dart';
+import '../widgets/LocationsLoadingScreen.dart';
 
 class LineSliderTickMarkShape extends SliderTickMarkShape {
   final double tickWidth;
@@ -24,22 +25,22 @@ class LineSliderTickMarkShape extends SliderTickMarkShape {
   }
 
   @override
-  void paint(PaintingContext context,
-      Offset center, {
-        required RenderBox parentBox,
-        required SliderThemeData sliderTheme,
-        required Animation<double> enableAnimation,
-        required Offset thumbCenter,
-        required bool isEnabled,
-        required TextDirection textDirection,
-      }) {
+  void paint(
+    PaintingContext context,
+    Offset center, {
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required Animation<double> enableAnimation,
+    required Offset thumbCenter,
+    required bool isEnabled,
+    required TextDirection textDirection,
+  }) {
     // This block is just copied from `slider_theme`
     final bool isTickMarkRightOfThumb = center.dx > thumbCenter.dx;
     final begin =
-    isTickMarkRightOfThumb ? sliderTheme.disabledInactiveTickMarkColor : sliderTheme.disabledActiveTickMarkColor;
+        isTickMarkRightOfThumb ? sliderTheme.disabledInactiveTickMarkColor : sliderTheme.disabledActiveTickMarkColor;
     final end = isTickMarkRightOfThumb ? sliderTheme.inactiveTickMarkColor : sliderTheme.activeTickMarkColor;
-    final Paint paint = Paint()
-      ..color = ColorTween(begin: begin, end: end).evaluate(enableAnimation)!;
+    final Paint paint = Paint()..color = ColorTween(begin: begin, end: end).evaluate(enableAnimation)!;
 
     final trackHeight = sliderTheme.trackHeight!;
 
@@ -109,8 +110,7 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
     );
   }
 
-  DateTime normalizeDateTime(final DateTime dateTime) =>
-      DateTime(
+  DateTime normalizeDateTime(final DateTime dateTime) => DateTime(
         dateTime.year,
         dateTime.month,
         dateTime.day,
@@ -168,118 +168,77 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
     final locationsAmount = locationsPerHour.values.isEmpty
         ? 1
         : locationsPerHour.values.fold(0, (value, element) => value + element.length);
-    final topColor = Theme
-        .of(context)
-        .colorScheme
-        .primary;
-    final topColor2 = HSLColor.fromColor(topColor).withLightness(0.5).toColor();
-    final topColor3 = HSLColor.fromColor(topColor).withLightness(0.3).toColor();
-    final topColor4 = HSLColor.fromColor(topColor).withLightness(0.1).toColor();
-    final windowHeight = MediaQuery
-        .of(context)
-        .size
-        .height;
+    final shades = getPrimaryColorShades(context);
 
     return PlatformScaffold(
       appBar: PlatformAppBar(
         title: Text('View Detail'),
-        material: (_, __) =>
-            MaterialAppBarData(
-              centerTitle: true,
-            ),
+        material: (_, __) => MaterialAppBarData(
+          centerTitle: true,
+        ),
       ),
       body: _isLoading
           ? Padding(
-        padding: const EdgeInsets.all(MEDIUM_SPACE),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            Expanded(
-              child: Column(
-                children: <Widget>[
-                  Text(
-                    "Loading locations: ${_locations.length}",
-                    style: getTitleTextStyle(context),
-                  ),
-                  const SizedBox(height: MEDIUM_SPACE),
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: _locations.length,
-                      itemBuilder: (context, index) {
-                        final location = _locations[index];
-
-                        return Text(
-                          "${location.latitude}, ${location.longitude}",
-                          style: getBodyTextTextStyle(context),
-                        );
-                      },
-                    ),
-                  ),
-                ],
+              padding: const EdgeInsets.all(MEDIUM_SPACE),
+              child: LocationsLoadingScreen(
+                locations: _locations,
               ),
-            ),
-            PlatformCircularProgressIndicator()
-          ],
-        ),
-      )
+            )
           : Column(
-        children: <Widget>[
-          Expanded(
-            flex: 11,
-            child: VisibilityDetector(
-              key: const Key('map'),
-              onVisibilityChanged: (visibility) {
-                // Initial draw
-                if (visibility.visibleFraction == 1) {
-                  drawPoints();
-                  goToLocation(_locations.last);
-                }
-              },
-              child: OSMFlutter(
-                controller: _controller,
-                initZoom: 15,
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 1,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: List.generate(24, (index) => 23 - index).map((hour) {
-                final date = DateTime.now().subtract(Duration(hours: hour));
-                final normalizedDate = normalizeDateTime(date);
-
-                return PlatformInkWell(
-                  onTap: () {
-                    _controller.removeAllCircle();
-
-                    if (locationsPerHour[normalizedDate] == null) {
-                      return;
-                    }
-
-                    drawPoints(
-                      locations: locationsPerHour[normalizedDate],
-                    );
-                    goToLocation(locationsPerHour[normalizedDate]!.last);
-                  },
-                  child: FillUpPaint(
-                    color: topColor,
-                    fillPercentage:
-                    (locationsPerHour[normalizedDate]?.length ?? 0).toDouble() / locationsAmount.toDouble(),
-                    size: Size(
-                      MediaQuery
-                          .of(context)
-                          .size
-                          .width / 24,
-                      50,
+              children: <Widget>[
+                Expanded(
+                  flex: 11,
+                  child: VisibilityDetector(
+                    key: const Key('map'),
+                    onVisibilityChanged: (visibility) {
+                      // Initial draw
+                      if (visibility.visibleFraction == 1) {
+                        drawPoints();
+                        goToLocation(_locations.last);
+                      }
+                    },
+                    child: OSMFlutter(
+                      controller: _controller,
+                      initZoom: 15,
                     ),
                   ),
-                );
-              }).toList(),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: List.generate(24, (index) => 23 - index).map((hour) {
+                      final date = DateTime.now().subtract(Duration(hours: hour));
+                      final normalizedDate = normalizeDateTime(date);
+
+                      return PlatformInkWell(
+                        onTap: () {
+                          _controller.removeAllCircle();
+
+                          if (locationsPerHour[normalizedDate] == null) {
+                            return;
+                          }
+
+                          drawPoints(
+                            locations: locationsPerHour[normalizedDate],
+                          );
+                          goToLocation(locationsPerHour[normalizedDate]!.last);
+                        },
+                        child: FillUpPaint(
+                          color: shades[0]!,
+                          fillPercentage:
+                              (locationsPerHour[normalizedDate]?.length ?? 0).toDouble() / locationsAmount.toDouble(),
+                          size: Size(
+                            MediaQuery.of(context).size.width / 24,
+                            50,
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
     );
   }
 }

@@ -9,6 +9,7 @@ import 'package:locus/screens/task_detail_screen_widgets/Details.dart';
 import 'package:locus/services/location_point_service.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/utils/theme.dart';
+import 'package:locus/widgets/LocationsLoadingScreen.dart';
 
 import '../api/get-locations.dart';
 
@@ -106,6 +107,8 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final shades = getPrimaryColorShades(context);
+
     return PlatformScaffold(
       appBar: PlatformAppBar(
         title: Text(
@@ -120,35 +123,8 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
           child: _isLoading
               ? Padding(
                   padding: const EdgeInsets.all(MEDIUM_SPACE),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Expanded(
-                        child: Column(
-                          children: <Widget>[
-                            Text(
-                              "Loading locations: ${_locations.length}",
-                              style: getTitleTextStyle(context),
-                            ),
-                            const SizedBox(height: MEDIUM_SPACE),
-                            Expanded(
-                              child: ListView.builder(
-                                itemCount: _locations.length,
-                                itemBuilder: (context, index) {
-                                  final location = _locations[index];
-
-                                  return Text(
-                                    "${location.latitude}, ${location.longitude}",
-                                    style: getBodyTextTextStyle(context),
-                                  );
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      PlatformCircularProgressIndicator()
-                    ],
+                  child: LocationsLoadingScreen(
+                    locations: _locations,
                   ),
                 )
               : PageView(
