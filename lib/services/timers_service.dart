@@ -86,6 +86,7 @@ class WeekdayTimer extends TaskRuntimeTimer {
 
   @override
   DateTime nextStartDate(final DateTime now) {
+    print("now weekday: ${now.weekday}, now: $now, this day: $day");
     if (now.weekday != day) {
       // Find next day that matches the weekday
       final nextDay = now.next(day);
