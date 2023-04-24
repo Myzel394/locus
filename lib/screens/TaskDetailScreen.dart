@@ -31,6 +31,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   final PageController _pageController = PageController();
   void Function()? _unsubscribeGetLocations;
   bool _isLoading = true;
+  bool _isError = false;
   bool _isShowingDetails = false;
   final List<LocationPointService> _locations = [];
 
@@ -83,6 +84,11 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
           _isLoading = false;
         });
       },
+      onError: () {
+        setState(() {
+          _isError = true;
+        });
+      },
     );
   }
 
@@ -107,8 +113,6 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final shades = getPrimaryColorShades(context);
-
     return PlatformScaffold(
       appBar: PlatformAppBar(
         title: Text(
@@ -120,70 +124,80 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
       ),
       body: Builder(
         builder: (context) => Center(
-          child: _isLoading
-              ? Padding(
-                  padding: const EdgeInsets.all(MEDIUM_SPACE),
-                  child: LocationsLoadingScreen(
-                    locations: _locations,
+          child: _isError
+              ? Center(
+                  child: Text(
+                    "There was an error fetching the locations. Please try again later.",
+                    style: getBodyTextTextStyle(context).copyWith(
+                      color: Colors.red,
+                    ),
                   ),
                 )
-              : PageView(
-                  physics:
-                      _isShowingDetails ? const AlwaysScrollableScrollPhysics() : const NeverScrollableScrollPhysics(),
-                  scrollDirection: Axis.vertical,
-                  controller: _pageController,
-                  children: <Widget>[
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
+              : _isLoading
+                  ? Padding(
+                      padding: const EdgeInsets.all(MEDIUM_SPACE),
+                      child: LocationsLoadingScreen(
+                        locations: _locations,
+                      ),
+                    )
+                  : PageView(
+                      physics: _isShowingDetails
+                          ? const AlwaysScrollableScrollPhysics()
+                          : const NeverScrollableScrollPhysics(),
+                      scrollDirection: Axis.vertical,
+                      controller: _pageController,
                       children: <Widget>[
-                        Expanded(
-                          flex: 9,
-                          child: OSMFlutter(
-                            controller: _controller,
-                            initZoom: 15,
-                          ),
-                        ),
-                        Expanded(
-                          flex: 1,
-                          child: PlatformTextButton(
-                            material: (_, __) => MaterialTextButtonData(
-                              style: ButtonStyle(
-                                // Not rounded, but square
-                                shape: MaterialStateProperty.all(
-                                  const RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.zero,
-                                  ),
-                                ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: <Widget>[
+                            Expanded(
+                              flex: 9,
+                              child: OSMFlutter(
+                                controller: _controller,
+                                initZoom: 15,
                               ),
                             ),
-                            child: Text("View Details"),
-                            onPressed: () {
-                              _pageController.animateToPage(
-                                1,
-                                duration: const Duration(milliseconds: 500),
-                                curve: Curves.easeInOut,
-                              );
-                            },
+                            Expanded(
+                              flex: 1,
+                              child: PlatformTextButton(
+                                material: (_, __) => MaterialTextButtonData(
+                                  style: ButtonStyle(
+                                    // Not rounded, but square
+                                    shape: MaterialStateProperty.all(
+                                      const RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.zero,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                child: Text("View Details"),
+                                onPressed: () {
+                                  _pageController.animateToPage(
+                                    1,
+                                    duration: const Duration(milliseconds: 500),
+                                    curve: Curves.easeInOut,
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                        Expanded(
+                          child: SingleChildScrollView(
+                            child: Details(
+                                locations: UnmodifiableListView<LocationPointService>(_locations),
+                                task: widget.task,
+                                onGoBack: () {
+                                  _pageController.animateToPage(
+                                    0,
+                                    duration: const Duration(milliseconds: 500),
+                                    curve: Curves.easeInOut,
+                                  );
+                                }),
                           ),
                         ),
                       ],
                     ),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        child: Details(
-                            locations: UnmodifiableListView<LocationPointService>(_locations),
-                            task: widget.task,
-                            onGoBack: () {
-                              _pageController.animateToPage(
-                                0,
-                                duration: const Duration(milliseconds: 500),
-                                curve: Curves.easeInOut,
-                              );
-                            }),
-                      ),
-                    ),
-                  ],
-                ),
         ),
       ),
     );

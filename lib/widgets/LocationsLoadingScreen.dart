@@ -1,4 +1,3 @@
-import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:lottie/lottie.dart';
@@ -71,8 +70,15 @@ class LocationsLoadingScreen extends StatelessWidget {
             ),
           ),
         ).animate().fadeIn(duration: 800.ms),
-        const Expanded(child: SizedBox()),
-        PlatformCircularProgressIndicator()
+        TweenAnimationBuilder<double>(
+          duration: const Duration(seconds: 20),
+          curve: Curves.easeInOut,
+          tween: Tween<double>(
+            begin: 1,
+            end: 0,
+          ),
+          builder: (context, value, _) => LinearProgressIndicator(value: value),
+        ).animate().fadeIn(duration: 2.seconds, delay: 10.seconds),
       ],
     );
   }

@@ -10,6 +10,7 @@ Future<void Function()> getLocations({
   required final List<String> relays,
   required void Function(LocationPointService) onLocationFetched,
   required void Function() onEnd,
+  required void Function() onError,
 }) async {
   final request = Request(generate64RandomHexChars(), [
     Filter(
@@ -23,6 +24,7 @@ Future<void Function()> getLocations({
   );
   final List<Future<LocationPointService>> decryptionProcesses = [];
   bool hasReceivedEndOfStream = false;
+  bool hasReceivedEvent = false;
 
   socket.add(request.serialize());
 
@@ -31,6 +33,8 @@ Future<void Function()> getLocations({
 
     switch (event.type) {
       case "EVENT":
+        hasReceivedEvent = true;
+
         final locationProcess = LocationPointService.fromEncrypted(
           event.message.content,
           viewPrivateKey,
@@ -54,9 +58,17 @@ Future<void Function()> getLocations({
 
         hasReceivedEndOfStream = true;
 
-        if (decryptionProcesses.isEmpty) {
+        if (decryptionProcesses.isEmpty && hasReceivedEvent) {
           onEnd();
         }
+
+        Future.delayed(const Duration(seconds: 20)).then((_) {
+          if (!hasReceivedEvent) {
+            // Something went wrong, there should be at least one event after this time
+            onError();
+          }
+        });
+
         break;
     }
   });

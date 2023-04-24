@@ -71,6 +71,7 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
   void Function()? _unsubscribeGetLocations;
   final List<LocationPointService> _locations = [];
   bool _isLoading = true;
+  bool _isError = false;
 
   double timeOffset = 0;
 
@@ -105,6 +106,11 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
       onEnd: () {
         setState(() {
           _isLoading = false;
+        });
+      },
+      onError: () {
+        setState(() {
+          _isError = true;
         });
       },
     );
@@ -177,68 +183,77 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
           centerTitle: true,
         ),
       ),
-      body: _isLoading
-          ? Padding(
-              padding: const EdgeInsets.all(MEDIUM_SPACE),
-              child: LocationsLoadingScreen(
-                locations: _locations,
+      body: _isError
+          ? Center(
+              child: Text(
+                "There was an error fetching the locations. Please try again later.",
+                style: getBodyTextTextStyle(context).copyWith(
+                  color: Colors.red,
+                ),
               ),
             )
-          : Column(
-              children: <Widget>[
-                Expanded(
-                  flex: 11,
-                  child: VisibilityDetector(
-                    key: const Key('map'),
-                    onVisibilityChanged: (visibility) {
-                      // Initial draw
-                      if (visibility.visibleFraction == 1) {
-                        drawPoints();
-                        goToLocation(_locations.last);
-                      }
-                    },
-                    child: OSMFlutter(
-                      controller: _controller,
-                      initZoom: 15,
-                    ),
+          : _isLoading
+              ? Padding(
+                  padding: const EdgeInsets.all(MEDIUM_SPACE),
+                  child: LocationsLoadingScreen(
+                    locations: _locations,
                   ),
-                ),
-                Expanded(
-                  flex: 1,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: List.generate(24, (index) => 23 - index).map((hour) {
-                      final date = DateTime.now().subtract(Duration(hours: hour));
-                      final normalizedDate = normalizeDateTime(date);
-
-                      return PlatformInkWell(
-                        onTap: () {
-                          _controller.removeAllCircle();
-
-                          if (locationsPerHour[normalizedDate] == null) {
-                            return;
+                )
+              : Column(
+                  children: <Widget>[
+                    Expanded(
+                      flex: 11,
+                      child: VisibilityDetector(
+                        key: const Key('map'),
+                        onVisibilityChanged: (visibility) {
+                          // Initial draw
+                          if (visibility.visibleFraction == 1) {
+                            drawPoints();
+                            goToLocation(_locations.last);
                           }
-
-                          drawPoints(
-                            locations: locationsPerHour[normalizedDate],
-                          );
-                          goToLocation(locationsPerHour[normalizedDate]!.last);
                         },
-                        child: FillUpPaint(
-                          color: shades[0]!,
-                          fillPercentage:
-                              (locationsPerHour[normalizedDate]?.length ?? 0).toDouble() / locationsAmount.toDouble(),
-                          size: Size(
-                            MediaQuery.of(context).size.width / 24,
-                            50,
-                          ),
+                        child: OSMFlutter(
+                          controller: _controller,
+                          initZoom: 15,
                         ),
-                      );
-                    }).toList(),
-                  ),
+                      ),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: List.generate(24, (index) => 23 - index).map((hour) {
+                          final date = DateTime.now().subtract(Duration(hours: hour));
+                          final normalizedDate = normalizeDateTime(date);
+
+                          return PlatformInkWell(
+                            onTap: () {
+                              _controller.removeAllCircle();
+
+                              if (locationsPerHour[normalizedDate] == null) {
+                                return;
+                              }
+
+                              drawPoints(
+                                locations: locationsPerHour[normalizedDate],
+                              );
+                              goToLocation(locationsPerHour[normalizedDate]!.last);
+                            },
+                            child: FillUpPaint(
+                              color: shades[0]!,
+                              fillPercentage: (locationsPerHour[normalizedDate]?.length ?? 0).toDouble() /
+                                  locationsAmount.toDouble(),
+                              size: Size(
+                                MediaQuery.of(context).size.width / 24,
+                                50,
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
     );
   }
 }
