@@ -505,47 +505,45 @@ DateTime? findNextStartDate(final List<TaskRuntimeTimer> timers,
   final now = startDate ?? DateTime.now();
 
   final nextDates = List<DateTime>.from(
-      timers.map((timer) => timer.nextStartDate(now)).where((date) => date != null && date.isAfter(now)));
+    timers.map((timer) => timer.nextStartDate(now)).where(
+          (date) => date != null && (date.isAfter(now) || date == now),
+        ),
+  );
 
   if (nextDates.isEmpty) {
     return null;
   }
 
   // Find earliest date
-  return nextDates.reduce((value, element) => value.isBefore(element) ? value : element);
+  nextDates.sort();
+  return nextDates.first;
 }
 
 DateTime? findNextEndDate(final List<TaskRuntimeTimer> timers, {final DateTime? startDate}) {
   final now = startDate ?? DateTime.now();
+  final nextDates = List<DateTime>.from(
+    timers.map((timer) => timer.nextEndDate(now)).where((date) => date != null),
+  )..sort();
 
-  DateTime? date;
+  DateTime endDate = nextDates.first;
 
-  for (final timer in timers) {
-    final timerDate = timer.nextEndDate(now);
+  for (final date in nextDates.sublist(1)) {
+    endDate = date;
 
-    if (timerDate == null) {
-      continue;
+    final nextStartDate = findNextStartDate(timers, startDate: date);
+
+    if (nextStartDate == null) {
+      // No next start date found, so this is the last date
+      break;
     }
 
-    if (date == null) {
-      date = timerDate;
-      continue;
-    }
+    final difference = date.difference(nextStartDate);
 
-    if (timer is WeekdayTimer) {
-      if (timerDate.isAfter(date)) {
-        date = timerDate;
-      }
-
-      continue;
-    } else {
-      if (timerDate.isBefore(date)) {
-        date = timerDate;
-      }
-
-      continue;
+    if (difference.inMinutes.abs() > 15) {
+      // The difference between the end date and the next start date is more than 15 minutes, so this is the last date
+      break;
     }
   }
 
-  return date;
+  return endDate;
 }
