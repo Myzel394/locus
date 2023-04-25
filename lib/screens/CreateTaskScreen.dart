@@ -273,8 +273,11 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                   curve: Curves.easeOut,
                                 ),
                             const SizedBox(height: MEDIUM_SPACE),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            Wrap(
+                              alignment: WrapAlignment.spaceEvenly,
+                              spacing: SMALL_SPACE,
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              direction: Axis.horizontal,
                               children: <Widget>[
                                 PlatformElevatedButton(
                                   material: (_, __) =>

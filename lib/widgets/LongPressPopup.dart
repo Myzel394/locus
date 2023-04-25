@@ -41,22 +41,24 @@ class _LongPressPopupState<T> extends State<LongPressPopup> {
   Offset _tapPosition = Offset.zero;
 
   List<CupertinoContextMenuAction> get cupertinoActions => widget.items
-      .map((item) => CupertinoContextMenuAction(
-            trailingIcon: item.icon,
-            onPressed: item.onPressed,
-            isDefaultAction: item.isDefaultAction,
-            isDestructiveAction: item.isDestructiveAction,
-            child: item.label,
-          ))
+      .map(
+        (item) => CupertinoContextMenuAction(
+          trailingIcon: item.icon,
+          onPressed: () {
+            Navigator.pop(context);
+            item.onPressed();
+          },
+          isDefaultAction: item.isDefaultAction,
+          isDestructiveAction: item.isDestructiveAction,
+          child: item.label,
+        ),
+      )
       .toList();
   List<PopupMenuItem<int>> get materialActions => List<PopupMenuItem<int>>.from(
         widget.items.mapIndexed(
           (index, item) => PopupMenuItem(
             value: index,
-            onTap: () {
-              Navigator.pop(context);
-              item.onPressed();
-            },
+            onTap: item.onPressed,
             child: Row(
               children: [
                 if (item.icon != null) ...[

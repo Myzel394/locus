@@ -27,7 +27,7 @@ Color getButtonBackgroundColor(final BuildContext context) => platformThemeData(
 
 Color getButtonTextColor(final BuildContext context) => platformThemeData(
       context,
-      material: (data) => data.buttonTheme.colorScheme!.onBackground,
+      material: (data) => data.buttonTheme.colorScheme!.onPrimary,
       cupertino: (data) => data.primaryContrastingColor,
     );
 

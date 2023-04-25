@@ -1,4 +1,5 @@
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:locus/constants/spacing.dart';
@@ -39,6 +40,42 @@ class _WeekdaySelectionState extends State<WeekdaySelection> {
     endTime = widget.endTime;
   }
 
+  Future<TimeOfDay?> _showTimePicker(final TimeOfDay initialTime) async {
+    if (isCupertino(context)) {
+      DateTime value = initialTime.toDateTime();
+
+      await showCupertinoModalPopup(
+        context: context,
+        builder: (context) => Container(
+          height: 300,
+          padding: const EdgeInsets.only(top: 6.0),
+          margin: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+          ),
+          color: CupertinoColors.systemBackground.resolveFrom(context),
+          child: SafeArea(
+            top: false,
+            child: CupertinoDatePicker(
+              initialDateTime: initialTime.toDateTime(),
+              mode: CupertinoDatePickerMode.time,
+              use24hFormat: true,
+              onDateTimeChanged: (DateTime newTime) {
+                value = newTime;
+              },
+            ),
+          ),
+        ),
+      );
+
+      return TimeOfDay.fromDateTime(value);
+    } else {
+      return showTimePicker(
+        context: context,
+        initialTime: initialTime,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return PlatformAlertDialog(
@@ -52,9 +89,13 @@ class _WeekdaySelectionState extends State<WeekdaySelection> {
               borderRadius: BorderRadius.circular(SMALL_SPACE),
             ),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: MEDIUM_SPACE, vertical: SMALL_SPACE),
+              padding: const EdgeInsets.symmetric(
+                  horizontal: MEDIUM_SPACE, vertical: SMALL_SPACE),
               child: PlatformDropdownButton<int>(
                 value: weekday,
+                style: TextStyle(
+                  backgroundColor: Colors.blue,
+                ),
                 onChanged: widget.lockWeekday
                     ? null
                     : ((value) {
@@ -117,13 +158,11 @@ class _WeekdaySelectionState extends State<WeekdaySelection> {
                   ),
                 ),
                 child: Text(
-                  DateFormat("HH:mm").format(DateTime(0, 0, 0, startTime.hour, startTime.minute)),
+                  DateFormat("HH:mm").format(
+                      DateTime(0, 0, 0, startTime.hour, startTime.minute)),
                 ),
                 onPressed: () async {
-                  final time = await showPlatformTimePicker(
-                    context: context,
-                    initialTime: startTime,
-                  );
+                  final time = await _showTimePicker(startTime);
                   if (time != null) {
                     setState(() {
                       startTime = time;
@@ -137,7 +176,8 @@ class _WeekdaySelectionState extends State<WeekdaySelection> {
                     padding: MaterialStateProperty.all<EdgeInsets>(
                       const EdgeInsets.all(MEDIUM_SPACE),
                     ),
-                    backgroundColor: MaterialStateProperty.all<Color>(Theme.of(context).colorScheme.surface),
+                    backgroundColor: MaterialStateProperty.all<Color>(
+                        Theme.of(context).colorScheme.surface),
                     shape: MaterialStateProperty.all<OutlinedBorder>(
                       RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(SMALL_SPACE),
@@ -146,7 +186,8 @@ class _WeekdaySelectionState extends State<WeekdaySelection> {
                   ),
                 ),
                 child: Text(
-                  DateFormat("HH:mm").format(DateTime(0, 0, 0, endTime.hour, endTime.minute)),
+                  DateFormat("HH:mm")
+                      .format(DateTime(0, 0, 0, endTime.hour, endTime.minute)),
                 ),
                 onPressed: () async {
                   final time = await showPlatformTimePicker(
