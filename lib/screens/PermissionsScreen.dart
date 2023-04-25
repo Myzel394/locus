@@ -1,7 +1,8 @@
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/utils/theme.dart';
+import 'package:lottie/lottie.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'MainScreen.dart';
@@ -46,6 +47,8 @@ class PermissionsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final shades = getPrimaryColorShades(context);
+
     return PlatformScaffold(
       body: Padding(
         padding: const EdgeInsets.all(MEDIUM_SPACE),
@@ -61,6 +64,24 @@ class PermissionsScreen extends StatelessWidget {
               Text(
                 "We need the permission to access your location in the background in order to store your location history.",
                 style: getBodyTextTextStyle(context),
+              ),
+              const SizedBox(height: LARGE_SPACE),
+              Lottie.asset(
+                "assets/lotties/location-pointer.json",
+                repeat: false,
+                frameRate: FrameRate.max,
+                delegates: LottieDelegates(
+                  values: [
+                    ValueDelegate.color(
+                      ["Path 3306", "Path 3305", "Fill 1"],
+                      value: shades[0],
+                    ),
+                    ValueDelegate.color(
+                      ["Path 3305", "Path 3305", "Fill 1"],
+                      value: shades[0],
+                    )
+                  ],
+                ),
               ),
               const SizedBox(height: LARGE_SPACE),
               PlatformElevatedButton(
