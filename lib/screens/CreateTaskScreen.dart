@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:basic_utils/basic_utils.dart';
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
@@ -38,7 +40,8 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
     _nameController.addListener(() {
       final taskService = context.read<TaskService>();
       final lowerCasedName = _nameController.text.toLowerCase();
-      final alreadyExists = taskService.tasks.any((element) => element.name.toLowerCase() == lowerCasedName);
+      final alreadyExists = taskService.tasks
+          .any((element) => element.name.toLowerCase() == lowerCasedName);
 
       setState(() {
         anotherTaskAlreadyExists = alreadyExists;
@@ -125,6 +128,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
           centerTitle: true,
         ),
       ),
+      iosContentPadding: true,
       material: (_, __) => MaterialScaffoldData(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       ),
@@ -173,6 +177,8 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
 
                               return null;
                             },
+                            keyboardType: TextInputType.name,
+                            autofillHints: const [AutofillHints.name],
                             material: (_, __) => MaterialTextFormFieldData(
                               decoration: InputDecoration(
                                 labelText: "Name",
@@ -207,7 +213,8 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                 Flexible(
                                   child: Text(
                                     "A task with this name already exists. You can create the task, but you will have to tasks with the same name.",
-                                    style: getCaptionTextStyle(context).copyWith(
+                                    style:
+                                        getCaptionTextStyle(context).copyWith(
                                       color: Colors.yellow,
                                     ),
                                   ),
@@ -221,7 +228,8 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                             enabled: _taskProgress == null,
                             textInputAction: TextInputAction.done,
                             keyboardType: TextInputType.number,
-                            textAlign: TextAlign.center,
+                            textAlign:
+                                Platform.isAndroid ? TextAlign.center : null,
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return "Please enter a frequency";
@@ -249,6 +257,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                             ),
                             cupertino: (_, __) => CupertinoTextFormFieldData(
                               placeholder: "Frequency",
+                              prefix: Icon(context.platformIcons.time),
                             ),
                           )
                               .animate()
@@ -270,6 +279,10 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                               PlatformElevatedButton(
                                 material: (_, __) => MaterialElevatedButtonData(
                                   icon: Icon(Icons.dns_rounded),
+                                ),
+                                cupertino: (_, __) =>
+                                    CupertinoElevatedButtonData(
+                                  padding: getSmallButtonPadding(context),
                                 ),
                                 onPressed: _taskProgress != null
                                     ? null
@@ -307,6 +320,10 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                               PlatformElevatedButton(
                                 material: (_, __) => MaterialElevatedButtonData(
                                   icon: const Icon(Icons.timer_rounded),
+                                ),
+                                cupertino: (_, __) =>
+                                    CupertinoElevatedButtonData(
+                                  padding: getSmallButtonPadding(context),
                                 ),
                                 onPressed: _taskProgress != null
                                     ? null
