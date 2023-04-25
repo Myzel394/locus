@@ -1,8 +1,10 @@
 import 'dart:io';
 
 import 'package:apple_maps_flutter/apple_maps_flutter.dart' as AppleMaps;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
+import 'package:intl/intl.dart';
 
 import '../services/location_point_service.dart';
 
@@ -21,6 +23,25 @@ class LocationsMapAppleMaps extends StatefulWidget {
 class _LocationsMapAppleMapsState extends State<LocationsMapAppleMaps> {
   late final AppleMaps.AppleMapController _controller;
 
+  String get snippetText {
+    final location = widget.locations.last;
+
+    final batteryInfo = location.batteryLevel == null
+        ? ""
+        : "Battery at ${(location.batteryLevel! * 100).ceil()}%";
+    final dateInfo =
+        "Date: ${DateFormat.yMd().add_jm().format(location.createdAt)}";
+    final speedInfo = location.speed == null
+        ? ""
+        : "Moving at ${(location.speed!.abs() * 3.6).ceil()} km/h";
+
+    return [
+      batteryInfo,
+      dateInfo,
+      speedInfo,
+    ].where((element) => element.isNotEmpty).join("\n");
+  }
+
   @override
   Widget build(BuildContext context) {
     return AppleMaps.AppleMap(
@@ -33,6 +54,23 @@ class _LocationsMapAppleMapsState extends State<LocationsMapAppleMaps> {
       ),
       onMapCreated: (controller) {
         _controller = controller;
+      },
+      myLocationEnabled: true,
+      myLocationButtonEnabled: true,
+      annotations: {
+        AppleMaps.Annotation(
+          annotationId: AppleMaps.AnnotationId(
+            "annotation_${widget.locations.last.latitude}:${widget.locations.last.longitude}",
+          ),
+          position: AppleMaps.LatLng(
+            widget.locations.last.latitude,
+            widget.locations.last.longitude,
+          ),
+          infoWindow: AppleMaps.InfoWindow(
+            title: "Last known location",
+            snippet: snippetText,
+          ),
+        ),
       },
       circles: widget.locations
           .map(
@@ -114,7 +152,18 @@ class _LocationsMapOSMState extends State<LocationsMapOSM> {
 
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return OSMFlutter(
+      controller: _controller,
+      initZoom: 15,
+      trackMyPosition: true,
+      androidHotReloadSupport: kDebugMode,
+      onMapIsReady: (controller) {
+        drawPoints();
+      },
+      onGeoPointClicked: (point) {
+        print(point);
+      },
+    );
   }
 }
 

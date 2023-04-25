@@ -1,5 +1,7 @@
 PODS:
   - Alamofire (5.6.2)
+  - apple_maps_flutter (0.0.1):
+    - Flutter
   - battery_plus (1.0.0):
     - Flutter
   - clipboard_watcher (0.0.1):
@@ -75,6 +77,7 @@ PODS:
     - Flutter
 
 DEPENDENCIES:
+  - apple_maps_flutter (from `.symlinks/plugins/apple_maps_flutter/ios`)
   - battery_plus (from `.symlinks/plugins/battery_plus/ios`)
   - clipboard_watcher (from `.symlinks/plugins/clipboard_watcher/ios`)
   - file_picker (from `.symlinks/plugins/file_picker/ios`)
@@ -103,6 +106,8 @@ SPEC REPOS:
     - Tangram-es
 
 EXTERNAL SOURCES:
+  apple_maps_flutter:
+    :path: ".symlinks/plugins/apple_maps_flutter/ios"
   battery_plus:
     :path: ".symlinks/plugins/battery_plus/ios"
   clipboard_watcher:
@@ -138,6 +143,7 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Alamofire: d368e1ff8a298e6dde360e35a3e68e6c610e7204
+  apple_maps_flutter: c59725efea39e13e703cde52a1d2b14866ad68a8
   battery_plus: 7851ab482c336dd101ae735dc9363f01e1223c7c
   clipboard_watcher: 86fb70421aca6f4944e0591a8292605da7784666
   DKImagePickerController: b512c28220a2b8ac7419f21c491fc8534b7601ac

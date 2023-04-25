@@ -82,7 +82,7 @@ class _BottomSheetFilterBuilderState<T>
             material: (_, __) => MaterialTextFieldData(
               decoration: InputDecoration(
                 hintText: "Search",
-                suffixIcon: PlatformIconButton(
+                suffixIcon: IconButton(
                   icon: Icon(Icons.clear),
                   onPressed: () {
                     widget.searchController!.clear();
@@ -93,8 +93,12 @@ class _BottomSheetFilterBuilderState<T>
             ),
             cupertino: (_, __) => CupertinoTextFieldData(
               placeholder: "Search",
-              suffix: PlatformIconButton(
-                icon: Icon(CupertinoIcons.clear),
+              prefix: Padding(
+                padding: const EdgeInsets.only(left: SMALL_SPACE),
+                child: Icon(CupertinoIcons.search),
+              ),
+              suffix: CupertinoButton(
+                child: Icon(CupertinoIcons.clear),
                 onPressed: () {
                   widget.searchController!.clear();
                   updateElements();
