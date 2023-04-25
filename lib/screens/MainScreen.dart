@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:animations/animations.dart';
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:locus/constants/spacing.dart';
@@ -32,6 +35,7 @@ class _MainScreenState extends State<MainScreen> {
   bool shouldUseScreenHeight = false;
   bool listViewShouldFillUp = false;
   double listViewHeight = 0;
+  int activeTab = 0;
 
   double get windowHeight =>
       MediaQuery.of(context).size.height - kToolbarHeight;
@@ -107,7 +111,7 @@ class _MainScreenState extends State<MainScreen> {
                   width: FAB_DIMENSION,
                   child: Center(
                     child: Icon(
-                      context.platformIcons.add,
+                      Icons.add,
                       color: Theme.of(context).colorScheme.onPrimary,
                     ),
                   ),
@@ -123,158 +127,193 @@ class _MainScreenState extends State<MainScreen> {
               ).animate().scale(
                 duration: 500.ms, delay: 1.seconds, curve: Curves.bounceOut),
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: showEmptyScreen
-              ? Column(
-                  children: <Widget>[
-                    SizedBox(
-                      height: windowHeight,
-                      child: Center(
-                        child: CreateTask(),
-                      ),
-                    ),
-                    SizedBox(
-                      height: windowHeight,
-                      child: Center(
-                        child: ImportTask(),
-                      ),
-                    ),
-                  ],
-                )
-              : Expanded(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.max,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      SizedBox(
-                        height: windowHeight,
-                        child: SingleChildScrollView(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: MEDIUM_SPACE),
-                          child: Wrap(
-                            runSpacing: LARGE_SPACE,
-                            crossAxisAlignment: WrapCrossAlignment.start,
-                            children: <Widget>[
-                              if (taskService.tasks.isNotEmpty)
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    const Padding(
-                                      padding: EdgeInsets.symmetric(
-                                          horizontal: MEDIUM_SPACE),
-                                      child: ChipCaption("Tasks",
-                                          icon: Icons.task_rounded),
-                                    ).animate().fadeIn(duration: 1.seconds),
-                                    ListView.builder(
-                                      shrinkWrap: true,
-                                      padding: const EdgeInsets.only(
-                                          top: MEDIUM_SPACE),
-                                      physics:
-                                          const NeverScrollableScrollPhysics(),
-                                      itemCount: taskService.tasks.length,
-                                      itemBuilder: (context, index) {
-                                        final task = taskService.tasks[index];
-
-                                        return TaskTile(
-                                          task: task,
-                                        )
-                                            .animate()
-                                            .then(delay: 100.ms * index)
-                                            .slide(
-                                              duration: 1.seconds,
-                                              curve: Curves.easeOut,
-                                              begin: Offset(0, 0.2),
-                                            )
-                                            .fadeIn(
-                                              delay: 100.ms,
-                                              duration: 1.seconds,
-                                              curve: Curves.easeOut,
-                                            );
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              if (viewService.views.isNotEmpty)
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: MEDIUM_SPACE),
-                                      child: ChipCaption(
-                                        "Views",
-                                        icon: context.platformIcons.eyeSolid,
-                                      ),
-                                    ).animate().fadeIn(duration: 1.seconds),
-                                    ListView.builder(
-                                      shrinkWrap: true,
-                                      padding: const EdgeInsets.only(
-                                          top: MEDIUM_SPACE),
-                                      physics:
-                                          const NeverScrollableScrollPhysics(),
-                                      itemCount: viewService.views.length,
-                                      itemBuilder: (context, index) {
-                                        final view = viewService.views[index];
-
-                                        return PlatformListTile(
-                                          title: view.name == null
-                                              ? Text(
-                                                  "Unnamed",
-                                                  style: TextStyle(
-                                                      fontFamily: "Cursive"),
-                                                )
-                                              : Text(view.name!),
-                                          onTap: () {
-                                            Navigator.of(context).push(
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    ViewDetailScreen(
-                                                  view: view,
-                                                ),
-                                              ),
-                                            );
-                                          },
-                                        )
-                                            .animate()
-                                            .then(delay: 100.ms * index)
-                                            .slide(
-                                              duration: 1.seconds,
-                                              curve: Curves.easeOut,
-                                              begin: Offset(0, 0.2),
-                                            )
-                                            .fadeIn(
-                                              delay: 100.ms,
-                                              duration: 1.seconds,
-                                              curve: Curves.easeOut,
-                                            );
-                                      },
-                                    ),
-                                  ],
-                                ),
-                            ],
+      // Settings bottomNavBar via cupertino data class does not work
+      bottomNavBar: Platform.isIOS
+          ? PlatformNavBar(
+              itemChanged: (index) {
+                setState(() {
+                  activeTab = index;
+                });
+              },
+              currentIndex: activeTab,
+              items: [
+                BottomNavigationBarItem(
+                  icon: Icon(CupertinoIcons.home),
+                  label: "Overview",
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(CupertinoIcons.location_fill),
+                  label: "Create Task",
+                ),
+              ],
+            )
+          : null,
+      body: activeTab == 0
+          ? SafeArea(
+              child: SingleChildScrollView(
+                child: showEmptyScreen
+                    ? Column(
+                        children: <Widget>[
+                          SizedBox(
+                            height: windowHeight,
+                            child: Center(
+                              child: CreateTask(),
+                            ),
                           ),
-                        ),
-                      ),
-                      SizedBox(
-                        height: windowHeight,
-                        child: Padding(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: MEDIUM_SPACE,
-                            vertical: HUGE_SPACE,
-                          ),
-                          child: const Center(
-                            child: Paper(
+                          SizedBox(
+                            height: windowHeight,
+                            child: Center(
                               child: ImportTask(),
                             ),
                           ),
+                        ],
+                      )
+                    : Expanded(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.max,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: <Widget>[
+                            SizedBox(
+                              height: windowHeight,
+                              child: SingleChildScrollView(
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: MEDIUM_SPACE),
+                                child: Wrap(
+                                  runSpacing: LARGE_SPACE,
+                                  crossAxisAlignment: WrapCrossAlignment.start,
+                                  children: <Widget>[
+                                    if (taskService.tasks.isNotEmpty)
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: <Widget>[
+                                          const Padding(
+                                            padding: EdgeInsets.symmetric(
+                                                horizontal: MEDIUM_SPACE),
+                                            child: ChipCaption("Tasks",
+                                                icon: Icons.task_rounded),
+                                          )
+                                              .animate()
+                                              .fadeIn(duration: 1.seconds),
+                                          ListView.builder(
+                                            shrinkWrap: true,
+                                            padding: const EdgeInsets.only(
+                                                top: MEDIUM_SPACE),
+                                            physics:
+                                                const NeverScrollableScrollPhysics(),
+                                            itemCount: taskService.tasks.length,
+                                            itemBuilder: (context, index) {
+                                              final task =
+                                                  taskService.tasks[index];
+
+                                              return TaskTile(
+                                                task: task,
+                                              )
+                                                  .animate()
+                                                  .then(delay: 100.ms * index)
+                                                  .slide(
+                                                    duration: 1.seconds,
+                                                    curve: Curves.easeOut,
+                                                    begin: Offset(0, 0.2),
+                                                  )
+                                                  .fadeIn(
+                                                    delay: 100.ms,
+                                                    duration: 1.seconds,
+                                                    curve: Curves.easeOut,
+                                                  );
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                    if (viewService.views.isNotEmpty)
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: <Widget>[
+                                          Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: MEDIUM_SPACE),
+                                            child: ChipCaption(
+                                              "Views",
+                                              icon: context
+                                                  .platformIcons.eyeSolid,
+                                            ),
+                                          )
+                                              .animate()
+                                              .fadeIn(duration: 1.seconds),
+                                          ListView.builder(
+                                            shrinkWrap: true,
+                                            padding: const EdgeInsets.only(
+                                                top: MEDIUM_SPACE),
+                                            physics:
+                                                const NeverScrollableScrollPhysics(),
+                                            itemCount: viewService.views.length,
+                                            itemBuilder: (context, index) {
+                                              final view =
+                                                  viewService.views[index];
+
+                                              return PlatformListTile(
+                                                title: view.name == null
+                                                    ? Text(
+                                                        "Unnamed",
+                                                        style: TextStyle(
+                                                            fontFamily:
+                                                                "Cursive"),
+                                                      )
+                                                    : Text(view.name!),
+                                                onTap: () {
+                                                  Navigator.of(context).push(
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          ViewDetailScreen(
+                                                        view: view,
+                                                      ),
+                                                    ),
+                                                  );
+                                                },
+                                              )
+                                                  .animate()
+                                                  .then(delay: 100.ms * index)
+                                                  .slide(
+                                                    duration: 1.seconds,
+                                                    curve: Curves.easeOut,
+                                                    begin: Offset(0, 0.2),
+                                                  )
+                                                  .fadeIn(
+                                                    delay: 100.ms,
+                                                    duration: 1.seconds,
+                                                    curve: Curves.easeOut,
+                                                  );
+                                            },
+                                          ),
+                                        ],
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              height: windowHeight,
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: MEDIUM_SPACE,
+                                  vertical: HUGE_SPACE,
+                                ),
+                                child: const Center(
+                                  child: Paper(
+                                    child: ImportTask(),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
-                ),
-        ),
-      ),
+              ),
+            )
+          : activeTab == 1
+              ? CreateTaskScreen()
+              : null,
     );
   }
 }

@@ -122,85 +122,87 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
           centerTitle: true,
         ),
       ),
-      iosContentPadding: true,
-      body: Builder(
-        builder: (context) => Center(
-          child: _isError
-              ? Center(
-                  child: Text(
-                    "There was an error fetching the locations. Please try again later.",
-                    style: getBodyTextTextStyle(context).copyWith(
-                      color: Colors.red,
-                    ),
-                  ),
-                )
-              : _isLoading
-                  ? Padding(
-                      padding: const EdgeInsets.all(MEDIUM_SPACE),
-                      child: LocationsLoadingScreen(
-                        locations: _locations,
+      body: SafeArea(
+        child: Builder(
+          builder: (context) => Center(
+            child: _isError
+                ? Center(
+                    child: Text(
+                      "There was an error fetching the locations. Please try again later.",
+                      style: getBodyTextTextStyle(context).copyWith(
+                        color: Colors.red,
                       ),
-                    )
-                  : PageView(
-                      physics: _isShowingDetails
-                          ? const AlwaysScrollableScrollPhysics()
-                          : const NeverScrollableScrollPhysics(),
-                      scrollDirection: Axis.vertical,
-                      controller: _pageController,
-                      children: <Widget>[
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: <Widget>[
-                            Expanded(
-                              flex: 9,
-                              child: OSMFlutter(
-                                controller: _controller,
-                                initZoom: 15,
+                    ),
+                  )
+                : _isLoading
+                    ? Padding(
+                        padding: const EdgeInsets.all(MEDIUM_SPACE),
+                        child: LocationsLoadingScreen(
+                          locations: _locations,
+                        ),
+                      )
+                    : PageView(
+                        physics: _isShowingDetails
+                            ? const AlwaysScrollableScrollPhysics()
+                            : const NeverScrollableScrollPhysics(),
+                        scrollDirection: Axis.vertical,
+                        controller: _pageController,
+                        children: <Widget>[
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: <Widget>[
+                              Expanded(
+                                flex: 9,
+                                child: OSMFlutter(
+                                  controller: _controller,
+                                  initZoom: 15,
+                                ),
                               ),
-                            ),
-                            Expanded(
-                              flex: 1,
-                              child: PlatformTextButton(
-                                material: (_, __) => MaterialTextButtonData(
-                                  style: ButtonStyle(
-                                    // Not rounded, but square
-                                    shape: MaterialStateProperty.all(
-                                      const RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.zero,
+                              Expanded(
+                                flex: 1,
+                                child: PlatformTextButton(
+                                  material: (_, __) => MaterialTextButtonData(
+                                    style: ButtonStyle(
+                                      // Not rounded, but square
+                                      shape: MaterialStateProperty.all(
+                                        const RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.zero,
+                                        ),
                                       ),
                                     ),
                                   ),
+                                  child: Text("View Details"),
+                                  onPressed: () {
+                                    _pageController.animateToPage(
+                                      1,
+                                      duration:
+                                          const Duration(milliseconds: 500),
+                                      curve: Curves.easeInOut,
+                                    );
+                                  },
                                 ),
-                                child: Text("View Details"),
-                                onPressed: () {
-                                  _pageController.animateToPage(
-                                    1,
-                                    duration: const Duration(milliseconds: 500),
-                                    curve: Curves.easeInOut,
-                                  );
-                                },
                               ),
-                            ),
-                          ],
-                        ),
-                        Expanded(
-                          child: SingleChildScrollView(
-                            child: Details(
-                                locations:
-                                    UnmodifiableListView<LocationPointService>(
-                                        _locations),
-                                task: widget.task,
-                                onGoBack: () {
-                                  _pageController.animateToPage(
-                                    0,
-                                    duration: const Duration(milliseconds: 500),
-                                    curve: Curves.easeInOut,
-                                  );
-                                }),
+                            ],
                           ),
-                        ),
-                      ],
-                    ),
+                          Expanded(
+                            child: SingleChildScrollView(
+                              child: Details(
+                                  locations: UnmodifiableListView<
+                                      LocationPointService>(_locations),
+                                  task: widget.task,
+                                  onGoBack: () {
+                                    _pageController.animateToPage(
+                                      0,
+                                      duration:
+                                          const Duration(milliseconds: 500),
+                                      curve: Curves.easeInOut,
+                                    );
+                                  }),
+                            ),
+                          ),
+                        ],
+                      ),
+          ),
         ),
       ),
     );
