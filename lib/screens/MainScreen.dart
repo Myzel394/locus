@@ -98,34 +98,58 @@ class _MainScreenState extends State<MainScreen> {
     final showEmptyScreen =
         taskService.tasks.isEmpty && viewService.views.isEmpty;
 
+    if (showEmptyScreen) {
+      return PlatformScaffold(
+        body: SafeArea(
+          child: SingleChildScrollView(
+            child: Column(
+              children: <Widget>[
+                SizedBox(
+                  height: windowHeight,
+                  child: const Center(
+                    child: CreateTask(),
+                  ),
+                ),
+                SizedBox(
+                  height: windowHeight,
+                  child: const Center(
+                    child: ImportTask(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     return PlatformScaffold(
       material: (_, __) => MaterialScaffoldData(
-        floatingActionButton: showEmptyScreen
-            ? null
-            : OpenContainer(
-                transitionDuration: const Duration(milliseconds: 500),
-                transitionType: ContainerTransitionType.fade,
-                openBuilder: (context, action) => const CreateTaskScreen(),
-                closedBuilder: (context, action) => SizedBox(
-                  height: FAB_DIMENSION,
-                  width: FAB_DIMENSION,
-                  child: Center(
-                    child: Icon(
-                      Icons.add,
-                      color: Theme.of(context).colorScheme.onPrimary,
-                    ),
-                  ),
-                ),
-                closedElevation: 6.0,
-                closedShape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(FAB_DIMENSION / 2),
-                  ),
-                ),
-                openColor: Theme.of(context).scaffoldBackgroundColor,
-                closedColor: Theme.of(context).colorScheme.primary,
-              ).animate().scale(
-                duration: 500.ms, delay: 1.seconds, curve: Curves.bounceOut),
+        floatingActionButton: OpenContainer(
+          transitionDuration: const Duration(milliseconds: 500),
+          transitionType: ContainerTransitionType.fade,
+          openBuilder: (context, action) => const CreateTaskScreen(),
+          closedBuilder: (context, action) => SizedBox(
+            height: FAB_DIMENSION,
+            width: FAB_DIMENSION,
+            child: Center(
+              child: Icon(
+                Icons.add,
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
+            ),
+          ),
+          closedElevation: 6.0,
+          closedShape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(
+              Radius.circular(FAB_DIMENSION / 2),
+            ),
+          ),
+          openColor: Theme.of(context).scaffoldBackgroundColor,
+          closedColor: Theme.of(context).colorScheme.primary,
+        )
+            .animate()
+            .scale(duration: 500.ms, delay: 1.seconds, curve: Curves.bounceOut),
       ),
       // Settings bottomNavBar via cupertino data class does not work
       bottomNavBar: Platform.isIOS
@@ -151,164 +175,137 @@ class _MainScreenState extends State<MainScreen> {
       body: activeTab == 0
           ? SafeArea(
               child: SingleChildScrollView(
-                child: showEmptyScreen
-                    ? Column(
-                        children: <Widget>[
-                          SizedBox(
-                            height: windowHeight,
-                            child: Center(
-                              child: CreateTask(),
-                            ),
+                child: Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      SizedBox(
+                        height: windowHeight,
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: MEDIUM_SPACE),
+                          child: Wrap(
+                            runSpacing: LARGE_SPACE,
+                            crossAxisAlignment: WrapCrossAlignment.start,
+                            children: <Widget>[
+                              if (taskService.tasks.isNotEmpty)
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    const Padding(
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: MEDIUM_SPACE),
+                                      child: ChipCaption("Tasks",
+                                          icon: Icons.task_rounded),
+                                    ).animate().fadeIn(duration: 1.seconds),
+                                    ListView.builder(
+                                      shrinkWrap: true,
+                                      padding: const EdgeInsets.only(
+                                          top: MEDIUM_SPACE),
+                                      physics:
+                                          const NeverScrollableScrollPhysics(),
+                                      itemCount: taskService.tasks.length,
+                                      itemBuilder: (context, index) {
+                                        final task = taskService.tasks[index];
+
+                                        return TaskTile(
+                                          task: task,
+                                        )
+                                            .animate()
+                                            .then(delay: 100.ms * index)
+                                            .slide(
+                                              duration: 1.seconds,
+                                              curve: Curves.easeOut,
+                                              begin: Offset(0, 0.2),
+                                            )
+                                            .fadeIn(
+                                              delay: 100.ms,
+                                              duration: 1.seconds,
+                                              curve: Curves.easeOut,
+                                            );
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              if (viewService.views.isNotEmpty)
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: <Widget>[
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: MEDIUM_SPACE),
+                                      child: ChipCaption(
+                                        "Views",
+                                        icon: context.platformIcons.eyeSolid,
+                                      ),
+                                    ).animate().fadeIn(duration: 1.seconds),
+                                    ListView.builder(
+                                      shrinkWrap: true,
+                                      padding: const EdgeInsets.only(
+                                          top: MEDIUM_SPACE),
+                                      physics:
+                                          const NeverScrollableScrollPhysics(),
+                                      itemCount: viewService.views.length,
+                                      itemBuilder: (context, index) {
+                                        final view = viewService.views[index];
+
+                                        return PlatformListTile(
+                                          title: view.name == null
+                                              ? Text(
+                                                  "Unnamed",
+                                                  style: TextStyle(
+                                                      fontFamily: "Cursive"),
+                                                )
+                                              : Text(view.name!),
+                                          onTap: () {
+                                            Navigator.of(context).push(
+                                              MaterialPageRoute(
+                                                builder: (context) =>
+                                                    ViewDetailScreen(
+                                                  view: view,
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        )
+                                            .animate()
+                                            .then(delay: 100.ms * index)
+                                            .slide(
+                                              duration: 1.seconds,
+                                              curve: Curves.easeOut,
+                                              begin: Offset(0, 0.2),
+                                            )
+                                            .fadeIn(
+                                              delay: 100.ms,
+                                              duration: 1.seconds,
+                                              curve: Curves.easeOut,
+                                            );
+                                      },
+                                    ),
+                                  ],
+                                ),
+                            ],
                           ),
-                          SizedBox(
-                            height: windowHeight,
-                            child: Center(
+                        ),
+                      ),
+                      SizedBox(
+                        height: windowHeight,
+                        child: const Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: MEDIUM_SPACE,
+                            vertical: HUGE_SPACE,
+                          ),
+                          child: Center(
+                            child: Paper(
                               child: ImportTask(),
                             ),
                           ),
-                        ],
-                      )
-                    : Expanded(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.max,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                            SizedBox(
-                              height: windowHeight,
-                              child: SingleChildScrollView(
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: MEDIUM_SPACE),
-                                child: Wrap(
-                                  runSpacing: LARGE_SPACE,
-                                  crossAxisAlignment: WrapCrossAlignment.start,
-                                  children: <Widget>[
-                                    if (taskService.tasks.isNotEmpty)
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: <Widget>[
-                                          const Padding(
-                                            padding: EdgeInsets.symmetric(
-                                                horizontal: MEDIUM_SPACE),
-                                            child: ChipCaption("Tasks",
-                                                icon: Icons.task_rounded),
-                                          )
-                                              .animate()
-                                              .fadeIn(duration: 1.seconds),
-                                          ListView.builder(
-                                            shrinkWrap: true,
-                                            padding: const EdgeInsets.only(
-                                                top: MEDIUM_SPACE),
-                                            physics:
-                                                const NeverScrollableScrollPhysics(),
-                                            itemCount: taskService.tasks.length,
-                                            itemBuilder: (context, index) {
-                                              final task =
-                                                  taskService.tasks[index];
-
-                                              return TaskTile(
-                                                task: task,
-                                              )
-                                                  .animate()
-                                                  .then(delay: 100.ms * index)
-                                                  .slide(
-                                                    duration: 1.seconds,
-                                                    curve: Curves.easeOut,
-                                                    begin: Offset(0, 0.2),
-                                                  )
-                                                  .fadeIn(
-                                                    delay: 100.ms,
-                                                    duration: 1.seconds,
-                                                    curve: Curves.easeOut,
-                                                  );
-                                            },
-                                          ),
-                                        ],
-                                      ),
-                                    if (viewService.views.isNotEmpty)
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: <Widget>[
-                                          Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: MEDIUM_SPACE),
-                                            child: ChipCaption(
-                                              "Views",
-                                              icon: context
-                                                  .platformIcons.eyeSolid,
-                                            ),
-                                          )
-                                              .animate()
-                                              .fadeIn(duration: 1.seconds),
-                                          ListView.builder(
-                                            shrinkWrap: true,
-                                            padding: const EdgeInsets.only(
-                                                top: MEDIUM_SPACE),
-                                            physics:
-                                                const NeverScrollableScrollPhysics(),
-                                            itemCount: viewService.views.length,
-                                            itemBuilder: (context, index) {
-                                              final view =
-                                                  viewService.views[index];
-
-                                              return PlatformListTile(
-                                                title: view.name == null
-                                                    ? Text(
-                                                        "Unnamed",
-                                                        style: TextStyle(
-                                                            fontFamily:
-                                                                "Cursive"),
-                                                      )
-                                                    : Text(view.name!),
-                                                onTap: () {
-                                                  Navigator.of(context).push(
-                                                    MaterialPageRoute(
-                                                      builder: (context) =>
-                                                          ViewDetailScreen(
-                                                        view: view,
-                                                      ),
-                                                    ),
-                                                  );
-                                                },
-                                              )
-                                                  .animate()
-                                                  .then(delay: 100.ms * index)
-                                                  .slide(
-                                                    duration: 1.seconds,
-                                                    curve: Curves.easeOut,
-                                                    begin: Offset(0, 0.2),
-                                                  )
-                                                  .fadeIn(
-                                                    delay: 100.ms,
-                                                    duration: 1.seconds,
-                                                    curve: Curves.easeOut,
-                                                  );
-                                            },
-                                          ),
-                                        ],
-                                      ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            SizedBox(
-                              height: windowHeight,
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: MEDIUM_SPACE,
-                                  vertical: HUGE_SPACE,
-                                ),
-                                child: const Center(
-                                  child: Paper(
-                                    child: ImportTask(),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
                         ),
                       ),
+                    ],
+                  ),
+                ),
               ),
             )
           : activeTab == 1
