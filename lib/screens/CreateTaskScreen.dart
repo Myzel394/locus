@@ -5,6 +5,7 @@ import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:locus/constants/spacing.dart';
+import 'package:locus/screens/create_task_screen_widgets/SignKeyLottie.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/RelaySelectSheet.dart';
@@ -119,6 +120,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final shades = getPrimaryColorShades(context);
     final isKeyboardVisible = MediaQuery.of(context).viewInsets.bottom != 0;
 
     return PlatformScaffold(
@@ -382,10 +384,10 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                     ),
                     const SizedBox(height: MEDIUM_SPACE),
                   ],
+                  const Expanded(
+                    child: SignKeyLottie(),
+                  ),
                   if (_taskProgress != null) ...[
-                    Center(
-                      child: PlatformCircularProgressIndicator(),
-                    ),
                     Text(
                       (() {
                         switch (_taskProgress) {
