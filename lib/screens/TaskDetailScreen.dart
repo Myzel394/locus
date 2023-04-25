@@ -3,13 +3,13 @@ import 'dart:io';
 
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/screens/task_detail_screen_widgets/Details.dart';
 import 'package:locus/services/location_point_service.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/LocationsLoadingScreen.dart';
+import 'package:locus/widgets/LocationsMap.dart';
 
 import '../api/get-locations.dart';
 
@@ -27,7 +27,6 @@ class TaskDetailScreen extends StatefulWidget {
 
 class _TaskDetailScreenState extends State<TaskDetailScreen> {
   late final WebSocket _socket;
-  late final MapController _controller;
   final PageController _pageController = PageController();
   void Function()? _unsubscribeGetLocations;
   bool _isLoading = true;
@@ -38,10 +37,6 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   @override
   void initState() {
     super.initState();
-
-    _controller = MapController(
-      initMapWithUserPosition: true,
-    );
 
     addListener();
 
@@ -61,7 +56,6 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   @override
   void dispose() {
     _socket.close();
-    _controller.dispose();
     _pageController.dispose();
 
     _unsubscribeGetLocations?.call();
@@ -90,25 +84,6 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
         });
       },
     );
-  }
-
-  void drawPoints() {
-    _controller.removeAllCircle();
-
-    for (final location in _locations) {
-      _controller.drawCircle(
-        CircleOSM(
-          key: "circle_${location.latitude}:${location.longitude}",
-          centerPoint: GeoPoint(
-            latitude: location.latitude,
-            longitude: location.longitude,
-          ),
-          radius: 200,
-          color: Colors.blue,
-          strokeWidth: location.accuracy < 10 ? 1 : 3,
-        ),
-      );
-    }
   }
 
   @override
@@ -153,9 +128,8 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                             children: <Widget>[
                               Expanded(
                                 flex: 9,
-                                child: OSMFlutter(
-                                  controller: _controller,
-                                  initZoom: 15,
+                                child: LocationsMap(
+                                  locations: _locations,
                                 ),
                               ),
                               Expanded(

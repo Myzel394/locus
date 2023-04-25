@@ -8,6 +8,8 @@ import 'package:locus/services/task_service.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../api/nostr-events.dart';
+import '../../services/location_point_service.dart';
 import '../TaskDetailScreen.dart';
 
 final Map<TaskLinkPublishProgress?, String> TASK_LINK_PROGRESS_TEXT_MAP = {
@@ -52,6 +54,18 @@ class _TaskTileState extends State<TaskTile> {
                 if (value) {
                   await widget.task.startExecutionImmediately();
                   final nextEndDate = widget.task.nextEndDate();
+
+                  final eventManager = NostrEventsManager.fromTask(widget.task);
+
+                  final locationPoint =
+                      await LocationPointService.createUsingCurrentLocation();
+                  final message = await locationPoint.toEncryptedMessage(
+                    signPrivateKey: widget.task.signPGPPrivateKey,
+                    signPublicKey: widget.task.signPGPPublicKey,
+                    viewPublicKey: widget.task.viewPGPPublicKey,
+                  );
+
+                  await eventManager.publishMessage(message);
 
                   if (!mounted) {
                     return;

@@ -115,7 +115,8 @@ class _DetailsState extends State<Details> {
 
         await FileSaver.instance.saveFile(
           name: "viewkey.json",
-          bytes: const Utf8Encoder().convert(widget.task.generateViewKeyContent()),
+          bytes:
+              const Utf8Encoder().convert(widget.task.generateViewKeyContent()),
         );
         break;
       case "share":
@@ -212,7 +213,8 @@ class _DetailsState extends State<Details> {
                                   SizedBox.square(
                                     dimension: getIconSizeForBodyText(context),
                                     child: PlatformCircularProgressIndicator(
-                                      material: (_, __) => MaterialProgressIndicatorData(
+                                      material: (_, __) =>
+                                          MaterialProgressIndicatorData(
                                         strokeWidth: 2,
                                       ),
                                     ),
@@ -264,10 +266,11 @@ class _DetailsState extends State<Details> {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: <Widget>[
                         for (final relay in widget.task.relays)
-                          ListTile(
+                          PlatformListTile(
                             title: Text(
                               relay,
                             ),
+                            trailing: const SizedBox.shrink(),
                           ),
                       ] +
                       [
@@ -289,7 +292,8 @@ class _DetailsState extends State<Details> {
                               ),
                             );
 
-                            widget.task.update(relays: _relaysController.relays);
+                            widget.task
+                                .update(relays: _relaysController.relays);
                             taskService.update(widget.task);
                           },
                         ),
@@ -329,7 +333,8 @@ class _DetailsState extends State<Details> {
                                     icon: const Icon(Icons.stop_rounded),
                                   ),
                                   onPressed: () async {
-                                    await widget.task.stopExecutionImmediately();
+                                    await widget.task
+                                        .stopExecutionImmediately();
 
                                     taskService.update(widget.task);
                                   },
@@ -341,7 +346,8 @@ class _DetailsState extends State<Details> {
                                     icon: const Icon(Icons.play_arrow_rounded),
                                   ),
                                   onPressed: () async {
-                                    await widget.task.startExecutionImmediately();
+                                    await widget.task
+                                        .startExecutionImmediately();
 
                                     taskService.update(widget.task);
                                   },
@@ -349,7 +355,8 @@ class _DetailsState extends State<Details> {
                               const SizedBox(width: MEDIUM_SPACE),
                               FutureBuilder<Map<String, dynamic>>(
                                 future: (() async {
-                                  final status = await widget.task.getScheduleStatus();
+                                  final status =
+                                      await widget.task.getScheduleStatus();
 
                                   if (status == null) {
                                     return {} as Map<String, dynamic>;
@@ -358,11 +365,13 @@ class _DetailsState extends State<Details> {
                                   return status;
                                 })(),
                                 builder: (context, scheduleSnapshot) {
-                                  if (scheduleSnapshot.connectionState == ConnectionState.done) {
+                                  if (scheduleSnapshot.connectionState ==
+                                      ConnectionState.done) {
                                     if (scheduleSnapshot.hasData) {
                                       return PlatformTextButton(
                                         child: Text("Stop scheduling"),
-                                        material: (_, __) => MaterialTextButtonData(
+                                        material: (_, __) =>
+                                            MaterialTextButtonData(
                                           icon: const Icon(Icons.stop_outlined),
                                         ),
                                         onPressed: () async {
@@ -372,7 +381,8 @@ class _DetailsState extends State<Details> {
 
                                           await showPlatformDialog(
                                             context: context,
-                                            builder: (context) => PlatformAlertDialog(
+                                            builder: (context) =>
+                                                PlatformAlertDialog(
                                               title: Text("Task unscheduled"),
                                               content: Text(
                                                 "The task has been unscheduled. It will no longer be executed automatically. To start it again, you can either schedule it again or start it manually",
@@ -392,19 +402,24 @@ class _DetailsState extends State<Details> {
                                     } else {
                                       return PlatformTextButton(
                                         child: Text("Start scheduling"),
-                                        material: (_, __) => MaterialTextButtonData(
-                                          icon: const Icon(Icons.schedule_rounded),
+                                        material: (_, __) =>
+                                            MaterialTextButtonData(
+                                          icon: const Icon(
+                                              Icons.schedule_rounded),
                                         ),
                                         onPressed: () async {
-                                          final startDate = await widget.task.startSchedule();
+                                          final startDate =
+                                              await widget.task.startSchedule();
 
                                           taskService.update(widget.task);
 
                                           if (startDate == null) {
                                             await showPlatformDialog(
                                               context: context,
-                                              builder: (context) => PlatformAlertDialog(
-                                                title: Text("Task not scheduled"),
+                                              builder: (context) =>
+                                                  PlatformAlertDialog(
+                                                title:
+                                                    Text("Task not scheduled"),
                                                 content: Text(
                                                   "The task has not been started because there is no schedule set for the future.",
                                                 ),
@@ -412,7 +427,8 @@ class _DetailsState extends State<Details> {
                                                   PlatformDialogAction(
                                                     child: Text("OK"),
                                                     onPressed: () {
-                                                      Navigator.of(context).pop();
+                                                      Navigator.of(context)
+                                                          .pop();
                                                     },
                                                   ),
                                                 ],
@@ -421,7 +437,8 @@ class _DetailsState extends State<Details> {
                                           }
                                           await showPlatformDialog(
                                             context: context,
-                                            builder: (context) => PlatformAlertDialog(
+                                            builder: (context) =>
+                                                PlatformAlertDialog(
                                               title: Text("Task scheduled"),
                                               content: Text(
                                                 "The task has been scheduled to start at ${DateFormat('MMMM d, HH:mm').format(startDate!)}.",
@@ -442,7 +459,8 @@ class _DetailsState extends State<Details> {
                                   }
 
                                   return PlatformCircularProgressIndicator(
-                                    material: (_, __) => MaterialProgressIndicatorData(
+                                    material: (_, __) =>
+                                        MaterialProgressIndicatorData(
                                       strokeWidth: 2,
                                     ),
                                   );

@@ -124,7 +124,7 @@ class _TimerWidgetState extends State<TimerWidget> {
                       _controller.removeAt(index);
                     },
                   )
-                : null,
+                : const SizedBox.shrink(),
             onTap: (widget.allowEdit && timer is WeekdayTimer)
                 ? () async {
                     final data = await showPlatformDialog(

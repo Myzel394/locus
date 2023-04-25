@@ -70,6 +70,7 @@ dependencies:
   file_picker: ^5.2.10
   basic_utils: ^5.5.4
   flutter_animate: ^4.1.1+1
+  apple_maps_flutter: ^1.2.0
 
 dev_dependencies:
   flutter_test:
