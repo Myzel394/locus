@@ -8,12 +8,15 @@ import 'WeekdaySelection.dart';
 class TimerController extends ChangeNotifier {
   final List<TaskRuntimeTimer> _timers = [];
 
-  UnmodifiableListView<TaskRuntimeTimer> get timers => UnmodifiableListView(_timers);
+  UnmodifiableListView<TaskRuntimeTimer> get timers =>
+      UnmodifiableListView(_timers);
 
   void add(final TaskRuntimeTimer timer) {
     // Merge the new timer if a timer for the same weekday already exists
-    final existingTimer = _timers.firstWhereOrNull(
-        (currentTimer) => currentTimer is WeekdayTimer && timer is WeekdayTimer && currentTimer.day == timer.day);
+    final existingTimer = _timers.firstWhereOrNull((currentTimer) =>
+        currentTimer is WeekdayTimer &&
+        timer is WeekdayTimer &&
+        currentTimer.day == timer.day);
 
     if (existingTimer != null) {
       _timers.remove(existingTimer);
@@ -112,7 +115,7 @@ class _TimerWidgetState extends State<TimerWidget> {
       itemBuilder: (_, index) {
         final timer = sortedTimers[index];
 
-        return ListTile(
+        return PlatformListTile(
             title: Text(timer.format(context)),
             trailing: widget.allowEdit
                 ? PlatformIconButton(

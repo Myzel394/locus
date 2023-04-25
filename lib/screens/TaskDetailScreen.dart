@@ -122,6 +122,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
           centerTitle: true,
         ),
       ),
+      iosContentPadding: true,
       body: Builder(
         builder: (context) => Center(
           child: _isError
@@ -185,7 +186,9 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                         Expanded(
                           child: SingleChildScrollView(
                             child: Details(
-                                locations: UnmodifiableListView<LocationPointService>(_locations),
+                                locations:
+                                    UnmodifiableListView<LocationPointService>(
+                                        _locations),
                                 task: widget.task,
                                 onGoBack: () {
                                   _pageController.animateToPage(

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -36,9 +38,8 @@ class _TaskTileState extends State<TaskTile> {
   @override
   Widget build(BuildContext context) {
     final taskService = context.watch<TaskService>();
-    final scaffold = ScaffoldMessenger.of(context);
 
-    return ListTile(
+    return PlatformListTile(
       title: Text(widget.task.name),
       subtitle: Text(widget.task.frequency.toString()),
       leading: FutureBuilder<bool>(
@@ -79,7 +80,8 @@ class _TaskTileState extends State<TaskTile> {
                   );
                 } else {
                   await widget.task.stopExecutionImmediately();
-                  final nextStartDate = await widget.task.startScheduleTomorrow();
+                  final nextStartDate =
+                      await widget.task.startScheduleTomorrow();
 
                   if (!mounted) {
                     return;
@@ -116,48 +118,56 @@ class _TaskTileState extends State<TaskTile> {
           return const SizedBox();
         },
       ),
-      trailing: PopupMenuButton(
-        itemBuilder: (context) => <PopupMenuEntry<String>>[
-          PopupMenuItem(
-            child: const ListTile(
+      trailing: PlatformPopupMenuButton(
+        onSelected: (value) async {
+          final url = await widget.task.generateLink(
+            onProgress: (progress) {
+              if (snackBar != null) {
+                try {
+                  snackBar!.close();
+                } catch (e) {}
+              }
+
+              if (progress != TaskLinkPublishProgress.done &&
+                  Platform.isAndroid) {
+                final scaffold = ScaffoldMessenger.of(context);
+
+                snackBar = scaffold.showSnackBar(
+                  SnackBar(
+                    content: Text(TASK_LINK_PROGRESS_TEXT_MAP[progress]!),
+                    duration: const Duration(seconds: 1),
+                    backgroundColor: Colors.indigoAccent,
+                  ),
+                );
+              }
+            },
+          );
+
+          await Clipboard.setData(ClipboardData(text: url));
+          await Share.share(
+            url,
+            subject: "Here's my Locus link to see my location",
+          );
+
+          if (Platform.isAndroid) {
+            final scaffold = ScaffoldMessenger.of(context);
+
+            scaffold.showSnackBar(
+              SnackBar(
+                content: const Text("Link copied to clipboard"),
+                duration: const Duration(seconds: 3),
+                backgroundColor: Colors.green,
+              ),
+            );
+          }
+        },
+        itemBuilder: (context) => [
+          const PlatformPopupMenuItem(
+            child: PlatformListTile(
               leading: Icon(Icons.link_rounded),
               title: Text("Generate link"),
             ),
-            onTap: () async {
-              final url = await widget.task.generateLink(
-                onProgress: (progress) {
-                  if (snackBar != null) {
-                    try {
-                      snackBar!.close();
-                    } catch (e) {}
-                  }
-
-                  if (progress != TaskLinkPublishProgress.done) {
-                    snackBar = scaffold.showSnackBar(
-                      SnackBar(
-                        content: Text(TASK_LINK_PROGRESS_TEXT_MAP[progress]!),
-                        duration: const Duration(seconds: 1),
-                        backgroundColor: Colors.indigoAccent,
-                      ),
-                    );
-                  }
-                },
-              );
-
-              await Clipboard.setData(ClipboardData(text: url));
-              await Share.share(
-                url,
-                subject: "Here's my Locus link to see my location",
-              );
-
-              scaffold.showSnackBar(
-                SnackBar(
-                  content: const Text("Link copied to clipboard"),
-                  duration: const Duration(seconds: 3),
-                  backgroundColor: Colors.green,
-                ),
-              );
-            },
+            value: 0,
           ),
         ],
       ),

@@ -27,10 +27,12 @@ class BottomSheetFilterBuilder<T> extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<BottomSheetFilterBuilder> createState() => _BottomSheetFilterBuilderState<T>();
+  State<BottomSheetFilterBuilder> createState() =>
+      _BottomSheetFilterBuilderState<T>();
 }
 
-class _BottomSheetFilterBuilderState<T> extends State<BottomSheetFilterBuilder> {
+class _BottomSheetFilterBuilderState<T>
+    extends State<BottomSheetFilterBuilder> {
   List<T> _elements = [];
 
   @override
@@ -80,7 +82,7 @@ class _BottomSheetFilterBuilderState<T> extends State<BottomSheetFilterBuilder> 
             material: (_, __) => MaterialTextFieldData(
               decoration: InputDecoration(
                 hintText: "Search",
-                suffixIcon: IconButton(
+                suffixIcon: PlatformIconButton(
                   icon: Icon(Icons.clear),
                   onPressed: () {
                     widget.searchController!.clear();
@@ -91,7 +93,7 @@ class _BottomSheetFilterBuilderState<T> extends State<BottomSheetFilterBuilder> 
             ),
             cupertino: (_, __) => CupertinoTextFieldData(
               placeholder: "Search",
-              suffix: IconButton(
+              suffix: PlatformIconButton(
                 icon: Icon(CupertinoIcons.clear),
                 onPressed: () {
                   widget.searchController!.clear();

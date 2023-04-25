@@ -69,7 +69,8 @@ class _TimerWidgetSheetState extends State<TimerWidgetSheet> {
                     Text(
                       "Next execution will start at ${DateFormat('MMMM d, HH:mm').format(findNextStartDate(widget.controller.timers)!)}",
                     ),
-                    if (widget.controller.timers.any((timer) => timer.isInfinite())) ...[
+                    if (widget.controller.timers
+                        .any((timer) => timer.isInfinite())) ...[
                       const SizedBox(height: SMALL_SPACE),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -96,20 +97,20 @@ class _TimerWidgetSheetState extends State<TimerWidgetSheet> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
                       LongPressPopup<String>(
-                        items: List<PopupMenuEntry<String>>.from(
+                        items: List<LongPressPopupMenuItem>.from(
                           WEEKDAY_TIMERS.entries.map(
-                            (entry) => PopupMenuItem<String>(
-                              value: entry.key,
-                              child: Text(entry.value["name"] as String),
+                            (entry) => LongPressPopupMenuItem(
+                              label: Text(entry.value["name"] as String),
+                              onPressed: () {
+                                widget.controller.clear();
+
+                                final timers =
+                                    entry.value["timers"] as List<WeekdayTimer>;
+                                widget.controller.addAll(timers);
+                              },
                             ),
                           ),
                         ),
-                        onSelected: (final dynamic id) {
-                          widget.controller.clear();
-
-                          final timers = WEEKDAY_TIMERS[id]!["timers"] as List<TaskRuntimeTimer>;
-                          widget.controller.addAll(timers);
-                        },
                         child: PlatformTextButton(
                           child: Text("Add Weekday"),
                           material: (_, __) => MaterialTextButtonData(
@@ -138,7 +139,7 @@ class _TimerWidgetSheetState extends State<TimerWidgetSheet> {
                   if (widget.controller.timers.isNotEmpty) ...[
                     const SizedBox(height: MEDIUM_SPACE),
                     PlatformElevatedButton(
-                      child: Text("Save"),
+                      child: Text("Done"),
                       material: (_, __) => MaterialElevatedButtonData(
                         icon: Icon(Icons.check),
                       ),
