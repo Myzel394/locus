@@ -9,6 +9,7 @@ import 'package:workmanager/workmanager.dart';
 const TASK_EXECUTION_KEY = "tasks_manager";
 const TASK_SCHEDULE_KEY = "tasks_schedule";
 
+@pragma('vm:entry-point')
 void callbackDispatcher() {
   Workmanager().executeTask((taskName, inputData) async {
     try {
@@ -22,7 +23,8 @@ void callbackDispatcher() {
 
           final eventManager = NostrEventsManager.fromTask(task);
 
-          final locationPoint = await LocationPointService.createUsingCurrentLocation();
+          final locationPoint =
+              await LocationPointService.createUsingCurrentLocation();
           final message = await locationPoint.toEncryptedMessage(
             signPrivateKey: task.signPGPPrivateKey,
             signPublicKey: task.signPGPPublicKey,
