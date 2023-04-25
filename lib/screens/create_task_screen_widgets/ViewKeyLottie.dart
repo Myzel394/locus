@@ -20,11 +20,21 @@ class _ViewKeyLottieState extends State<ViewKeyLottie> {
       frameRate: FrameRate.max,
       delegates: LottieDelegates(
         values: [
-          ValueDelegate.colorFilter(
-            ["left", "Rectangle 1", "Stroke 1"],
-            value: ColorFilter.mode(
-              shades[0]!,
-              BlendMode.lighten,
+          ...List.generate(
+            4,
+            (index) => ValueDelegate.strokeColor(
+              ["1 - ${index + 1}", "Shape 1", "Stroke 1"],
+              value: shades[0],
+            ),
+          ),
+          ...List.generate(
+            4,
+            (index) => ValueDelegate.colorFilter(
+              ["1 - ${index + 1}", "Shape 1", "Fill 1"],
+              value: ColorFilter.mode(
+                shades[0]!,
+                BlendMode.srcIn,
+              ),
             ),
           )
         ],

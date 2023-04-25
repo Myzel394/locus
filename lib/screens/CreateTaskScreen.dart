@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/screens/create_task_screen_widgets/SignKeyLottie.dart';
+import 'package:locus/screens/create_task_screen_widgets/ViewKeyLottie.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/RelaySelectSheet.dart';
@@ -384,10 +385,16 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                     ),
                     const SizedBox(height: MEDIUM_SPACE),
                   ],
-                  const Expanded(
-                    child: SignKeyLottie(),
-                  ),
                   if (_taskProgress != null) ...[
+                    if (_taskProgress == TaskCreationProgress.creatingViewKeys)
+                      const Expanded(
+                        child: ViewKeyLottie(),
+                      ).animate().fadeIn(duration: 1.seconds),
+                    if (_taskProgress == TaskCreationProgress.creatingSignKeys)
+                      const Expanded(
+                        child: SignKeyLottie(),
+                      ).animate().fadeIn(duration: 1.seconds),
+                    const SizedBox(height: MEDIUM_SPACE),
                     Text(
                       (() {
                         switch (_taskProgress) {
@@ -406,6 +413,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                       textAlign: TextAlign.center,
                       style: getCaptionTextStyle(context),
                     ),
+                    const SizedBox(height: MEDIUM_SPACE),
                   ],
                   PlatformElevatedButton(
                     padding: const EdgeInsets.all(MEDIUM_SPACE),
