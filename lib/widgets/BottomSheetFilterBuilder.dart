@@ -72,33 +72,17 @@ class _BottomSheetFilterBuilderState<T>
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        if (widget.searchController != null)
-          PlatformTextField(
+        PlatformWidget(
+          material: (_, __) => TextField(
             controller: widget.searchController,
             onChanged: (value) {
               updateElements();
             },
             focusNode: widget.searchFocusNode,
-            material: (_, __) => MaterialTextFieldData(
-              decoration: InputDecoration(
-                hintText: "Search",
-                suffixIcon: IconButton(
-                  icon: Icon(Icons.clear),
-                  onPressed: () {
-                    widget.searchController!.clear();
-                    updateElements();
-                  },
-                ),
-              ),
-            ),
-            cupertino: (_, __) => CupertinoTextFieldData(
-              placeholder: "Search",
-              prefix: Padding(
-                padding: const EdgeInsets.only(left: SMALL_SPACE),
-                child: Icon(CupertinoIcons.search),
-              ),
-              suffix: CupertinoButton(
-                child: Icon(CupertinoIcons.clear),
+            decoration: InputDecoration(
+              hintText: "Search",
+              suffixIcon: IconButton(
+                icon: Icon(Icons.clear),
                 onPressed: () {
                   widget.searchController!.clear();
                   updateElements();
@@ -106,6 +90,15 @@ class _BottomSheetFilterBuilderState<T>
               ),
             ),
           ),
+          cupertino: (_, __) => CupertinoSearchTextField(
+            controller: widget.searchController,
+            onChanged: (value) {
+              updateElements();
+            },
+            focusNode: widget.searchFocusNode,
+            placeholder: "Search",
+          ),
+        ),
         const SizedBox(height: SMALL_SPACE),
         Expanded(
           child: widget.builder(
