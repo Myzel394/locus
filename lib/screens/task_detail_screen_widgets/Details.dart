@@ -1,6 +1,7 @@
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:file_saver/file_saver.dart';
@@ -8,15 +9,18 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:locus/api/get-address.dart';
 import 'package:locus/constants/spacing.dart';
+import 'package:locus/screens/task_detail_screen_widgets/ShareLocationButton.dart';
 import 'package:locus/services/location_point_service.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/utils/file.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/DetailInformationBox.dart';
+import 'package:locus/widgets/ModalSheet.dart';
 import 'package:locus/widgets/RelaySelectSheet.dart';
 import 'package:locus/widgets/TimerWidget.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 
 class Details extends StatefulWidget {
@@ -51,88 +55,6 @@ class _DetailsState extends State<Details> {
   void dispose() {
     _relaysController.dispose();
     super.dispose();
-  }
-
-  Future<File> _createTempViewKeyFile() {
-    return createTempFile(
-      const Utf8Encoder().convert(widget.task.generateViewKeyContent()),
-      name: "viewkey.locus.json",
-    );
-  }
-
-  void openShareLocationDialog() async {
-    final shouldShare = await showPlatformDialog(
-      context: context,
-      builder: (context) => PlatformAlertDialog(
-        title: Text("Share location"),
-        content: Text(
-          "Would you like to share your location from this task? This will allow other users to see your location. A view key file will be generated which allows anyone to view your location. Makes sure to keep this file safe and only share it with people you trust.",
-        ),
-        actions: createCancellableDialogActions(context, [
-          PlatformDialogAction(
-            child: Text("Save file"),
-            material: (_, __) => MaterialDialogActionData(
-              icon: const Icon(Icons.save_alt_rounded),
-            ),
-            onPressed: () => Navigator.of(context).pop("save"),
-          ),
-          PlatformDialogAction(
-            child: Text("Create QR Code"),
-            material: (_, __) => MaterialDialogActionData(
-              icon: const Icon(Icons.qr_code),
-            ),
-            onPressed: () => Navigator.of(context).pop("save"),
-          ),
-          PlatformDialogAction(
-            child: Text("Share file"),
-            material: (_, __) => MaterialDialogActionData(
-              icon: const Icon(Icons.share_rounded),
-            ),
-            onPressed: () => Navigator.of(context).pop("share"),
-          ),
-          PlatformDialogAction(
-            child: Text("Share link"),
-            cupertino: (_, __) => CupertinoDialogActionData(
-              isDefaultAction: true,
-            ),
-            material: (_, __) => MaterialDialogActionData(
-              icon: const Icon(Icons.link_rounded),
-            ),
-            onPressed: () => Navigator.of(context).pop("link"),
-          ),
-        ]),
-      ),
-    );
-
-    switch (shouldShare) {
-      case "save":
-        if (!(await Permission.storage.isGranted)) {
-          await Permission.storage.request();
-        }
-
-        await FileSaver.instance.saveFile(
-          name: "viewkey.json",
-          bytes:
-              const Utf8Encoder().convert(widget.task.generateViewKeyContent()),
-        );
-        break;
-      case "share":
-        final file = XFile((await _createTempViewKeyFile()).path);
-
-        await Share.shareXFiles(
-          [file],
-          text: "Locus view key",
-          subject: "Here's my Locus View Key to see my location",
-        );
-        break;
-      case "link":
-        final url = await widget.task.generateLink();
-
-        await Share.share(
-          url,
-          subject: "Here's my Locus link to see my location",
-        );
-    }
   }
 
   @override
@@ -488,12 +410,8 @@ class _DetailsState extends State<Details> {
                 ),
               ),
               Center(
-                child: PlatformElevatedButton(
-                  child: Text("Share location"),
-                  material: (_, __) => MaterialElevatedButtonData(
-                    icon: Icon(Icons.share_location_rounded),
-                  ),
-                  onPressed: openShareLocationDialog,
+                child: ShareLocationButton(
+                  task: widget.task,
                 ),
               ),
               Center(

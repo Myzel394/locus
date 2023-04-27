@@ -228,6 +228,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                               ),
                               if (showExamples)
                                 ExampleTasksRoulette(
+                                  disabled: _taskProgress != null,
                                   onSelected: (example) {
                                     FocusManager.instance.primaryFocus
                                         ?.unfocus();

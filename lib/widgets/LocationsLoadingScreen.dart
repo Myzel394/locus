@@ -5,6 +5,8 @@ import 'package:lottie/lottie.dart';
 import '../services/location_point_service.dart';
 import '../utils/theme.dart';
 
+const TIMEOUT_DURATION = Duration(seconds: 40);
+
 class LocationsLoadingScreen extends StatelessWidget {
   final List<LocationPointService> locations;
 
@@ -71,14 +73,19 @@ class LocationsLoadingScreen extends StatelessWidget {
           ),
         ).animate().fadeIn(duration: 800.ms),
         TweenAnimationBuilder<double>(
-          duration: const Duration(seconds: 20),
+          duration: TIMEOUT_DURATION,
           curve: Curves.easeInOut,
           tween: Tween<double>(
             begin: 1,
             end: 0,
           ),
           builder: (context, value, _) => LinearProgressIndicator(value: value),
-        ).animate().fadeIn(duration: 2.seconds, delay: 10.seconds),
+        ).animate().fadeIn(
+              duration: 2.seconds,
+              delay: Duration(
+                seconds: (TIMEOUT_DURATION.inSeconds / 2).ceil(),
+              ),
+            ),
       ],
     );
   }

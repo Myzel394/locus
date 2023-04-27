@@ -159,17 +159,18 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                           Expanded(
                             child: SingleChildScrollView(
                               child: Details(
-                                  locations: UnmodifiableListView<
-                                      LocationPointService>(_locations),
-                                  task: widget.task,
-                                  onGoBack: () {
-                                    _pageController.animateToPage(
-                                      0,
-                                      duration:
-                                          const Duration(milliseconds: 500),
-                                      curve: Curves.easeInOut,
-                                    );
-                                  }),
+                                locations:
+                                    UnmodifiableListView<LocationPointService>(
+                                        _locations),
+                                task: widget.task,
+                                onGoBack: () {
+                                  _pageController.animateToPage(
+                                    0,
+                                    duration: const Duration(milliseconds: 500),
+                                    curve: Curves.easeInOut,
+                                  );
+                                },
+                              ),
                             ),
                           ),
                         ],
