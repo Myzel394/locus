@@ -66,21 +66,26 @@ class PermissionsScreen extends StatelessWidget {
                 style: getBodyTextTextStyle(context),
               ),
               const SizedBox(height: LARGE_SPACE),
-              Lottie.asset(
-                "assets/lotties/location-pointer.json",
-                repeat: false,
-                frameRate: FrameRate.max,
-                delegates: LottieDelegates(
-                  values: [
-                    ValueDelegate.color(
-                      ["Path 3306", "Path 3305", "Fill 1"],
-                      value: shades[0],
-                    ),
-                    ValueDelegate.color(
-                      ["Path 3305", "Path 3305", "Fill 1"],
-                      value: shades[0],
-                    )
-                  ],
+              Container(
+                constraints: BoxConstraints(
+                  maxWidth: 250,
+                ),
+                child: Lottie.asset(
+                  "assets/lotties/location-pointer.json",
+                  repeat: false,
+                  frameRate: FrameRate.max,
+                  delegates: LottieDelegates(
+                    values: [
+                      ValueDelegate.color(
+                        ["Path 3306", "Path 3305", "Fill 1"],
+                        value: shades[0],
+                      ),
+                      ValueDelegate.color(
+                        ["Path 3305", "Path 3305", "Fill 1"],
+                        value: shades[0],
+                      )
+                    ],
+                  ),
                 ),
               ),
               const SizedBox(height: LARGE_SPACE),
