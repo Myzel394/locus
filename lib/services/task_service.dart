@@ -1,5 +1,6 @@
 import 'dart:collection';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -14,6 +15,7 @@ import 'package:openpgp/openpgp.dart';
 import 'package:uuid/uuid.dart';
 import 'package:workmanager/workmanager.dart';
 
+import 'location_point_service.dart';
 import 'timers_service.dart';
 
 const storage = FlutterSecureStorage();
@@ -99,6 +101,9 @@ class Task extends ChangeNotifier {
   String get scheduleKey => "Task:$id:Schedule";
 
   String get nostrPublicKey => Keychain(nostrPrivateKey).public;
+
+  bool get usePeriodOneOfTaskExecution =>
+      Platform.isIOS || frequency < const Duration(minutes: 15);
 
   Map<String, dynamic> toJSON() {
     return {
@@ -286,18 +291,46 @@ class Task extends ChangeNotifier {
   Future<void> startExecutionImmediately() async {
     await stopSchedule();
 
-    Workmanager().registerPeriodicTask(
-      id,
-      TASK_EXECUTION_KEY,
-      frequency: frequency,
-      constraints: Constraints(
-        networkType: NetworkType.connected,
-      ),
-      inputData: {
-        "taskID": id,
-      },
-      existingWorkPolicy: ExistingWorkPolicy.replace,
-    );
+    if (Platform.isIOS) {
+      Workmanager().registerOneOffTask(
+        "task-identifier",
+        TASK_EXECUTION_KEY,
+        initialDelay: Duration.zero,
+        constraints: Constraints(
+          networkType: NetworkType.connected,
+          requiresCharging: true,
+        ),
+        inputData: {
+          "taskID": id,
+        },
+        existingWorkPolicy: ExistingWorkPolicy.replace,
+      );
+    } else if (usePeriodOneOfTaskExecution) {
+      Workmanager().registerOneOffTask(
+        id,
+        TASK_EXECUTION_KEY,
+        constraints: Constraints(
+          networkType: NetworkType.connected,
+        ),
+        inputData: {
+          "taskID": id,
+        },
+        existingWorkPolicy: ExistingWorkPolicy.replace,
+      );
+    } else {
+      Workmanager().registerPeriodicTask(
+        id,
+        TASK_EXECUTION_KEY,
+        frequency: frequency,
+        constraints: Constraints(
+          networkType: NetworkType.connected,
+        ),
+        inputData: {
+          "taskID": id,
+        },
+        existingWorkPolicy: ExistingWorkPolicy.replace,
+      );
+    }
 
     await storage.write(
       key: taskKey,
@@ -428,6 +461,20 @@ class Task extends ChangeNotifier {
     secretKey.destroy();
 
     return uri.toString();
+  }
+
+  Future<void> publishCurrentLocationNow() async {
+    final eventManager = NostrEventsManager.fromTask(this);
+
+    final locationPoint =
+        await LocationPointService.createUsingCurrentLocation();
+    final message = await locationPoint.toEncryptedMessage(
+      signPrivateKey: signPGPPrivateKey,
+      signPublicKey: signPGPPublicKey,
+      viewPublicKey: viewPGPPublicKey,
+    );
+
+    await eventManager.publishMessage(message);
   }
 }
 
