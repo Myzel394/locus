@@ -10,17 +10,18 @@ class BottomSheetFilterBuilder<T> extends StatefulWidget {
   final Widget Function(BuildContext, List<T>) builder;
   final String Function(T) extractValue;
 
-  final FocusNode? searchFocusNode;
   final TextEditingController? searchController;
   final bool sortingFilters;
   final int maxLevenshteinDistance;
+
+  final ValueChanged<bool>? onSearchFocusChanged;
 
   const BottomSheetFilterBuilder({
     required this.elements,
     required this.builder,
     required this.extractValue,
+    this.onSearchFocusChanged,
     this.searchController,
-    this.searchFocusNode,
     this.sortingFilters = true,
     this.maxLevenshteinDistance = 4,
     Key? key,
@@ -72,31 +73,34 @@ class _BottomSheetFilterBuilderState<T>
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        PlatformWidget(
-          material: (_, __) => TextField(
-            controller: widget.searchController,
-            onChanged: (value) {
-              updateElements();
-            },
-            focusNode: widget.searchFocusNode,
-            decoration: InputDecoration(
-              hintText: "Search",
-              suffixIcon: IconButton(
-                icon: Icon(Icons.clear),
-                onPressed: () {
-                  widget.searchController!.clear();
-                  updateElements();
-                },
-              ),
-            ),
-          ),
-          cupertino: (_, __) => CupertinoSearchTextField(
-            controller: widget.searchController,
-            onChanged: (value) {
-              updateElements();
-            },
-            focusNode: widget.searchFocusNode,
-            placeholder: "Search",
+        Focus(
+          onFocusChange: widget.onSearchFocusChanged,
+          child: PlatformWidget(
+            material: (_, __) =>
+                TextField(
+                  controller: widget.searchController,
+                  onChanged: (value) {
+                    updateElements();
+                  },
+                  decoration: InputDecoration(
+                    hintText: "Search",
+                    suffixIcon: IconButton(
+                      icon: Icon(Icons.clear),
+                      onPressed: () {
+                        widget.searchController!.clear();
+                        updateElements();
+                      },
+                    ),
+                  ),
+                ),
+            cupertino: (_, __) =>
+                CupertinoSearchTextField(
+                  controller: widget.searchController,
+                  onChanged: (value) {
+                    updateElements();
+                  },
+                  placeholder: "Search",
+                ),
           ),
         ),
         const SizedBox(height: SMALL_SPACE),

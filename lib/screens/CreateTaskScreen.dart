@@ -121,7 +121,6 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final shades = getPrimaryColorShades(context);
     final isKeyboardVisible = MediaQuery.of(context).viewInsets.bottom != 0;
 
     return PlatformScaffold(
@@ -440,10 +439,17 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                         fontSize: getActionButtonSize(context),
                       ),
                     ),
-                  ).animate().then(delay: IN_DELAY * 8).slide(
+                  )
+                      .animate()
+                      .then(delay: IN_DELAY * 8)
+                      .slide(
                         duration: 500.ms,
                         curve: Curves.easeOut,
                         begin: Offset(0, 1.3),
+                      )
+                      .fadeIn(
+                        duration: 500.ms,
+                        curve: Curves.easeOut,
                       ),
                 ],
               ),

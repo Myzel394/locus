@@ -1,7 +1,10 @@
 import 'dart:collection';
 
+import 'package:animated_list_plus/animated_list_plus.dart';
+import 'package:animated_list_plus/transitions.dart';
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/utils/load_status.dart';
 import 'package:locus/widgets/BottomSheetFilterBuilder.dart';
@@ -47,7 +50,7 @@ class RelayController extends ChangeNotifier {
 class RelaySelectSheet extends StatefulWidget {
   final RelayController controller;
 
-  RelaySelectSheet({
+  const RelaySelectSheet({
     required this.controller,
     Key? key,
   }) : super(key: key);
@@ -60,8 +63,7 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
   List<String> availableRelays = [];
   LoadStatus loadStatus = LoadStatus.loading;
   final _searchController = TextEditingController();
-  final _sheetController = DraggableScrollableController();
-  final _searchFocusNode = FocusNode();
+  late final DraggableScrollableController _sheetController;
 
   Set<String> get checkedRelaysSet => Set.from(widget.controller.relays);
 
@@ -70,19 +72,14 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
     super.initState();
     fetchAvailableRelays();
 
-    _searchFocusNode.addListener(() {
-      if (_searchFocusNode.hasFocus) {
-        _sheetController.animateTo(1, duration: const Duration(milliseconds: 100), curve: Curves.linearToEaseOut);
-      }
-    });
     widget.controller.addListener(rebuild);
+    _sheetController = DraggableScrollableController();
   }
 
   @override
   dispose() {
     _searchController.dispose();
     _sheetController.dispose();
-    _searchFocusNode.dispose();
     widget.controller.removeListener(rebuild);
 
     super.dispose();
@@ -131,22 +128,33 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
             else if (availableRelays.isNotEmpty)
               Expanded(
                 child: BottomSheetFilterBuilder(
-                    elements: availableRelays,
-                    searchController: _searchController,
-                    searchFocusNode: _searchFocusNode,
-                    extractValue: (dynamic element) => element as String,
-                    builder: (_, List<dynamic> foundRelays) {
-                      final uncheckedFoundRelays =
-                          foundRelays.where((element) => !checkedRelaysSet.contains(element)).toList();
-                      final allRelays = [...widget.controller.relays, ...uncheckedFoundRelays];
+                  elements: availableRelays,
+                  searchController: _searchController,
+                  onSearchFocusChanged: (hasFocus) async {
+                    if (hasFocus) {
+                      _sheetController.animateTo(
+                        1,
+                        duration: 500.ms,
+                        curve: Curves.linearToEaseOut,
+                      );
+                    }
+                  },
+                  extractValue: (dynamic element) => element as String,
+                  builder: (_, List<dynamic> foundRelays) {
+                    final uncheckedFoundRelays = foundRelays
+                        .where((element) => !checkedRelaysSet.contains(element))
+                        .toList();
+                    final allRelays = List<String>.from(
+                        [...widget.controller.relays, ...uncheckedFoundRelays]);
 
-                      return ListView.builder(
+                    return PlatformWidget(
+                      material: (context, _) => ListView.builder(
                         controller: controller,
                         itemCount: allRelays.length,
                         itemBuilder: (context, index) {
                           final relay = allRelays[index];
 
-                          return PlatformCheckboxListTile(
+                          return CheckboxListTile(
                             title: Text(
                               relay.substring(6),
                             ),
@@ -164,9 +172,56 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
                             },
                           );
                         },
-                      );
-                    }),
+                      ),
+                      cupertino: (context, _) => ImplicitlyAnimatedList<String>(
+                        items: allRelays,
+                        controller: controller,
+                        areItemsTheSame: (a, b) => a == b,
+                        itemBuilder: (context, animation, relay, index) {
+                          return SizeFadeTransition(
+                            animation: animation,
+                            sizeFraction: 0.7,
+                            curve: Curves.easeInOut,
+                            child: CupertinoCheckboxListTile(
+                              title: Text(
+                                relay.substring(6),
+                              ),
+                              value: widget.controller.relays.contains(relay),
+                              onChanged: (newValue) {
+                                if (newValue == null) {
+                                  return;
+                                }
+
+                                if (newValue) {
+                                  widget.controller.add(relay);
+                                } else {
+                                  widget.controller.remove(relay);
+                                }
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  },
+                ),
               ),
+            const SizedBox(height: MEDIUM_SPACE),
+            PlatformTextButton(
+              child: Text("Select 5 random relays"),
+              material: (_, __) => MaterialTextButtonData(
+                icon: const Icon(Icons.shuffle),
+              ),
+              onPressed: loadStatus == LoadStatus.success
+                  ? () {
+                      final relays = availableRelays.toList();
+                      relays.shuffle();
+
+                      widget.controller.clear();
+                      widget.controller.addAll(relays.take(5).toList());
+                    }
+                  : null,
+            ),
             const SizedBox(height: SMALL_SPACE),
             PlatformElevatedButton(
               onPressed: () {
