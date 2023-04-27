@@ -68,21 +68,18 @@ class _DetailsState extends State<Details> {
         content: Text(
           "Would you like to share your location from this task? This will allow other users to see your location. A view key file will be generated which allows anyone to view your location. Makes sure to keep this file safe and only share it with people you trust.",
         ),
-        actions: <Widget>[
-          PlatformDialogAction(
-            child: Text("Cancel"),
-            cupertino: (_, __) => CupertinoDialogActionData(
-              isDestructiveAction: true,
-            ),
-            material: (_, __) => MaterialDialogActionData(
-              icon: const Icon(Icons.cancel_outlined),
-            ),
-            onPressed: () => Navigator.of(context).pop(""),
-          ),
+        actions: createCancellableDialogActions(context, [
           PlatformDialogAction(
             child: Text("Save file"),
             material: (_, __) => MaterialDialogActionData(
               icon: const Icon(Icons.save_alt_rounded),
+            ),
+            onPressed: () => Navigator.of(context).pop("save"),
+          ),
+          PlatformDialogAction(
+            child: Text("Create QR Code"),
+            material: (_, __) => MaterialDialogActionData(
+              icon: const Icon(Icons.qr_code),
             ),
             onPressed: () => Navigator.of(context).pop("save"),
           ),
@@ -103,7 +100,7 @@ class _DetailsState extends State<Details> {
             ),
             onPressed: () => Navigator.of(context).pop("link"),
           ),
-        ],
+        ]),
       ),
     );
 
@@ -379,6 +376,10 @@ class _DetailsState extends State<Details> {
 
                                           taskService.update(widget.task);
 
+                                          if (!mounted) {
+                                            return;
+                                          }
+
                                           await showPlatformDialog(
                                             context: context,
                                             builder: (context) =>
@@ -515,11 +516,7 @@ class _DetailsState extends State<Details> {
                         content: Text(
                           "Are you sure you want to delete this task? This means that no more locations will be saved for this task. Existing locations will not be deleted. This action cannot be undone.",
                         ),
-                        actions: <Widget>[
-                          PlatformDialogAction(
-                            child: Text("Cancel"),
-                            onPressed: () => Navigator.of(context).pop(false),
-                          ),
+                        actions: createCancellableDialogActions(context, [
                           PlatformDialogAction(
                             child: Text("Delete"),
                             onPressed: () => Navigator.of(context).pop(true),
@@ -532,7 +529,7 @@ class _DetailsState extends State<Details> {
                               isDestructiveAction: true,
                             ),
                           ),
-                        ],
+                        ]),
                       ),
                     );
 

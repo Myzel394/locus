@@ -1,3 +1,6 @@
+import 'dart:collection';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
@@ -109,3 +112,33 @@ EdgeInsets getSmallButtonPadding(final BuildContext context) =>
         vertical: TINY_SPACE,
       ),
     );
+
+List<Widget> createCancellableDialogActions(
+  final BuildContext context,
+  final Iterable<Widget> actions,
+) {
+  final cancelWidget = PlatformDialogAction(
+    child: const Text("Cancel"),
+    cupertino: (_, __) => CupertinoDialogActionData(
+      isDestructiveAction: true,
+    ),
+    material: (_, __) => MaterialDialogActionData(
+        icon: PlatformWidget(
+      material: (_, __) => Icon(Icons.cancel_outlined),
+      cupertino: (_, __) => Icon(CupertinoIcons.clear_thick),
+    )),
+    onPressed: () => Navigator.of(context).pop(""),
+  );
+
+  if (isCupertino(context)) {
+    return [
+      ...actions,
+      cancelWidget,
+    ];
+  }
+
+  return [
+    cancelWidget,
+    ...actions,
+  ];
+}

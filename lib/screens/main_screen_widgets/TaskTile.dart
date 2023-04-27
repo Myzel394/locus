@@ -36,6 +36,7 @@ class TaskTile extends StatefulWidget {
 class _TaskTileState extends State<TaskTile> {
   TaskLinkPublishProgress? linkProgress;
   ScaffoldFeatureController<SnackBar, SnackBarClosedReason>? snackBar;
+  bool isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -50,82 +51,85 @@ class _TaskTileState extends State<TaskTile> {
           if (snapshot.hasData) {
             return PlatformSwitch(
               value: snapshot.data!,
-              onChanged: (value) async {
-                if (value) {
-                  await widget.task.startExecutionImmediately();
-                  final nextEndDate = widget.task.nextEndDate();
+              onChanged: isLoading
+                  ? null
+                  : (value) async {
+                      setState(() {
+                        isLoading = true;
+                      });
 
-                  final eventManager = NostrEventsManager.fromTask(widget.task);
+                      try {
+                        if (value) {
+                          await widget.task.startExecutionImmediately();
+                          final nextEndDate = widget.task.nextEndDate();
 
-                  final locationPoint =
-                      await LocationPointService.createUsingCurrentLocation();
-                  final message = await locationPoint.toEncryptedMessage(
-                    signPrivateKey: widget.task.signPGPPrivateKey,
-                    signPublicKey: widget.task.signPGPPublicKey,
-                    viewPublicKey: widget.task.viewPGPPublicKey,
-                  );
+                          widget.task.publishCurrentLocationNow();
 
-                  await eventManager.publishMessage(message);
+                          if (!mounted) {
+                            return;
+                          }
 
-                  if (!mounted) {
-                    return;
-                  }
+                          if (nextEndDate == null) {
+                            return;
+                          }
 
-                  if (nextEndDate == null) {
-                    return;
-                  }
+                          showPlatformDialog(
+                            context: context,
+                            builder: (_) => PlatformAlertDialog(
+                              title: Text("Task started"),
+                              content: Text(
+                                "The task has been started and will run until ${DateFormat('MMMM d, HH:mm').format(nextEndDate)}",
+                              ),
+                              actions: <Widget>[
+                                PlatformDialogActionButton(
+                                  child: Text("OK"),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                )
+                              ],
+                            ),
+                          );
+                        } else {
+                          await widget.task.stopExecutionImmediately();
+                          final nextStartDate =
+                              await widget.task.startScheduleTomorrow();
 
-                  await showPlatformDialog(
-                    context: context,
-                    builder: (_) => PlatformAlertDialog(
-                      title: Text("Task started"),
-                      content: Text(
-                        "The task has been started and will run until ${DateFormat('MMMM d, HH:mm').format(nextEndDate)}",
-                      ),
-                      actions: <Widget>[
-                        PlatformDialogActionButton(
-                          child: Text("OK"),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                        )
-                      ],
-                    ),
-                  );
-                } else {
-                  await widget.task.stopExecutionImmediately();
-                  final nextStartDate =
-                      await widget.task.startScheduleTomorrow();
+                          if (!mounted) {
+                            return;
+                          }
 
-                  if (!mounted) {
-                    return;
-                  }
+                          if (nextStartDate == null) {
+                            return;
+                          }
 
-                  if (nextStartDate == null) {
-                    return;
-                  }
+                          showPlatformDialog(
+                            context: context,
+                            builder: (_) => PlatformAlertDialog(
+                              title: Text("Task stopped"),
+                              content: Text(
+                                "The task has been stopped and will run again on ${DateFormat('MMMM d, HH:mm').format(nextStartDate)}",
+                              ),
+                              actions: <Widget>[
+                                PlatformDialogActionButton(
+                                  child: Text("OK"),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                )
+                              ],
+                            ),
+                          );
+                        }
 
-                  await showPlatformDialog(
-                    context: context,
-                    builder: (_) => PlatformAlertDialog(
-                      title: Text("Task stopped"),
-                      content: Text(
-                        "The task has been stopped and will run again on ${DateFormat('MMMM d, HH:mm').format(nextStartDate)}",
-                      ),
-                      actions: <Widget>[
-                        PlatformDialogActionButton(
-                          child: Text("OK"),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                        )
-                      ],
-                    ),
-                  );
-                }
-
-                taskService.update(widget.task);
-              },
+                        taskService.update(widget.task);
+                      } catch (_) {
+                      } finally {
+                        setState(() {
+                          isLoading = false;
+                        });
+                      }
+                    },
             );
           }
 
