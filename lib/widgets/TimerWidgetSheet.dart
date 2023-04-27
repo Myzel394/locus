@@ -72,24 +72,10 @@ class _TimerWidgetSheetState extends State<TimerWidgetSheet> {
                     if (widget.controller.timers
                         .any((timer) => timer.isInfinite())) ...[
                       const SizedBox(height: SMALL_SPACE),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: <Widget>[
-                          const Icon(
-                            Icons.warning_rounded,
-                            color: Colors.yellow,
-                          ),
-                          const SizedBox(width: TINY_SPACE),
-                          Text(
-                            "This task will run until you stop it manually.",
-                            style: getCaptionTextStyle(context).copyWith(
-                              color: Colors.yellow,
-                            ),
-                          ),
-                        ],
-                      )
-                    ]
+                      WarningText(
+                        "This task will run until you stop it manually.",
+                      ),
+                    ],
                   ],
                   const SizedBox(height: MEDIUM_SPACE),
                   Row(

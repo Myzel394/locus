@@ -232,23 +232,8 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                               ),
                             if (anotherTaskAlreadyExists) ...[
                               const SizedBox(height: MEDIUM_SPACE),
-                              Row(
-                                children: <Widget>[
-                                  const Icon(
-                                    Icons.warning_rounded,
-                                    color: Colors.yellow,
-                                  ),
-                                  const SizedBox(width: TINY_SPACE),
-                                  Flexible(
-                                    child: Text(
-                                      "A task with this name already exists. You can create the task, but you will have to tasks with the same name.",
-                                      style:
-                                          getCaptionTextStyle(context).copyWith(
-                                        color: Colors.yellow,
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                              WarningText(
+                                "A task with this name already exists. You can create the task, but you will have two tasks with the same name.",
                               ),
                             ],
                             const SizedBox(height: MEDIUM_SPACE),
