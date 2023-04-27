@@ -219,21 +219,21 @@
 				TargetAttributes = {
 					331C8080294A63A400263BE5 = {
 						CreatedOnToolsVersion = 14.0;
-						TestTargetID = 97C146ED1CF9000F007C117D;
 						SystemCapabilities = {
-                        	com.apple.BackgroundModes = {
-                        		enabled = 1;
-                        	};
-                        };
+							com.apple.BackgroundModes = {
+								enabled = 1;
+							};
+						};
+						TestTargetID = 97C146ED1CF9000F007C117D;
 					};
 					97C146ED1CF9000F007C117D = {
 						CreatedOnToolsVersion = 7.3.1;
 						LastSwiftMigration = 1100;
 						SystemCapabilities = {
-                        	com.apple.BackgroundModes = {
-                        		enabled = 1;
-                        	};
-                        };
+							com.apple.BackgroundModes = {
+								enabled = 1;
+							};
+						};
 					};
 				};
 			};

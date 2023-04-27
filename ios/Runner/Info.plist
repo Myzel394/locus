@@ -2,6 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>workmanager.background.task</string>
+	</array>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
@@ -22,11 +26,41 @@
 	<string>$(FLUTTER_BUILD_NAME)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>locus</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>fossapp394</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>We need to access the location to store it.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>We need to always access the location to store it in the background.</string>
+	<key>NSLocationUsageDescription</key>
+	<string>We need to access the location to store it.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>We need to access the location to store it.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>processing</string>
+	</array>
+	<key>UIFileSharingEnabled</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
@@ -47,44 +81,5 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
-	<key>CADisableMinimumFrameDurationOnPhone</key>
-	<true/>
-	<key>UIApplicationSupportsIndirectInputEvents</key>
-	<true/>
-
-    <key>NSLocationWhenInUseUsageDescription</key>
-    <string>We need to access the location to store it.</string>
-    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-    <string>We need to access the location to store it.</string>
-    <key>NSLocationUsageDescription</key>
-    <string>We need to access the location to store it.</string>
-    <key>NSLocationAlwaysUsageDescription</key>
-    <string>We need to always access the location to store it in the background.</string>
-
-    <key>CFBundleURLTypes</key>
-    <array>
-        <dict>
-            <key>CFBundleTypeRole</key>
-            <string>Editor</string>
-            <key>CFBundleURLName</key>
-            <string>locus</string>
-            <key>CFBundleURLSchemes</key>
-            <array>
-                <string>fossapp394</string>
-            </array>
-        </dict>
-    </array>
-    <key>LSSupportsOpeningDocumentsInPlace</key>
-    <true/>
-    <key>UIFileSharingEnabled</key>
-    <true/>
-    <key>UIBackgroundModes</key>
-    <array>
-    	<string>processing</string>
-    </array>
-    <key>BGTaskSchedulerPermittedIdentifiers</key>
-    <array>
-        <string>workmanager.background.task</string>
-    </array>
 </dict>
 </plist>

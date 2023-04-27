@@ -9,6 +9,7 @@ import 'package:locus/constants/spacing.dart';
 import 'package:locus/screens/ViewDetailScreen.dart';
 import 'package:locus/screens/main_screen_widgets/ImportTask.dart';
 import 'package:locus/screens/main_screen_widgets/TaskTile.dart';
+import 'package:locus/screens/main_screen_widgets/ViewTile.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:locus/widgets/ChipCaption.dart';
@@ -128,7 +129,11 @@ class _MainScreenState extends State<MainScreen> {
         floatingActionButton: OpenContainer(
           transitionDuration: const Duration(milliseconds: 500),
           transitionType: ContainerTransitionType.fade,
-          openBuilder: (context, action) => const CreateTaskScreen(),
+          openBuilder: (context, action) => CreateTaskScreen(
+            onCreated: () {
+              Navigator.pop(context);
+            },
+          ),
           closedBuilder: (context, action) => SizedBox(
             height: FAB_DIMENSION,
             width: FAB_DIMENSION,
@@ -152,7 +157,7 @@ class _MainScreenState extends State<MainScreen> {
             .scale(duration: 500.ms, delay: 1.seconds, curve: Curves.bounceOut),
       ),
       // Settings bottomNavBar via cupertino data class does not work
-      bottomNavBar: Platform.isIOS
+      bottomNavBar: isCupertino(context)
           ? PlatformNavBar(
               itemChanged: (index) {
                 setState(() {
@@ -160,7 +165,7 @@ class _MainScreenState extends State<MainScreen> {
                 });
               },
               currentIndex: activeTab,
-              items: [
+              items: const [
                 BottomNavigationBarItem(
                   icon: Icon(CupertinoIcons.home),
                   label: "Overview",
@@ -190,100 +195,109 @@ class _MainScreenState extends State<MainScreen> {
                             crossAxisAlignment: WrapCrossAlignment.start,
                             children: <Widget>[
                               if (taskService.tasks.isNotEmpty)
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    const Padding(
-                                      padding: EdgeInsets.symmetric(
-                                          horizontal: MEDIUM_SPACE),
-                                      child: ChipCaption("Tasks",
-                                          icon: Icons.task_rounded),
-                                    ).animate().fadeIn(duration: 1.seconds),
-                                    ListView.builder(
-                                      shrinkWrap: true,
-                                      padding: const EdgeInsets.only(
-                                          top: MEDIUM_SPACE),
-                                      physics:
-                                          const NeverScrollableScrollPhysics(),
-                                      itemCount: taskService.tasks.length,
-                                      itemBuilder: (context, index) {
-                                        final task = taskService.tasks[index];
+                                PlatformWidget(
+                                  material: (context, __) => Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      const Padding(
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: MEDIUM_SPACE),
+                                        child: ChipCaption("Tasks",
+                                            icon: Icons.task_rounded),
+                                      ).animate().fadeIn(duration: 1.seconds),
+                                      ListView.builder(
+                                        shrinkWrap: true,
+                                        padding: const EdgeInsets.only(
+                                            top: MEDIUM_SPACE),
+                                        physics:
+                                            const NeverScrollableScrollPhysics(),
+                                        itemCount: taskService.tasks.length,
+                                        itemBuilder: (context, index) {
+                                          final task = taskService.tasks[index];
 
-                                        return TaskTile(
-                                          task: task,
+                                          return TaskTile(
+                                            task: task,
+                                          )
+                                              .animate()
+                                              .then(delay: 100.ms * index)
+                                              .slide(
+                                                duration: 1.seconds,
+                                                curve: Curves.easeOut,
+                                                begin: Offset(0, 0.2),
+                                              )
+                                              .fadeIn(
+                                                delay: 100.ms,
+                                                duration: 1.seconds,
+                                                curve: Curves.easeOut,
+                                              );
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                  cupertino: (context, __) =>
+                                      CupertinoListSection(
+                                    header: const Text("Tasks"),
+                                    children: taskService.tasks
+                                        .map(
+                                          (task) => TaskTile(
+                                            task: task,
+                                          ),
                                         )
-                                            .animate()
-                                            .then(delay: 100.ms * index)
-                                            .slide(
-                                              duration: 1.seconds,
-                                              curve: Curves.easeOut,
-                                              begin: Offset(0, 0.2),
-                                            )
-                                            .fadeIn(
-                                              delay: 100.ms,
-                                              duration: 1.seconds,
-                                              curve: Curves.easeOut,
-                                            );
-                                      },
-                                    ),
-                                  ],
+                                        .toList(),
+                                  ),
                                 ),
                               if (viewService.views.isNotEmpty)
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: MEDIUM_SPACE),
-                                      child: ChipCaption(
-                                        "Views",
-                                        icon: context.platformIcons.eyeSolid,
-                                      ),
-                                    ).animate().fadeIn(duration: 1.seconds),
-                                    ListView.builder(
-                                      shrinkWrap: true,
-                                      padding: const EdgeInsets.only(
-                                          top: MEDIUM_SPACE),
-                                      physics:
-                                          const NeverScrollableScrollPhysics(),
-                                      itemCount: viewService.views.length,
-                                      itemBuilder: (context, index) {
-                                        final view = viewService.views[index];
-
-                                        return PlatformListTile(
-                                          title: view.name == null
-                                              ? Text(
-                                                  "Unnamed",
-                                                  style: TextStyle(
-                                                      fontFamily: "Cursive"),
-                                                )
-                                              : Text(view.name!),
-                                          onTap: () {
-                                            Navigator.of(context).push(
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    ViewDetailScreen(
-                                                  view: view,
-                                                ),
-                                              ),
-                                            );
-                                          },
+                                PlatformWidget(
+                                  material: (context, __) => Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: MEDIUM_SPACE),
+                                        child: ChipCaption(
+                                          "Views",
+                                          icon: context.platformIcons.eyeSolid,
+                                        ),
+                                      ).animate().fadeIn(duration: 1.seconds),
+                                      ListView.builder(
+                                        shrinkWrap: true,
+                                        padding: const EdgeInsets.only(
+                                            top: MEDIUM_SPACE),
+                                        physics:
+                                            const NeverScrollableScrollPhysics(),
+                                        itemCount: viewService.views.length,
+                                        itemBuilder: (context, index) =>
+                                            ViewTile(
+                                          view: viewService.views[index],
                                         )
-                                            .animate()
-                                            .then(delay: 100.ms * index)
-                                            .slide(
-                                              duration: 1.seconds,
-                                              curve: Curves.easeOut,
-                                              begin: Offset(0, 0.2),
-                                            )
-                                            .fadeIn(
-                                              delay: 100.ms,
-                                              duration: 1.seconds,
-                                              curve: Curves.easeOut,
-                                            );
-                                      },
-                                    ),
-                                  ],
+                                                .animate()
+                                                .then(delay: 100.ms * index)
+                                                .slide(
+                                                  duration: 1.seconds,
+                                                  curve: Curves.easeOut,
+                                                  begin: const Offset(0, 0.2),
+                                                )
+                                                .fadeIn(
+                                                  delay: 100.ms,
+                                                  duration: 1.seconds,
+                                                  curve: Curves.easeOut,
+                                                ),
+                                      ),
+                                    ],
+                                  ),
+                                  cupertino: (context, __) =>
+                                      CupertinoListSection(
+                                    header: const Text("Views"),
+                                    children: viewService.views
+                                        .map(
+                                          (view) => ViewTile(
+                                            view: view,
+                                          ),
+                                        )
+                                        .toList(),
+                                  ),
                                 ),
                             ],
                           ),
@@ -309,7 +323,17 @@ class _MainScreenState extends State<MainScreen> {
               ),
             )
           : activeTab == 1
-              ? CreateTaskScreen()
+              ? CreateTaskScreen(
+                  onCreated: () {
+                    if (isCupertino(context)) {
+                      setState(() {
+                        activeTab = 0;
+                      });
+                    } else {
+                      Navigator.pop(context);
+                    }
+                  },
+                )
               : null,
     );
   }

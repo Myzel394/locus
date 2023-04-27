@@ -71,6 +71,7 @@ dependencies:
   basic_utils: ^5.5.4
   flutter_animate: ^4.1.1+1
   apple_maps_flutter: ^1.2.0
+  animated_list_plus: ^0.5.0
 
 dev_dependencies:
   flutter_test:

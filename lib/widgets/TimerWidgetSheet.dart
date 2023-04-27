@@ -9,6 +9,7 @@ import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/LongPressPopup.dart';
 import 'package:locus/widgets/ModalSheet.dart';
 import 'package:locus/widgets/TimerWidget.dart';
+import 'package:locus/widgets/WarningText.dart';
 import 'package:locus/widgets/WeekdaySelection.dart';
 
 class TimerWidgetSheet extends StatefulWidget {

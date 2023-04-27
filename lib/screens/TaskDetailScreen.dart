@@ -26,7 +26,6 @@ class TaskDetailScreen extends StatefulWidget {
 }
 
 class _TaskDetailScreenState extends State<TaskDetailScreen> {
-  late final WebSocket _socket;
   final PageController _pageController = PageController();
   void Function()? _unsubscribeGetLocations;
   bool _isLoading = true;
@@ -55,7 +54,6 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
 
   @override
   void dispose() {
-    _socket.close();
     _pageController.dispose();
 
     _unsubscribeGetLocations?.call();

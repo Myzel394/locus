@@ -95,7 +95,11 @@ class _CreateTaskState extends State<CreateTask> with TickerProviderStateMixin {
         OpenContainer(
           transitionDuration: const Duration(milliseconds: 700),
           transitionType: ContainerTransitionType.fade,
-          openBuilder: (context, action) => const CreateTaskScreen(),
+          openBuilder: (context, action) => CreateTaskScreen(
+            onCreated: () {
+              Navigator.pop(context);
+            },
+          ),
           closedShape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(
               Radius.circular(HUGE_SPACE),

@@ -15,11 +15,18 @@ import 'package:locus/widgets/TimerWidget.dart';
 import 'package:locus/widgets/TimerWidgetSheet.dart';
 import 'package:provider/provider.dart';
 
+import '../widgets/WarningText.dart';
+
 final IN_DURATION = 700.ms;
 final IN_DELAY = 80.ms;
 
 class CreateTaskScreen extends StatefulWidget {
-  const CreateTaskScreen({Key? key}) : super(key: key);
+  final void Function() onCreated;
+
+  const CreateTaskScreen({
+    required this.onCreated,
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<CreateTaskScreen> createState() => _CreateTaskScreenState();
@@ -111,10 +118,9 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
       });
 
       if (mounted) {
-        Navigator.of(context).pop();
+        widget.onCreated();
       }
     } catch (error) {
-    } finally {
       setState(() {
         _taskProgress = null;
       });
@@ -163,49 +169,126 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                               ),
                             ],
                           ),
-                        const SizedBox(height: LARGE_SPACE),
-                        Column(
-                          children: <Widget>[
-                            Focus(
-                              onFocusChange: (hasFocus) {
-                                if (!hasFocus) {
-                                  return;
-                                }
-
-                                setState(() {
-                                  showExamples = true;
-                                });
-                              },
-                              child: PlatformTextFormField(
-                                controller: _nameController,
-                                enabled: _taskProgress == null,
-                                textInputAction: TextInputAction.next,
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return "Please enter a name";
+                        SizedBox(height: isKeyboardVisible ? 0 : LARGE_SPACE),
+                        SingleChildScrollView(
+                          child: Column(
+                            children: <Widget>[
+                              Focus(
+                                onFocusChange: (hasFocus) {
+                                  if (!hasFocus) {
+                                    return;
                                   }
 
-                                  if (!StringUtils.isAscii(value)) {
-                                    return "Name contains invalid characters";
+                                  setState(() {
+                                    showExamples = true;
+                                  });
+                                },
+                                child: PlatformTextFormField(
+                                  controller: _nameController,
+                                  enabled: _taskProgress == null,
+                                  textInputAction: TextInputAction.next,
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return "Please enter a name";
+                                    }
+
+                                    if (!StringUtils.isAscii(value)) {
+                                      return "Name contains invalid characters";
+                                    }
+
+                                    return null;
+                                  },
+                                  keyboardType: TextInputType.name,
+                                  autofillHints: const [AutofillHints.name],
+                                  material: (_, __) =>
+                                      MaterialTextFormFieldData(
+                                    decoration: InputDecoration(
+                                      labelText: "Name",
+                                      prefixIcon:
+                                          Icon(context.platformIcons.tag),
+                                    ),
+                                  ),
+                                  cupertino: (_, __) =>
+                                      CupertinoTextFormFieldData(
+                                    placeholder: "Name",
+                                    prefix: Icon(context.platformIcons.tag),
+                                  ),
+                                )
+                                    .animate()
+                                    .slide(
+                                      duration: IN_DURATION,
+                                      curve: Curves.easeOut,
+                                      begin: Offset(0, 0.2),
+                                    )
+                                    .fadeIn(
+                                      delay: IN_DELAY,
+                                      duration: IN_DURATION,
+                                      curve: Curves.easeOut,
+                                    ),
+                              ),
+                              if (showExamples)
+                                ExampleTasksRoulette(
+                                  onSelected: (example) {
+                                    FocusManager.instance.primaryFocus
+                                        ?.unfocus();
+
+                                    _nameController.text = example.name;
+                                    _frequencyController.text =
+                                        example.frequency.inMinutes.toString();
+                                    _timersController
+                                      ..clear()
+                                      ..addAll(example.timers);
+                                  },
+                                ),
+                              if (anotherTaskAlreadyExists) ...[
+                                const SizedBox(height: MEDIUM_SPACE),
+                                WarningText(
+                                  "A task with this name already exists. You can create the task, but you will have two tasks with the same name.",
+                                ),
+                              ],
+                              const SizedBox(height: MEDIUM_SPACE),
+                              PlatformTextFormField(
+                                controller: _frequencyController,
+                                enabled: _taskProgress == null,
+                                textInputAction: TextInputAction.done,
+                                keyboardType: TextInputType.number,
+                                textAlign: Platform.isAndroid
+                                    ? TextAlign.center
+                                    : null,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return "Please enter a frequency";
+                                  }
+
+                                  if (!StringUtils.isDigit(value)) {
+                                    return "Frequency must be a number";
+                                  }
+
+                                  final frequency = int.parse(value);
+
+                                  if (frequency < 1) {
+                                    return "Frequency must be greater than 0";
                                   }
 
                                   return null;
                                 },
-                                keyboardType: TextInputType.name,
-                                autofillHints: const [AutofillHints.name],
                                 material: (_, __) => MaterialTextFormFieldData(
                                   decoration: InputDecoration(
-                                    labelText: "Name",
-                                    prefixIcon: Icon(context.platformIcons.tag),
+                                    prefixIcon:
+                                        Icon(context.platformIcons.time),
+                                    labelText: "Frequency",
+                                    prefixText: "Every",
+                                    suffix: Text("Minutes"),
                                   ),
                                 ),
                                 cupertino: (_, __) =>
                                     CupertinoTextFormFieldData(
-                                  placeholder: "Name",
-                                  prefix: Icon(context.platformIcons.tag),
+                                  placeholder: "Frequency (in minutes)",
+                                  prefix: Icon(context.platformIcons.time),
                                 ),
                               )
                                   .animate()
+                                  .then(delay: IN_DELAY * 2)
                                   .slide(
                                     duration: IN_DURATION,
                                     curve: Curves.easeOut,
@@ -216,172 +299,103 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                     duration: IN_DURATION,
                                     curve: Curves.easeOut,
                                   ),
-                            ),
-                            if (showExamples)
-                              ExampleTasksRoulette(
-                                onSelected: (example) {
-                                  FocusManager.instance.primaryFocus?.unfocus();
-
-                                  _nameController.text = example.name;
-                                  _frequencyController.text =
-                                      example.frequency.inMinutes.toString();
-                                  _timersController
-                                    ..clear()
-                                    ..addAll(example.timers);
-                                },
-                              ),
-                            if (anotherTaskAlreadyExists) ...[
                               const SizedBox(height: MEDIUM_SPACE),
-                              WarningText(
-                                "A task with this name already exists. You can create the task, but you will have two tasks with the same name.",
+                              Wrap(
+                                alignment: WrapAlignment.spaceEvenly,
+                                spacing: SMALL_SPACE,
+                                crossAxisAlignment: WrapCrossAlignment.center,
+                                direction: Axis.horizontal,
+                                children: <Widget>[
+                                  PlatformElevatedButton(
+                                    material: (_, __) =>
+                                        MaterialElevatedButtonData(
+                                      icon: Icon(Icons.dns_rounded),
+                                    ),
+                                    cupertino: (_, __) =>
+                                        CupertinoElevatedButtonData(
+                                      padding: getSmallButtonPadding(context),
+                                    ),
+                                    onPressed: _taskProgress != null
+                                        ? null
+                                        : () {
+                                            showPlatformModalSheet(
+                                              context: context,
+                                              material: MaterialModalSheetData(
+                                                backgroundColor:
+                                                    Colors.transparent,
+                                                isScrollControlled: true,
+                                                isDismissible: true,
+                                              ),
+                                              builder: (_) => RelaySelectSheet(
+                                                controller: _relaysController,
+                                              ),
+                                            );
+                                          },
+                                    child: Text(
+                                      _relaysController.relays.isEmpty
+                                          ? "Select Relays"
+                                          : "Selected ${_relaysController.relays.length} Relay${_relaysController.relays.length == 1 ? "" : "s"}",
+                                    ),
+                                  )
+                                      .animate()
+                                      .then(delay: IN_DELAY * 4)
+                                      .slide(
+                                        duration: IN_DURATION,
+                                        curve: Curves.easeOut,
+                                        begin: Offset(0.2, 0),
+                                      )
+                                      .fadeIn(
+                                        delay: IN_DELAY,
+                                        duration: IN_DURATION,
+                                        curve: Curves.easeOut,
+                                      ),
+                                  PlatformElevatedButton(
+                                    material: (_, __) =>
+                                        MaterialElevatedButtonData(
+                                      icon: const Icon(Icons.timer_rounded),
+                                    ),
+                                    cupertino: (_, __) =>
+                                        CupertinoElevatedButtonData(
+                                      padding: getSmallButtonPadding(context),
+                                    ),
+                                    onPressed: _taskProgress != null
+                                        ? null
+                                        : () async {
+                                            await showPlatformModalSheet(
+                                              context: context,
+                                              material: MaterialModalSheetData(
+                                                backgroundColor:
+                                                    Colors.transparent,
+                                                isScrollControlled: true,
+                                                isDismissible: true,
+                                              ),
+                                              builder: (_) => TimerWidgetSheet(
+                                                controller: _timersController,
+                                              ),
+                                            );
+                                          },
+                                    child: Text(
+                                      _timersController.timers.isEmpty
+                                          ? "Select Timers"
+                                          : "Selected ${_timersController.timers.length} Timer${_timersController.timers.length == 1 ? "" : "s"}",
+                                    ),
+                                  )
+                                      .animate()
+                                      .then(delay: IN_DELAY * 5)
+                                      .slide(
+                                        duration: IN_DURATION,
+                                        curve: Curves.easeOut,
+                                        begin: Offset(-0.2, 0),
+                                      )
+                                      .fadeIn(
+                                        delay: IN_DELAY,
+                                        duration: IN_DURATION,
+                                        curve: Curves.easeOut,
+                                      ),
+                                ],
                               ),
                             ],
-                            const SizedBox(height: MEDIUM_SPACE),
-                            PlatformTextFormField(
-                              controller: _frequencyController,
-                              enabled: _taskProgress == null,
-                              textInputAction: TextInputAction.done,
-                              keyboardType: TextInputType.number,
-                              textAlign:
-                                  Platform.isAndroid ? TextAlign.center : null,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return "Please enter a frequency";
-                                }
-
-                                if (!StringUtils.isDigit(value)) {
-                                  return "Frequency must be a number";
-                                }
-
-                                final frequency = int.parse(value);
-
-                                if (frequency < 1) {
-                                  return "Frequency must be greater than 0";
-                                }
-
-                                return null;
-                              },
-                              material: (_, __) => MaterialTextFormFieldData(
-                                decoration: InputDecoration(
-                                  prefixIcon: Icon(context.platformIcons.time),
-                                  labelText: "Frequency",
-                                  prefixText: "Every",
-                                  suffix: Text("Minutes"),
-                                ),
-                              ),
-                              cupertino: (_, __) => CupertinoTextFormFieldData(
-                                placeholder: "Frequency (in minutes)",
-                                prefix: Icon(context.platformIcons.time),
-                              ),
-                            )
-                                .animate()
-                                .then(delay: IN_DELAY * 2)
-                                .slide(
-                                  duration: IN_DURATION,
-                                  curve: Curves.easeOut,
-                                  begin: Offset(0, 0.2),
-                                )
-                                .fadeIn(
-                                  delay: IN_DELAY,
-                                  duration: IN_DURATION,
-                                  curve: Curves.easeOut,
-                                ),
-                            const SizedBox(height: MEDIUM_SPACE),
-                            Wrap(
-                              alignment: WrapAlignment.spaceEvenly,
-                              spacing: SMALL_SPACE,
-                              crossAxisAlignment: WrapCrossAlignment.center,
-                              direction: Axis.horizontal,
-                              children: <Widget>[
-                                PlatformElevatedButton(
-                                  material: (_, __) =>
-                                      MaterialElevatedButtonData(
-                                    icon: Icon(Icons.dns_rounded),
-                                  ),
-                                  cupertino: (_, __) =>
-                                      CupertinoElevatedButtonData(
-                                    padding: getSmallButtonPadding(context),
-                                  ),
-                                  onPressed: _taskProgress != null
-                                      ? null
-                                      : () {
-                                          showPlatformModalSheet(
-                                            context: context,
-                                            material: MaterialModalSheetData(
-                                              backgroundColor:
-                                                  Colors.transparent,
-                                              isScrollControlled: true,
-                                              isDismissible: true,
-                                            ),
-                                            builder: (_) => RelaySelectSheet(
-                                              controller: _relaysController,
-                                            ),
-                                          );
-                                        },
-                                  child: Text(
-                                    _relaysController.relays.isEmpty
-                                        ? "Select Relays"
-                                        : "Selected ${_relaysController.relays.length} Relay${_relaysController.relays.length == 1 ? "" : "s"}",
-                                  ),
-                                )
-                                    .animate()
-                                    .then(delay: IN_DELAY * 4)
-                                    .slide(
-                                      duration: IN_DURATION,
-                                      curve: Curves.easeOut,
-                                      begin: Offset(0.2, 0),
-                                    )
-                                    .fadeIn(
-                                      delay: IN_DELAY,
-                                      duration: IN_DURATION,
-                                      curve: Curves.easeOut,
-                                    ),
-                                PlatformElevatedButton(
-                                  material: (_, __) =>
-                                      MaterialElevatedButtonData(
-                                    icon: const Icon(Icons.timer_rounded),
-                                  ),
-                                  cupertino: (_, __) =>
-                                      CupertinoElevatedButtonData(
-                                    padding: getSmallButtonPadding(context),
-                                  ),
-                                  onPressed: _taskProgress != null
-                                      ? null
-                                      : () async {
-                                          await showPlatformModalSheet(
-                                            context: context,
-                                            material: MaterialModalSheetData(
-                                              backgroundColor:
-                                                  Colors.transparent,
-                                              isScrollControlled: true,
-                                              isDismissible: true,
-                                            ),
-                                            builder: (_) => TimerWidgetSheet(
-                                              controller: _timersController,
-                                            ),
-                                          );
-                                        },
-                                  child: Text(
-                                    _timersController.timers.isEmpty
-                                        ? "Select Timers"
-                                        : "Selected ${_timersController.timers.length} Timer${_timersController.timers.length == 1 ? "" : "s"}",
-                                  ),
-                                )
-                                    .animate()
-                                    .then(delay: IN_DELAY * 5)
-                                    .slide(
-                                      duration: IN_DURATION,
-                                      curve: Curves.easeOut,
-                                      begin: Offset(-0.2, 0),
-                                    )
-                                    .fadeIn(
-                                      delay: IN_DELAY,
-                                      duration: IN_DURATION,
-                                      curve: Curves.easeOut,
-                                    ),
-                              ],
-                            ),
-                          ],
+                          ),
                         ),
                       ],
                     ),
