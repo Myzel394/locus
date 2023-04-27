@@ -14,7 +14,8 @@ class WarningText extends StatelessWidget {
   Widget build(BuildContext context) {
     final color =
         isCupertino(context) ? CupertinoColors.systemYellow : Colors.yellow;
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final isDarkMode =
+        MediaQuery.of(context).platformBrightness == Brightness.dark;
 
     if (isDarkMode) {
       return Row(
