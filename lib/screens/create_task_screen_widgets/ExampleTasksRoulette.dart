@@ -61,7 +61,7 @@ const STATIC_EXAMPLES = [
     ],
   ),
   TaskExample(
-    name: "1 Hour",
+    name: "1 hours",
     frequency: Duration(minutes: 1),
     realtime: true,
     timers: [
@@ -69,14 +69,14 @@ const STATIC_EXAMPLES = [
     ],
   ),
   TaskExample(
-    name: "6 Hour",
+    name: "6 hours",
     frequency: Duration(minutes: 15),
     timers: [
       DurationTimer(duration: Duration(hours: 6)),
     ],
   ),
   TaskExample(
-    name: "12 Hour",
+    name: "12 hours",
     frequency: Duration(minutes: 15),
     timers: [
       DurationTimer(duration: Duration(hours: 12)),
