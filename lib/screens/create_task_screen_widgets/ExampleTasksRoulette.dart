@@ -107,9 +107,11 @@ const STATIC_EXAMPLES = [
 
 class ExampleTasksRoulette extends StatelessWidget {
   final void Function(TaskExample) onSelected;
+  final bool disabled;
 
   const ExampleTasksRoulette({
     required this.onSelected,
+    this.disabled = false,
     Key? key,
   }) : super(key: key);
 
@@ -122,9 +124,11 @@ class ExampleTasksRoulette extends StatelessWidget {
             .mapIndexed(
               (index, example) => PlatformTextButton(
                 padding: getSmallButtonPadding(context),
-                onPressed: () {
-                  onSelected(example);
-                },
+                onPressed: disabled
+                    ? null
+                    : () {
+                        onSelected(example);
+                      },
                 child: Text(
                   example.name,
                   style: TextStyle(
