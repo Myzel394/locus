@@ -5,6 +5,7 @@ import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:locus/constants/spacing.dart';
+import 'package:locus/screens/create_task_screen_widgets/ExampleTasksRoulette.dart';
 import 'package:locus/screens/create_task_screen_widgets/SignKeyLottie.dart';
 import 'package:locus/screens/create_task_screen_widgets/ViewKeyLottie.dart';
 import 'package:locus/services/task_service.dart';
@@ -32,6 +33,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
   final _formKey = GlobalKey<FormState>();
   String? errorMessage;
   bool anotherTaskAlreadyExists = false;
+  bool showExamples = false;
 
   TaskCreationProgress? _taskProgress;
 
@@ -164,47 +166,72 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                         const SizedBox(height: LARGE_SPACE),
                         Column(
                           children: <Widget>[
-                            PlatformTextFormField(
-                              controller: _nameController,
-                              enabled: _taskProgress == null,
-                              textInputAction: TextInputAction.next,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return "Please enter a name";
+                            Focus(
+                              onFocusChange: (hasFocus) {
+                                if (!hasFocus) {
+                                  return;
                                 }
 
-                                if (!StringUtils.isAscii(value)) {
-                                  return "Name contains invalid characters";
-                                }
-
-                                return null;
+                                setState(() {
+                                  showExamples = true;
+                                });
                               },
-                              keyboardType: TextInputType.name,
-                              autofillHints: const [AutofillHints.name],
-                              material: (_, __) => MaterialTextFormFieldData(
-                                decoration: InputDecoration(
-                                  labelText: "Name",
-                                  prefixIcon: Icon(context.platformIcons.tag),
+                              child: PlatformTextFormField(
+                                controller: _nameController,
+                                enabled: _taskProgress == null,
+                                textInputAction: TextInputAction.next,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return "Please enter a name";
+                                  }
+
+                                  if (!StringUtils.isAscii(value)) {
+                                    return "Name contains invalid characters";
+                                  }
+
+                                  return null;
+                                },
+                                keyboardType: TextInputType.name,
+                                autofillHints: const [AutofillHints.name],
+                                material: (_, __) => MaterialTextFormFieldData(
+                                  decoration: InputDecoration(
+                                    labelText: "Name",
+                                    prefixIcon: Icon(context.platformIcons.tag),
+                                  ),
                                 ),
-                              ),
-                              cupertino: (_, __) => CupertinoTextFormFieldData(
-                                placeholder: "Name",
-                                prefix: Icon(context.platformIcons.tag),
-                              ),
-                            )
-                                .animate()
-                                .slide(
-                                  duration: IN_DURATION,
-                                  curve: Curves.easeOut,
-                                  begin: Offset(0, 0.2),
-                                )
-                                .fadeIn(
-                                  delay: IN_DELAY,
-                                  duration: IN_DURATION,
-                                  curve: Curves.easeOut,
+                                cupertino: (_, __) =>
+                                    CupertinoTextFormFieldData(
+                                  placeholder: "Name",
+                                  prefix: Icon(context.platformIcons.tag),
                                 ),
+                              )
+                                  .animate()
+                                  .slide(
+                                    duration: IN_DURATION,
+                                    curve: Curves.easeOut,
+                                    begin: Offset(0, 0.2),
+                                  )
+                                  .fadeIn(
+                                    delay: IN_DELAY,
+                                    duration: IN_DURATION,
+                                    curve: Curves.easeOut,
+                                  ),
+                            ),
+                            if (showExamples)
+                              ExampleTasksRoulette(
+                                onSelected: (example) {
+                                  FocusManager.instance.primaryFocus?.unfocus();
+
+                                  _nameController.text = example.name;
+                                  _frequencyController.text =
+                                      example.frequency.inMinutes.toString();
+                                  _timersController
+                                    ..clear()
+                                    ..addAll(example.timers);
+                                },
+                              ),
                             if (anotherTaskAlreadyExists) ...[
-                              const SizedBox(height: SMALL_SPACE),
+                              const SizedBox(height: MEDIUM_SPACE),
                               Row(
                                 children: <Widget>[
                                   const Icon(
@@ -258,7 +285,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                 ),
                               ),
                               cupertino: (_, __) => CupertinoTextFormFieldData(
-                                placeholder: "Frequency",
+                                placeholder: "Frequency (in minutes)",
                                 prefix: Icon(context.platformIcons.time),
                               ),
                             )

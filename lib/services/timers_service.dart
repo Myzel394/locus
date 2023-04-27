@@ -11,8 +11,6 @@ abstract class TaskRuntimeTimer {
   // A static value that should return whether the timer can potentially run forever
   bool isInfinite();
 
-  bool shouldRun(final DateTime now);
-
   DateTime? nextStartDate(final DateTime now);
 
   DateTime? nextEndDate(final DateTime now);
@@ -53,26 +51,14 @@ class WeekdayTimer extends TaskRuntimeTimer {
     return "$dayString ${startTime.format(context)} - ${endTime.format(context)}";
   }
 
-  get isAllDay => startTime.hour == 0 && startTime.minute == 0 && endTime.hour == 23 && endTime.minute == 59;
+  get isAllDay =>
+      startTime.hour == 0 &&
+      startTime.minute == 0 &&
+      endTime.hour == 23 &&
+      endTime.minute == 59;
 
   @override
   bool isInfinite() => true;
-
-  @override
-  bool shouldRun(final DateTime now) {
-    if (now.weekday != day) {
-      return false;
-    }
-
-    if (isAllDay) {
-      return true;
-    }
-
-    final start = DateTime(now.year, now.month, now.day, startTime.hour, startTime.minute);
-    final end = DateTime(now.year, now.month, now.day, endTime.hour, endTime.minute);
-
-    return now.isAfter(start) && now.isBefore(end);
-  }
 
   @override
   Map<String, dynamic> toJSON() {
@@ -86,28 +72,31 @@ class WeekdayTimer extends TaskRuntimeTimer {
 
   @override
   DateTime nextStartDate(final DateTime now) {
-    print("now weekday: ${now.weekday}, now: $now, this day: $day");
     if (now.weekday != day) {
       // Find next day that matches the weekday
       final nextDay = now.next(day);
-      return DateTime(nextDay.year, nextDay.month, nextDay.day, startTime.hour, startTime.minute);
+      return DateTime(nextDay.year, nextDay.month, nextDay.day, startTime.hour,
+          startTime.minute);
     }
 
     // Check if start time is in the future, if yes, return that
-    final start = DateTime(now.year, now.month, now.day, startTime.hour, startTime.minute);
+    final start = DateTime(
+        now.year, now.month, now.day, startTime.hour, startTime.minute);
     if (now.isBefore(start)) {
       return start;
     }
 
     // Check if end time is in the future, if yes, return now
-    final end = DateTime(now.year, now.month, now.day, endTime.hour, endTime.minute);
+    final end =
+        DateTime(now.year, now.month, now.day, endTime.hour, endTime.minute);
     if (now.isBefore(end)) {
       return now;
     }
 
     // Find next day that matches the weekday
     final nextDay = now.next(day);
-    return DateTime(nextDay.year, nextDay.month, nextDay.day, startTime.hour, startTime.minute);
+    return DateTime(nextDay.year, nextDay.month, nextDay.day, startTime.hour,
+        startTime.minute);
   }
 
   @override
@@ -115,7 +104,8 @@ class WeekdayTimer extends TaskRuntimeTimer {
     if (now.weekday != day) {
       // Find next day that matches the weekday
       final nextDay = now.next(day);
-      return DateTime(nextDay.year, nextDay.month, nextDay.day, endTime.hour, endTime.minute);
+      return DateTime(nextDay.year, nextDay.month, nextDay.day, endTime.hour,
+          endTime.minute);
     }
 
     return DateTime(now.year, now.month, now.day, endTime.hour, endTime.minute);
@@ -130,69 +120,45 @@ class WeekdayTimer extends TaskRuntimeTimer {
   }
 }
 
-class TimedTimer extends TaskRuntimeTimer {
+class DurationTimer extends TaskRuntimeTimer {
   // A timer that runs for a certain amount of time
-  final DateTime startTime;
-  final DateTime endTime;
+  final Duration duration;
 
-  const TimedTimer({
-    required this.startTime,
-    required this.endTime,
+  const DurationTimer({
+    required this.duration,
   });
 
-  static const IDENTIFIER = "timed";
+  static const IDENTIFIER = "duration";
 
   @override
   String format(final BuildContext context) {
-    return "${DateFormat.yMEd().format(startTime)} ${DateFormat.yMEd().format(endTime)}";
+    return duration.toString();
   }
 
   @override
   bool isInfinite() => false;
 
   @override
-  bool shouldRun(final DateTime now) {
-    return now.isAfter(startTime) && now.isBefore(endTime);
-  }
-
-  @override
   Map<String, dynamic> toJSON() {
     return {
       "_IDENTIFIER": IDENTIFIER,
-      "startTime": startTime.toIso8601String(),
-      "endTime": endTime.toIso8601String(),
+      "duration": duration,
     };
   }
 
   @override
   DateTime? nextStartDate(final DateTime now) {
-    // Check if start time is in the future, if yes, return that
-    if (now.isBefore(startTime)) {
-      return startTime;
-    }
-
-    // Check if end time is in the future, if yes, return now
-    if (now.isBefore(endTime)) {
-      return now;
-    }
-
-    // Timer already ended
-    return null;
+    return now;
   }
 
-  static TimedTimer fromJSON(final Map<String, dynamic> json) {
-    return TimedTimer(
-      startTime: DateTime.parse(json["startTime"]),
-      endTime: DateTime.parse(json["endTime"]),
+  static DurationTimer fromJSON(final Map<String, dynamic> json) {
+    return DurationTimer(
+      duration: json["duration"],
     );
   }
 
   @override
   DateTime? nextEndDate(final DateTime now) {
-    if (now.isBefore(endTime)) {
-      return endTime;
-    }
-
-    return null;
+    return now.add(duration);
   }
 }

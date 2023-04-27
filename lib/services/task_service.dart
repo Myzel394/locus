@@ -84,8 +84,8 @@ class Task extends ChangeNotifier {
         switch (timer["_IDENTIFIER"]) {
           case WeekdayTimer.IDENTIFIER:
             return WeekdayTimer.fromJSON(timer);
-          case TimedTimer.IDENTIFIER:
-            return TimedTimer.fromJSON(timer);
+          case DurationTimer.IDENTIFIER:
+            return DurationTimer.fromJSON(timer);
           default:
             throw Exception("Unknown timer type");
         }
@@ -197,15 +197,10 @@ class Task extends ChangeNotifier {
     };
   }
 
-  DateTime? nextStartDate({final DateTime? date}) => findNextStartDate(timers, startDate: date);
+  DateTime? nextStartDate({final DateTime? date}) =>
+      findNextStartDate(timers, startDate: date);
 
   DateTime? nextEndDate() => findNextEndDate(timers);
-
-  bool shouldRun() {
-    final now = DateTime.now();
-
-    return timers.any((timer) => timer.shouldRun(now));
-  }
 
   bool isInfinite() => timers.any((timer) => timer.isInfinite());
 
@@ -230,7 +225,9 @@ class Task extends ChangeNotifier {
   // Starts the task. This will schedule the task to run at the next expected time.
   // You can find out when the task will run by calling `nextStartDate`.
   // Returns the next start date of the task OR `null` if the task is not scheduled to run.
-  Future<DateTime?> startSchedule({final bool startNowIfNextRunIsUnknown = false, final DateTime? startDate}) async {
+  Future<DateTime?> startSchedule(
+      {final bool startNowIfNextRunIsUnknown = false,
+      final DateTime? startDate}) async {
     final now = startDate ?? DateTime.now();
     DateTime? nextStartDate = this.nextStartDate(date: now);
 
@@ -278,7 +275,8 @@ class Task extends ChangeNotifier {
   // Returns the next date the task will run OR `null` if the task is not scheduled to run.
   Future<DateTime?> startScheduleTomorrow() {
     final tomorrow = DateTime.now().add(const Duration(days: 1));
-    final nextDate = DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 6, 0, 0);
+    final nextDate =
+        DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 6, 0, 0);
 
     return startSchedule(startDate: nextDate);
   }
@@ -399,7 +397,8 @@ class Task extends ChangeNotifier {
       privateKey: nostrPrivateKey,
     );
     final nostrMessage = jsonEncode(encrypted.cipherText);
-    final publishedEvent = await manager.publishMessage(nostrMessage, kind: 1001);
+    final publishedEvent =
+        await manager.publishMessage(nostrMessage, kind: 1001);
 
     onProgress?.call(TaskLinkPublishProgress.creatingURI);
 
@@ -500,6 +499,20 @@ class TaskService extends ChangeNotifier {
   }
 }
 
+class TaskExample {
+  final String name;
+  final Duration frequency;
+  final List<TaskRuntimeTimer> timers;
+  final bool realtime;
+
+  const TaskExample({
+    required this.name,
+    required this.frequency,
+    required this.timers,
+    this.realtime = false,
+  });
+}
+
 DateTime? findNextStartDate(final List<TaskRuntimeTimer> timers,
     {final DateTime? startDate, final bool onlyFuture = true}) {
   final now = startDate ?? DateTime.now();
@@ -519,7 +532,8 @@ DateTime? findNextStartDate(final List<TaskRuntimeTimer> timers,
   return nextDates.first;
 }
 
-DateTime? findNextEndDate(final List<TaskRuntimeTimer> timers, {final DateTime? startDate}) {
+DateTime? findNextEndDate(final List<TaskRuntimeTimer> timers,
+    {final DateTime? startDate}) {
   final now = startDate ?? DateTime.now();
   final nextDates = List<DateTime>.from(
     timers.map((timer) => timer.nextEndDate(now)).where((date) => date != null),
