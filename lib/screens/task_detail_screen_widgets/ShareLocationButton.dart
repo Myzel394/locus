@@ -1,10 +1,15 @@
 import 'dart:convert';
+import 'dart:ffi';
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:locus/constants/spacing.dart';
 import 'package:locus/services/task_service.dart';
+import 'package:locus/widgets/SingularElementDialog.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
@@ -102,52 +107,42 @@ class _ShareLocationButtonState extends State<ShareLocationButton> {
 
           await FileSaver.instance.saveFile(
             name: "viewkey.json",
-            bytes:
-            const Utf8Encoder().convert(widget.task.generateViewKeyContent()),
+            bytes: const Utf8Encoder()
+                .convert(widget.task.generateViewKeyContent()),
           );
           break;
         case "qr":
           final url = await widget.task.generateLink();
 
-          await showPlatformModalSheet(
-            context: context,
-            material: MaterialModalSheetData(
-              backgroundColor: Colors.transparent,
-              isDismissible: true,
-            ),
-            cupertino: CupertinoModalSheetData(
-              barrierDismissible: true,
-            ),
-            builder: (context) =>
-                ModalSheet(
-                  child: Expanded(
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: <Widget>[
-                          Text(
-                            "Scan this QR Code to import task ${widget.task
-                                .name}",
-                            style: getTitle2TextStyle(context),
-                            textAlign: TextAlign.center,
-                          ),
-                          QrImage(
-                            data: url,
-                            errorCorrectionLevel: QrErrorCorrectLevel.H,
-                            gapless: false,
-                            backgroundColor: Colors.white,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-          );
+          if (!mounted) {
+            return;
+          }
 
+          await showSingularElementDialog(
+              context: context, builder: (context) =>
+              Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: List<Widget>.from(
+                  [
+                    Text(
+                      "Scan this QR Code to import task ${widget.task.name}",
+                      style: getTitle2TextStyle(context),
+                      textAlign: TextAlign.center,
+                    ),
+                    isMaterial(context)
+                        ? const SizedBox(height: LARGE_SPACE)
+                        : null,
+                    QrImage(
+                      data: url,
+                      errorCorrectionLevel: QrErrorCorrectLevel.H,
+                      gapless: false,
+                      backgroundColor: Colors.white,
+                    ),
+                  ].where((element) => element != null),
+                ),
+              )
+          );
           break;
         case "share":
           final file = XFile((await _createTempViewKeyFile()).path);

@@ -36,13 +36,13 @@ Color getButtonTextColor(final BuildContext context) => platformThemeData(
 
 TextStyle getTitleTextStyle(final BuildContext context) => platformThemeData(
       context,
-      material: (data) => data.textTheme.headline1!,
+      material: (data) => data.textTheme.headlineLarge!,
       cupertino: (data) => data.textTheme.navLargeTitleTextStyle,
     );
 
 TextStyle getTitle2TextStyle(final BuildContext context) => platformThemeData(
       context,
-      material: (data) => data.textTheme.headline2!,
+      material: (data) => data.textTheme.headlineSmall!,
       cupertino: (data) => data.textTheme.navTitleTextStyle,
     );
 
