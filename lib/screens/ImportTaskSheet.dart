@@ -134,6 +134,45 @@ class _ImportTaskSheetState extends State<ImportTaskSheet>
     }
   }
 
+  Future<void> _importURL(final String url) async {
+    final taskService = context.read<TaskService>();
+    final viewService = context.read<ViewService>();
+
+    try {
+      setState(() {
+        isLoading = true;
+      });
+
+      final parameters = TaskView.parseLink(url);
+      final taskView = await TaskView.fetchFromNostr(parameters);
+      final errorMessage = await taskView.validate(
+        taskService: taskService,
+        viewService: viewService,
+      );
+
+      if (errorMessage == null) {
+        setState(() {
+          _taskView = taskView;
+          _screen = ImportScreen.askName;
+        });
+      } else {
+        setState(() {
+          this.errorMessage = errorMessage;
+          _screen = ImportScreen.error;
+        });
+      }
+    } catch (_) {
+      setState(() {
+        errorMessage = "An error occurred while fetching the task.";
+        _screen = ImportScreen.error;
+      });
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -177,18 +216,7 @@ class _ImportTaskSheetState extends State<ImportTaskSheet>
                     )
                   else if (_screen == ImportScreen.askURL)
                     URLForm(
-                      onSubmitted: (taskView) {
-                        setState(() {
-                          _taskView = taskView;
-                          _screen = ImportScreen.askName;
-                        });
-                      },
-                      onTaskError: (message) {
-                        setState(() {
-                          errorMessage = message;
-                          _screen = ImportScreen.error;
-                        });
-                      },
+                      onImport: _importURL,
                     )
                   else if (_screen == ImportScreen.askName)
                     NameForm(

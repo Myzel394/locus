@@ -89,5 +89,7 @@
     <array>
         <string>task-identifier</string>
     </array>
+    <key>NSCameraUsageDescription</key>
+    <string>Use the camera to import tasks by QR codes.</string>
 </dict>
 </plist>

@@ -9,12 +9,10 @@ import '../../utils/theme.dart';
 import 'URLImporter.dart';
 
 class URLForm extends StatefulWidget {
-  final void Function(TaskView) onSubmitted;
-  final void Function(String) onTaskError;
+  final Future<void> Function(String url) onImport;
 
   const URLForm({
-    required this.onSubmitted,
-    required this.onTaskError,
+    required this.onImport,
     Key? key,
   }) : super(key: key);
 
@@ -70,39 +68,30 @@ class _URLFormState extends State<URLForm> {
             onPressed: isFetching
                 ? null
                 : () async {
-              if (!_formKey.currentState!.validate()) {
-                return;
-              }
+                    if (!_formKey.currentState!.validate()) {
+                      return;
+                    }
 
-              try {
-                setState(() {
-                  isFetching = true;
-                });
+                    try {
+                      setState(() {
+                        isFetching = true;
+                      });
 
-                final parameters = TaskView.parseLink(_urlController.text);
-                final taskView = await TaskView.fetchFromNostr(parameters);
-                final errorMessage = await taskView.validate(taskService: taskService, viewService: viewService);
-
-                if (errorMessage != null) {
-                  widget.onTaskError(errorMessage);
-                  return;
-                } else {
-                  widget.onSubmitted(taskView);
-                }
-              } catch (_) {
-                setState(() {
-                  errorMessage = "An error occurred while fetching the task.";
-                });
-              } finally {
-                setState(() {
-                  isFetching = false;
-                });
-              }
-            },
-            material: (_, __) =>
-                MaterialElevatedButtonData(
-                  icon: const Icon(Icons.link_rounded),
-                ),
+                      await widget.onImport(_urlController.text);
+                    } catch (_) {
+                      setState(() {
+                        errorMessage =
+                            "An error occurred while fetching the task.";
+                      });
+                    } finally {
+                      setState(() {
+                        isFetching = false;
+                      });
+                    }
+                  },
+            material: (_, __) => MaterialElevatedButtonData(
+              icon: const Icon(Icons.link_rounded),
+            ),
             child: const Text("Import URL"),
           ),
           if (errorMessage != null) ...[
