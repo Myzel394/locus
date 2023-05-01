@@ -10,14 +10,15 @@ Future<void Function()> getLocations({
   required final List<String> relays,
   required void Function(LocationPointService) onLocationFetched,
   required void Function() onEnd,
-  required void Function() onError,
   bool onlyLatestPosition = false,
+  DateTime? from,
 }) async {
   final request = Request(generate64RandomHexChars(), [
     Filter(
       kinds: [1000],
       authors: [nostrPublicKey],
       limit: onlyLatestPosition ? 1 : null,
+      since: from == null ? null : (from.millisecondsSinceEpoch / 1000).floor(),
     ),
   ]);
 
@@ -63,14 +64,6 @@ Future<void Function()> getLocations({
         if (decryptionProcesses.isEmpty && hasReceivedEvent) {
           onEnd();
         }
-
-        Future.delayed(const Duration(seconds: 20)).then((_) {
-          if (!hasReceivedEvent) {
-            // Something went wrong, there should be at least one event after this time
-            onError();
-          }
-        });
-
         break;
     }
   });

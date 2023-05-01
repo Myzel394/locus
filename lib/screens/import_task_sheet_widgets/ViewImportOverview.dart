@@ -68,11 +68,6 @@ class _ViewImportOverviewState extends State<ViewImportOverview> {
           _isLoading = false;
         });
       },
-      onError: () {
-        setState(() {
-          _isError = true;
-        });
-      },
     );
   }
 
@@ -120,7 +115,7 @@ class _ViewImportOverviewState extends State<ViewImportOverview> {
                     }
                   }),
               subtitle: const Text("Public Sign Key"),
-              leading: const Icon(Icons.edit),
+              leading: Icon(context.platformIcons.pen),
               trailing: const SizedBox.shrink(),
             )
           ],

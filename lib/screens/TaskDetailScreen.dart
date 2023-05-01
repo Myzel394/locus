@@ -77,11 +77,6 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
           _isLoading = false;
         });
       },
-      onError: () {
-        setState(() {
-          _isError = true;
-        });
-      },
     );
   }
 
