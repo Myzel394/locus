@@ -2,6 +2,7 @@ import 'dart:collection';
 import 'dart:io';
 
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/screens/task_detail_screen_widgets/Details.dart';
@@ -94,88 +95,87 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
         material: (_, __) => MaterialAppBarData(
           centerTitle: true,
         ),
-      ),
-      body: SafeArea(
-        child: Builder(
-          builder: (context) => Center(
-            child: _isError
-                ? Center(
-                    child: Text(
-                      "There was an error fetching the locations. Please try again later.",
-                      style: getBodyTextTextStyle(context).copyWith(
-                        color: Colors.red,
-                      ),
-                    ),
-                  )
-                : _isLoading
-                    ? Padding(
-                        padding: const EdgeInsets.all(MEDIUM_SPACE),
-                        child: LocationsLoadingScreen(
-                          locations: _controller.locations,
-                        ),
-                      )
-                    : PageView(
-                        physics: _isShowingDetails
-                            ? const AlwaysScrollableScrollPhysics()
-                            : const NeverScrollableScrollPhysics(),
-                        scrollDirection: Axis.vertical,
-                        controller: _pageController,
-                        children: <Widget>[
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: <Widget>[
-                              Expanded(
-                                flex: 9,
-                                child: LocationsMap(
-                                  controller: _controller,
-                                ),
-                              ),
-                              Expanded(
-                                flex: 1,
-                                child: PlatformTextButton(
-                                  material: (_, __) => MaterialTextButtonData(
-                                    style: ButtonStyle(
-                                      // Not rounded, but square
-                                      shape: MaterialStateProperty.all(
-                                        const RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.zero,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  child: Text("View Details"),
-                                  onPressed: () {
-                                    _pageController.animateToPage(
-                                      1,
-                                      duration:
-                                          const Duration(milliseconds: 500),
-                                      curve: Curves.easeInOut,
-                                    );
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                          Expanded(
-                            child: SingleChildScrollView(
-                              child: Details(
-                                locations: _controller.locations,
-                                task: widget.task,
-                                onGoBack: () {
-                                  _pageController.animateToPage(
-                                    0,
-                                    duration: const Duration(milliseconds: 500),
-                                    curve: Curves.easeInOut,
-                                  );
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-          ),
+        cupertino: (_, __) => CupertinoNavigationBarData(
+          backgroundColor:
+              CupertinoTheme.of(context).barBackgroundColor.withOpacity(.5),
         ),
       ),
+      body: _isError
+          ? Center(
+              child: Text(
+                "There was an error fetching the locations. Please try again later.",
+                style: getBodyTextTextStyle(context).copyWith(
+                  color: Colors.red,
+                ),
+              ),
+            )
+          : _isLoading
+              ? SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.all(MEDIUM_SPACE),
+                    child: LocationsLoadingScreen(
+                      locations: _controller.locations,
+                    ),
+                  ),
+                )
+              : PageView(
+                  physics: _isShowingDetails
+                      ? const AlwaysScrollableScrollPhysics()
+                      : const NeverScrollableScrollPhysics(),
+                  scrollDirection: Axis.vertical,
+                  controller: _pageController,
+                  children: <Widget>[
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        Expanded(
+                          flex: 9,
+                          child: LocationsMap(
+                            controller: _controller,
+                          ),
+                        ),
+                        Expanded(
+                          flex: 1,
+                          child: PlatformTextButton(
+                            material: (_, __) => MaterialTextButtonData(
+                              style: ButtonStyle(
+                                // Not rounded, but square
+                                shape: MaterialStateProperty.all(
+                                  const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.zero,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            child: Text("View Details"),
+                            onPressed: () {
+                              _pageController.animateToPage(
+                                1,
+                                duration: const Duration(milliseconds: 500),
+                                curve: Curves.easeInOut,
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Details(
+                          locations: _controller.locations,
+                          task: widget.task,
+                          onGoBack: () {
+                            _pageController.animateToPage(
+                              0,
+                              duration: const Duration(milliseconds: 500),
+                              curve: Curves.easeInOut,
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
     );
   }
 }

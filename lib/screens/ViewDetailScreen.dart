@@ -1,4 +1,5 @@
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:locus/api/get-locations.dart';
 import 'package:locus/services/view_service.dart';
@@ -131,6 +132,10 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
         material: (_, __) => MaterialAppBarData(
           centerTitle: true,
         ),
+        cupertino: (_, __) => CupertinoNavigationBarData(
+          backgroundColor:
+              CupertinoTheme.of(context).barBackgroundColor.withOpacity(.5),
+        ),
       ),
       body: _isError
           ? Center(
@@ -142,10 +147,12 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
               ),
             )
           : _isLoading
-              ? Padding(
-                  padding: const EdgeInsets.all(MEDIUM_SPACE),
-                  child: LocationsLoadingScreen(
-                    locations: _controller.locations,
+              ? SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.all(MEDIUM_SPACE),
+                    child: LocationsLoadingScreen(
+                      locations: _controller.locations,
+                    ),
                   ),
                 )
               : Column(
