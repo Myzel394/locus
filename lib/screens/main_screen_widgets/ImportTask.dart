@@ -34,10 +34,7 @@ class _ImportTaskState extends State<ImportTask> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final topColor = Theme
-        .of(context)
-        .colorScheme
-        .primary;
+    final topColor = Theme.of(context).colorScheme.primary;
     final topColor2 = HSLColor.fromColor(topColor).withLightness(0.5).toColor();
     final topColor3 = HSLColor.fromColor(topColor).withLightness(0.3).toColor();
 
@@ -112,36 +109,43 @@ class _ImportTaskState extends State<ImportTask> with TickerProviderStateMixin {
               initialScreen = await showCupertinoModalPopup(
                 context: context,
                 barrierDismissible: true,
-                builder: (cupertino) =>
-                    CupertinoActionSheet(
-                      title: Text("Import a task"),
-                      message: Text("How would you like to import?"),
-                      actions: <CupertinoActionSheetAction>[
-                        CupertinoActionSheetAction(
-                          child: const Text("Import URL"),
-                          isDefaultAction: true,
-                          onPressed: () {
-                            Navigator.of(context).pop(ImportScreen.askURL);
-                          },
-                        ),
-                        CupertinoActionSheetAction(
-                          child: const Text("Import file"),
-                          isDefaultAction: true,
-                          onPressed: () {
-                            Navigator.of(context).pop(ImportScreen.importFile);
-                          },
-                        ),
-                        CupertinoActionSheetAction(
-                          child: const Text("Scan QR code"),
-                          isDefaultAction: true,
-                          onPressed: () {
-                            Navigator.of(context).pop(ImportScreen.scanQR);
-                          },
-                        ),
-                      ],
-                    ),
+                builder: (cupertino) => CupertinoActionSheet(
+                  title: Text("Import a task"),
+                  message: Text("How would you like to import?"),
+                  actions: createCancellableDialogActions(
+                    context,
+                    [
+                      CupertinoActionSheetAction(
+                        child: const Text("Import URL"),
+                        isDefaultAction: true,
+                        onPressed: () {
+                          Navigator.of(context).pop(ImportScreen.askURL);
+                        },
+                      ),
+                      CupertinoActionSheetAction(
+                        child: const Text("Import file"),
+                        isDefaultAction: true,
+                        onPressed: () {
+                          Navigator.of(context).pop(ImportScreen.importFile);
+                        },
+                      ),
+                      CupertinoActionSheetAction(
+                        child: const Text("Scan QR code"),
+                        isDefaultAction: true,
+                        onPressed: () {
+                          Navigator.of(context).pop(ImportScreen.scanQR);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
               );
             }
+
+            if (!mounted) {
+              return;
+            }
+
             await showPlatformModalSheet(
               context: context,
               material: MaterialModalSheetData(
@@ -155,10 +159,9 @@ class _ImportTaskState extends State<ImportTask> with TickerProviderStateMixin {
 
             _controller.forward();
           },
-          material: (_, __) =>
-              MaterialElevatedButtonData(
-                icon: Icon(Icons.file_download_outlined),
-              ),
+          material: (_, __) => MaterialElevatedButtonData(
+            icon: Icon(Icons.file_download_outlined),
+          ),
           child: Text("Import Task"),
         ),
       ],
