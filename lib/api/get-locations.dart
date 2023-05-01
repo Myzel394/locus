@@ -11,11 +11,13 @@ Future<void Function()> getLocations({
   required void Function(LocationPointService) onLocationFetched,
   required void Function() onEnd,
   required void Function() onError,
+  bool onlyLatestPosition = false,
 }) async {
   final request = Request(generate64RandomHexChars(), [
     Filter(
       kinds: [1000],
       authors: [nostrPublicKey],
+      limit: onlyLatestPosition ? 1 : null,
     ),
   ]);
 

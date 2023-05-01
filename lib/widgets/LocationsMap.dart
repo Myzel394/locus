@@ -94,9 +94,11 @@ class LocationsMapController extends ChangeNotifier {
 
 class LocationsMapAppleMaps extends StatefulWidget {
   final LocationsMapController controller;
+  final double initialZoomLevel;
 
   const LocationsMapAppleMaps({
     required this.controller,
+    required this.initialZoomLevel,
     Key? key,
   }) : super(key: key);
 
@@ -208,7 +210,7 @@ class _LocationsMapAppleMapsState extends State<LocationsMapAppleMaps> {
       key: Key(initialPosition.toString()),
       initialCameraPosition: AppleMaps.CameraPosition(
         target: initialPosition,
-        zoom: 16,
+        zoom: widget.initialZoomLevel,
       ),
       onMapCreated: (controller) {
         _controller = controller;
@@ -254,9 +256,11 @@ class _LocationsMapAppleMapsState extends State<LocationsMapAppleMaps> {
 
 class LocationsMapOSM extends StatefulWidget {
   final LocationsMapController controller;
+  final double initialZoomLevel;
 
   const LocationsMapOSM({
     required this.controller,
+    required this.initialZoomLevel,
     Key? key,
   }) : super(key: key);
 
@@ -334,7 +338,7 @@ class _LocationsMapOSMState extends State<LocationsMapOSM> {
   Widget build(BuildContext context) {
     return OSMFlutter(
       controller: _controller,
-      initZoom: 15,
+      initZoom: widget.initialZoomLevel,
       trackMyPosition: true,
       androidHotReloadSupport: kDebugMode,
       onMapIsReady: (controller) {
@@ -349,9 +353,11 @@ class _LocationsMapOSMState extends State<LocationsMapOSM> {
 
 class LocationsMap extends StatelessWidget {
   final LocationsMapController controller;
+  final double initialZoomLevel;
 
   const LocationsMap({
     required this.controller,
+    this.initialZoomLevel = 15,
     Key? key,
   }) : super(key: key);
 
@@ -360,10 +366,12 @@ class LocationsMap extends StatelessWidget {
     if (Platform.isIOS) {
       return LocationsMapAppleMaps(
         controller: controller,
+        initialZoomLevel: initialZoomLevel,
       );
     }
     return LocationsMapOSM(
       controller: controller,
+      initialZoomLevel: initialZoomLevel,
     );
   }
 }
