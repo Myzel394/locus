@@ -1,10 +1,9 @@
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 import 'package:locus/api/get-locations.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:locus/widgets/FillUpPaint.dart';
-import 'package:visibility_detector/visibility_detector.dart';
+import 'package:locus/widgets/LocationsMap.dart';
 
 import '../constants/spacing.dart';
 import '../services/location_point_service.dart';
@@ -19,7 +18,8 @@ class LineSliderTickMarkShape extends SliderTickMarkShape {
   }) : super();
 
   @override
-  Size getPreferredSize({required SliderThemeData sliderTheme, required bool isEnabled}) {
+  Size getPreferredSize(
+      {required SliderThemeData sliderTheme, required bool isEnabled}) {
     // We don't need this
     return Size.zero;
   }
@@ -37,10 +37,14 @@ class LineSliderTickMarkShape extends SliderTickMarkShape {
   }) {
     // This block is just copied from `slider_theme`
     final bool isTickMarkRightOfThumb = center.dx > thumbCenter.dx;
-    final begin =
-        isTickMarkRightOfThumb ? sliderTheme.disabledInactiveTickMarkColor : sliderTheme.disabledActiveTickMarkColor;
-    final end = isTickMarkRightOfThumb ? sliderTheme.inactiveTickMarkColor : sliderTheme.activeTickMarkColor;
-    final Paint paint = Paint()..color = ColorTween(begin: begin, end: end).evaluate(enableAnimation)!;
+    final begin = isTickMarkRightOfThumb
+        ? sliderTheme.disabledInactiveTickMarkColor
+        : sliderTheme.disabledActiveTickMarkColor;
+    final end = isTickMarkRightOfThumb
+        ? sliderTheme.inactiveTickMarkColor
+        : sliderTheme.activeTickMarkColor;
+    final Paint paint = Paint()
+      ..color = ColorTween(begin: begin, end: end).evaluate(enableAnimation)!;
 
     final trackHeight = sliderTheme.trackHeight!;
 
@@ -67,9 +71,8 @@ class ViewDetailScreen extends StatefulWidget {
 }
 
 class _ViewDetailScreenState extends State<ViewDetailScreen> {
-  late final MapController _controller;
   void Function()? _unsubscribeGetLocations;
-  final List<LocationPointService> _locations = [];
+  final LocationsMapController _controller = LocationsMapController();
   bool _isLoading = true;
   bool _isError = false;
 
@@ -79,16 +82,13 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
   void initState() {
     super.initState();
 
-    _controller = MapController(
-      initMapWithUserPosition: true,
-    );
     addListener();
   }
 
   @override
   void dispose() {
-    _controller.dispose();
     _unsubscribeGetLocations?.call();
+    _controller.dispose();
 
     super.dispose();
   }
@@ -100,7 +100,7 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
       nostrPublicKey: widget.view.nostrPublicKey,
       relays: widget.view.relays,
       onLocationFetched: (final LocationPointService location) {
-        _locations.add(location);
+        _controller.add(location);
         setState(() {});
       },
       onEnd: () {
@@ -116,64 +116,13 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
     );
   }
 
-  DateTime normalizeDateTime(final DateTime dateTime) => DateTime(
-        dateTime.year,
-        dateTime.month,
-        dateTime.day,
-        dateTime.hour,
-      );
-
-  // Groups the locations by hour and returns a map of the hour and the number of locations in that hour.
-  Map<DateTime, List<LocationPointService>> getLocationsPerHour() =>
-      _locations.fold({}, (final Map<DateTime, List<LocationPointService>> value, element) {
-        final date = normalizeDateTime(element.createdAt);
-
-        if (value.containsKey(date)) {
-          value[date]!.add(element);
-        } else {
-          value[date] = [element];
-        }
-
-        return value;
-      });
-
-  void drawPoints({final List<LocationPointService>? locations}) {
-    final List<LocationPointService> locs = locations ?? _locations;
-
-    _controller.removeAllCircle();
-
-    for (final location in locs) {
-      _controller.drawCircle(
-        CircleOSM(
-          key: "circle_${location.latitude}:${location.longitude}",
-          centerPoint: GeoPoint(
-            latitude: location.latitude,
-            longitude: location.longitude,
-          ),
-          radius: 200,
-          color: Colors.blue,
-          strokeWidth: location.accuracy < 10 ? 1 : 3,
-        ),
-      );
-    }
-  }
-
-  void goToLocation(final LocationPointService location) {
-    _controller.goToLocation(
-      GeoPoint(
-        latitude: location.latitude,
-        longitude: location.longitude,
-      ),
-    );
-    _controller.setZoom(zoomLevel: 15);
-  }
-
   @override
   Widget build(BuildContext context) {
-    final locationsPerHour = getLocationsPerHour();
+    final locationsPerHour = _controller.getLocationsPerHour();
     final locationsAmount = locationsPerHour.values.isEmpty
         ? 1
-        : locationsPerHour.values.fold(0, (value, element) => value + element.length);
+        : locationsPerHour.values
+            .fold(0, (value, element) => value + element.length);
     final shades = getPrimaryColorShades(context);
 
     return PlatformScaffold(
@@ -196,53 +145,47 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
               ? Padding(
                   padding: const EdgeInsets.all(MEDIUM_SPACE),
                   child: LocationsLoadingScreen(
-                    locations: _locations,
+                    locations: _controller.locations,
                   ),
                 )
               : Column(
                   children: <Widget>[
                     Expanded(
                       flex: 11,
-                      child: VisibilityDetector(
-                        key: const Key('map'),
-                        onVisibilityChanged: (visibility) {
-                          // Initial draw
-                          if (visibility.visibleFraction == 1) {
-                            drawPoints();
-                            goToLocation(_locations.last);
-                          }
-                        },
-                        child: OSMFlutter(
-                          controller: _controller,
-                          initZoom: 15,
-                        ),
+                      child: LocationsMap(
+                        controller: _controller,
                       ),
                     ),
                     Expanded(
                       flex: 1,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: List.generate(24, (index) => 23 - index).map((hour) {
-                          final date = DateTime.now().subtract(Duration(hours: hour));
-                          final normalizedDate = normalizeDateTime(date);
+                        children: List.generate(24, (index) => 23 - index)
+                            .map((hour) {
+                          final date =
+                              DateTime.now().subtract(Duration(hours: hour));
+                          final normalizedDate =
+                              LocationsMapController.normalizeDateTime(date);
 
                           return PlatformInkWell(
                             onTap: () {
-                              _controller.removeAllCircle();
+                              _controller.clear();
 
-                              if (locationsPerHour[normalizedDate] == null) {
-                                return;
+                              final locations =
+                                  locationsPerHour[normalizedDate] ?? [];
+
+                              if (locations.isNotEmpty) {
+                                _controller.addAll(locations);
+                                _controller.goTo(locations.last);
                               }
-
-                              drawPoints(
-                                locations: locationsPerHour[normalizedDate],
-                              );
-                              goToLocation(locationsPerHour[normalizedDate]!.last);
                             },
                             child: FillUpPaint(
                               color: shades[0]!,
-                              fillPercentage: (locationsPerHour[normalizedDate]?.length ?? 0).toDouble() /
-                                  locationsAmount.toDouble(),
+                              fillPercentage:
+                                  (locationsPerHour[normalizedDate]?.length ??
+                                              0)
+                                          .toDouble() /
+                                      locationsAmount.toDouble(),
                               size: Size(
                                 MediaQuery.of(context).size.width / 24,
                                 50,

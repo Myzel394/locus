@@ -24,7 +24,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 
 class Details extends StatefulWidget {
-  final UnmodifiableListView<LocationPointService> locations;
+  final Iterable<LocationPointService> locations;
   final Task task;
   final void Function() onGoBack;
 

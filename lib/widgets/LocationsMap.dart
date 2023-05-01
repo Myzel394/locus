@@ -1,18 +1,102 @@
+import 'dart:collection';
 import 'dart:io';
+import 'dart:async';
 
 import 'package:apple_maps_flutter/apple_maps_flutter.dart' as AppleMaps;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 
 import '../services/location_point_service.dart';
 
+class LocationsMapController extends ChangeNotifier {
+  // A controller for `LocationsMap`
+  // Basically a wrapper for `FlutterOSMPlugin` and `AppleMaps`
+  // Used to control the map from outside of the widget
+  final List<LocationPointService> _locations;
+
+  // To inform our wrappers to update the map, we use a stream.
+  // This emits event to which our wrappers listen to.
+  final StreamController<Map<String, dynamic>> _eventEmitter =
+      StreamController.broadcast();
+
+  LocationsMapController({
+    List<LocationPointService>? locations,
+  }) : _locations = locations ?? [];
+
+  static DateTime normalizeDateTime(final DateTime dateTime) => DateTime(
+        dateTime.year,
+        dateTime.month,
+        dateTime.day,
+        dateTime.hour,
+      );
+
+  Stream<Map<String, dynamic>> get eventListener => _eventEmitter.stream;
+
+  bool get useAppleMaps => Platform.isIOS;
+
+  UnmodifiableListView<LocationPointService> get locations =>
+      UnmodifiableListView(_locations);
+
+  @override
+  void dispose() {
+    _eventEmitter.close();
+
+    super.dispose();
+  }
+
+  void add(LocationPointService location) {
+    _locations.add(location);
+    notifyListeners();
+  }
+
+  void addAll(List<LocationPointService> locations) {
+    _locations.addAll(locations);
+    notifyListeners();
+  }
+
+  void clear() {
+    _locations.clear();
+    notifyListeners();
+  }
+
+  void remove(LocationPointService location) {
+    _locations.remove(location);
+    notifyListeners();
+  }
+
+  // Groups the locations by hour and returns a map of the hour and the number of locations in that hour.
+  Map<DateTime, List<LocationPointService>> getLocationsPerHour() =>
+      locations.fold(
+        {},
+        (final Map<DateTime, List<LocationPointService>> value, element) {
+          final date = normalizeDateTime(element.createdAt);
+
+          if (value.containsKey(date)) {
+            value[date]!.add(element);
+          } else {
+            value[date] = [element];
+          }
+
+          return value;
+        },
+      );
+
+  void goTo(final LocationPointService location) {
+    _eventEmitter.add({
+      "type": "goTo",
+      "location": location,
+    });
+  }
+}
+
 class LocationsMapAppleMaps extends StatefulWidget {
-  final List<LocationPointService> locations;
+  final LocationsMapController controller;
 
   const LocationsMapAppleMaps({
-    required this.locations,
+    required this.controller,
     Key? key,
   }) : super(key: key);
 
@@ -21,10 +105,65 @@ class LocationsMapAppleMaps extends StatefulWidget {
 }
 
 class _LocationsMapAppleMapsState extends State<LocationsMapAppleMaps> {
-  late final AppleMaps.AppleMapController _controller;
+  AppleMaps.AppleMapController? _controller;
+  Position? userPosition;
+
+  @override
+  void initState() {
+    super.initState();
+
+    widget.controller.addListener(rebuild);
+    widget.controller.eventListener.listen(eventEmitterListener);
+
+    fetchInitialPosition();
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(rebuild);
+
+    super.dispose();
+  }
+
+  void eventEmitterListener(final Map<String, dynamic> data) async {
+    switch (data["type"]) {
+      case "goTo":
+        final location = data["location"] as LocationPointService;
+        final zoomLevel = await _controller!.getZoomLevel();
+
+        _controller!.animateCamera(
+          AppleMaps.CameraUpdate.newCameraPosition(
+            AppleMaps.CameraPosition(
+              target: AppleMaps.LatLng(
+                location.latitude,
+                location.longitude,
+              ),
+              zoom: zoomLevel ?? 16,
+            ),
+          ),
+        );
+        break;
+    }
+  }
+
+  Future<void> fetchInitialPosition() async {
+    final locationData = await Geolocator.getCurrentPosition(
+      // We want to get the position as fast as possible
+      desiredAccuracy: LocationAccuracy.lowest,
+      timeLimit: const Duration(seconds: 5),
+    );
+
+    setState(() {
+      userPosition = locationData;
+    });
+  }
+
+  void rebuild() {
+    setState(() {});
+  }
 
   String get snippetText {
-    final location = widget.locations.last;
+    final location = widget.controller.locations.last;
 
     final batteryInfo = location.batteryLevel == null
         ? ""
@@ -42,14 +181,30 @@ class _LocationsMapAppleMapsState extends State<LocationsMapAppleMaps> {
     ].where((element) => element.isNotEmpty).join("\n");
   }
 
+  AppleMaps.LatLng get initialPosition {
+    if (userPosition != null) {
+      return AppleMaps.LatLng(
+        userPosition!.latitude,
+        userPosition!.longitude,
+      );
+    }
+
+    if (widget.controller.locations.isEmpty) {
+      return const AppleMaps.LatLng(0, 0);
+    }
+
+    return AppleMaps.LatLng(
+      widget.controller.locations.last.latitude,
+      widget.controller.locations.last.longitude,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return AppleMaps.AppleMap(
+      key: Key(initialPosition.toString()),
       initialCameraPosition: AppleMaps.CameraPosition(
-        target: AppleMaps.LatLng(
-          widget.locations.last.latitude,
-          widget.locations.last.longitude,
-        ),
+        target: initialPosition,
         zoom: 16,
       ),
       onMapCreated: (controller) {
@@ -57,22 +212,24 @@ class _LocationsMapAppleMapsState extends State<LocationsMapAppleMaps> {
       },
       myLocationEnabled: true,
       myLocationButtonEnabled: true,
-      annotations: {
-        AppleMaps.Annotation(
-          annotationId: AppleMaps.AnnotationId(
-            "annotation_${widget.locations.last.latitude}:${widget.locations.last.longitude}",
-          ),
-          position: AppleMaps.LatLng(
-            widget.locations.last.latitude,
-            widget.locations.last.longitude,
-          ),
-          infoWindow: AppleMaps.InfoWindow(
-            title: "Last known location",
-            snippet: snippetText,
-          ),
-        ),
-      },
-      circles: widget.locations
+      annotations: widget.controller.locations.isNotEmpty
+          ? {
+              AppleMaps.Annotation(
+                annotationId: AppleMaps.AnnotationId(
+                  "annotation_${widget.controller.locations.last.latitude}:${widget.controller.locations.last.longitude}",
+                ),
+                position: AppleMaps.LatLng(
+                  widget.controller.locations.last.latitude,
+                  widget.controller.locations.last.longitude,
+                ),
+                infoWindow: AppleMaps.InfoWindow(
+                  title: "Last location",
+                  snippet: snippetText,
+                ),
+              ),
+            }
+          : {},
+      circles: widget.controller.locations
           .map(
             (location) => AppleMaps.Circle(
               circleId: AppleMaps.CircleId(
@@ -94,10 +251,10 @@ class _LocationsMapAppleMapsState extends State<LocationsMapAppleMaps> {
 }
 
 class LocationsMapOSM extends StatefulWidget {
-  final List<LocationPointService> locations;
+  final LocationsMapController controller;
 
   const LocationsMapOSM({
-    required this.locations,
+    required this.controller,
     Key? key,
   }) : super(key: key);
 
@@ -115,26 +272,25 @@ class _LocationsMapOSMState extends State<LocationsMapOSM> {
     _controller = MapController(
       initMapWithUserPosition: true,
     );
-  }
-
-  @override
-  void didUpdateWidget(covariant LocationsMapOSM oldWidget) {
-    super.didUpdateWidget(oldWidget);
-
-    drawPoints();
+    widget.controller.addListener(drawCircles);
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    widget.controller.removeListener(drawCircles);
 
     super.dispose();
   }
 
-  void drawPoints() {
+  void rebuild() {
+    setState(() {});
+  }
+
+  void drawCircles() {
     _controller.removeAllCircle();
 
-    for (final location in widget.locations) {
+    for (final location in widget.controller.locations) {
       _controller.drawCircle(
         CircleOSM(
           key: "circle_${location.latitude}:${location.longitude}",
@@ -158,7 +314,7 @@ class _LocationsMapOSMState extends State<LocationsMapOSM> {
       trackMyPosition: true,
       androidHotReloadSupport: kDebugMode,
       onMapIsReady: (controller) {
-        drawPoints();
+        drawCircles();
       },
       onGeoPointClicked: (point) {
         print(point);
@@ -168,10 +324,10 @@ class _LocationsMapOSMState extends State<LocationsMapOSM> {
 }
 
 class LocationsMap extends StatelessWidget {
-  final List<LocationPointService> locations;
+  final LocationsMapController controller;
 
   const LocationsMap({
-    required this.locations,
+    required this.controller,
     Key? key,
   }) : super(key: key);
 
@@ -179,11 +335,11 @@ class LocationsMap extends StatelessWidget {
   Widget build(BuildContext context) {
     if (Platform.isIOS) {
       return LocationsMapAppleMaps(
-        locations: locations,
+        controller: controller,
       );
     }
     return LocationsMapOSM(
-      locations: locations,
+      controller: controller,
     );
   }
 }

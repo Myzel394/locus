@@ -82,8 +82,6 @@ PODS:
   - GoogleUtilitiesComponents (1.1.0):
     - GoogleUtilities/Logger
   - GTMSessionFetcher/Core (2.3.0)
-  - location (0.0.1):
-    - Flutter
   - MLImage (1.0.0-beta4)
   - MLKitBarcodeScanning (3.0.0):
     - MLKitCommon (~> 9.0)
@@ -145,7 +143,6 @@ DEPENDENCIES:
   - flutter_osm_plugin (from `.symlinks/plugins/flutter_osm_plugin/ios`)
   - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
   - geolocator_apple (from `.symlinks/plugins/geolocator_apple/ios`)
-  - location (from `.symlinks/plugins/location/ios`)
   - mobile_scanner (from `.symlinks/plugins/mobile_scanner/ios`)
   - openpgp (from `.symlinks/plugins/openpgp/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
@@ -197,8 +194,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_secure_storage/ios"
   geolocator_apple:
     :path: ".symlinks/plugins/geolocator_apple/ios"
-  location:
-    :path: ".symlinks/plugins/location/ios"
   mobile_scanner:
     :path: ".symlinks/plugins/mobile_scanner/ios"
   openpgp:
@@ -237,7 +232,6 @@ SPEC CHECKSUMS:
   GoogleUtilities: 9aa0ad5a7bc171f8bae016300bfcfa3fb8425749
   GoogleUtilitiesComponents: 679b2c881db3b615a2777504623df6122dd20afe
   GTMSessionFetcher: 3a63d75eecd6aa32c2fc79f578064e1214dfdec2
-  location: 3a2eed4dd2fab25e7b7baf2a9efefe82b512d740
   MLImage: 7bb7c4264164ade9bf64f679b40fb29c8f33ee9b
   MLKitBarcodeScanning: 04e264482c5f3810cb89ebc134ef6b61e67db505
   MLKitCommon: c1b791c3e667091918d91bda4bba69a91011e390

@@ -27,11 +27,11 @@ class TaskDetailScreen extends StatefulWidget {
 
 class _TaskDetailScreenState extends State<TaskDetailScreen> {
   final PageController _pageController = PageController();
+  final LocationsMapController _controller = LocationsMapController();
   void Function()? _unsubscribeGetLocations;
   bool _isLoading = true;
   bool _isError = false;
   bool _isShowingDetails = false;
-  final List<LocationPointService> _locations = [];
 
   @override
   void initState() {
@@ -68,7 +68,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
       nostrPublicKey: widget.task.nostrPublicKey,
       relays: widget.task.relays,
       onLocationFetched: (final LocationPointService location) {
-        _locations.add(location);
+        _controller.add(location);
         setState(() {});
       },
       onEnd: () {
@@ -111,7 +111,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                     ? Padding(
                         padding: const EdgeInsets.all(MEDIUM_SPACE),
                         child: LocationsLoadingScreen(
-                          locations: _locations,
+                          locations: _controller.locations,
                         ),
                       )
                     : PageView(
@@ -127,7 +127,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                               Expanded(
                                 flex: 9,
                                 child: LocationsMap(
-                                  locations: _locations,
+                                  controller: _controller,
                                 ),
                               ),
                               Expanded(
@@ -159,9 +159,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                           Expanded(
                             child: SingleChildScrollView(
                               child: Details(
-                                locations:
-                                    UnmodifiableListView<LocationPointService>(
-                                        _locations),
+                                locations: _controller.locations,
                                 task: widget.task,
                                 onGoBack: () {
                                   _pageController.animateToPage(
