@@ -6,6 +6,8 @@ import 'package:locus/api/get-locations.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:locus/widgets/FillUpPaint.dart';
 import 'package:locus/widgets/LocationsMap.dart';
+import 'package:locus/widgets/OpenInMaps.dart';
+import 'package:map_launcher/map_launcher.dart';
 
 import '../constants/spacing.dart';
 import '../services/location_point_service.dart';
@@ -132,6 +134,35 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
     return PlatformScaffold(
       appBar: PlatformAppBar(
         title: Text('View Detail'),
+        trailingActions: _controller.locations.isNotEmpty
+            ? <Widget>[
+                PlatformPopupMenuButton<String>(
+                  itemBuilder: (context) => [
+                    PlatformPopupMenuItem<String>(
+                      child: PlatformListTile(
+                        leading: Icon(context.platformIcons.location),
+                        trailing: SizedBox.shrink(),
+                        title: Text("Open Maps to latest location"),
+                      ),
+                      value: "open_maps",
+                    ),
+                  ],
+                  onSelected: (action) async {
+                    switch (action) {
+                      case "open_maps":
+                        await showPlatformModalSheet(
+                          context: context,
+                          builder: (context) => OpenInMaps(
+                            destination: Coords(
+                                _controller.locations.last.latitude,
+                                _controller.locations.last.longitude),
+                          ),
+                        );
+                    }
+                  },
+                ),
+              ]
+            : [],
         material: (_, __) => MaterialAppBarData(
           centerTitle: true,
         ),

@@ -183,6 +183,7 @@ class _TaskTileState extends State<TaskTile> {
           const PlatformPopupMenuItem(
             child: PlatformListTile(
               leading: Icon(Icons.link_rounded),
+              trailing: SizedBox.shrink(),
               title: Text("Generate link"),
             ),
             value: 0,

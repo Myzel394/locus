@@ -74,6 +74,8 @@ dependencies:
   qr_flutter: ^4.0.0
   mobile_scanner: ^3.2.0
   vibration: ^1.7.6
+  map_launcher: ^2.5.0+1
+  flutter_svg: ^2.0.5
 
 dev_dependencies:
   flutter_test:
