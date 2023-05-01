@@ -43,51 +43,45 @@ class _ShareLocationButtonState extends State<ShareLocationButton> {
   void openShareLocationDialog() async {
     final shouldShare = await showPlatformDialog(
       context: context,
-      builder: (context) =>
-          PlatformAlertDialog(
-            title: Text("Share location"),
-            content: Text(
-              "Would you like to share your location from this task? This will allow other users to see your location. A view key file will be generated which allows anyone to view your location. Makes sure to keep this file safe and only share it with people you trust.",
+      builder: (context) => PlatformAlertDialog(
+        title: Text("Share location"),
+        content: Text(
+          "Would you like to share your location from this task? This will allow other users to see your location. A view key file will be generated which allows anyone to view your location. Makes sure to keep this file safe and only share it with people you trust.",
+        ),
+        actions: createCancellableDialogActions(context, [
+          PlatformDialogAction(
+            child: Text("Save file"),
+            material: (_, __) => MaterialDialogActionData(
+              icon: const Icon(Icons.save_alt_rounded),
             ),
-            actions: createCancellableDialogActions(context, [
-              PlatformDialogAction(
-                child: Text("Save file"),
-                material: (_, __) =>
-                    MaterialDialogActionData(
-                      icon: const Icon(Icons.save_alt_rounded),
-                    ),
-                onPressed: () => Navigator.of(context).pop("save"),
-              ),
-              PlatformDialogAction(
-                child: Text("Create QR Code"),
-                material: (_, __) =>
-                    MaterialDialogActionData(
-                      icon: const Icon(Icons.qr_code),
-                    ),
-                onPressed: () => Navigator.of(context).pop("qr"),
-              ),
-              PlatformDialogAction(
-                child: Text("Share file"),
-                material: (_, __) =>
-                    MaterialDialogActionData(
-                      icon: const Icon(Icons.share_rounded),
-                    ),
-                onPressed: () => Navigator.of(context).pop("share"),
-              ),
-              PlatformDialogAction(
-                child: Text("Share link"),
-                cupertino: (_, __) =>
-                    CupertinoDialogActionData(
-                      isDefaultAction: true,
-                    ),
-                material: (_, __) =>
-                    MaterialDialogActionData(
-                      icon: const Icon(Icons.link_rounded),
-                    ),
-                onPressed: () => Navigator.of(context).pop("link"),
-              ),
-            ]),
+            onPressed: () => Navigator.of(context).pop("save"),
           ),
+          PlatformDialogAction(
+            child: Text("Create QR Code"),
+            material: (_, __) => MaterialDialogActionData(
+              icon: const Icon(Icons.qr_code),
+            ),
+            onPressed: () => Navigator.of(context).pop("qr"),
+          ),
+          PlatformDialogAction(
+            child: Text("Share file"),
+            material: (_, __) => MaterialDialogActionData(
+              icon: const Icon(Icons.share_rounded),
+            ),
+            onPressed: () => Navigator.of(context).pop("share"),
+          ),
+          PlatformDialogAction(
+            child: Text("Share link"),
+            cupertino: (_, __) => CupertinoDialogActionData(
+              isDefaultAction: true,
+            ),
+            material: (_, __) => MaterialDialogActionData(
+              icon: const Icon(Icons.link_rounded),
+            ),
+            onPressed: () => Navigator.of(context).pop("link"),
+          ),
+        ]),
+      ),
     );
 
     if (!mounted) {
@@ -119,30 +113,29 @@ class _ShareLocationButtonState extends State<ShareLocationButton> {
           }
 
           await showSingularElementDialog(
-              context: context, builder: (context) =>
-              Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: List<Widget>.from(
-                  [
-                    Text(
-                      "Scan this QR Code to import task ${widget.task.name}",
-                      style: getTitle2TextStyle(context),
-                      textAlign: TextAlign.center,
+              context: context,
+              builder: (context) => Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: List<Widget>.from(
+                      [
+                        Text(
+                          "Scan this QR Code to import task ${widget.task.name}",
+                          style: getTitle2TextStyle(context),
+                          textAlign: TextAlign.center,
+                        ),
+                        isMaterial(context)
+                            ? const SizedBox(height: LARGE_SPACE)
+                            : null,
+                        QrImage(
+                          data: url,
+                          errorCorrectionLevel: QrErrorCorrectLevel.H,
+                          gapless: false,
+                          backgroundColor: Colors.white,
+                        ),
+                      ].where((element) => element != null),
                     ),
-                    isMaterial(context)
-                        ? const SizedBox(height: LARGE_SPACE)
-                        : null,
-                    QrImage(
-                      data: url,
-                      errorCorrectionLevel: QrErrorCorrectLevel.H,
-                      gapless: false,
-                      backgroundColor: Colors.white,
-                    ),
-                  ].where((element) => element != null),
-                ),
-              )
-          );
+                  ));
           break;
         case "share":
           final file = XFile((await _createTempViewKeyFile()).path);
@@ -161,7 +154,8 @@ class _ShareLocationButtonState extends State<ShareLocationButton> {
             subject: "Here's my Locus link to see my location",
           );
       }
-    } catch (_) {} finally {
+    } catch (_) {
+    } finally {
       setState(() {
         isLoading = false;
       });
@@ -172,10 +166,9 @@ class _ShareLocationButtonState extends State<ShareLocationButton> {
   Widget build(BuildContext context) {
     return PlatformElevatedButton(
       child: Text("Share location"),
-      material: (_, __) =>
-          MaterialElevatedButtonData(
-            icon: Icon(Icons.share_location_rounded),
-          ),
+      material: (_, __) => MaterialElevatedButtonData(
+        icon: Icon(Icons.share_location_rounded),
+      ),
       onPressed: isLoading ? null : openShareLocationDialog,
     );
   }
