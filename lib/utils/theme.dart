@@ -119,9 +119,6 @@ List<Widget> createCancellableDialogActions(
 ) {
   final cancelWidget = PlatformDialogAction(
     child: const Text("Cancel"),
-    cupertino: (_, __) => CupertinoDialogActionData(
-      isDestructiveAction: true,
-    ),
     material: (_, __) => MaterialDialogActionData(
         icon: PlatformWidget(
       material: (_, __) => Icon(Icons.cancel_outlined),
@@ -130,7 +127,7 @@ List<Widget> createCancellableDialogActions(
     onPressed: () => Navigator.of(context).pop(""),
   );
 
-  if (isCupertino(context)) {
+  if (isCupertino(context) && actions.length > 1) {
     return [
       ...actions,
       cancelWidget,
