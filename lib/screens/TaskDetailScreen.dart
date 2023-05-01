@@ -69,6 +69,10 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
       nostrPublicKey: widget.task.nostrPublicKey,
       relays: widget.task.relays,
       onLocationFetched: (final LocationPointService location) {
+        if (!mounted) {
+          return;
+        }
+
         _controller.add(location);
         setState(() {});
       },
