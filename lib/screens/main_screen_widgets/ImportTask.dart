@@ -1,4 +1,5 @@
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:locus/screens/ImportTaskSheet.dart';
 import 'package:lottie/lottie.dart';
@@ -33,7 +34,10 @@ class _ImportTaskState extends State<ImportTask> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final topColor = Theme.of(context).colorScheme.primary;
+    final topColor = Theme
+        .of(context)
+        .colorScheme
+        .primary;
     final topColor2 = HSLColor.fromColor(topColor).withLightness(0.5).toColor();
     final topColor3 = HSLColor.fromColor(topColor).withLightness(0.3).toColor();
 
@@ -94,14 +98,50 @@ class _ImportTaskState extends State<ImportTask> with TickerProviderStateMixin {
         ),
         const SizedBox(height: SMALL_SPACE),
         Text(
-          "Import a task from a link or file you have received",
+          "Import a task from a link, a file or QR code you have received",
           style: getCaptionTextStyle(context),
         ),
         const SizedBox(height: MEDIUM_SPACE),
         PlatformElevatedButton(
           onPressed: () async {
+            ImportScreen initialScreen = ImportScreen.ask;
+
             _controller.reverse();
 
+            if (isCupertino(context)) {
+              initialScreen = await showCupertinoModalPopup(
+                context: context,
+                barrierDismissible: true,
+                builder: (cupertino) =>
+                    CupertinoActionSheet(
+                      title: Text("Import a task"),
+                      message: Text("How would you like to import?"),
+                      actions: <CupertinoActionSheetAction>[
+                        CupertinoActionSheetAction(
+                          child: const Text("Import URL"),
+                          isDefaultAction: true,
+                          onPressed: () {
+                            Navigator.of(context).pop(ImportScreen.askURL);
+                          },
+                        ),
+                        CupertinoActionSheetAction(
+                          child: const Text("Import file"),
+                          isDefaultAction: true,
+                          onPressed: () {
+                            Navigator.of(context).pop(ImportScreen.importFile);
+                          },
+                        ),
+                        CupertinoActionSheetAction(
+                          child: const Text("Scan QR code"),
+                          isDefaultAction: true,
+                          onPressed: () {
+                            Navigator.of(context).pop(ImportScreen.scanQR);
+                          },
+                        ),
+                      ],
+                    ),
+              );
+            }
             await showPlatformModalSheet(
               context: context,
               material: MaterialModalSheetData(
@@ -109,14 +149,16 @@ class _ImportTaskState extends State<ImportTask> with TickerProviderStateMixin {
                 isScrollControlled: true,
                 isDismissible: true,
               ),
-              builder: (context) => ImportTaskSheet(),
+              builder: (context) =>
+                  ImportTaskSheet(initialScreen: initialScreen),
             );
 
             _controller.forward();
           },
-          material: (_, __) => MaterialElevatedButtonData(
-            icon: Icon(Icons.file_download_outlined),
-          ),
+          material: (_, __) =>
+              MaterialElevatedButtonData(
+                icon: Icon(Icons.file_download_outlined),
+              ),
           child: Text("Import Task"),
         ),
       ],

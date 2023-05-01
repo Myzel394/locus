@@ -30,7 +30,12 @@ enum ImportScreen {
 }
 
 class ImportTaskSheet extends StatefulWidget {
-  const ImportTaskSheet({Key? key}) : super(key: key);
+  final ImportScreen? initialScreen;
+
+  const ImportTaskSheet({
+    this.initialScreen = ImportScreen.ask,
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<ImportTaskSheet> createState() => _ImportTaskSheetState();
@@ -46,6 +51,14 @@ class _ImportTaskSheetState extends State<ImportTaskSheet>
   bool isLoading = false;
 
   void reset() {
+    if (isCupertino(context)) {
+      // Action sheet has been shown, so no `ask` screen was shown
+      // Instead, we pop the sheet so that the user can see the ActionSheet
+      // again if they want to
+      Navigator.of(context).pop();
+      return;
+    }
+
     _nameController.clear();
     _urlController.clear();
 
@@ -66,6 +79,19 @@ class _ImportTaskSheetState extends State<ImportTaskSheet>
     setState(() {
       _screen = ImportScreen.done;
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.initialScreen != null) {
+      _screen = widget.initialScreen!;
+
+      if (_screen == ImportScreen.importFile) {
+        _importFile();
+      }
+    }
   }
 
   @override
@@ -102,7 +128,9 @@ class _ImportTaskSheetState extends State<ImportTaskSheet>
     }
 
     try {
-      if (result != null) {
+      if (result == null) {
+        reset();
+      } else {
         final rawData = const Utf8Decoder().convert(result.files[0].bytes!);
         final data = jsonDecode(rawData);
 
@@ -131,7 +159,8 @@ class _ImportTaskSheetState extends State<ImportTaskSheet>
           });
         }
       }
-    } catch (_) {} finally {
+    } catch (_) {
+    } finally {
       setState(() {
         isLoading = false;
       });
@@ -206,10 +235,7 @@ class _ImportTaskSheetState extends State<ImportTaskSheet>
           ModalSheet(
             child: Padding(
               padding: EdgeInsets.only(
-                bottom: MediaQuery
-                    .of(context)
-                    .viewInsets
-                    .bottom,
+                bottom: MediaQuery.of(context).viewInsets.bottom,
               ),
               child: Column(
                 children: <Widget>[
@@ -233,95 +259,85 @@ class _ImportTaskSheetState extends State<ImportTaskSheet>
                         }
                       },
                     )
-                  else
-                    if (_screen == ImportScreen.askURL)
-                      URLForm(
-                        isFetching: isLoading,
-                        controller: _urlController,
-                        onImport: _importURL,
-                      )
-                    else
-                      if (_screen == ImportScreen.askName)
-                        NameForm(
-                          controller: _nameController,
-                          onSubmitted: () {
-                            _taskView!.update(name: _nameController.text);
+                  else if (_screen == ImportScreen.askURL)
+                    URLForm(
+                      isFetching: isLoading,
+                      controller: _urlController,
+                      onImport: _importURL,
+                    )
+                  else if (_screen == ImportScreen.askName)
+                    NameForm(
+                      controller: _nameController,
+                      onSubmitted: () {
+                        _taskView!.update(name: _nameController.text);
 
-                            importView();
-                          },
-                        )
-                      else
-                        if (_screen == ImportScreen.importFile)
-                          Column(
-                            children: <Widget>[
-                              Text(
-                                "Importing task...",
-                                style: getSubTitleTextStyle(context),
-                              ),
-                              const SizedBox(height: SMALL_SPACE),
-                              if (isLoading)
-                                const CircularProgressIndicator()
-                              else
-                                if (errorMessage != null)
-                                  Text(
-                                    errorMessage!,
-                                    style: getBodyTextTextStyle(context)
-                                        .copyWith(color: Colors.red),
-                                  ),
-                            ],
-                          )
-                        else
-                          if (_screen == ImportScreen.present)
-                            ViewImportOverview(
-                              view: _taskView!,
-                              onImport: () {
-                                setState(() {
-                                  _screen = ImportScreen.askName;
-                                });
-                              },
-                            )
-                          else
-                            if (_screen == ImportScreen.done)
-                              ImportSuccess(
-                                onClose: () {
-                                  if (!mounted) {
-                                    return;
-                                  }
+                        importView();
+                      },
+                    )
+                  else if (_screen == ImportScreen.importFile)
+                    Column(
+                      children: <Widget>[
+                        Text(
+                          "Importing task...",
+                          style: getSubTitleTextStyle(context),
+                        ),
+                        const SizedBox(height: SMALL_SPACE),
+                        if (isLoading)
+                          const CircularProgressIndicator()
+                        else if (errorMessage != null)
+                          Text(
+                            errorMessage!,
+                            style: getBodyTextTextStyle(context)
+                                .copyWith(color: Colors.red),
+                          ),
+                      ],
+                    )
+                  else if (_screen == ImportScreen.present)
+                    ViewImportOverview(
+                      view: _taskView!,
+                      onImport: () {
+                        setState(() {
+                          _screen = ImportScreen.askName;
+                        });
+                      },
+                    )
+                  else if (_screen == ImportScreen.done)
+                    ImportSuccess(
+                      onClose: () {
+                        if (!mounted) {
+                          return;
+                        }
 
-                                  Navigator.of(context).pop(_taskView!);
-                                },
-                              )
-                            else
-                              if (_screen == ImportScreen.error)
-                                Column(
-                                  children: <Widget>[
-                                    Icon(context.platformIcons.error,
-                                        size: 64, color: Colors.red),
-                                    const SizedBox(height: MEDIUM_SPACE),
-                                    Text(
-                                      "An error occurred while importing the task",
-                                      style: getSubTitleTextStyle(context),
-                                    ),
-                                    const SizedBox(height: SMALL_SPACE),
-                                    Text(
-                                      errorMessage!,
-                                      style: getBodyTextTextStyle(context)
-                                          .copyWith(color: Colors.red),
-                                    ),
-                                    const SizedBox(height: LARGE_SPACE),
-                                    PlatformElevatedButton(
-                                      padding: const EdgeInsets.all(
-                                          MEDIUM_SPACE),
-                                      onPressed: reset,
-                                      material: (_, __) =>
-                                          MaterialElevatedButtonData(
-                                            icon: const Icon(
-                                                Icons.arrow_back_rounded),
-                                          ),
-                                      child: const Text("Go back"),
-                                    ),
-                                  ],
-                                ),
+                        Navigator.of(context).pop(_taskView!);
+                      },
+                    )
+                  else if (_screen == ImportScreen.error)
+                    Column(
+                      children: <Widget>[
+                        Icon(context.platformIcons.error,
+                            size: 64, color: Colors.red),
+                        const SizedBox(height: MEDIUM_SPACE),
+                        Text(
+                          "An error occurred while importing the task",
+                          style: getSubTitleTextStyle(context),
+                        ),
+                        const SizedBox(height: SMALL_SPACE),
+                        Text(
+                          errorMessage!,
+                          style: getBodyTextTextStyle(context)
+                              .copyWith(color: Colors.red),
+                        ),
+                        const SizedBox(height: LARGE_SPACE),
+                        PlatformElevatedButton(
+                          padding: const EdgeInsets.all(MEDIUM_SPACE),
+                          onPressed: reset,
+                          material: (_, __) => MaterialElevatedButtonData(
+                            icon: const Icon(Icons.arrow_back_rounded),
+                          ),
+                          child: const Text("Go back"),
+                        ),
+                      ],
+                    ),
                   const SizedBox(height: LARGE_SPACE),
                 ],
               ),
