@@ -74,6 +74,7 @@ dependencies:
   animated_list_plus: ^0.5.0
   qr_flutter: ^4.0.0
   mobile_scanner: ^3.2.0
+  vibration: ^1.7.6
 
 dev_dependencies:
   flutter_test:

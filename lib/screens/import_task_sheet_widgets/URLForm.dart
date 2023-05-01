@@ -9,10 +9,14 @@ import '../../utils/theme.dart';
 import 'URLImporter.dart';
 
 class URLForm extends StatefulWidget {
-  final Future<void> Function(String url) onImport;
+  final TextEditingController controller;
+  final Future<void> Function() onImport;
+  final bool isFetching;
 
   const URLForm({
+    required this.controller,
     required this.onImport,
+    this.isFetching = false,
     Key? key,
   }) : super(key: key);
 
@@ -21,17 +25,15 @@ class URLForm extends StatefulWidget {
 }
 
 class _URLFormState extends State<URLForm> {
-  final _urlController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  bool isFetching = false;
   String? errorMessage;
 
   @override
   void initState() {
     super.initState();
 
-    _urlController.addListener(() {
-      if (_urlController.text.isNotEmpty && errorMessage != null) {
+    widget.controller.addListener(() {
+      if (widget.controller.text.isNotEmpty && errorMessage != null) {
         setState(() {
           errorMessage = null;
         });
@@ -55,17 +57,17 @@ class _URLFormState extends State<URLForm> {
           ),
           const SizedBox(height: MEDIUM_SPACE),
           URLImporter(
-            controller: _urlController,
-            enabled: !isFetching,
+            controller: widget.controller,
+            enabled: !widget.isFetching,
           ),
           const SizedBox(height: MEDIUM_SPACE),
-          if (isFetching) ...[
+          if (widget.isFetching) ...[
             const LinearProgressIndicator(),
             const SizedBox(height: MEDIUM_SPACE),
           ],
           PlatformElevatedButton(
             padding: const EdgeInsets.all(MEDIUM_SPACE),
-            onPressed: isFetching
+            onPressed: widget.isFetching
                 ? null
                 : () async {
                     if (!_formKey.currentState!.validate()) {
@@ -73,19 +75,11 @@ class _URLFormState extends State<URLForm> {
                     }
 
                     try {
-                      setState(() {
-                        isFetching = true;
-                      });
-
-                      await widget.onImport(_urlController.text);
+                      await widget.onImport();
                     } catch (_) {
                       setState(() {
                         errorMessage =
                             "An error occurred while fetching the task.";
-                      });
-                    } finally {
-                      setState(() {
-                        isFetching = false;
                       });
                     }
                   },

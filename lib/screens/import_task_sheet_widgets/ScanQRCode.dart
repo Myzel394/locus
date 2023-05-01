@@ -1,8 +1,10 @@
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:locus/constants/app.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/utils/theme.dart';
@@ -27,10 +29,10 @@ class _ScanQRCodeState extends State<ScanQRCode> {
   final controller = MobileScannerController(
     detectionSpeed: DetectionSpeed.noDuplicates,
     facing: CameraFacing.back,
-    formats: [BarcodeFormat.qrCode],
   );
   bool hasTorch = false;
   bool torchEnabled = false;
+  String message = "";
 
   @override
   void initState() {
@@ -41,6 +43,8 @@ class _ScanQRCodeState extends State<ScanQRCode> {
         hasTorch = controller.hasTorch;
       });
     });
+
+    showHint();
   }
 
   @override
@@ -48,6 +52,14 @@ class _ScanQRCodeState extends State<ScanQRCode> {
     controller.dispose();
 
     super.dispose();
+  }
+
+  Future<void> showHint() async {
+    await Future.delayed(10.seconds);
+
+    setState(() {
+      message = "Try moving back and fourth";
+    });
   }
 
   @override
@@ -119,7 +131,7 @@ class _ScanQRCodeState extends State<ScanQRCode> {
                           PlatformIconButton(
                             icon: Icon(context.platformIcons.back),
                             onPressed: widget.onAbort,
-                            padding: const EdgeInsets.all(MEDIUM_SPACE),
+                            padding: const EdgeInsets.all(SMALL_SPACE),
                             color: Colors.white,
                           ),
                         ],
@@ -149,6 +161,17 @@ class _ScanQRCodeState extends State<ScanQRCode> {
                                 ),
                               ],
                             ),
+                          )
+                        : const SizedBox.shrink(),
+                    message.isNotEmpty
+                        ? Positioned(
+                            top: HUGE_SPACE,
+                            left: 0,
+                            right: 0,
+                            child: Text(
+                              message,
+                              textAlign: TextAlign.center,
+                            ).animate().fadeIn(duration: 1.seconds),
                           )
                         : const SizedBox.shrink(),
                   ],

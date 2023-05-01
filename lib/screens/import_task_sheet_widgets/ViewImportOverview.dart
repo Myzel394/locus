@@ -9,12 +9,10 @@ import '../../utils/theme.dart';
 
 class ViewImportOverview extends StatelessWidget {
   final TaskView view;
-  final void Function() onGoToNameEdit;
   final void Function() onImport;
 
   const ViewImportOverview({
     required this.view,
-    required this.onGoToNameEdit,
     required this.onImport,
     Key? key,
   }) : super(key: key);
@@ -38,29 +36,19 @@ class ViewImportOverview extends StatelessWidget {
         ListView(
           shrinkWrap: true,
           children: <Widget>[
-            ListTile(
-              title: Text(view.name!),
-              subtitle: const Text("Name"),
-              leading: PlatformWidget(
-                material: (_, __) => const Icon(Icons.text_fields_rounded),
-                cupertino: (_, __) => const Icon(CupertinoIcons.textformat),
-              ),
-              trailing: PlatformIconButton(
-                icon: Icon(context.platformIcons.edit),
-                onPressed: onGoToNameEdit,
-              ),
-            ),
-            ListTile(
+            PlatformListTile(
               title: Text(view.relays.join(", ")),
               subtitle: const Text("Relays"),
               leading: const Icon(Icons.dns_rounded),
+              trailing: const SizedBox.shrink(),
             ),
-            ListTile(
+            PlatformListTile(
               title: Text(view.nostrPublicKey),
               subtitle: const Text("Public Nostr Key"),
               leading: const Icon(Icons.key),
+              trailing: const SizedBox.shrink(),
             ),
-            ListTile(
+            PlatformListTile(
               title: FutureBuilder<String>(
                   future: getFingerprintFromKey(view.signPublicKey),
                   builder: (context, snapshot) {
@@ -74,6 +62,7 @@ class ViewImportOverview extends StatelessWidget {
                   }),
               subtitle: const Text("Public Sign Key"),
               leading: const Icon(Icons.edit),
+              trailing: const SizedBox.shrink(),
             )
           ],
         ),
