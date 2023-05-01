@@ -15,9 +15,18 @@ Future<dynamic> showSingularElementDialog({
     // Cupertino already has a blur effect
     return showCupertinoDialog(
       context: context,
-      builder: (context) => GestureDetector(
-        onTap: () => Navigator.of(context).pop(),
-        child: builder(context),
+      builder: (context) => CupertinoPopupSurface(
+        isSurfacePainted: true,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            vertical: LARGE_SPACE,
+            horizontal: MEDIUM_SPACE,
+          ),
+          child: GestureDetector(
+            onTap: () => Navigator.of(context).pop(),
+            child: builder(context),
+          ),
+        ),
       ),
       barrierDismissible: true,
     );
