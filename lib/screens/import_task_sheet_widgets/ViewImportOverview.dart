@@ -64,6 +64,10 @@ class _ViewImportOverviewState extends State<ViewImportOverview> {
         setState(() {});
       },
       onEnd: () {
+        if (!mounted) {
+          return;
+        }
+
         setState(() {
           _isLoading = false;
         });
@@ -127,38 +131,41 @@ class _ViewImportOverviewState extends State<ViewImportOverview> {
               child: CircularProgressIndicator(),
             ),
           )
-        else if (_isError)
-          Text(
-            "Error while loading locations",
-            style: TextStyle(
-              color: Colors.red,
-            ),
-          )
-        else ...[
-          Text(
-            "Last position:",
-            textAlign: TextAlign.center,
-            style: getSubTitleTextStyle(context),
-          ),
-          const SizedBox(height: MEDIUM_SPACE),
-          SizedBox(
-            width: double.infinity,
-            height: 200,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(MEDIUM_SPACE),
-              child: LocationsMap(
-                controller: _controller,
+        else
+          if (_isError)
+            Text(
+              "Error while loading locations",
+              style: TextStyle(
+                color: Colors.red,
               ),
-            ),
-          ),
-        ],
+            )
+          else
+            ...[
+              Text(
+                "Last position:",
+                textAlign: TextAlign.center,
+                style: getSubTitleTextStyle(context),
+              ),
+              const SizedBox(height: MEDIUM_SPACE),
+              SizedBox(
+                width: double.infinity,
+                height: 200,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(MEDIUM_SPACE),
+                  child: LocationsMap(
+                    controller: _controller,
+                  ),
+                ),
+              ),
+            ],
         const SizedBox(height: MEDIUM_SPACE),
         PlatformElevatedButton(
           padding: const EdgeInsets.all(MEDIUM_SPACE),
           onPressed: widget.onImport,
-          material: (_, __) => MaterialElevatedButtonData(
-            icon: const Icon(Icons.file_download_outlined),
-          ),
+          material: (_, __) =>
+              MaterialElevatedButtonData(
+                icon: const Icon(Icons.file_download_outlined),
+              ),
           child: const Text("Import"),
         ),
       ],
