@@ -13,10 +13,23 @@ class TimerController extends ChangeNotifier {
 
   void add(final TaskRuntimeTimer timer) {
     // Merge the new timer if a timer for the same weekday already exists
-    final existingTimer = _timers.firstWhereOrNull((currentTimer) =>
-        currentTimer is WeekdayTimer &&
-        timer is WeekdayTimer &&
-        currentTimer.day == timer.day);
+    final existingTimer = _timers.firstWhereOrNull(
+      (currentTimer) {
+        if (timer is WeekdayTimer) {
+          if (currentTimer is WeekdayTimer && currentTimer.day == timer.day) {
+            return true;
+          }
+        }
+
+        if (timer is DurationTimer) {
+          if (currentTimer is DurationTimer) {
+            return true;
+          }
+        }
+
+        return false;
+      },
+    );
 
     if (existingTimer != null) {
       _timers.remove(existingTimer);

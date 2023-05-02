@@ -76,6 +76,7 @@ dependencies:
   vibration: ^1.7.6
   map_launcher: ^2.5.0+1
   flutter_svg: ^2.0.5
+  duration_picker: ^1.1.1
 
 dev_dependencies:
   flutter_test:

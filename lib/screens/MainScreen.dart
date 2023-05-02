@@ -129,7 +129,7 @@ class _MainScreenState extends State<MainScreen> {
         floatingActionButton: OpenContainer(
           transitionDuration: const Duration(milliseconds: 500),
           transitionType: ContainerTransitionType.fade,
-          openBuilder: (context, action) => CreateTaskScreen(
+          openBuilder: (_, action) => CreateTaskScreen(
             onCreated: () {
               Navigator.pop(context);
             },
@@ -189,7 +189,8 @@ class _MainScreenState extends State<MainScreen> {
                         height: windowHeight,
                         child: SingleChildScrollView(
                           padding: const EdgeInsets.symmetric(
-                              vertical: MEDIUM_SPACE),
+                            vertical: MEDIUM_SPACE,
+                          ),
                           child: Wrap(
                             runSpacing: LARGE_SPACE,
                             crossAxisAlignment: WrapCrossAlignment.start,

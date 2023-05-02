@@ -110,7 +110,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
 
       taskService.add(task);
       await taskService.save();
-      task.startSchedule();
+      task.startSchedule(startNowIfNextRunIsUnknown: true);
 
       // Calling this explicitly so the text is cleared when leaving the screen
       setState(() {

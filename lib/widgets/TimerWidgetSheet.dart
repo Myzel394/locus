@@ -1,4 +1,6 @@
+import 'package:duration_picker/duration_picker.dart';
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:locus/constants/spacing.dart';
@@ -66,10 +68,12 @@ class _TimerWidgetSheetState extends State<TimerWidgetSheet> {
                       ),
                     ),
                     const SizedBox(height: SMALL_SPACE),
-                    // Month, date and time
-                    Text(
-                      "Next execution will start at ${DateFormat('MMMM d, HH:mm').format(findNextStartDate(widget.controller.timers)!)}",
-                    ),
+                    if (findNextStartDate(widget.controller.timers) == null)
+                      Text("Execution will start immediately.")
+                    else
+                      Text(
+                        "Next execution will start at ${DateFormat('MMMM d, HH:mm').format(findNextStartDate(widget.controller.timers)!)}",
+                      ),
                     if (widget.controller.timers
                         .any((timer) => timer.isInfinite())) ...[
                       const SizedBox(height: SMALL_SPACE),
@@ -120,6 +124,57 @@ class _TimerWidgetSheetState extends State<TimerWidgetSheet> {
                             }
                           },
                         ),
+                      ),
+                      PlatformTextButton(
+                        child: Text("Add Duration"),
+                        material: (_, __) => MaterialTextButtonData(
+                          icon: Icon(Icons.timelapse_rounded),
+                        ),
+                        onPressed: () async {
+                          Duration? duration;
+
+                          if (isCupertino(context)) {
+                            await showCupertinoModalPopup(
+                              context: context,
+                              builder: (context) => Container(
+                                height: 300,
+                                padding: const EdgeInsets.only(top: 6.0),
+                                margin: EdgeInsets.only(
+                                  bottom:
+                                      MediaQuery.of(context).viewInsets.bottom,
+                                ),
+                                color: CupertinoColors.systemBackground
+                                    .resolveFrom(context),
+                                child: SafeArea(
+                                  top: false,
+                                  child: CupertinoTimerPicker(
+                                    initialTimerDuration: Duration.zero,
+                                    minuteInterval: 5,
+                                    onTimerDurationChanged: (value) {
+                                      duration = value;
+                                    },
+                                    mode: CupertinoTimerPickerMode.hm,
+                                  ),
+                                ),
+                              ),
+                            );
+                          } else {
+                            duration = await showDurationPicker(
+                              context: context,
+                              initialTime: Duration.zero,
+                              snapToMins: 15.0,
+                            );
+                          }
+
+                          if (duration != null && duration!.inSeconds > 0) {
+                            widget.controller.add(
+                              DurationTimer(
+                                startDate: DateTime.now(),
+                                duration: duration!,
+                              ),
+                            );
+                          }
+                        },
                       ),
                     ],
                   ),

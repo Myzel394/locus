@@ -123,9 +123,11 @@ class WeekdayTimer extends TaskRuntimeTimer {
 class DurationTimer extends TaskRuntimeTimer {
   // A timer that runs for a certain amount of time
   final Duration duration;
+  final DateTime startDate;
 
   const DurationTimer({
     required this.duration,
+    required this.startDate,
   });
 
   static const IDENTIFIER = "duration";
@@ -142,18 +144,25 @@ class DurationTimer extends TaskRuntimeTimer {
   Map<String, dynamic> toJSON() {
     return {
       "_IDENTIFIER": IDENTIFIER,
-      "duration": duration,
+      "startDate": startDate.toIso8601String(),
+      "duration": duration.inSeconds,
     };
   }
 
   @override
   DateTime? nextStartDate(final DateTime now) {
-    return now;
+    return null;
   }
 
   static DurationTimer fromJSON(final Map<String, dynamic> json) {
+    final duration = Duration(seconds: json["duration"]);
+    final startDate = DateTime.parse(json["startDate"]);
+
+    final remainingDuration = startDate.difference(DateTime.now()).abs();
+
     return DurationTimer(
-      duration: json["duration"],
+      duration: remainingDuration,
+      startDate: DateTime.now(),
     );
   }
 
