@@ -100,101 +100,90 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
         title: Text(
           _isShowingDetails ? "Details" : widget.task.name,
         ),
-        material: (_, __) =>
-            MaterialAppBarData(
-              centerTitle: true,
-            ),
-        cupertino: (_, __) =>
-            CupertinoNavigationBarData(
-              backgroundColor:
-              CupertinoTheme
-                  .of(context)
-                  .barBackgroundColor
-                  .withOpacity(.5),
-            ),
+        material: (_, __) => MaterialAppBarData(
+          centerTitle: true,
+        ),
+        cupertino: (_, __) => CupertinoNavigationBarData(
+          backgroundColor:
+              CupertinoTheme.of(context).barBackgroundColor.withOpacity(.5),
+        ),
       ),
       body: _isError
           ? Center(
-        child: Text(
-          "There was an error fetching the locations. Please try again later.",
-          style: getBodyTextTextStyle(context).copyWith(
-            color: Colors.red,
-          ),
-        ),
-      )
-          : _isLoading
-          ? SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(MEDIUM_SPACE),
-          child: LocationsLoadingScreen(
-            locations: _controller.locations,
-            onTimeout: () {
-              setState(() {
-                _isError = true;
-              });
-            },
-          ),
-        ),
-      )
-          : PageView(
-        physics: _isShowingDetails
-            ? const AlwaysScrollableScrollPhysics()
-            : const NeverScrollableScrollPhysics(),
-        scrollDirection: Axis.vertical,
-        controller: _pageController,
-        children: <Widget>[
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              Expanded(
-                flex: 9,
-                child: LocationsMap(
-                  controller: _controller,
+              child: Text(
+                "There was an error fetching the locations. Please try again later.",
+                style: getBodyTextTextStyle(context).copyWith(
+                  color: Colors.red,
                 ),
               ),
-              Expanded(
-                flex: 1,
-                child: PlatformTextButton(
-                  material: (_, __) =>
-                      MaterialTextButtonData(
-                        style: ButtonStyle(
-                          // Not rounded, but square
-                          shape: MaterialStateProperty.all(
-                            const RoundedRectangleBorder(
-                              borderRadius: BorderRadius.zero,
+            )
+          : PageView(
+              physics: _isShowingDetails
+                  ? const AlwaysScrollableScrollPhysics()
+                  : const NeverScrollableScrollPhysics(),
+              scrollDirection: Axis.vertical,
+              controller: _pageController,
+              children: <Widget>[
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    Expanded(
+                      flex: 9,
+                      child: _isLoading
+                          ? LocationsLoadingScreen(
+                              locations: _controller.locations,
+                              onTimeout: () {
+                                setState(() {
+                                  _isError = true;
+                                });
+                              },
+                            )
+                          : LocationsMap(
+                              controller: _controller,
+                            ),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: PlatformTextButton(
+                        material: (_, __) => MaterialTextButtonData(
+                          style: ButtonStyle(
+                            // Not rounded, but square
+                            shape: MaterialStateProperty.all(
+                              const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.zero,
+                              ),
                             ),
                           ),
                         ),
+                        child: Text("View Details"),
+                        onPressed: () {
+                          _pageController.animateToPage(
+                            1,
+                            duration: const Duration(milliseconds: 500),
+                            curve: Curves.easeInOut,
+                          );
+                        },
                       ),
-                  child: Text("View Details"),
-                  onPressed: () {
-                    _pageController.animateToPage(
-                      1,
-                      duration: const Duration(milliseconds: 500),
-                      curve: Curves.easeInOut,
-                    );
-                  },
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          ),
-          Expanded(
-            child: SingleChildScrollView(
-              child: Details(
-                locations: _controller.locations,
-                task: widget.task,
-                onGoBack: () {
-                  _pageController.animateToPage(
-                    0,
-                    duration: const Duration(milliseconds: 500),
-                    curve: Curves.easeInOut,
-                  );
-                },
-              ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Details(
+                      locations: _controller.locations,
+                      task: widget.task,
+                      onGoBack: () {
+                        _pageController.animateToPage(
+                          0,
+                          duration: const Duration(milliseconds: 500),
+                          curve: Curves.easeInOut,
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
     );
   }
 }
