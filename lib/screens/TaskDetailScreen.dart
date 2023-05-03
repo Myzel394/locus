@@ -131,13 +131,16 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                       flex: 9,
                       child: _isLoading
                           ? SafeArea(
-                              child: LocationsLoadingScreen(
-                                locations: _controller.locations,
-                                onTimeout: () {
-                                  setState(() {
-                                    _isError = true;
-                                  });
-                                },
+                              child: Padding(
+                                padding: const EdgeInsets.all(MEDIUM_SPACE),
+                                child: LocationsLoadingScreen(
+                                  locations: _controller.locations,
+                                  onTimeout: () {
+                                    setState(() {
+                                      _isError = true;
+                                    });
+                                  },
+                                ),
                               ),
                             )
                           : LocationsMap(

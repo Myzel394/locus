@@ -24,17 +24,7 @@ void callbackDispatcher() {
           taskService = await TaskService.restore();
           task = taskService.getByID(taskID);
 
-          final eventManager = NostrEventsManager.fromTask(task);
-
-          final locationPoint =
-              await LocationPointService.createUsingCurrentLocation();
-          final message = await locationPoint.toEncryptedMessage(
-            signPrivateKey: task.signPGPPrivateKey,
-            signPublicKey: task.signPGPPublicKey,
-            viewPublicKey: task.viewPGPPublicKey,
-          );
-
-          await eventManager.publishMessage(message);
+          await task.publishCurrentLocationNow();
 
           if (!task.shouldRunNow()) {
             await task.stopExecutionImmediately();

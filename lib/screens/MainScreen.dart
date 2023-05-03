@@ -32,6 +32,7 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   final listViewKey = GlobalKey();
+  late final _checkupFuture;
   late final TaskService taskService;
   bool shouldUseScreenHeight = false;
   bool listViewShouldFillUp = false;
@@ -70,6 +71,8 @@ class _MainScreenState extends State<MainScreen> {
     });
 
     final taskService = context.read<TaskService>();
+
+    _checkupFuture = taskService.checkup();
 
     taskService.addListener(updateView);
   }
@@ -197,7 +200,7 @@ class _MainScreenState extends State<MainScreen> {
                             children: <Widget>[
                               if (taskService.tasks.isNotEmpty)
                                 FutureBuilder(
-                                  future: taskService.checkup(),
+                                  future: _checkupFuture,
                                   builder: (context, snapshot) =>
                                       PlatformWidget(
                                     material: (context, __) => Column(
