@@ -21,9 +21,14 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
 
-  final hasLocationAlwaysGranted = await Permission.locationAlways.isGranted;
-  final taskService = await TaskService.restore();
-  final viewService = await ViewService.restore();
+  final futures = await Future.wait<dynamic>([
+    Permission.locationAlways.isGranted,
+    TaskService.restore(),
+    ViewService.restore(),
+  ]);
+  final bool hasLocationAlwaysGranted = futures[0];
+  final TaskService taskService = futures[1];
+  final ViewService viewService = futures[2];
 
   runApp(
     MultiProvider(
