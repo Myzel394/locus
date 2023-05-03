@@ -39,8 +39,7 @@ class WeekdayTimer extends TaskRuntimeTimer {
     required this.endTime,
   });
 
-  static WeekdayTimer allDay(final int day) =>
-      WeekdayTimer(
+  static WeekdayTimer allDay(final int day) => WeekdayTimer(
         day: day,
         startTime: TimeOfDay(hour: 0, minute: 0),
         endTime: TimeOfDay(hour: 23, minute: 59),
@@ -62,15 +61,14 @@ class WeekdayTimer extends TaskRuntimeTimer {
       return "$dayString (All Day)";
     }
 
-    return "$dayString ${startTime.format(context)} - ${endTime.format(
-        context)}";
+    return "$dayString ${startTime.format(context)} - ${endTime.format(context)}";
   }
 
   get isAllDay =>
       startTime.hour == 0 &&
-          startTime.minute == 0 &&
-          endTime.hour == 23 &&
-          endTime.minute == 59;
+      startTime.minute == 0 &&
+      endTime.hour == 23 &&
+      endTime.minute == 59;
 
   @override
   bool isInfinite() => true;
@@ -88,7 +86,7 @@ class WeekdayTimer extends TaskRuntimeTimer {
     final start = DateTime(
         now.year, now.month, now.day, startTime.hour, startTime.minute);
     final end =
-    DateTime(now.year, now.month, now.day, endTime.hour, endTime.minute);
+        DateTime(now.year, now.month, now.day, endTime.hour, endTime.minute);
 
     return now.isAfter(start) && now.isBefore(end);
   }
@@ -121,7 +119,7 @@ class WeekdayTimer extends TaskRuntimeTimer {
 
     // Check if end time is in the future, if yes, return now
     final end =
-    DateTime(now.year, now.month, now.day, endTime.hour, endTime.minute);
+        DateTime(now.year, now.month, now.day, endTime.hour, endTime.minute);
     if (now.isBefore(end)) {
       return now;
     }
@@ -160,6 +158,7 @@ class DurationTimer extends TaskRuntimeTimer {
 
   DurationTimer({
     required this.duration,
+    this.startDate,
   });
 
   static const IDENTIFIER = "duration";
@@ -175,7 +174,7 @@ class DurationTimer extends TaskRuntimeTimer {
   @override
   bool shouldRun(final DateTime now) {
     if (startDate == null) {
-      return true;
+      return false;
     }
 
     final endDate = startDate!.add(duration);
@@ -188,6 +187,7 @@ class DurationTimer extends TaskRuntimeTimer {
     return {
       "_IDENTIFIER": IDENTIFIER,
       "duration": duration.inSeconds,
+      "startDate": startDate?.toIso8601String(),
     };
   }
 
@@ -198,19 +198,21 @@ class DurationTimer extends TaskRuntimeTimer {
 
   static DurationTimer fromJSON(final Map<String, dynamic> json) {
     final duration = Duration(seconds: json["duration"]);
+    final rawStartDate = json["startDate"];
 
     return DurationTimer(
       duration: duration,
+      startDate: rawStartDate == null ? null : DateTime.parse(rawStartDate),
     );
   }
 
   @override
   DateTime? nextEndDate(final DateTime now) {
-    if (duration.isNegative) {
-      return null;
+    if (startDate == null) {
+      return startDate!.add(duration);
+    } else {
+      return now.add(duration);
     }
-
-    return now.add(duration);
   }
 
   @override
@@ -220,6 +222,6 @@ class DurationTimer extends TaskRuntimeTimer {
 
   @override
   void executionStopped() {
-    duration = DateTime.now().difference(startDate!);
+    startDate = null;
   }
 }

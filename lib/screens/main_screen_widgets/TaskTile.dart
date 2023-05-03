@@ -23,9 +23,11 @@ final Map<TaskLinkPublishProgress?, String> TASK_LINK_PROGRESS_TEXT_MAP = {
 
 class TaskTile extends StatefulWidget {
   final Task task;
+  final bool disabled;
 
   const TaskTile({
     required this.task,
+    this.disabled = false,
     Key? key,
   }) : super(key: key);
 
@@ -51,7 +53,7 @@ class _TaskTileState extends State<TaskTile> {
           if (snapshot.hasData) {
             return PlatformSwitch(
               value: snapshot.data!,
-              onChanged: isLoading
+              onChanged: widget.disabled || isLoading
                   ? null
                   : (value) async {
                       setState(() {

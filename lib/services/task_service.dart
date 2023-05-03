@@ -573,6 +573,24 @@ class TaskService extends ChangeNotifier {
     notifyListeners();
     save();
   }
+
+  // Does a general check up state of the task.
+  // Checks if the task should be running / should be deleted etc.
+  Future<void> checkup() async {
+    for (final task in tasks) {
+      if (!task.isInfinite() && task.nextEndDate() == null) {
+        // Delete task
+        remove(task);
+        await save();
+      } else if (task.shouldRunNow()) {
+        if (task.usePeriodOneOfTaskExecution) {
+          await task.startRepeatingTask();
+        }
+      } else {
+        await task.stopExecutionImmediately();
+      }
+    }
+  }
 }
 
 class TaskExample {

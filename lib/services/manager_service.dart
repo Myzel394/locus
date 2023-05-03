@@ -53,18 +53,8 @@ void callbackDispatcher() {
       Logger().e(error.toString());
       throw Exception(error);
     } finally {
-      if (task != null) {
-        if (!task.isInfinite() && task.nextEndDate() == null) {
-          // Delete task
-          taskService!.remove(task);
-          await taskService!.save();
-        } else if (task.shouldRunNow()) {
-          if (task.usePeriodOneOfTaskExecution) {
-            await task.startRepeatingTask();
-          }
-        } else {
-          await task.stopExecutionImmediately();
-        }
+      if (taskService != null) {
+        await taskService.checkup();
       }
     }
 

@@ -226,7 +226,7 @@ class _DetailsState extends State<Details> {
                     final status = await widget.task.getExecutionStatus();
 
                     if (status == null) {
-                      return {} as Map<String, dynamic>;
+                      return Map<String, dynamic>.from({});
                     }
 
                     return status;
@@ -278,7 +278,7 @@ class _DetailsState extends State<Details> {
                                       await widget.task.getScheduleStatus();
 
                                   if (status == null) {
-                                    return {} as Map<String, dynamic>;
+                                    return Map<String, dynamic>.from({});
                                   }
 
                                   return status;
