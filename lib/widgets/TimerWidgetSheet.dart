@@ -169,7 +169,6 @@ class _TimerWidgetSheetState extends State<TimerWidgetSheet> {
                           if (duration != null && duration!.inSeconds > 0) {
                             widget.controller.add(
                               DurationTimer(
-                                startDate: DateTime.now(),
                                 duration: duration!,
                               ),
                             );

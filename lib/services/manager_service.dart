@@ -12,14 +12,17 @@ const TASK_SCHEDULE_KEY = "tasks_schedule";
 @pragma('vm:entry-point')
 void callbackDispatcher() {
   Workmanager().executeTask((taskName, inputData) async {
+    TaskService? taskService;
+    Task? task;
+
     try {
       DartPluginRegistrant.ensureInitialized();
 
       switch (taskName) {
         case TASK_EXECUTION_KEY:
           final taskID = inputData!["taskID"]!;
-          final taskService = await TaskService.restore();
-          final task = taskService.getByID(taskID);
+          taskService = await TaskService.restore();
+          task = taskService.getByID(taskID);
 
           final eventManager = NostrEventsManager.fromTask(task);
 
@@ -33,6 +36,10 @@ void callbackDispatcher() {
 
           await eventManager.publishMessage(message);
 
+          if (!task.shouldRunNow()) {
+            await task.stopExecutionImmediately();
+          }
+
           break;
         case TASK_SCHEDULE_KEY:
           final taskID = inputData!["taskID"]!;
@@ -45,6 +52,20 @@ void callbackDispatcher() {
     } catch (error) {
       Logger().e(error.toString());
       throw Exception(error);
+    } finally {
+      if (task != null) {
+        if (!task.isInfinite() && task.nextEndDate() == null) {
+          // Delete task
+          taskService!.remove(task);
+          await taskService!.save();
+        } else if (task.shouldRunNow()) {
+          if (task.usePeriodOneOfTaskExecution) {
+            await task.startRepeatingTask();
+          }
+        } else {
+          await task.stopExecutionImmediately();
+        }
+      }
     }
 
     return true;

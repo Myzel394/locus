@@ -61,13 +61,12 @@ List<TaskExample> getExamples() => [
         ],
       ),
       TaskExample(
-        name: "1 hours",
+        name: "1 hour",
         frequency: Duration(minutes: 1),
         realtime: true,
         timers: [
           DurationTimer(
             duration: Duration(hours: 1),
-            startDate: DateTime.now(),
           ),
         ],
       ),
@@ -77,7 +76,6 @@ List<TaskExample> getExamples() => [
         timers: [
           DurationTimer(
             duration: Duration(hours: 6),
-            startDate: DateTime.now(),
           ),
         ],
       ),
@@ -87,7 +85,6 @@ List<TaskExample> getExamples() => [
         timers: [
           DurationTimer(
             duration: Duration(hours: 12),
-            startDate: DateTime.now(),
           ),
         ],
       ),
@@ -97,7 +94,6 @@ List<TaskExample> getExamples() => [
         timers: [
           DurationTimer(
             duration: Duration(hours: 24),
-            startDate: DateTime.now(),
           ),
         ],
       ),
@@ -107,7 +103,6 @@ List<TaskExample> getExamples() => [
         timers: [
           DurationTimer(
             duration: Duration(days: 3),
-            startDate: DateTime.now(),
           ),
         ],
       ),
@@ -117,7 +112,6 @@ List<TaskExample> getExamples() => [
         timers: [
           DurationTimer(
             duration: Duration(days: 7),
-            startDate: DateTime.now(),
           ),
         ],
       ),

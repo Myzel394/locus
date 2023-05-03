@@ -213,6 +213,8 @@ class Task extends ChangeNotifier {
 
   bool isInfinite() => timers.any((timer) => timer.isInfinite());
 
+  bool shouldRunNow() => timers.any((timer) => timer.shouldRun(DateTime.now()));
+
   Future<void> stopSchedule() async {
     await storage.delete(key: scheduleKey);
 
@@ -297,11 +299,11 @@ class Task extends ChangeNotifier {
     return startSchedule(startDate: nextDate);
   }
 
-  // Starts the actual execution of the task. You should only call this if either the user wants to manually start the
-  // task or if the task is scheduled to run.
-  Future<void> startExecutionImmediately() async {
-    await stopSchedule();
-
+  // Starts the actual repeating task
+  // Android uses `registerPeriodicTask`, which needs to be only called once,
+  // iOS uses `registerOneOffTask`, which needs to be called each time after
+  // an execution.
+  Future<void> startRepeatingTask() async {
     if (Platform.isIOS) {
       Workmanager().registerOneOffTask(
         "task-identifier",
@@ -342,6 +344,14 @@ class Task extends ChangeNotifier {
         existingWorkPolicy: ExistingWorkPolicy.replace,
       );
     }
+  }
+
+  // Starts the actual execution of the task. You should only call this if either the user wants to manually start the
+  // task or if the task is scheduled to run.
+  Future<void> startExecutionImmediately() async {
+    await stopSchedule();
+
+    await startRepeatingTask();
 
     await storage.write(
       key: taskKey,
@@ -350,6 +360,10 @@ class Task extends ChangeNotifier {
         "startedAt": DateTime.now().toIso8601String(),
       }),
     );
+
+    for (final timer in timers) {
+      timer.executionStarted();
+    }
 
     notifyListeners();
   }
@@ -360,6 +374,10 @@ class Task extends ChangeNotifier {
     Workmanager().cancelByUniqueName(id);
 
     await storage.delete(key: taskKey);
+
+    for (final timer in timers) {
+      timer.executionStopped();
+    }
 
     notifyListeners();
   }

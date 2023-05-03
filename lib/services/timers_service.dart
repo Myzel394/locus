@@ -11,6 +11,8 @@ abstract class TaskRuntimeTimer {
   // A static value that should return whether the timer can potentially run forever
   bool isInfinite();
 
+  bool shouldRun(final DateTime now);
+
   DateTime? nextStartDate(final DateTime now);
 
   DateTime? nextEndDate(final DateTime now);
@@ -18,6 +20,11 @@ abstract class TaskRuntimeTimer {
   String format(final BuildContext context);
 
   Map<String, dynamic> toJSON();
+
+  // Events
+  void executionStarted();
+
+  void executionStopped();
 }
 
 class WeekdayTimer extends TaskRuntimeTimer {
@@ -32,13 +39,20 @@ class WeekdayTimer extends TaskRuntimeTimer {
     required this.endTime,
   });
 
-  static WeekdayTimer allDay(final int day) => WeekdayTimer(
+  static WeekdayTimer allDay(final int day) =>
+      WeekdayTimer(
         day: day,
         startTime: TimeOfDay(hour: 0, minute: 0),
         endTime: TimeOfDay(hour: 23, minute: 59),
       );
 
   static const IDENTIFIER = "weekday";
+
+  @override
+  void executionStarted() {}
+
+  @override
+  void executionStopped() {}
 
   @override
   String format(final BuildContext context) {
@@ -48,17 +62,36 @@ class WeekdayTimer extends TaskRuntimeTimer {
       return "$dayString (All Day)";
     }
 
-    return "$dayString ${startTime.format(context)} - ${endTime.format(context)}";
+    return "$dayString ${startTime.format(context)} - ${endTime.format(
+        context)}";
   }
 
   get isAllDay =>
       startTime.hour == 0 &&
-      startTime.minute == 0 &&
-      endTime.hour == 23 &&
-      endTime.minute == 59;
+          startTime.minute == 0 &&
+          endTime.hour == 23 &&
+          endTime.minute == 59;
 
   @override
   bool isInfinite() => true;
+
+  @override
+  bool shouldRun(final DateTime now) {
+    if (now.weekday != day) {
+      return false;
+    }
+
+    if (isAllDay) {
+      return true;
+    }
+
+    final start = DateTime(
+        now.year, now.month, now.day, startTime.hour, startTime.minute);
+    final end =
+    DateTime(now.year, now.month, now.day, endTime.hour, endTime.minute);
+
+    return now.isAfter(start) && now.isBefore(end);
+  }
 
   @override
   Map<String, dynamic> toJSON() {
@@ -88,7 +121,7 @@ class WeekdayTimer extends TaskRuntimeTimer {
 
     // Check if end time is in the future, if yes, return now
     final end =
-        DateTime(now.year, now.month, now.day, endTime.hour, endTime.minute);
+    DateTime(now.year, now.month, now.day, endTime.hour, endTime.minute);
     if (now.isBefore(end)) {
       return now;
     }
@@ -122,12 +155,11 @@ class WeekdayTimer extends TaskRuntimeTimer {
 
 class DurationTimer extends TaskRuntimeTimer {
   // A timer that runs for a certain amount of time
-  final Duration duration;
-  final DateTime startDate;
+  Duration duration;
+  DateTime? startDate;
 
-  const DurationTimer({
+  DurationTimer({
     required this.duration,
-    required this.startDate,
   });
 
   static const IDENTIFIER = "duration";
@@ -141,10 +173,20 @@ class DurationTimer extends TaskRuntimeTimer {
   bool isInfinite() => false;
 
   @override
+  bool shouldRun(final DateTime now) {
+    if (startDate == null) {
+      return true;
+    }
+
+    final endDate = startDate!.add(duration);
+
+    return now.isAfter(startDate!) && now.isBefore(endDate);
+  }
+
+  @override
   Map<String, dynamic> toJSON() {
     return {
       "_IDENTIFIER": IDENTIFIER,
-      "startDate": startDate.toIso8601String(),
       "duration": duration.inSeconds,
     };
   }
@@ -156,18 +198,28 @@ class DurationTimer extends TaskRuntimeTimer {
 
   static DurationTimer fromJSON(final Map<String, dynamic> json) {
     final duration = Duration(seconds: json["duration"]);
-    final startDate = DateTime.parse(json["startDate"]);
-
-    final remainingDuration = startDate.difference(DateTime.now()).abs();
 
     return DurationTimer(
-      duration: remainingDuration,
-      startDate: DateTime.now(),
+      duration: duration,
     );
   }
 
   @override
   DateTime? nextEndDate(final DateTime now) {
+    if (duration.isNegative) {
+      return null;
+    }
+
     return now.add(duration);
+  }
+
+  @override
+  void executionStarted() {
+    startDate = DateTime.now();
+  }
+
+  @override
+  void executionStopped() {
+    duration = DateTime.now().difference(startDate!);
   }
 }
