@@ -1,11 +1,6 @@
 {
   "appName": "Locus",
-  "welcome_description": "Share your location with your friends and family.",
-  "welcome_explanation_endToEndEncrypted": "Data is end-to-end encrypted",
-  "welcome_explanation_decentralized": "Data is stored decentralized",
-  "welcome_continue": "Start",
-  "initialization_title": "Get started",
-  "initialization_description": "Select on which relays you want to store your data. After that we will create your encryption keys.",
-  "initialization_form_field_name_label": "Name",
-  "initialization_continue": "Done"
+  "welcomeScreen_title": "Welcome to Locus",
+  "welcomeScreen_description": "Share your location with your friends and family fully privately and securely.",
+  "welcomeScreen_getStarted": "Get Started"
 }

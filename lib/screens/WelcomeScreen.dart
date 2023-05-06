@@ -13,64 +13,21 @@ class WelcomeScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
 
     return PlatformScaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Icon(context.platformIcons.location, size: 80),
-            const SizedBox(height: MEDIUM_SPACE),
-            Text(
-              l10n.appName,
-              style: getTitleTextStyle(context),
-            ),
-            const SizedBox(height: MEDIUM_SPACE),
-            Text(
-              l10n.welcome_description,
-              style: getCaptionTextStyle(context),
-            ),
-            const SizedBox(height: LARGE_SPACE),
-            Wrap(
-              direction: Axis.vertical,
-              spacing: SMALL_SPACE,
-              children: <Widget>[
-                Wrap(
-                  direction: Axis.horizontal,
-                  spacing: MEDIUM_SPACE,
-                  children: <Widget>[
-                    Icon(context.platformIcons.person),
-                    Text(
-                      l10n.welcome_explanation_endToEndEncrypted,
-                      style: theme.textTheme.bodyText1,
-                    ),
-                  ],
-                ),
-                Wrap(
-                  direction: Axis.horizontal,
-                  spacing: MEDIUM_SPACE,
-                  children: <Widget>[
-                    Icon(context.platformIcons.share),
-                    Text(
-                      l10n.welcome_explanation_decentralized,
-                      style: theme.textTheme.bodyText1,
-                    ),
-                  ],
-                )
-              ],
-            ),
-            const SizedBox(height: LARGE_SPACE),
-            PlatformElevatedButton(
-              child: Text(
-                l10n.welcome_continue,
-                style: theme.textTheme.button,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(MEDIUM_SPACE),
+          child: PageView(
+            children: <Widget>[
+              Column(
+                children: <Widget>[
+                  Text(l10n.welcomeScreen_title,
+                    style: getTitleTextStyle(context),
+                  ),
+                ],
               ),
-              // Navigate to "/createKeys
-              onPressed: () {
-                Navigator.pushReplacementNamed(context, "/initialize");
-              },
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
-  }
 }
