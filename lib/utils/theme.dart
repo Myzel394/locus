@@ -1,11 +1,10 @@
-import 'dart:collection';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
 
-TextStyle getBodyTextTextStyle(final BuildContext context) => platformThemeData(
+TextStyle getBodyTextTextStyle(final BuildContext context) =>
+    platformThemeData(
       context,
       material: (data) => data.textTheme.bodyText1!,
       cupertino: (data) => data.textTheme.textStyle,
@@ -16,81 +15,101 @@ TextStyle getErrorTextStyle(final BuildContext context) =>
       color: Colors.red,
     );
 
-Color getBodyTextColor(final BuildContext context) => platformThemeData(
+Color getBodyTextColor(final BuildContext context) =>
+    platformThemeData(
       context,
       material: (data) => data.textTheme.bodyText1!.color!,
       cupertino: (data) => data.textTheme.textStyle.color!,
     );
 
-Color getButtonBackgroundColor(final BuildContext context) => platformThemeData(
+Color getButtonBackgroundColor(final BuildContext context) =>
+    platformThemeData(
       context,
-      material: (data) => data.buttonTheme.colorScheme!.background,
+      material: (data) {
+        final isDarkMode =
+            MediaQuery
+                .of(context)
+                .platformBrightness == Brightness.dark;
+
+        if (isDarkMode) {
+          return data.colorScheme.primary.withOpacity(.2);
+        } else {
+          return Colors.white;
+        }
+      },
       cupertino: (data) => data.primaryColor,
     );
 
-Color getButtonTextColor(final BuildContext context) => platformThemeData(
+Color getButtonTextColor(final BuildContext context) =>
+    platformThemeData(
       context,
-      material: (data) => data.buttonTheme.colorScheme!.onPrimary,
+      material: (data) => data.colorScheme.primary,
       cupertino: (data) => data.primaryContrastingColor,
     );
 
-TextStyle getTitleTextStyle(final BuildContext context) => platformThemeData(
+TextStyle getTitleTextStyle(final BuildContext context) =>
+    platformThemeData(
       context,
       material: (data) => data.textTheme.headlineLarge!,
       cupertino: (data) => data.textTheme.navLargeTitleTextStyle,
     );
 
-TextStyle getTitle2TextStyle(final BuildContext context) => platformThemeData(
+TextStyle getTitle2TextStyle(final BuildContext context) =>
+    platformThemeData(
       context,
       material: (data) => data.textTheme.headlineSmall!,
       cupertino: (data) => data.textTheme.navTitleTextStyle,
     );
 
-TextStyle getSubTitleTextStyle(final BuildContext context) => platformThemeData(
+TextStyle getSubTitleTextStyle(final BuildContext context) =>
+    platformThemeData(
       context,
       material: (data) => data.textTheme.subtitle1!,
       cupertino: (data) => data.textTheme.navTitleTextStyle,
     );
 
-TextStyle getCaptionTextStyle(final BuildContext context) => platformThemeData(
+TextStyle getCaptionTextStyle(final BuildContext context) =>
+    platformThemeData(
       context,
       material: (data) => data.textTheme.caption!,
       cupertino: (data) => data.textTheme.tabLabelTextStyle,
     );
 
-Color getSheetColor(final BuildContext context) => platformThemeData(
+Color getSheetColor(final BuildContext context) =>
+    platformThemeData(
       context,
-      material: (data) =>
-          HSLColor.fromColor(data.scaffoldBackgroundColor.withAlpha(255))
-              .withLightness(.18)
-              .toColor(),
+      material: (data) => HSLColor.fromColor(data.scaffoldBackgroundColor.withAlpha(255)).withLightness(.18).toColor(),
       cupertino: (data) => data.barBackgroundColor,
     );
 
-double getIconSizeForBodyText(final BuildContext context) => platformThemeData(
+double getIconSizeForBodyText(final BuildContext context) =>
+    platformThemeData(
       context,
       material: (data) => data.textTheme.bodyText1!.fontSize ?? 16,
       cupertino: (data) => data.textTheme.textStyle.fontSize ?? 16,
     );
 
-double getActionButtonSize(final BuildContext context) => platformThemeData(
+double getActionButtonSize(final BuildContext context) =>
+    platformThemeData(
       context,
       material: (data) => data.textTheme.headline6!.fontSize ?? 16,
       cupertino: (data) => data.textTheme.actionTextStyle.fontSize ?? 16,
     );
 
 Map<int, Color> getPrimaryColorShades(final BuildContext context) {
-  final primaryColor = Theme.of(context).colorScheme.primary;
+  final primaryColor = Theme
+      .of(context)
+      .colorScheme
+      .primary;
 
   final colorShades = Map.fromEntries(
     List.generate(
       9,
-      (index) => MapEntry(
-        (index + 1) * 100,
-        HSLColor.fromColor(primaryColor)
-            .withLightness(1 - (index / 10))
-            .toColor(),
-      ),
+          (index) =>
+          MapEntry(
+            (index + 1) * 100,
+            HSLColor.fromColor(primaryColor).withLightness(1 - (index / 10)).toColor(),
+          ),
     ),
   );
 
@@ -103,27 +122,28 @@ Map<int, Color> getPrimaryColorShades(final BuildContext context) {
 EdgeInsets getSmallButtonPadding(final BuildContext context) =>
     platformThemeData(
       context,
-      material: (data) => const EdgeInsets.symmetric(
+      material: (data) =>
+      const EdgeInsets.symmetric(
         horizontal: MEDIUM_SPACE,
         vertical: SMALL_SPACE,
       ),
-      cupertino: (data) => const EdgeInsets.symmetric(
+      cupertino: (data) =>
+      const EdgeInsets.symmetric(
         horizontal: SMALL_SPACE,
         vertical: TINY_SPACE,
       ),
     );
 
-List<Widget> createCancellableDialogActions(
-  final BuildContext context,
-  final Iterable<Widget> actions,
-) {
+List<Widget> createCancellableDialogActions(final BuildContext context,
+    final Iterable<Widget> actions,) {
   final cancelWidget = PlatformDialogAction(
     child: const Text("Cancel"),
-    material: (_, __) => MaterialDialogActionData(
-        icon: PlatformWidget(
-      material: (_, __) => Icon(Icons.cancel_outlined),
-      cupertino: (_, __) => Icon(CupertinoIcons.clear_thick),
-    )),
+    material: (_, __) =>
+        MaterialDialogActionData(
+            icon: PlatformWidget(
+              material: (_, __) => Icon(Icons.cancel_outlined),
+              cupertino: (_, __) => Icon(CupertinoIcons.clear_thick),
+            )),
     onPressed: () => Navigator.of(context).pop(""),
   );
 

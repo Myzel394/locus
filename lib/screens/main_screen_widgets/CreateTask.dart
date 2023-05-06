@@ -131,6 +131,7 @@ class _CreateTaskState extends State<CreateTask> with TickerProviderStateMixin {
                     "Create Task",
                     style: TextStyle(
                       color: getButtonTextColor(context),
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ],
