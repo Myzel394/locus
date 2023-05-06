@@ -8,5 +8,7 @@
   "welcomeScreen_permissions_allow": "Allow",
   "welcomeScreen_battery_title": "Battery optimization",
   "welcomeScreen_battery_description": "In order to share your location in the background, we need to disable battery optimization for this app.",
-  "welcomeScreen_battery_openSettings": "Open Settings"
+  "welcomeScreen_battery_openSettings": "Open Settings",
+  "welcomeScreen_battery_disableManufacturerOptimization_title": "You have additional battery optimization enabled",
+  "welcomeScreen_battery_disableManufacturerOptimization_description": "Follow these steps to disable additional battery optimization for Locus. You may need to restart the app after following the steps."
 }

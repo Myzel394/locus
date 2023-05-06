@@ -78,8 +78,9 @@ class _BatteryOptimizationsScreenState extends State<BatteryOptimizationsScreen>
           onPressed: () async {
             await DisableBatteryOptimization.showDisableBatteryOptimizationSettings();
             await DisableBatteryOptimization.showDisableManufacturerBatteryOptimizationSettings(
-                "Your device has additional battery optimization",
-                "Follow the steps and disable the optimizations to allow smooth functioning of this app");
+              l10n.welcomeScreen_battery_disableManufacturerOptimization_title,
+              l10n.welcomeScreen_battery_disableManufacturerOptimization_description,
+            );
             final isIgnoringBatteryOptimizations =
                 await DisableBatteryOptimization.isAllBatteryOptimizationDisabled ?? false;
 

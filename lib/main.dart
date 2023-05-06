@@ -26,7 +26,7 @@ void main() async {
     Permission.locationAlways.isGranted,
     TaskService.restore(),
     ViewService.restore(),
-    DisableBatteryOptimization.isAllBatteryOptimizationDisabled,
+    DisableBatteryOptimization.isBatteryOptimizationDisabled,
   ]);
   final bool hasLocationAlwaysGranted = futures[0];
   final TaskService taskService = futures[1];
