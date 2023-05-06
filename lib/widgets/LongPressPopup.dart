@@ -4,6 +4,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:locus/constants/spacing.dart';
+import 'package:locus/utils/theme.dart';
 
 class LongPressPopupMenuItem<T> {
   final Widget label;
@@ -64,7 +65,7 @@ class _LongPressPopupState<T> extends State<LongPressPopup> {
                   Icon(
                     item.icon,
                     color: item.isDestructiveAction
-                        ? Colors.red
+                        ? getErrorColor(context)
                         : item.isDefaultAction
                             ? Colors.blue
                             : null,

@@ -1,14 +1,11 @@
-import 'dart:collection';
-import 'dart:io';
-
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:locus/constants/spacing.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:locus/screens/task_detail_screen_widgets/Details.dart';
 import 'package:locus/services/location_point_service.dart';
 import 'package:locus/services/task_service.dart';
-import 'package:locus/utils/theme.dart';
+import 'package:locus/widgets/LocationFetchError.dart';
 import 'package:locus/widgets/LocationsLoadingScreen.dart';
 import 'package:locus/widgets/LocationsMap.dart';
 
@@ -95,32 +92,24 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return PlatformScaffold(
       appBar: PlatformAppBar(
         title: Text(
-          _isShowingDetails ? "Details" : widget.task.name,
+          _isShowingDetails ? l10n.taskDetails_title : widget.task.name,
         ),
         material: (_, __) => MaterialAppBarData(
           centerTitle: true,
         ),
         cupertino: (_, __) => CupertinoNavigationBarData(
-          backgroundColor:
-              CupertinoTheme.of(context).barBackgroundColor.withOpacity(.5),
+          backgroundColor: CupertinoTheme.of(context).barBackgroundColor.withOpacity(.5),
         ),
       ),
       body: _isError
-          ? Center(
-              child: Text(
-                "There was an error fetching the locations. Please try again later.",
-                style: getBodyTextTextStyle(context).copyWith(
-                  color: Colors.red,
-                ),
-              ),
-            )
+          ? const LocationFetchError()
           : PageView(
-              physics: _isShowingDetails
-                  ? const AlwaysScrollableScrollPhysics()
-                  : const NeverScrollableScrollPhysics(),
+              physics: _isShowingDetails ? const AlwaysScrollableScrollPhysics() : const NeverScrollableScrollPhysics(),
               scrollDirection: Axis.vertical,
               controller: _pageController,
               children: <Widget>[
@@ -157,7 +146,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                             ),
                           ),
                         ),
-                        child: Text("View Details"),
+                        child: Text(l10n.taskDetails_goToDetails),
                         onPressed: () {
                           _pageController.animateToPage(
                             1,

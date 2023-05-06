@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:locus/services/timers_service.dart';
 
@@ -14,7 +15,7 @@ class TimerController extends ChangeNotifier {
   void add(final TaskRuntimeTimer timer) {
     // Merge the new timer if a timer for the same weekday already exists
     final existingTimer = _timers.firstWhereOrNull(
-      (currentTimer) {
+          (currentTimer) {
         if (timer is WeekdayTimer) {
           if (currentTimer is WeekdayTimer && currentTimer.day == timer.day) {
             return true;
@@ -110,14 +111,15 @@ class _TimerWidgetState extends State<TimerWidget> {
     super.dispose();
   }
 
-  List<TaskRuntimeTimer> get sortedTimers => _controller.timers.toList()
-    ..sort((a, b) {
-      if (a is WeekdayTimer && b is WeekdayTimer) {
-        return a.day.compareTo(b.day);
-      }
+  List<TaskRuntimeTimer> get sortedTimers =>
+      _controller.timers.toList()
+        ..sort((a, b) {
+          if (a is WeekdayTimer && b is WeekdayTimer) {
+            return a.day.compareTo(b.day);
+          }
 
-      return 0;
-    });
+          return 0;
+        });
 
   @override
   Widget build(BuildContext context) {
@@ -132,34 +134,38 @@ class _TimerWidgetState extends State<TimerWidget> {
             title: Text(timer.format(context)),
             trailing: widget.allowEdit
                 ? PlatformIconButton(
-                    icon: Icon(Icons.cancel),
-                    onPressed: () {
-                      _controller.removeAt(index);
-                    },
-                  )
+              icon: PlatformWidget(
+                material: (_, __) => const Icon(Icons.cancel),
+                cupertino: (_, __) => const Icon(CupertinoIcons.clear_thick_circled),
+              ),
+              onPressed: () {
+                _controller.removeAt(index);
+              },
+            )
                 : const SizedBox.shrink(),
             onTap: (widget.allowEdit && timer is WeekdayTimer)
                 ? () async {
-                    final data = await showPlatformDialog(
-                      context: context,
-                      builder: (_) => WeekdaySelection(
-                        weekday: timer.day,
-                        startTime: timer.startTime,
-                        endTime: timer.endTime,
-                        lockWeekday: true,
-                      ),
-                    );
+              final data = await showPlatformDialog(
+                context: context,
+                builder: (_) =>
+                    WeekdaySelection(
+                      weekday: timer.day,
+                      startTime: timer.startTime,
+                      endTime: timer.endTime,
+                      lockWeekday: true,
+                    ),
+              );
 
-                    if (data != null) {
-                      _controller.timers.add(
-                        WeekdayTimer(
-                          day: data["weekday"] as int,
-                          startTime: data["startTime"] as TimeOfDay,
-                          endTime: data["endTime"] as TimeOfDay,
-                        ),
-                      );
-                    }
-                  }
+              if (data != null) {
+                _controller.timers.add(
+                  WeekdayTimer(
+                    day: data["weekday"] as int,
+                    startTime: data["startTime"] as TimeOfDay,
+                    endTime: data["endTime"] as TimeOfDay,
+                  ),
+                );
+              }
+            }
                 : null);
       },
     );

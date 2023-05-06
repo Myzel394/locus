@@ -1,9 +1,10 @@
-import 'dart:io';
-
 import 'package:basic_utils/basic_utils.dart';
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/screens/create_task_screen_widgets/ExampleTasksRoulette.dart';
 import 'package:locus/screens/create_task_screen_widgets/SignKeyLottie.dart';
@@ -51,8 +52,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
     _nameController.addListener(() {
       final taskService = context.read<TaskService>();
       final lowerCasedName = _nameController.text.toLowerCase();
-      final alreadyExists = taskService.tasks
-          .any((element) => element.name.toLowerCase() == lowerCasedName);
+      final alreadyExists = taskService.tasks.any((element) => element.name.toLowerCase() == lowerCasedName);
 
       setState(() {
         anotherTaskAlreadyExists = alreadyExists;
@@ -127,13 +127,23 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
     }
   }
 
+  Map<TaskCreationProgress, String> getCreationProgressTextMap() {
+    final l10n = AppLocalizations.of(context);
+
+    return {
+      TaskCreationProgress.creatingSignKeys: l10n.createTask_process_creatingSignKeys,
+      TaskCreationProgress.creatingViewKeys: l10n.createTask_process_creatingViewKeys,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final isKeyboardVisible = MediaQuery.of(context).viewInsets.bottom != 0;
 
     return PlatformScaffold(
       appBar: PlatformAppBar(
-        title: Text("Create Task"),
+        title: Text(l10n.mainScreen_createTask),
         material: (_, __) => MaterialAppBarData(
           centerTitle: true,
         ),
@@ -159,12 +169,12 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                             children: <Widget>[
                               const SizedBox(height: SMALL_SPACE),
                               Text(
-                                "Define a name and a frequency for your task",
+                                l10n.createTask_title,
                                 style: getSubTitleTextStyle(context),
                               ),
                               const SizedBox(height: SMALL_SPACE),
                               Text(
-                                "Note that a frequency of less than 15 minutes will automatically be set to 15 minutes. This is not set by us, but by the operating system.",
+                                l10n.createTask_description,
                                 style: getCaptionTextStyle(context),
                               ),
                             ],
@@ -189,28 +199,25 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                   textInputAction: TextInputAction.next,
                                   validator: (value) {
                                     if (value == null || value.isEmpty) {
-                                      return "Please enter a name";
+                                      return l10n.fields_errors_isEmpty;
                                     }
 
                                     if (!StringUtils.isAscii(value)) {
-                                      return "Name contains invalid characters";
+                                      return l10n.fields_errors_invalidCharacters;
                                     }
 
                                     return null;
                                   },
                                   keyboardType: TextInputType.name,
                                   autofillHints: const [AutofillHints.name],
-                                  material: (_, __) =>
-                                      MaterialTextFormFieldData(
+                                  material: (_, __) => MaterialTextFormFieldData(
                                     decoration: InputDecoration(
-                                      labelText: "Name",
-                                      prefixIcon:
-                                          Icon(context.platformIcons.tag),
+                                      labelText: l10n.createTask_fields_name_label,
+                                      prefixIcon: Icon(context.platformIcons.tag),
                                     ),
                                   ),
-                                  cupertino: (_, __) =>
-                                      CupertinoTextFormFieldData(
-                                    placeholder: "Name",
+                                  cupertino: (_, __) => CupertinoTextFormFieldData(
+                                    placeholder: l10n.createTask_fields_name_label,
                                     prefix: Icon(context.platformIcons.tag),
                                   ),
                                 )
@@ -230,12 +237,10 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                 ExampleTasksRoulette(
                                   disabled: _taskProgress != null,
                                   onSelected: (example) {
-                                    FocusManager.instance.primaryFocus
-                                        ?.unfocus();
+                                    FocusManager.instance.primaryFocus?.unfocus();
 
                                     _nameController.text = example.name;
-                                    _frequencyController.text =
-                                        example.frequency.inMinutes.toString();
+                                    _frequencyController.text = example.frequency.inMinutes.toString();
                                     _timersController
                                       ..clear()
                                       ..addAll(example.timers);
@@ -243,9 +248,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                 ),
                               if (anotherTaskAlreadyExists) ...[
                                 const SizedBox(height: MEDIUM_SPACE),
-                                WarningText(
-                                  "A task with this name already exists. You can create the task, but you will have two tasks with the same name.",
-                                ),
+                                WarningText(l10n.createTask_sameTaskNameAlreadyExists),
                               ],
                               const SizedBox(height: MEDIUM_SPACE),
                               PlatformTextFormField(
@@ -253,39 +256,32 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                 enabled: _taskProgress == null,
                                 textInputAction: TextInputAction.done,
                                 keyboardType: TextInputType.number,
-                                textAlign: Platform.isAndroid
-                                    ? TextAlign.center
-                                    : null,
+                                inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
+                                textAlign: isMaterial(context) ? TextAlign.center : null,
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
-                                    return "Please enter a frequency";
-                                  }
-
-                                  if (!StringUtils.isDigit(value)) {
-                                    return "Frequency must be a number";
+                                    return l10n.fields_errors_isEmpty;
                                   }
 
                                   final frequency = int.parse(value);
 
-                                  if (frequency < 1) {
-                                    return "Frequency must be greater than 0";
+                                  if (frequency <= 0) {
+                                    return l10n.fields_errors_greaterThan(0);
                                   }
 
                                   return null;
                                 },
                                 material: (_, __) => MaterialTextFormFieldData(
                                   decoration: InputDecoration(
-                                    prefixIcon:
-                                        Icon(context.platformIcons.time),
-                                    labelText: "Frequency",
-                                    prefixText: "Every",
-                                    suffix: Text("Minutes"),
+                                    prefixIcon: const Icon(Icons.timer),
+                                    labelText: l10n.createTask_fields_frequency_label,
+                                    prefixText: l10n.createTask_fields_frequency_prefix,
+                                    suffixText: l10n.createTask_fields_frequency_suffix,
                                   ),
                                 ),
-                                cupertino: (_, __) =>
-                                    CupertinoTextFormFieldData(
-                                  placeholder: "Frequency (in minutes)",
-                                  prefix: Icon(context.platformIcons.time),
+                                cupertino: (_, __) => CupertinoTextFormFieldData(
+                                  placeholder: l10n.createTask_fields_frequency_placeholder,
+                                  prefix: const Icon(CupertinoIcons.timer),
                                 ),
                               )
                                   .animate()
@@ -308,12 +304,13 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                 direction: Axis.horizontal,
                                 children: <Widget>[
                                   PlatformElevatedButton(
-                                    material: (_, __) =>
-                                        MaterialElevatedButtonData(
-                                      icon: Icon(Icons.dns_rounded),
+                                    material: (_, __) => MaterialElevatedButtonData(
+                                      icon: PlatformWidget(
+                                        material: (_, __) => const Icon(Icons.dns_rounded),
+                                        cupertino: (_, __) => const Icon(CupertinoIcons.list_bullet),
+                                      ),
                                     ),
-                                    cupertino: (_, __) =>
-                                        CupertinoElevatedButtonData(
+                                    cupertino: (_, __) => CupertinoElevatedButtonData(
                                       padding: getSmallButtonPadding(context),
                                     ),
                                     onPressed: _taskProgress != null
@@ -322,8 +319,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                             showPlatformModalSheet(
                                               context: context,
                                               material: MaterialModalSheetData(
-                                                backgroundColor:
-                                                    Colors.transparent,
+                                                backgroundColor: Colors.transparent,
                                                 isScrollControlled: true,
                                                 isDismissible: true,
                                               ),
@@ -333,10 +329,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                             );
                                           },
                                     child: Text(
-                                      _relaysController.relays.isEmpty
-                                          ? "Select Relays"
-                                          : "Selected ${_relaysController.relays.length} Relay${_relaysController.relays.length == 1 ? "" : "s"}",
-                                    ),
+                                        l10n.createTask_fields_relays_selectLabel(_relaysController.relays.length)),
                                   )
                                       .animate()
                                       .then(delay: IN_DELAY * 4)
@@ -351,12 +344,10 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                         curve: Curves.easeOut,
                                       ),
                                   PlatformElevatedButton(
-                                    material: (_, __) =>
-                                        MaterialElevatedButtonData(
+                                    material: (_, __) => MaterialElevatedButtonData(
                                       icon: const Icon(Icons.timer_rounded),
                                     ),
-                                    cupertino: (_, __) =>
-                                        CupertinoElevatedButtonData(
+                                    cupertino: (_, __) => CupertinoElevatedButtonData(
                                       padding: getSmallButtonPadding(context),
                                     ),
                                     onPressed: _taskProgress != null
@@ -365,8 +356,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                             await showPlatformModalSheet(
                                               context: context,
                                               material: MaterialModalSheetData(
-                                                backgroundColor:
-                                                    Colors.transparent,
+                                                backgroundColor: Colors.transparent,
                                                 isScrollControlled: true,
                                                 isDismissible: true,
                                               ),
@@ -376,9 +366,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                             );
                                           },
                                     child: Text(
-                                      _timersController.timers.isEmpty
-                                          ? "Select Timers"
-                                          : "Selected ${_timersController.timers.length} Timer${_timersController.timers.length == 1 ? "" : "s"}",
+                                      l10n.createTask_fields_timers_selectLabel(_timersController.timers.length),
                                     ),
                                   )
                                       .animate()
@@ -406,7 +394,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                       errorMessage!,
                       textAlign: TextAlign.center,
                       style: getBodyTextTextStyle(context).copyWith(
-                        color: Colors.red,
+                        color: getErrorColor(context),
                       ),
                     ),
                     const SizedBox(height: MEDIUM_SPACE),
@@ -422,20 +410,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                       ).animate().fadeIn(duration: 1.seconds),
                     const SizedBox(height: MEDIUM_SPACE),
                     Text(
-                      (() {
-                        switch (_taskProgress) {
-                          case TaskCreationProgress.startsSoon:
-                            return "Task generation started...";
-                          case TaskCreationProgress.creatingViewKeys:
-                            return "Creating view keys...";
-                          case TaskCreationProgress.creatingSignKeys:
-                            return "Creating sign keys...";
-                          case TaskCreationProgress.creatingTask:
-                            return "Creating task...";
-                          default:
-                            return "";
-                        }
-                      })(),
+                      getCreationProgressTextMap()[_taskProgress] ?? "",
                       textAlign: TextAlign.center,
                       style: getCaptionTextStyle(context),
                     ),
@@ -452,8 +427,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
 
                             if (_relaysController.relays.isEmpty) {
                               setState(() {
-                                errorMessage =
-                                    "Please select at least one relay";
+                                errorMessage = l10n.createTask_errors_emptyRelays;
                               });
                               return;
                             }
@@ -461,7 +435,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                             createTask(context);
                           },
                     child: Text(
-                      "Create",
+                      l10n.createTask_createLabel,
                       style: TextStyle(
                         fontSize: getActionButtonSize(context),
                       ),

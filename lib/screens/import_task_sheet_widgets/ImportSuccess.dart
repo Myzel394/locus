@@ -1,5 +1,6 @@
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:lottie/lottie.dart';
 
 import '../../constants/spacing.dart';
@@ -45,6 +46,8 @@ class _ImportSuccessState extends State<ImportSuccess> with TickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
@@ -60,7 +63,7 @@ class _ImportSuccessState extends State<ImportSuccess> with TickerProviderStateM
         ),
         const SizedBox(height: MEDIUM_SPACE),
         Text(
-          "Task imported successfully!",
+          l10n.mainScreen_importTask_successMessage,
           textAlign: TextAlign.center,
           style: getSubTitleTextStyle(context),
         ),
@@ -71,7 +74,7 @@ class _ImportSuccessState extends State<ImportSuccess> with TickerProviderStateM
           material: (_, __) => MaterialElevatedButtonData(
             icon: const Icon(Icons.check_rounded),
           ),
-          child: const Text("Done"),
+          child: Text(l10n.closePositiveSheetAction),
         ),
       ],
     );

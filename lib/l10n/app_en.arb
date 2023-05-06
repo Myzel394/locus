@@ -1,5 +1,120 @@
 {
   "appName": "Locus",
+  "unknownError": "An unknown error occurred",
+  "taskImportError": "An error occurred while importing the task",
+  "locationsLoadingError": "An error occurred while loading locations",
+  "locationFetchError": "There was an error fetching the locations. Please try again later.",
+  "goBack": "Go back",
+  "closePositiveSheetAction": "Done",
+  "closeNeutralAction": "Ok",
+  "continueLabel": "Continue",
+  "deleteLabel": "Delete",
+  "editRelays": "Edit Relays",
+  "actionNotUndoable": "This action cannot be undone!",
+  "linkCopiedToClipboard": "Link copied to clipboard!",
+  "nostrRelaysLabel": "Nostr Relays",
+  "nostrPublicKeyLabel": "Public Nostr key",
+  "signPublicKeyLabel": "Public Sign key",
+  "detailsTimersLabel": "Timers",
+  "searchLabel": "Search",
+  "fields_errors_isEmpty": "This field is required",
+  "fields_errors_invalidCharacters": "This field contains invalid characters",
+  "fields_errors_notNumber": "This field must be a number",
+  "fields_errors_greaterThan": "This field must be greater than {value}",
+  "@fields_error_greaterThan": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "openInMaps_title": "Open in Maps",
+  "openInMaps_description": "Where do you want to open this location in?",
+  "timer_executionStartsImmediately": "Execution will start immediately.",
+  "timer_nextExecution": "Next execution will start at {date}",
+  "timer_runsInfiniteMessage": "This task will run until you stop it manually.",
+  "timer_addWeekday": "Add Weekday",
+  "timer_addDuration": "Add Duration",
+  "@timer_nextExecution": {
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "MMMM d, HH:mm",
+        "isCustomDateFormat": "true"
+      }
+    }
+  },
+  "relaySelectSheet_selectRandomRelays": "Select {count} random Nostr Relays",
+  "taskAction_start": "Start Task",
+  "taskAction_started_title": "Task started",
+  "taskAction_started_description": "Task started at {date} with a frequency of {frequency} minutes",
+  "@taskAction_started_description": {
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "MMMM d, HH:mm",
+        "isCustomDateFormat": "true"
+      },
+      "frequency": {
+        "type": "int"
+      }
+    }
+  },
+  "taskAction_notRunning_title": "Task is not running",
+  "taskAction_started_runsUntil": "The task has been started and will run until {date}",
+  "@taskAction_started_runsUntil": {
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "MMMM d, HH:mm",
+        "isCustomDateFormat": "true"
+      }
+    }
+  },
+  "taskAction_stop": "Stop Task",
+  "taskAction_stopped_title": "Task stopped",
+  "taskAction_stopped_startsAgain": "The task has been stopped and will start again at {date}",
+  "@taskAction_stopped_startsAgain": {
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "MMMM d, HH:mm",
+        "isCustomDateFormat": "true"
+      }
+    }
+  },
+  "taskAction_startSchedule": "Start Schedule",
+  "taskAction_startSchedule_title": "Task has been scheduled",
+  "taskAction_startSchedule_description": "Task has been scheduled to start at {date}.",
+  "@taskAction_startSchedule_description": {
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "MMMM d, HH:mm",
+        "isCustomDateFormat": "true"
+      }
+    }
+  },
+  "taskAction_startSchedule_notScheduled_title": "Task has not been scheduled",
+  "taskAction_startSchedule_notScheduled_description": "The task has not been started because there is no schedule set for the future.",
+  "taskAction_stopSchedule": "Stop Schedule",
+  "taskAction_stopSchedule_title": "Task has been unscheduled",
+  "taskAction_stopSchedule_description": "The task has been unscheduled. It will no longer be executed automatically. To start it again, you can either schedule it again or start it manually",
+  "taskAction_generateLink": "Generate link",
+  "taskAction_generateLink_process_encrypting": "Encrypting...",
+  "taskAction_generateLink_process_publishing": "Publishing encrypted data...",
+  "taskAction_generateLink_process_creatingURI": "Creating link...",
+  "taskAction_generateLink_shareTextSubject": "Here's the link to see my location",
+  "unnamedView": "Unnamed",
+  "viewAction_delete": "Delete",
+  "viewAction_delete_confirm_title": "Are you sure you want to delete {view}?",
+  "@viewAction_delete_confirm_title": {
+    "placeholders": {
+      "view": {
+        "type": "String"
+      }
+    }
+  },
   "welcomeScreen_title": "Welcome to Locus",
   "welcomeScreen_description": "Share your location with your friends and family fully privately and securely.",
   "welcomeScreen_getStarted": "Get Started",
@@ -10,5 +125,100 @@
   "welcomeScreen_battery_description": "In order to share your location in the background, we need to disable battery optimization for this app.",
   "welcomeScreen_battery_openSettings": "Open Settings",
   "welcomeScreen_battery_disableManufacturerOptimization_title": "You have additional battery optimization enabled",
-  "welcomeScreen_battery_disableManufacturerOptimization_description": "Follow these steps to disable additional battery optimization for Locus. You may need to restart the app after following the steps."
+  "welcomeScreen_battery_disableManufacturerOptimization_description": "Follow these steps to disable additional battery optimization for Locus. You may need to restart the app after following the steps.",
+  "mainScreen_overview": "Overview",
+  "mainScreen_createTask": "Create Task",
+  "mainScreen_createTask_tasksEmpty": "No tasks yet",
+  "mainScreen_createTask_description": "Create a task to share your current location",
+  "mainScreen_createTask_action_create": "Create Task",
+  "mainScreen_tasksSection": "Tasks",
+  "mainScreen_viewsSection": "Views",
+  "mainScreen_importTask_title": "Import a Task",
+  "mainScreen_importTask_description": "Import a task from a link, a file or QR code you have received",
+  "mainScreen_importTask_action_import": "Import Task",
+  "mainScreen_importTask_action_importMethod": "How would you like to import the task?",
+  "mainScreen_importTask_action_importMethod_url": "Import URL",
+  "mainScreen_importTask_action_importMethod_url_title": "Enter the URL of the task",
+  "mainScreen_importTask_action_importMethod_file": "Import file",
+  "mainScreen_importTask_action_importMethod_file_selectFile": "Select a ViewKey file to import",
+  "mainScreen_importTask_action_importMethod_qrCode": "Scan QR code",
+  "mainScreen_importTask_action_import_isLoading": "Importing...",
+  "mainScreen_importTask_action_name_title": "Enter a name for this view",
+  "mainScreen_importTask_action_name_label": "Name",
+  "mainScreen_importTask_action_name_errors_sameNameAlreadyExists": "A view with this name already exists",
+  "mainScreen_importTask_importOverview_title": "Would you like to import this task view?",
+  "mainScreen_importTask_importOverview_lastPosition": "Last Position:",
+  "mainScreen_importTask_successMessage": "The task was successfully imported!",
+  "mainScreen_importTask_importLabel": "Import",
+  "createTask_title": "Define a name and a frequency for your task",
+  "createTask_description": "Note that a frequency of less than 15 minutes will automatically be set to 15 minutes. This is not set by us, but by the operating system.",
+  "createTask_fields_name_label": "Name",
+  "createTask_sameTaskNameAlreadyExists": "A task with this name already exists. You can create the task, but you will have two tasks with the same name.",
+  "createTask_fields_frequency_label": "Frequency",
+  "createTask_fields_frequency_prefix": "Every",
+  "createTask_fields_frequency_suffix": "Minutes",
+  "createTask_fields_frequency_placeholder": "Frequency (in minutes)",
+  "createTask_fields_relays_selectLabel": "{count, plural, =0{Select Relays} =1{Selected One Relay} other{Selected {count} Relays}}",
+  "@createTask_fields_relays_selectLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "createTask_fields_timers_selectLabel": "{count, plural, =0{Select Timers} =1{Selected One Timer} other{Selected {count} Timers}}",
+  "@createTask_fields_timers_selectLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "createTask_process_creatingSignKeys": "Creating Sign Key...",
+  "createTask_process_creatingViewKeys": "Creating View Key...",
+  "createTask_errors_emptyRelays": "Please select at least one relay",
+  "createTask_createLabel": "Create",
+  "taskDetails_title": "Details",
+  "taskDetails_goToDetails": "Go to Details",
+  "taskDetails_lastKnownLocation": "Last known location",
+  "taskDetails_noLocations": "No locations saved yet",
+  "taskDetails_mostRecentLocationExplanation": "This is the most recent location saved",
+  "taskDetails_locationDetails": "Location Details",
+  "taskDetails_savedLocations": "{count, plural, =0{No locations saved yet} =1{One location saved} other{{count} locations saved}}",
+  "@taskDetails_savedLocations": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "taskDetails_taskStatus": "Task Status",
+  "taskDetails_deleteTask": "Delete Task",
+  "taskDetails_deleteTask_confirm": "Are you sure you want to delete this task? This means that no more locations will be saved for this task. Existing locations will not be deleted.",
+  "viewDetails_title": "View Details",
+  "viewDetails_actions_openLatestLocation": "Open Maps to latest location",
+  "loadingLocationsTitle": "Loading locations: {count}",
+  "@loadingLocationsTitle": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "shareLocation_title": "Share Location",
+  "shareLocation_description": "Would you like to share your location from this task? This will allow other users to see your location. A view key file will be generated which allows anyone to view your location. Makes sure to keep this file safe and only share it with people you trust.",
+  "shareLocation_actions_saveFile": "Save File",
+  "shareLocation_actions_createQRCode": "Create QR Code",
+  "shareLocation_actions_shareFile": "Share File",
+  "shareLocation_actions_shareFile_text": "Here's my Locus View Key to see my location",
+  "shareLocation_actions_shareLink": "Share Link",
+  "shareLocation_actions_shareLink_text": "Here's my Locus link to see my location",
+  "shareLocation_scanToImport": "Scan this QR Code to import task {task}",
+  "@shareLocation_scanToImport": {
+    "placeholders": {
+      "task": {
+        "type": "String"
+      }
+    }
+  }
 }

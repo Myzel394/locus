@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:lottie/lottie.dart';
 
 import '../services/location_point_service.dart';
@@ -21,8 +22,7 @@ class LocationsLoadingScreen extends StatefulWidget {
   State<LocationsLoadingScreen> createState() => _LocationsLoadingScreenState();
 }
 
-class _LocationsLoadingScreenState extends State<LocationsLoadingScreen>
-    with SingleTickerProviderStateMixin {
+class _LocationsLoadingScreenState extends State<LocationsLoadingScreen> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _progressAnimation;
   late Animation<double> _opacityAnimation;
@@ -72,6 +72,7 @@ class _LocationsLoadingScreenState extends State<LocationsLoadingScreen>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final shades = getPrimaryColorShades(context);
 
     return Column(
@@ -79,8 +80,8 @@ class _LocationsLoadingScreenState extends State<LocationsLoadingScreen>
       children: <Widget>[
         Flexible(
           child: Text(
-            "Loading locations: ${widget.locations.length}",
-            style: getTitleTextStyle(context),
+            l10n.loadingLocationsTitle(widget.locations.length),
+            style: getSubTitleTextStyle(context),
           ),
         ),
         Expanded(
@@ -110,11 +111,10 @@ class _LocationsLoadingScreenState extends State<LocationsLoadingScreen>
                 ...List.generate(
                   // Starts at 8, ends at 8
                   18 - 8,
-                      (index) =>
-                      ValueDelegate.strokeColor(
-                        ["Shape Layer ${index + 8}", "Ellipse 1", "Stroke 1"],
-                        value: shades[800],
-                      ),
+                  (index) => ValueDelegate.strokeColor(
+                    ["Shape Layer ${index + 8}", "Ellipse 1", "Stroke 1"],
+                    value: shades[800],
+                  ),
                 ),
                 ValueDelegate.strokeColor(
                   const ["Shape Layer 1", "Ellipse 1", "Stroke 1"],
@@ -137,8 +137,7 @@ class _LocationsLoadingScreenState extends State<LocationsLoadingScreen>
               begin: 1,
               end: 0,
             ),
-            builder: (context, value, _) =>
-                LinearProgressIndicator(value: value),
+            builder: (context, value, _) => LinearProgressIndicator(value: value),
           ),
         ),
       ],

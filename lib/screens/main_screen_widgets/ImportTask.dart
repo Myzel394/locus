@@ -1,6 +1,7 @@
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:locus/screens/ImportTaskSheet.dart';
 import 'package:lottie/lottie.dart';
 import 'package:visibility_detector/visibility_detector.dart';
@@ -34,6 +35,7 @@ class _ImportTaskState extends State<ImportTask> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final topColor = Theme.of(context).colorScheme.primary;
     final topColor2 = HSLColor.fromColor(topColor).withLightness(0.5).toColor();
     final topColor3 = HSLColor.fromColor(topColor).withLightness(0.3).toColor();
@@ -90,12 +92,12 @@ class _ImportTaskState extends State<ImportTask> with TickerProviderStateMixin {
         ),
         const SizedBox(height: MEDIUM_SPACE),
         Text(
-          "Import a task",
+          l10n.mainScreen_importTask_title,
           style: getSubTitleTextStyle(context),
         ),
         const SizedBox(height: SMALL_SPACE),
         Text(
-          "Import a task from a link, a file or QR code you have received",
+          l10n.mainScreen_importTask_description,
           style: getCaptionTextStyle(context),
         ),
         const SizedBox(height: MEDIUM_SPACE),
@@ -110,27 +112,27 @@ class _ImportTaskState extends State<ImportTask> with TickerProviderStateMixin {
                 context: context,
                 barrierDismissible: true,
                 builder: (cupertino) => CupertinoActionSheet(
-                  title: Text("Import a task"),
-                  message: Text("How would you like to import?"),
+                  title: Text(l10n.mainScreen_importTask_action_import),
+                  message: Text(l10n.mainScreen_importTask_action_importMethod),
                   actions: createCancellableDialogActions(
                     context,
                     [
                       CupertinoActionSheetAction(
-                        child: const Text("Import URL"),
+                        child: Text(l10n.mainScreen_importTask_action_importMethod_url),
                         isDefaultAction: true,
                         onPressed: () {
                           Navigator.of(context).pop(ImportScreen.askURL);
                         },
                       ),
                       CupertinoActionSheetAction(
-                        child: const Text("Import file"),
+                        child: Text(l10n.mainScreen_importTask_action_importMethod_file),
                         isDefaultAction: true,
                         onPressed: () {
                           Navigator.of(context).pop(ImportScreen.importFile);
                         },
                       ),
                       CupertinoActionSheetAction(
-                        child: const Text("Scan QR code"),
+                        child: Text(l10n.mainScreen_importTask_action_importMethod_qrCode),
                         isDefaultAction: true,
                         onPressed: () {
                           Navigator.of(context).pop(ImportScreen.scanQR);
@@ -153,8 +155,7 @@ class _ImportTaskState extends State<ImportTask> with TickerProviderStateMixin {
                 isScrollControlled: true,
                 isDismissible: true,
               ),
-              builder: (context) =>
-                  ImportTaskSheet(initialScreen: initialScreen),
+              builder: (context) => ImportTaskSheet(initialScreen: initialScreen),
             );
 
             _controller.forward();
@@ -162,7 +163,7 @@ class _ImportTaskState extends State<ImportTask> with TickerProviderStateMixin {
           material: (_, __) => MaterialElevatedButtonData(
             icon: Icon(Icons.file_download_outlined),
           ),
-          child: Text("Import Task"),
+          child: Text(l10n.mainScreen_importTask_action_import),
         ),
       ],
     );

@@ -2,6 +2,7 @@ import 'package:basic_utils/basic_utils.dart';
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 
 import '../../constants/spacing.dart';
@@ -27,6 +28,7 @@ class _NameFormState extends State<NameForm> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final viewService = context.read<ViewService>();
 
     return Form(
@@ -35,7 +37,7 @@ class _NameFormState extends State<NameForm> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           Text(
-            "Enter a name for this task",
+            l10n.mainScreen_importTask_action_name_title,
             style: getBodyTextTextStyle(context),
           ),
           const SizedBox(height: MEDIUM_SPACE),
@@ -43,29 +45,29 @@ class _NameFormState extends State<NameForm> {
             controller: widget.controller,
             validator: (name) {
               if (name == null || name.isEmpty) {
-                return "Please enter a name.";
+                return l10n.fields_errors_isEmpty;
               }
 
               final lowerCasedName = name.toLowerCase();
 
               if (!StringUtils.isAscii(name)) {
-                return "Name contains invalid characters.";
+                return l10n.fields_errors_invalidCharacters;
               }
 
               if (viewService.views.any((element) => element.name?.toLowerCase() == lowerCasedName)) {
-                return "A view with this name already exists.";
+                return l10n.mainScreen_importTask_action_name_errors_sameNameAlreadyExists;
               }
 
               return null;
             },
             material: (_, __) => MaterialTextFormFieldData(
-              decoration: const InputDecoration(
-                labelText: "Name",
+              decoration: InputDecoration(
+                labelText: l10n.mainScreen_importTask_action_name_label,
                 icon: Icon(Icons.text_fields_rounded),
               ),
             ),
             cupertino: (_, __) => CupertinoTextFormFieldData(
-              placeholder: "Name",
+              placeholder: l10n.mainScreen_importTask_action_name_label,
               prefix: const Icon(CupertinoIcons.textformat),
             ),
           ),
@@ -82,7 +84,7 @@ class _NameFormState extends State<NameForm> {
             material: (_, __) => MaterialElevatedButtonData(
               icon: const Icon(Icons.arrow_forward_rounded),
             ),
-            child: const Text("Continue"),
+            child: Text(l10n.continueLabel),
           ),
         ],
       ),
