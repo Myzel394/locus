@@ -2,5 +2,11 @@
   "appName": "Locus",
   "welcomeScreen_title": "Welcome to Locus",
   "welcomeScreen_description": "Share your location with your friends and family fully privately and securely.",
-  "welcomeScreen_getStarted": "Get Started"
+  "welcomeScreen_getStarted": "Get Started",
+  "welcomeScreen_permissions_title": "We need your permission",
+  "welcomeScreen_permissions_description": "We need the permission to access your location in the background in order to store your location history. You will first be asked to grant location access while the app is in use. After that, we will ask you to grant location access in the background. This is necessary to share yur location when you don't have the app constantly opened.",
+  "welcomeScreen_permissions_allow": "Allow",
+  "welcomeScreen_battery_title": "Battery optimization",
+  "welcomeScreen_battery_description": "In order to share your location in the background, we need to disable battery optimization for this app.",
+  "welcomeScreen_battery_openSettings": "Open Settings"
 }

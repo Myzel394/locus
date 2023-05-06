@@ -1,3 +1,4 @@
+import 'package:disable_battery_optimization/disable_battery_optimization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -25,10 +26,12 @@ void main() async {
     Permission.locationAlways.isGranted,
     TaskService.restore(),
     ViewService.restore(),
+    DisableBatteryOptimization.isAllBatteryOptimizationDisabled,
   ]);
   final bool hasLocationAlwaysGranted = futures[0];
   final TaskService taskService = futures[1];
   final ViewService viewService = futures[2];
+  final bool isIgnoringBatteryOptimizations = futures[3];
 
   runApp(
     MultiProvider(
@@ -38,6 +41,7 @@ void main() async {
       ],
       child: App(
         hasLocationAlwaysGranted: hasLocationAlwaysGranted,
+        isIgnoringBatteryOptimizations: isIgnoringBatteryOptimizations,
       ),
     ),
   );

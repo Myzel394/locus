@@ -77,6 +77,7 @@ dependencies:
   map_launcher: ^2.5.0+1
   flutter_svg: ^2.0.5
   duration_picker: ^1.1.1
+  disable_battery_optimization: ^1.1.0+1
 
 flutter_launcher_icons:
   android: true
@@ -118,6 +119,7 @@ flutter:
 
   assets:
     - assets/lotties/
+    - assets/launcher-icon.svg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

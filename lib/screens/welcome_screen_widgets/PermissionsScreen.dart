@@ -1,26 +1,20 @@
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:lottie/lottie.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-import 'MainScreen.dart';
-
 class PermissionsScreen extends StatelessWidget {
-  const PermissionsScreen({Key? key}) : super(key: key);
+  final void Function() onGranted;
 
-  void _goToMainScreen(BuildContext context) {
-    Navigator.of(context).pushReplacement(
-      platformPageRoute(
-        context: context,
-        builder: (_) => MainScreen(),
-      ),
-    );
-  }
+  const PermissionsScreen({
+    required this.onGranted,
+    Key? key,
+  }) : super(key: key);
 
-  Future<PermissionStatus> _checkPermission(
-      {bool withoutRequest = false}) async {
+  Future<PermissionStatus> _checkPermission({bool withoutRequest = false}) async {
     var alwaysPermission = await Permission.locationAlways.status;
 
     // We first need to request locationWhenInUse, because it is required to request locationAlways
@@ -48,21 +42,23 @@ class PermissionsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final shades = getPrimaryColorShades(context);
+    final l10n = AppLocalizations.of(context);
 
-    return PlatformScaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(MEDIUM_SPACE),
-        child: Center(
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        Expanded(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Text(
-                "Permission",
+                l10n.welcomeScreen_permissions_title,
                 style: getTitleTextStyle(context),
               ),
               const SizedBox(height: MEDIUM_SPACE),
               Text(
-                "We need the permission to access your location in the background in order to store your location history.",
+                l10n.welcomeScreen_permissions_description,
                 style: getBodyTextTextStyle(context),
               ),
               const SizedBox(height: LARGE_SPACE),
@@ -88,22 +84,22 @@ class PermissionsScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: LARGE_SPACE),
-              PlatformElevatedButton(
-                child: Text(
-                  "Allow",
-                ),
-                onPressed: () async {
-                  final permission = await _checkPermission();
-                  if (permission.isGranted) {
-                    _goToMainScreen(context);
-                  }
-                },
-              )
             ],
           ),
         ),
-      ),
+        PlatformElevatedButton(
+          padding: const EdgeInsets.all(MEDIUM_SPACE),
+          onPressed: () async {
+            final permission = await _checkPermission();
+            if (permission.isGranted) {
+              onGranted();
+            } else {
+              await openAppSettings();
+            }
+          },
+          child: Text(l10n.welcomeScreen_permissions_allow),
+        ),
+      ],
     );
   }
 }

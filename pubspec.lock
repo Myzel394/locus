@@ -233,6 +233,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.1.0"
+  disable_battery_optimization:
+    dependency: "direct main"
+    description:
+      name: disable_battery_optimization
+      sha256: b3441975ab2a3ab0c19ed78e909a88d245ce689d43d17f9b23582b1ed41c047b
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.0+1"
   duration_picker:
     dependency: "direct main"
     description:
