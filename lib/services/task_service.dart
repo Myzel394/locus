@@ -103,8 +103,7 @@ class Task extends ChangeNotifier {
 
   String get nostrPublicKey => Keychain(nostrPrivateKey).public;
 
-  bool get usePeriodOneOfTaskExecution =>
-      Platform.isIOS || frequency < const Duration(minutes: 15);
+  bool get usePeriodOneOfTaskExecution => Platform.isIOS || frequency < const Duration(minutes: 15);
 
   Map<String, dynamic> toJSON() {
     return {
@@ -124,18 +123,18 @@ class Task extends ChangeNotifier {
     };
   }
 
-  static Future<Task> create(final String name,
-      final Duration frequency,
-      final List<String> relays, {
-        Function(TaskCreationProgress)? onProgress,
-        List<TaskRuntimeTimer> timers = const [],
-        bool deleteAfterRun = false,
-      }) async {
+  static Future<Task> create(
+    final String name,
+    final Duration frequency,
+    final List<String> relays, {
+    Function(TaskCreationProgress)? onProgress,
+    List<TaskRuntimeTimer> timers = const [],
+    bool deleteAfterRun = false,
+  }) async {
     onProgress?.call(TaskCreationProgress.creatingViewKeys);
     final viewKeyPair = await OpenPGP.generate(
       options: (Options()
-        ..keyOptions = (KeyOptions()
-          ..rsaBits = 4096)
+        ..keyOptions = (KeyOptions()..rsaBits = 4096)
         ..name = "Locus"
         ..email = "user@locus.example"),
     );
@@ -143,8 +142,7 @@ class Task extends ChangeNotifier {
     onProgress?.call(TaskCreationProgress.creatingSignKeys);
     final signKeyPair = await OpenPGP.generate(
       options: (Options()
-        ..keyOptions = (KeyOptions()
-          ..rsaBits = 4096)
+        ..keyOptions = (KeyOptions()..rsaBits = 4096)
         ..name = "Locus"
         ..email = "user@locus.example"),
     );
@@ -158,9 +156,7 @@ class Task extends ChangeNotifier {
       viewPGPPublicKey: viewKeyPair.publicKey,
       signPGPPrivateKey: signKeyPair.privateKey,
       signPGPPublicKey: signKeyPair.publicKey,
-      nostrPrivateKey: Keychain
-          .generate()
-          .private,
+      nostrPrivateKey: Keychain.generate().private,
       relays: relays,
       createdAt: DateTime.now(),
       timers: timers,
@@ -177,6 +173,7 @@ class Task extends ChangeNotifier {
   Future<Map<String, dynamic>?> getExecutionStatus() async {
     final rawData = await storage.read(key: taskKey);
 
+    print("raw $rawData");
     if (rawData == null || rawData == "") {
       return null;
     }
@@ -206,8 +203,7 @@ class Task extends ChangeNotifier {
     };
   }
 
-  DateTime? nextStartDate({final DateTime? date}) =>
-      findNextStartDate(timers, startDate: date);
+  DateTime? nextStartDate({final DateTime? date}) => findNextStartDate(timers, startDate: date);
 
   DateTime? nextEndDate() => findNextEndDate(timers);
 
@@ -262,6 +258,14 @@ class Task extends ChangeNotifier {
 
       _nextRunWorkManagerID = uuid.v4();
 
+      await storage.write(
+        key: scheduleKey,
+        value: jsonEncode({
+          "startedAt": DateTime.now().toIso8601String(),
+          "startsAt": nextStartDate.toIso8601String(),
+        }),
+      );
+
       Workmanager().registerOneOffTask(
         _nextRunWorkManagerID!,
         TASK_SCHEDULE_KEY,
@@ -276,14 +280,6 @@ class Task extends ChangeNotifier {
       );
     }
 
-    await storage.write(
-      key: scheduleKey,
-      value: jsonEncode({
-        "startedAt": DateTime.now().toIso8601String(),
-        "startsAt": nextStartDate.toIso8601String(),
-      }),
-    );
-
     return nextStartDate;
   }
 
@@ -293,8 +289,7 @@ class Task extends ChangeNotifier {
   // Returns the next date the task will run OR `null` if the task is not scheduled to run.
   Future<DateTime?> startScheduleTomorrow() {
     final tomorrow = DateTime.now().add(const Duration(days: 1));
-    final nextDate =
-    DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 6, 0, 0);
+    final nextDate = DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 6, 0, 0);
 
     return startSchedule(startDate: nextDate);
   }
@@ -308,7 +303,7 @@ class Task extends ChangeNotifier {
       Workmanager().registerOneOffTask(
         "task-identifier",
         TASK_EXECUTION_KEY,
-        initialDelay: Duration.zero,
+        initialDelay: frequency,
         constraints: Constraints(
           networkType: NetworkType.connected,
           requiresCharging: true,
@@ -322,6 +317,7 @@ class Task extends ChangeNotifier {
       Workmanager().registerOneOffTask(
         id,
         TASK_EXECUTION_KEY,
+        initialDelay: frequency,
         constraints: Constraints(
           networkType: NetworkType.connected,
         ),
@@ -335,6 +331,7 @@ class Task extends ChangeNotifier {
         id,
         TASK_EXECUTION_KEY,
         frequency: frequency,
+        initialDelay: frequency,
         constraints: Constraints(
           networkType: NetworkType.connected,
         ),
@@ -349,10 +346,6 @@ class Task extends ChangeNotifier {
   // Starts the actual execution of the task. You should only call this if either the user wants to manually start the
   // task or if the task is scheduled to run.
   Future<void> startExecutionImmediately() async {
-    await stopSchedule();
-
-    await startRepeatingTask();
-
     await storage.write(
       key: taskKey,
       value: jsonEncode({
@@ -361,9 +354,13 @@ class Task extends ChangeNotifier {
       }),
     );
 
+    await stopSchedule();
+
     for (final timer in timers) {
       timer.executionStarted();
     }
+
+    await startRepeatingTask();
 
     notifyListeners();
   }
@@ -459,8 +456,7 @@ class Task extends ChangeNotifier {
       privateKey: nostrPrivateKey,
     );
     final nostrMessage = jsonEncode(encrypted.cipherText);
-    final publishedEvent =
-    await manager.publishMessage(nostrMessage, kind: 1001);
+    final publishedEvent = await manager.publishMessage(nostrMessage, kind: 1001);
 
     onProgress?.call(TaskLinkPublishProgress.creatingURI);
 
@@ -495,8 +491,7 @@ class Task extends ChangeNotifier {
   Future<void> publishCurrentLocationNow() async {
     final eventManager = NostrEventsManager.fromTask(this);
 
-    final locationPoint =
-    await LocationPointService.createUsingCurrentLocation();
+    final locationPoint = await LocationPointService.createUsingCurrentLocation();
     final message = await locationPoint.toEncryptedMessage(
       signPrivateKey: signPGPPrivateKey,
       signPublicKey: signPGPPublicKey,
@@ -540,7 +535,7 @@ class TaskService extends ChangeNotifier {
     final data = jsonEncode(
       List<Map<String, dynamic>>.from(
         _tasks.map(
-              (task) => task.toJSON(),
+          (task) => task.toJSON(),
         ),
       ),
     );
@@ -611,11 +606,10 @@ DateTime? findNextStartDate(final List<TaskRuntimeTimer> timers,
     {final DateTime? startDate, final bool onlyFuture = true}) {
   final now = startDate ?? DateTime.now();
 
-  final nextDates = List<DateTime>.from(
-    timers.map((timer) => timer.nextStartDate(now)).where(
-          (date) => date != null && (date.isAfter(now) || date == now),
-    ),
-  );
+  final nextDates = timers
+      .map((timer) => timer.nextStartDate(now))
+      .where((date) => date != null && (date.isAfter(now) || date == now))
+      .toList(growable: false);
 
   if (nextDates.isEmpty) {
     return null;
@@ -626,32 +620,21 @@ DateTime? findNextStartDate(final List<TaskRuntimeTimer> timers,
   return nextDates.first;
 }
 
-DateTime? findNextEndDate(final List<TaskRuntimeTimer> timers,
-    {final DateTime? startDate}) {
+DateTime? findNextEndDate(final List<TaskRuntimeTimer> timers, {final DateTime? startDate}) {
   final now = startDate ?? DateTime.now();
   final nextDates = List<DateTime>.from(
     timers.map((timer) => timer.nextEndDate(now)).where((date) => date != null),
-  )
-    ..sort();
+  )..sort();
 
-  DateTime endDate = nextDates.first;
+  DateTime endDate = nextDates.first!;
 
   for (final date in nextDates.sublist(1)) {
-    endDate = date;
-
     final nextStartDate = findNextStartDate(timers, startDate: date);
-
-    if (nextStartDate == null) {
-      // No next start date found, so this is the last date
+    if (nextStartDate == null || nextStartDate.difference(date).inMinutes.abs() > 15) {
+      // No next start date found or the difference is more than 15 minutes, so this is the last date
       break;
     }
-
-    final difference = date.difference(nextStartDate);
-
-    if (difference.inMinutes.abs() > 15) {
-      // The difference between the end date and the next start date is more than 15 minutes, so this is the last date
-      break;
-    }
+    endDate = date;
   }
 
   return endDate;

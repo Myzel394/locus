@@ -1,10 +1,8 @@
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../constants/spacing.dart';
-import '../../services/task_service.dart';
-import '../../services/view_service.dart';
 import '../../utils/theme.dart';
 import 'URLImporter.dart';
 
@@ -43,8 +41,7 @@ class _URLFormState extends State<URLForm> {
 
   @override
   Widget build(BuildContext context) {
-    final taskService = context.read<TaskService>();
-    final viewService = context.read<ViewService>();
+    final l10n = AppLocalizations.of(context);
 
     return Form(
       key: _formKey,
@@ -52,7 +49,7 @@ class _URLFormState extends State<URLForm> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           Text(
-            "Enter the URL of your task",
+            l10n.mainScreen_importTask_action_importMethod_url_title,
             style: getBodyTextTextStyle(context),
           ),
           const SizedBox(height: MEDIUM_SPACE),
@@ -78,21 +75,22 @@ class _URLFormState extends State<URLForm> {
                       await widget.onImport();
                     } catch (_) {
                       setState(() {
-                        errorMessage =
-                            "An error occurred while fetching the task.";
+                        errorMessage = l10n.taskImportError;
                       });
                     }
                   },
             material: (_, __) => MaterialElevatedButtonData(
               icon: const Icon(Icons.link_rounded),
             ),
-            child: const Text("Import URL"),
+            child: Text(
+              l10n.mainScreen_importTask_action_importMethod_url,
+            ),
           ),
           if (errorMessage != null) ...[
             const SizedBox(height: SMALL_SPACE),
             Text(
               errorMessage!,
-              style: getBodyTextTextStyle(context).copyWith(color: Colors.red),
+              style: getBodyTextTextStyle(context).copyWith(color: getErrorColor(context)),
             ),
           ]
         ],

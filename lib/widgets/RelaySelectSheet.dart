@@ -5,8 +5,10 @@ import 'package:animated_list_plus/transitions.dart';
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/utils/load_status.dart';
+import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/BottomSheetFilterBuilder.dart';
 import 'package:locus/widgets/ModalSheet.dart';
 
@@ -108,6 +110,8 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return DraggableScrollableSheet(
       expand: false,
       controller: _sheetController,
@@ -121,9 +125,11 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
                 ),
               )
             else if (loadStatus == LoadStatus.error)
-              const Text(
-                'Error loading relays',
-                style: TextStyle(color: Colors.red),
+              Text(
+                l10n.unknownError,
+                style: TextStyle(
+                  color: getErrorColor(context),
+                ),
               )
             else if (availableRelays.isNotEmpty)
               Expanded(
@@ -141,11 +147,9 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
                   },
                   extractValue: (dynamic element) => element as String,
                   builder: (_, List<dynamic> foundRelays) {
-                    final uncheckedFoundRelays = foundRelays
-                        .where((element) => !checkedRelaysSet.contains(element))
-                        .toList();
-                    final allRelays = List<String>.from(
-                        [...widget.controller.relays, ...uncheckedFoundRelays]);
+                    final uncheckedFoundRelays =
+                        foundRelays.where((element) => !checkedRelaysSet.contains(element)).toList();
+                    final allRelays = List<String>.from([...widget.controller.relays, ...uncheckedFoundRelays]);
 
                     return PlatformWidget(
                       material: (context, _) => ListView.builder(
@@ -208,7 +212,7 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
               ),
             const SizedBox(height: MEDIUM_SPACE),
             PlatformTextButton(
-              child: Text("Select 5 random relays"),
+              child: Text(l10n.relaySelectSheet_selectRandomRelays(5)),
               material: (_, __) => MaterialTextButtonData(
                 icon: const Icon(Icons.shuffle),
               ),
@@ -230,7 +234,7 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
               material: (_, __) => MaterialElevatedButtonData(
                 icon: const Icon(Icons.done),
               ),
-              child: Text('Done'),
+              child: Text(l10n.closePositiveSheetAction),
             ),
           ],
         ),

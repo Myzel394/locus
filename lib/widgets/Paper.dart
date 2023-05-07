@@ -5,11 +5,14 @@ import 'package:locus/constants/spacing.dart';
 
 class Paper extends StatelessWidget {
   final Widget child;
+  final double roundness;
 
   const Paper({
     required this.child,
+    double? roundness,
     Key? key,
-  }) : super(key: key);
+  })  : roundness = roundness ?? MEDIUM_SPACE,
+        super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -22,9 +25,7 @@ class Paper extends StatelessWidget {
           material: (data) => data.dialogBackgroundColor,
           cupertino: (data) => data.barBackgroundColor,
         ),
-        borderRadius: BorderRadius.circular(
-          MEDIUM_SPACE,
-        ),
+        borderRadius: BorderRadius.circular(roundness),
       ),
       child: child,
     );

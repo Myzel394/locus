@@ -1,6 +1,6 @@
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:openpgp/openpgp.dart';
 
@@ -8,7 +8,6 @@ import '../../api/get-locations.dart';
 import '../../constants/spacing.dart';
 import '../../services/location_point_service.dart';
 import '../../utils/theme.dart';
-import '../../widgets/LocationsLoadingScreen.dart';
 import '../../widgets/LocationsMap.dart';
 
 class ViewImportOverview extends StatefulWidget {
@@ -83,6 +82,8 @@ class _ViewImportOverviewState extends State<ViewImportOverview> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
@@ -96,13 +97,13 @@ class _ViewImportOverviewState extends State<ViewImportOverview> {
           children: <Widget>[
             PlatformListTile(
               title: Text(widget.view.relays.join(", ")),
-              subtitle: const Text("Relays"),
+              subtitle: Text(l10n.nostrRelaysLabel),
               leading: const Icon(Icons.dns_rounded),
               trailing: const SizedBox.shrink(),
             ),
             PlatformListTile(
               title: Text(widget.view.nostrPublicKey),
-              subtitle: const Text("Public Nostr Key"),
+              subtitle: Text(l10n.nostrPublicKeyLabel),
               leading: const Icon(Icons.key),
               trailing: const SizedBox.shrink(),
             ),
@@ -118,55 +119,52 @@ class _ViewImportOverviewState extends State<ViewImportOverview> {
                       );
                     }
                   }),
-              subtitle: const Text("Public Sign Key"),
+              subtitle: Text(l10n.signPublicKeyLabel),
               leading: Icon(context.platformIcons.pen),
               trailing: const SizedBox.shrink(),
             )
           ],
         ),
         if (_isLoading)
-          Padding(
+          const Padding(
             padding: const EdgeInsets.all(MEDIUM_SPACE),
             child: Center(
               child: CircularProgressIndicator(),
             ),
           )
-        else
-          if (_isError)
-            Text(
-              "Error while loading locations",
-              style: TextStyle(
-                color: Colors.red,
+        else if (_isError)
+          Text(
+            l10n.locationsLoadingError,
+            style: TextStyle(
+              color: getErrorColor(context),
+            ),
+          )
+        else ...[
+          Text(
+            l10n.mainScreen_importTask_importOverview_lastPosition,
+            textAlign: TextAlign.center,
+            style: getSubTitleTextStyle(context),
+          ),
+          const SizedBox(height: MEDIUM_SPACE),
+          SizedBox(
+            width: double.infinity,
+            height: 200,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(MEDIUM_SPACE),
+              child: LocationsMap(
+                controller: _controller,
               ),
-            )
-          else
-            ...[
-              Text(
-                "Last position:",
-                textAlign: TextAlign.center,
-                style: getSubTitleTextStyle(context),
-              ),
-              const SizedBox(height: MEDIUM_SPACE),
-              SizedBox(
-                width: double.infinity,
-                height: 200,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(MEDIUM_SPACE),
-                  child: LocationsMap(
-                    controller: _controller,
-                  ),
-                ),
-              ),
-            ],
+            ),
+          ),
+        ],
         const SizedBox(height: MEDIUM_SPACE),
         PlatformElevatedButton(
           padding: const EdgeInsets.all(MEDIUM_SPACE),
           onPressed: widget.onImport,
-          material: (_, __) =>
-              MaterialElevatedButtonData(
-                icon: const Icon(Icons.file_download_outlined),
-              ),
-          child: const Text("Import"),
+          material: (_, __) => MaterialElevatedButtonData(
+            icon: const Icon(Icons.file_download_outlined),
+          ),
+          child: Text(l10n.mainScreen_importTask_importLabel),
         ),
       ],
     );

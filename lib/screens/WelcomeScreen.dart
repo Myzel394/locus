@@ -1,74 +1,106 @@
+import 'dart:io';
+
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:locus/constants/spacing.dart';
-import 'package:locus/utils/theme.dart';
+import 'package:locus/screens/welcome_screen_widgets/BatteryOptimizationsScreen.dart';
+import 'package:locus/screens/welcome_screen_widgets/InitialScreen.dart';
+import 'package:locus/screens/welcome_screen_widgets/PermissionsScreen.dart';
 
-class WelcomeScreen extends StatelessWidget {
-  const WelcomeScreen({Key? key}) : super(key: key);
+import 'MainScreen.dart';
+
+const storage = FlutterSecureStorage();
+
+enum Page {
+  welcome,
+  permissions,
+  batteryOptimizations,
+  done,
+}
+
+class WelcomeScreen extends StatefulWidget {
+  final bool hasLocationAlwaysGranted;
+  final bool isIgnoringBatteryOptimizations;
+
+  const WelcomeScreen({
+    required this.hasLocationAlwaysGranted,
+    required this.isIgnoringBatteryOptimizations,
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  State<WelcomeScreen> createState() => _WelcomeScreenState();
+}
+
+class _WelcomeScreenState extends State<WelcomeScreen> {
+  final PageController _controller = PageController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+
+    super.dispose();
+  }
+
+  void _nextScreen(final int page) {
+    _controller.animateToPage(page, duration: 500.ms, curve: Curves.easeOutExpo);
+  }
+
+  void _onDone() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const MainScreen(),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context);
-
     return PlatformScaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Icon(context.platformIcons.location, size: 80),
-            const SizedBox(height: MEDIUM_SPACE),
-            Text(
-              l10n.appName,
-              style: getTitleTextStyle(context),
-            ),
-            const SizedBox(height: MEDIUM_SPACE),
-            Text(
-              l10n.welcome_description,
-              style: getCaptionTextStyle(context),
-            ),
-            const SizedBox(height: LARGE_SPACE),
-            Wrap(
-              direction: Axis.vertical,
-              spacing: SMALL_SPACE,
-              children: <Widget>[
-                Wrap(
-                  direction: Axis.horizontal,
-                  spacing: MEDIUM_SPACE,
-                  children: <Widget>[
-                    Icon(context.platformIcons.person),
-                    Text(
-                      l10n.welcome_explanation_endToEndEncrypted,
-                      style: theme.textTheme.bodyText1,
-                    ),
-                  ],
-                ),
-                Wrap(
-                  direction: Axis.horizontal,
-                  spacing: MEDIUM_SPACE,
-                  children: <Widget>[
-                    Icon(context.platformIcons.share),
-                    Text(
-                      l10n.welcome_explanation_decentralized,
-                      style: theme.textTheme.bodyText1,
-                    ),
-                  ],
-                )
-              ],
-            ),
-            const SizedBox(height: LARGE_SPACE),
-            PlatformElevatedButton(
-              child: Text(
-                l10n.welcome_continue,
-                style: theme.textTheme.button,
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(MEDIUM_SPACE),
+          child: PageView(
+            controller: _controller,
+            scrollDirection: Axis.horizontal,
+            physics: const NeverScrollableScrollPhysics(),
+            children: <Widget>[
+              InitialScreen(
+                onContinue: () {
+                  if (Platform.isAndroid) {
+                    if (widget.hasLocationAlwaysGranted) {
+                      _nextScreen(Page.batteryOptimizations.index);
+                    } else {
+                      _nextScreen(Page.permissions.index);
+                    }
+                  } else {
+                    if (widget.hasLocationAlwaysGranted) {
+                      _onDone();
+                    } else {
+                      _nextScreen(Page.permissions.index);
+                    }
+                  }
+                },
               ),
-              // Navigate to "/createKeys
-              onPressed: () {
-                Navigator.pushReplacementNamed(context, "/initialize");
-              },
-            ),
-          ],
+              PermissionsScreen(
+                onGranted: () {
+                  if (Platform.isAndroid) {
+                    if (widget.isIgnoringBatteryOptimizations) {
+                      _onDone();
+                    } else {
+                      _nextScreen(Page.batteryOptimizations.index);
+                    }
+                  } else {
+                    _onDone();
+                  }
+                },
+              ),
+              BatteryOptimizationsScreen(onDone: _onDone),
+            ],
+          ),
         ),
       ),
     );

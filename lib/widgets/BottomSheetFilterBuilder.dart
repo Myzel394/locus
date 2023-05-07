@@ -1,6 +1,7 @@
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:locus/constants/spacing.dart';
 
 dynamic defaultExtractor(dynamic element) => element;
@@ -28,12 +29,10 @@ class BottomSheetFilterBuilder<T> extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<BottomSheetFilterBuilder> createState() =>
-      _BottomSheetFilterBuilderState<T>();
+  State<BottomSheetFilterBuilder> createState() => _BottomSheetFilterBuilderState<T>();
 }
 
-class _BottomSheetFilterBuilderState<T>
-    extends State<BottomSheetFilterBuilder> {
+class _BottomSheetFilterBuilderState<T> extends State<BottomSheetFilterBuilder> {
   List<T> _elements = [];
 
   @override
@@ -71,36 +70,36 @@ class _BottomSheetFilterBuilderState<T>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Column(
       children: <Widget>[
         Focus(
           onFocusChange: widget.onSearchFocusChanged,
           child: PlatformWidget(
-            material: (_, __) =>
-                TextField(
-                  controller: widget.searchController,
-                  onChanged: (value) {
+            material: (_, __) => TextField(
+              controller: widget.searchController,
+              onChanged: (value) {
+                updateElements();
+              },
+              decoration: InputDecoration(
+                hintText: l10n.searchLabel,
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: () {
+                    widget.searchController!.clear();
                     updateElements();
                   },
-                  decoration: InputDecoration(
-                    hintText: "Search",
-                    suffixIcon: IconButton(
-                      icon: Icon(Icons.clear),
-                      onPressed: () {
-                        widget.searchController!.clear();
-                        updateElements();
-                      },
-                    ),
-                  ),
                 ),
-            cupertino: (_, __) =>
-                CupertinoSearchTextField(
-                  controller: widget.searchController,
-                  onChanged: (value) {
-                    updateElements();
-                  },
-                  placeholder: "Search",
-                ),
+              ),
+            ),
+            cupertino: (_, __) => CupertinoSearchTextField(
+              controller: widget.searchController,
+              onChanged: (value) {
+                updateElements();
+              },
+              placeholder: l10n.searchLabel,
+            ),
           ),
         ),
         const SizedBox(height: SMALL_SPACE),

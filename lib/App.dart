@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/screens/MainScreen.dart';
-import 'package:locus/screens/PermissionsScreen.dart';
+import 'package:locus/screens/WelcomeScreen.dart';
 import 'package:locus/widgets/DismissKeyboard.dart';
 
 import 'constants/spacing.dart';
@@ -11,9 +11,11 @@ import 'constants/themes.dart';
 
 class App extends StatelessWidget {
   final bool hasLocationAlwaysGranted;
+  final bool isIgnoringBatteryOptimizations;
 
   const App({
     required this.hasLocationAlwaysGranted,
+    required this.isIgnoringBatteryOptimizations,
     super.key,
   });
 
@@ -22,16 +24,13 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return DismissKeyboard(
       child: DynamicColorBuilder(
-        builder:
-            (ColorScheme? lightColorScheme, ColorScheme? darkColorScheme) =>
-                PlatformApp(
+        builder: (ColorScheme? lightColorScheme, ColorScheme? darkColorScheme) => PlatformApp(
           title: 'Locus',
           material: (_, __) => MaterialAppData(
             theme: lightColorScheme != null
                 ? LIGHT_THEME_MATERIAL.copyWith(
                     colorScheme: lightColorScheme,
-                    scaffoldBackgroundColor:
-                        lightColorScheme.background.withAlpha(200),
+                    scaffoldBackgroundColor: lightColorScheme.background.withAlpha(200),
                     inputDecorationTheme: InputDecorationTheme(
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(MEDIUM_SPACE),
@@ -43,8 +42,7 @@ class App extends StatelessWidget {
             darkTheme: darkColorScheme != null
                 ? DARK_THEME_MATERIAL.copyWith(
                     colorScheme: darkColorScheme,
-                    scaffoldBackgroundColor:
-                        darkColorScheme.background.withAlpha(200),
+                    scaffoldBackgroundColor: darkColorScheme.background.withAlpha(200),
                     inputDecorationTheme: InputDecorationTheme(
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(MEDIUM_SPACE),
@@ -61,11 +59,14 @@ class App extends StatelessWidget {
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: (() {
-            if (!hasLocationAlwaysGranted) {
-              return const PermissionsScreen();
+            if (hasLocationAlwaysGranted && isIgnoringBatteryOptimizations) {
+              return const MainScreen();
             }
 
-            return const MainScreen();
+            return WelcomeScreen(
+              hasLocationAlwaysGranted: hasLocationAlwaysGranted,
+              isIgnoringBatteryOptimizations: isIgnoringBatteryOptimizations,
+            );
           })(),
         ),
       ),

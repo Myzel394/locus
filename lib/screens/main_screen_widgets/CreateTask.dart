@@ -1,6 +1,7 @@
 import 'package:animations/animations.dart';
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:lottie/lottie.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
@@ -34,6 +35,7 @@ class _CreateTaskState extends State<CreateTask> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final shades = getPrimaryColorShades(context);
 
     return Column(
@@ -83,12 +85,12 @@ class _CreateTaskState extends State<CreateTask> with TickerProviderStateMixin {
         ),
         const SizedBox(height: MEDIUM_SPACE),
         Text(
-          "No tasks yet",
+          l10n.mainScreen_createTask_tasksEmpty,
           style: getSubTitleTextStyle(context),
         ),
         const SizedBox(height: SMALL_SPACE),
         Text(
-          "Create a task to get started",
+          l10n.mainScreen_createTask_description,
           style: getCaptionTextStyle(context),
         ),
         const SizedBox(height: LARGE_SPACE),
@@ -128,9 +130,10 @@ class _CreateTaskState extends State<CreateTask> with TickerProviderStateMixin {
                   ),
                   const SizedBox(width: SMALL_SPACE),
                   Text(
-                    "Create Task",
+                    l10n.mainScreen_createTask_action_create,
                     style: TextStyle(
                       color: getButtonTextColor(context),
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
                 ],

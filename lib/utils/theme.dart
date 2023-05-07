@@ -1,5 +1,3 @@
-import 'dart:collection';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
@@ -11,9 +9,10 @@ TextStyle getBodyTextTextStyle(final BuildContext context) => platformThemeData(
       cupertino: (data) => data.textTheme.textStyle,
     );
 
-TextStyle getErrorTextStyle(final BuildContext context) =>
-    getBodyTextTextStyle(context).copyWith(
-      color: Colors.red,
+Color getErrorColor(final BuildContext context) => platformThemeData(
+      context,
+      material: (data) => data.colorScheme.error,
+      cupertino: (data) => CupertinoColors.systemRed,
     );
 
 Color getBodyTextColor(final BuildContext context) => platformThemeData(
@@ -24,13 +23,21 @@ Color getBodyTextColor(final BuildContext context) => platformThemeData(
 
 Color getButtonBackgroundColor(final BuildContext context) => platformThemeData(
       context,
-      material: (data) => data.buttonTheme.colorScheme!.background,
+      material: (data) {
+        final isDarkMode = MediaQuery.of(context).platformBrightness == Brightness.dark;
+
+        if (isDarkMode) {
+          return data.colorScheme.primary.withOpacity(.2);
+        } else {
+          return Colors.white;
+        }
+      },
       cupertino: (data) => data.primaryColor,
     );
 
 Color getButtonTextColor(final BuildContext context) => platformThemeData(
       context,
-      material: (data) => data.buttonTheme.colorScheme!.onPrimary,
+      material: (data) => data.colorScheme.primary,
       cupertino: (data) => data.primaryContrastingColor,
     );
 
@@ -60,10 +67,7 @@ TextStyle getCaptionTextStyle(final BuildContext context) => platformThemeData(
 
 Color getSheetColor(final BuildContext context) => platformThemeData(
       context,
-      material: (data) =>
-          HSLColor.fromColor(data.scaffoldBackgroundColor.withAlpha(255))
-              .withLightness(.18)
-              .toColor(),
+      material: (data) => HSLColor.fromColor(data.scaffoldBackgroundColor.withAlpha(255)).withLightness(.18).toColor(),
       cupertino: (data) => data.barBackgroundColor,
     );
 
@@ -87,9 +91,7 @@ Map<int, Color> getPrimaryColorShades(final BuildContext context) {
       9,
       (index) => MapEntry(
         (index + 1) * 100,
-        HSLColor.fromColor(primaryColor)
-            .withLightness(1 - (index / 10))
-            .toColor(),
+        HSLColor.fromColor(primaryColor).withLightness(1 - (index / 10)).toColor(),
       ),
     ),
   );
@@ -100,8 +102,7 @@ Map<int, Color> getPrimaryColorShades(final BuildContext context) {
   };
 }
 
-EdgeInsets getSmallButtonPadding(final BuildContext context) =>
-    platformThemeData(
+EdgeInsets getSmallButtonPadding(final BuildContext context) => platformThemeData(
       context,
       material: (data) => const EdgeInsets.symmetric(
         horizontal: MEDIUM_SPACE,

@@ -1,7 +1,5 @@
 import 'dart:ui';
 
-import 'package:locus/api/nostr-events.dart';
-import 'package:locus/services/location_point_service.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:logger/logger.dart';
 import 'package:workmanager/workmanager.dart';
@@ -25,10 +23,6 @@ void callbackDispatcher() {
           task = taskService.getByID(taskID);
 
           await task.publishCurrentLocationNow();
-
-          if (!task.shouldRunNow()) {
-            await task.stopExecutionImmediately();
-          }
 
           break;
         case TASK_SCHEDULE_KEY:

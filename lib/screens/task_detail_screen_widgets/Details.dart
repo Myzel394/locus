@@ -1,30 +1,20 @@
-import 'dart:collection';
-import 'dart:convert';
-import 'dart:io';
-import 'dart:math';
-
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
-import 'package:file_saver/file_saver.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:locus/api/get-address.dart';
 import 'package:locus/constants/spacing.dart';
+import 'package:locus/screens/LocationPointsDetailsScreen.dart';
 import 'package:locus/screens/task_detail_screen_widgets/ShareLocationButton.dart';
 import 'package:locus/services/location_point_service.dart';
 import 'package:locus/services/task_service.dart';
-import 'package:locus/utils/file.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/DetailInformationBox.dart';
-import 'package:locus/widgets/ModalSheet.dart';
 import 'package:locus/widgets/RelaySelectSheet.dart';
 import 'package:locus/widgets/TimerWidget.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
-import 'package:qr_flutter/qr_flutter.dart';
-import 'package:share_plus/share_plus.dart';
 
 class Details extends StatefulWidget {
-  final Iterable<LocationPointService> locations;
+  final List<LocationPointService> locations;
   final Task task;
   final void Function() onGoBack;
 
@@ -59,6 +49,7 @@ class _DetailsState extends State<Details> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final taskService = context.watch<TaskService>();
 
     return Column(
@@ -79,8 +70,8 @@ class _DetailsState extends State<Details> {
             ),
             icon: const Icon(Icons.arrow_upward_rounded),
           ),
-          child: Text("Go back"),
           onPressed: widget.onGoBack,
+          child: Text(l10n.goBack),
         ),
         Padding(
           padding: const EdgeInsets.all(MEDIUM_SPACE),
@@ -89,9 +80,9 @@ class _DetailsState extends State<Details> {
             crossAxisAlignment: WrapCrossAlignment.center,
             children: <Widget>[
               DetailInformationBox(
-                title: "Last known location",
+                title: l10n.taskDetails_lastKnownLocation,
                 child: widget.locations.isEmpty
-                    ? Text("No location available")
+                    ? Text(l10n.taskDetails_noLocations)
                     : Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
@@ -132,8 +123,7 @@ class _DetailsState extends State<Details> {
                                   SizedBox.square(
                                     dimension: getIconSizeForBodyText(context),
                                     child: PlatformCircularProgressIndicator(
-                                      material: (_, __) =>
-                                          MaterialProgressIndicatorData(
+                                      material: (_, __) => MaterialProgressIndicatorData(
                                         strokeWidth: 2,
                                       ),
                                     ),
@@ -144,7 +134,7 @@ class _DetailsState extends State<Details> {
                           ),
                           const SizedBox(height: MEDIUM_SPACE),
                           Tooltip(
-                            message: "Most recent location point",
+                            message: l10n.taskDetails_mostRecentLocationExplanation,
                             textAlign: TextAlign.center,
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.start,
@@ -166,38 +156,54 @@ class _DetailsState extends State<Details> {
                         ],
                       ),
               ),
-              DetailInformationBox(
-                title: "Location details",
+              GestureDetector(
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => LocationPointsDetailsScreen(
+                        locations: widget.locations,
+                        isPreview: false,
+                      ),
+                      maintainState: true,
+                    ),
+                  );
+                },
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Text(
-                      "${widget.locations.length} location points saved",
-                      style: getBodyTextTextStyle(context),
+                      l10n.taskDetails_locationDetails,
                       textAlign: TextAlign.start,
+                      style: getSubTitleTextStyle(context),
+                    ),
+                    const SizedBox(height: MEDIUM_SPACE),
+                    LocationPointsDetailsScreen(
+                      locations: widget.locations,
+                      isPreview: true,
                     ),
                   ],
                 ),
               ),
               DetailInformationBox(
-                title: "Nostr Relays",
+                title: l10n.nostrRelaysLabel,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
-                  children: <Widget>[
-                        for (final relay in widget.task.relays)
-                          PlatformListTile(
+                  children: List<Widget>.from(
+                        widget.task.relays.map(
+                          (relay) => PlatformListTile(
                             title: Text(
                               relay,
                             ),
                             trailing: const SizedBox.shrink(),
                           ),
-                      ] +
+                        ),
+                      ) +
                       [
                         PlatformTextButton(
                           material: (_, __) => MaterialTextButtonData(
                             icon: Icon(context.platformIcons.edit),
                           ),
-                          child: Text("Edit relays"),
+                          child: Text(l10n.editRelays),
                           onPressed: () async {
                             await showPlatformModalSheet(
                               context: context,
@@ -211,8 +217,7 @@ class _DetailsState extends State<Details> {
                               ),
                             );
 
-                            widget.task
-                                .update(relays: _relaysController.relays);
+                            widget.task.update(relays: _relaysController.relays);
                             taskService.update(widget.task);
                           },
                         ),
@@ -220,7 +225,7 @@ class _DetailsState extends State<Details> {
                 ),
               ),
               DetailInformationBox(
-                title: "Task status",
+                title: l10n.taskDetails_taskStatus,
                 child: FutureBuilder<Map<String, dynamic>>(
                   future: (() async {
                     final status = await widget.task.getExecutionStatus();
@@ -233,40 +238,43 @@ class _DetailsState extends State<Details> {
                   })(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.done) {
+                      final isRunning = snapshot.hasData && snapshot.data?["startedAt"] != null;
+
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          if (snapshot.hasData)
+                          if (isRunning)
                             Text(
-                              "Task started at ${snapshot.data!["startedAt"]} with a frequency of ${snapshot.data!["runFrequency"]}.",
+                              l10n.taskAction_started_description(
+                                snapshot.data!["startedAt"],
+                                (snapshot.data!["runFrequency"] as Duration).inMinutes,
+                              ),
                             )
                           else
-                            Text("Task is not running."),
+                            Text(l10n.taskAction_notRunning_title),
                           const SizedBox(height: MEDIUM_SPACE),
                           Row(
                             children: <Widget>[
-                              if (snapshot.hasData)
+                              if (isRunning)
                                 PlatformTextButton(
-                                  child: Text("Stop task"),
+                                  child: Text(l10n.taskAction_stop),
                                   material: (_, __) => MaterialTextButtonData(
                                     icon: const Icon(Icons.stop_rounded),
                                   ),
                                   onPressed: () async {
-                                    await widget.task
-                                        .stopExecutionImmediately();
+                                    await widget.task.stopExecutionImmediately();
 
                                     taskService.update(widget.task);
                                   },
                                 )
                               else
                                 PlatformTextButton(
-                                  child: Text("Start task"),
+                                  child: Text(l10n.taskAction_start),
                                   material: (_, __) => MaterialTextButtonData(
                                     icon: const Icon(Icons.play_arrow_rounded),
                                   ),
                                   onPressed: () async {
-                                    await widget.task
-                                        .startExecutionImmediately();
+                                    await widget.task.startExecutionImmediately();
 
                                     taskService.update(widget.task);
                                   },
@@ -274,8 +282,7 @@ class _DetailsState extends State<Details> {
                               const SizedBox(width: MEDIUM_SPACE),
                               FutureBuilder<Map<String, dynamic>>(
                                 future: (() async {
-                                  final status =
-                                      await widget.task.getScheduleStatus();
+                                  final status = await widget.task.getScheduleStatus();
 
                                   if (status == null) {
                                     return Map<String, dynamic>.from({});
@@ -284,13 +291,11 @@ class _DetailsState extends State<Details> {
                                   return status;
                                 })(),
                                 builder: (context, scheduleSnapshot) {
-                                  if (scheduleSnapshot.connectionState ==
-                                      ConnectionState.done) {
-                                    if (scheduleSnapshot.hasData) {
+                                  if (scheduleSnapshot.connectionState == ConnectionState.done) {
+                                    if (scheduleSnapshot.hasData && (scheduleSnapshot.data?.isNotEmpty ?? false)) {
                                       return PlatformTextButton(
-                                        child: Text("Stop scheduling"),
-                                        material: (_, __) =>
-                                            MaterialTextButtonData(
+                                        child: Text(l10n.taskAction_stopSchedule),
+                                        material: (_, __) => MaterialTextButtonData(
                                           icon: const Icon(Icons.stop_outlined),
                                         ),
                                         onPressed: () async {
@@ -304,15 +309,12 @@ class _DetailsState extends State<Details> {
 
                                           await showPlatformDialog(
                                             context: context,
-                                            builder: (context) =>
-                                                PlatformAlertDialog(
-                                              title: Text("Task unscheduled"),
-                                              content: Text(
-                                                "The task has been unscheduled. It will no longer be executed automatically. To start it again, you can either schedule it again or start it manually",
-                                              ),
+                                            builder: (context) => PlatformAlertDialog(
+                                              title: Text(l10n.taskAction_stopSchedule_title),
+                                              content: Text(l10n.taskAction_stopSchedule_description),
                                               actions: <Widget>[
                                                 PlatformDialogAction(
-                                                  child: Text("OK"),
+                                                  child: Text(l10n.closeNeutralAction),
                                                   onPressed: () {
                                                     Navigator.of(context).pop();
                                                   },
@@ -324,66 +326,59 @@ class _DetailsState extends State<Details> {
                                       );
                                     } else {
                                       return PlatformTextButton(
-                                        child: Text("Start scheduling"),
-                                        material: (_, __) =>
-                                            MaterialTextButtonData(
-                                          icon: const Icon(
-                                              Icons.schedule_rounded),
+                                        child: Text(l10n.taskAction_startSchedule),
+                                        material: (_, __) => MaterialTextButtonData(
+                                          icon: const Icon(Icons.schedule_rounded),
                                         ),
                                         onPressed: () async {
-                                          final startDate =
-                                              await widget.task.startSchedule();
+                                          final startDate = await widget.task.startSchedule();
 
                                           taskService.update(widget.task);
+
+                                          if (!mounted) {
+                                            return;
+                                          }
 
                                           if (startDate == null) {
                                             await showPlatformDialog(
                                               context: context,
-                                              builder: (context) =>
-                                                  PlatformAlertDialog(
-                                                title:
-                                                    Text("Task not scheduled"),
-                                                content: Text(
-                                                  "The task has not been started because there is no schedule set for the future.",
-                                                ),
+                                              builder: (context) => PlatformAlertDialog(
+                                                title: Text(l10n.taskAction_startSchedule_notScheduled_title),
+                                                content: Text(l10n.taskAction_startSchedule_notScheduled_description),
                                                 actions: <Widget>[
                                                   PlatformDialogAction(
-                                                    child: Text("OK"),
+                                                    child: Text(l10n.closeNeutralAction),
                                                     onPressed: () {
-                                                      Navigator.of(context)
-                                                          .pop();
+                                                      Navigator.of(context).pop();
+                                                    },
+                                                  ),
+                                                ],
+                                              ),
+                                            );
+                                          } else {
+                                            await showPlatformDialog(
+                                              context: context,
+                                              builder: (context) => PlatformAlertDialog(
+                                                title: Text(l10n.taskAction_startSchedule_title),
+                                                content: Text(l10n.taskAction_startSchedule_description(startDate!)),
+                                                actions: <Widget>[
+                                                  PlatformDialogAction(
+                                                    child: Text(l10n.closeNeutralAction),
+                                                    onPressed: () {
+                                                      Navigator.of(context).pop();
                                                     },
                                                   ),
                                                 ],
                                               ),
                                             );
                                           }
-                                          await showPlatformDialog(
-                                            context: context,
-                                            builder: (context) =>
-                                                PlatformAlertDialog(
-                                              title: Text("Task scheduled"),
-                                              content: Text(
-                                                "The task has been scheduled to start at ${DateFormat('MMMM d, HH:mm').format(startDate!)}.",
-                                              ),
-                                              actions: <Widget>[
-                                                PlatformDialogAction(
-                                                  child: Text("OK"),
-                                                  onPressed: () {
-                                                    Navigator.of(context).pop();
-                                                  },
-                                                ),
-                                              ],
-                                            ),
-                                          );
                                         },
                                       );
                                     }
                                   }
 
                                   return PlatformCircularProgressIndicator(
-                                    material: (_, __) =>
-                                        MaterialProgressIndicatorData(
+                                    material: (_, __) => MaterialProgressIndicatorData(
                                       strokeWidth: 2,
                                     ),
                                   );
@@ -402,7 +397,7 @@ class _DetailsState extends State<Details> {
                 ),
               ),
               DetailInformationBox(
-                title: "Timers",
+                title: l10n.detailsTimersLabel,
                 child: TimerWidget(
                   timers: widget.task.timers,
                   allowEdit: false,
@@ -416,7 +411,7 @@ class _DetailsState extends State<Details> {
               ),
               Center(
                 child: PlatformTextButton(
-                  child: Text("Delete task"),
+                  child: Text(l10n.taskDetails_deleteTask),
                   material: (_, __) => MaterialTextButtonData(
                     icon: Icon(context.platformIcons.delete),
                     style: TextButton.styleFrom(
@@ -430,13 +425,11 @@ class _DetailsState extends State<Details> {
                     final confirmed = await showPlatformDialog(
                       context: context,
                       builder: (context) => PlatformAlertDialog(
-                        title: Text("Delete task"),
-                        content: Text(
-                          "Are you sure you want to delete this task? This means that no more locations will be saved for this task. Existing locations will not be deleted. This action cannot be undone.",
-                        ),
+                        title: Text(l10n.taskDetails_deleteTask),
+                        content: Text(l10n.taskDetails_deleteTask_confirm),
                         actions: createCancellableDialogActions(context, [
                           PlatformDialogAction(
-                            child: Text("Delete"),
+                            child: Text(l10n.deleteLabel),
                             onPressed: () => Navigator.of(context).pop(true),
                             material: (_, __) => MaterialDialogActionData(
                               style: TextButton.styleFrom(

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/screens/import_task_sheet_widgets/ImportSelection.dart';
 import 'package:locus/screens/import_task_sheet_widgets/ImportSuccess.dart';
@@ -41,8 +42,7 @@ class ImportTaskSheet extends StatefulWidget {
   State<ImportTaskSheet> createState() => _ImportTaskSheetState();
 }
 
-class _ImportTaskSheetState extends State<ImportTaskSheet>
-    with TickerProviderStateMixin {
+class _ImportTaskSheetState extends State<ImportTaskSheet> with TickerProviderStateMixin {
   final _nameController = TextEditingController();
   final _urlController = TextEditingController();
   ImportScreen _screen = ImportScreen.ask;
@@ -103,6 +103,7 @@ class _ImportTaskSheetState extends State<ImportTaskSheet>
   }
 
   void _importFile() async {
+    final l10n = AppLocalizations.of(context);
     final taskService = context.read<TaskService>();
     final viewService = context.read<ViewService>();
 
@@ -118,12 +119,12 @@ class _ImportTaskSheetState extends State<ImportTaskSheet>
       result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ["json"],
-        dialogTitle: "Select a viewkey file",
+        dialogTitle: l10n.mainScreen_importTask_action_importMethod_file_selectFile,
         withData: true,
       );
     } catch (_) {
       setState(() {
-        errorMessage = "An error occurred while importing the task.";
+        errorMessage = l10n.unknownError;
       });
     }
 
@@ -169,6 +170,7 @@ class _ImportTaskSheetState extends State<ImportTaskSheet>
 
   Future<void> _importURL() async {
     final url = _urlController.text;
+    final l10n = AppLocalizations.of(context);
     final taskService = context.read<TaskService>();
     final viewService = context.read<ViewService>();
 
@@ -198,7 +200,7 @@ class _ImportTaskSheetState extends State<ImportTaskSheet>
       }
     } catch (_) {
       setState(() {
-        errorMessage = "An error occurred while fetching the task.";
+        errorMessage = l10n.unknownError;
         _screen = ImportScreen.error;
       });
     } finally {
@@ -210,6 +212,8 @@ class _ImportTaskSheetState extends State<ImportTaskSheet>
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -278,7 +282,7 @@ class _ImportTaskSheetState extends State<ImportTaskSheet>
                     Column(
                       children: <Widget>[
                         Text(
-                          "Importing task...",
+                          l10n.mainScreen_importTask_action_import_isLoading,
                           style: getSubTitleTextStyle(context),
                         ),
                         const SizedBox(height: SMALL_SPACE),
@@ -287,8 +291,7 @@ class _ImportTaskSheetState extends State<ImportTaskSheet>
                         else if (errorMessage != null)
                           Text(
                             errorMessage!,
-                            style: getBodyTextTextStyle(context)
-                                .copyWith(color: Colors.red),
+                            style: getBodyTextTextStyle(context).copyWith(color: getErrorColor(context)),
                           ),
                       ],
                     )
@@ -314,18 +317,16 @@ class _ImportTaskSheetState extends State<ImportTaskSheet>
                   else if (_screen == ImportScreen.error)
                     Column(
                       children: <Widget>[
-                        Icon(context.platformIcons.error,
-                            size: 64, color: Colors.red),
+                        Icon(context.platformIcons.error, size: 64, color: getErrorColor(context)),
                         const SizedBox(height: MEDIUM_SPACE),
                         Text(
-                          "An error occurred while importing the task",
+                          l10n.taskImportError,
                           style: getSubTitleTextStyle(context),
                         ),
                         const SizedBox(height: SMALL_SPACE),
                         Text(
                           errorMessage!,
-                          style: getBodyTextTextStyle(context)
-                              .copyWith(color: Colors.red),
+                          style: getBodyTextTextStyle(context).copyWith(color: getErrorColor(context)),
                         ),
                         const SizedBox(height: LARGE_SPACE),
                         PlatformElevatedButton(
@@ -334,7 +335,7 @@ class _ImportTaskSheetState extends State<ImportTaskSheet>
                           material: (_, __) => MaterialElevatedButtonData(
                             icon: const Icon(Icons.arrow_back_rounded),
                           ),
-                          child: const Text("Go back"),
+                          child: Text(l10n.goBack),
                         ),
                       ],
                     ),

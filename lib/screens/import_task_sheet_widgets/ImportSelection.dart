@@ -1,15 +1,8 @@
-import 'dart:convert';
-import 'dart:typed_data';
-
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:locus/services/view_service.dart';
-import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../constants/spacing.dart';
-import '../../services/task_service.dart';
 import '../../utils/theme.dart';
 
 enum ImportSelectionType {
@@ -35,22 +28,24 @@ class _ImportSelectionState extends State<ImportSelection> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Column(
       children: <Widget>[
         Text(
-          "Import a task",
+          l10n.mainScreen_importTask_title,
           style: getSubTitleTextStyle(context),
         ),
         const SizedBox(height: LARGE_SPACE),
         Text(
-          "How would you like to import?",
+          l10n.mainScreen_importTask_description,
           style: getBodyTextTextStyle(context),
         ),
         const SizedBox(height: MEDIUM_SPACE),
         if (errorMessage != null) ...[
           Text(
             errorMessage!,
-            style: getBodyTextTextStyle(context).copyWith(color: Colors.red),
+            style: getBodyTextTextStyle(context).copyWith(color: getErrorColor(context)),
           ),
           const SizedBox(height: MEDIUM_SPACE),
         ],
@@ -67,7 +62,7 @@ class _ImportSelectionState extends State<ImportSelection> {
               material: (_, __) => MaterialElevatedButtonData(
                 icon: const Icon(Icons.link_rounded),
               ),
-              child: const Text("Import URL"),
+              child: Text(l10n.mainScreen_importTask_action_importMethod_url),
             ),
             PlatformElevatedButton(
               padding: const EdgeInsets.all(MEDIUM_SPACE),
@@ -77,7 +72,7 @@ class _ImportSelectionState extends State<ImportSelection> {
               onPressed: () async {
                 widget.onSelect(ImportSelectionType.file);
               },
-              child: const Text("Import file"),
+              child: Text(l10n.mainScreen_importTask_action_importMethod_file),
             ),
             PlatformElevatedButton(
               padding: const EdgeInsets.all(MEDIUM_SPACE),
@@ -87,7 +82,7 @@ class _ImportSelectionState extends State<ImportSelection> {
               onPressed: () {
                 widget.onSelect(ImportSelectionType.qr);
               },
-              child: Text("Scan QR code"),
+              child: Text(l10n.mainScreen_importTask_action_importMethod_qrCode),
             ),
           ],
         ),

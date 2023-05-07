@@ -1,12 +1,10 @@
 import 'dart:convert';
-import 'dart:ffi';
 import 'dart:io';
-import 'dart:ui';
 
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/widgets/SingularElementDialog.dart';
@@ -16,7 +14,6 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../utils/file.dart';
 import '../../utils/theme.dart';
-import '../../widgets/ModalSheet.dart';
 
 class ShareLocationButton extends StatefulWidget {
   final Task task;
@@ -41,37 +38,37 @@ class _ShareLocationButtonState extends State<ShareLocationButton> {
   }
 
   void openShareLocationDialog() async {
+    final l10n = AppLocalizations.of(context);
+
     final shouldShare = await showPlatformDialog(
       context: context,
       builder: (context) => PlatformAlertDialog(
-        title: Text("Share location"),
-        content: Text(
-          "Would you like to share your location from this task? This will allow other users to see your location. A view key file will be generated which allows anyone to view your location. Makes sure to keep this file safe and only share it with people you trust.",
-        ),
+        title: Text(l10n.shareLocation_title),
+        content: Text(l10n.shareLocation_description),
         actions: createCancellableDialogActions(context, [
           PlatformDialogAction(
-            child: Text("Save file"),
+            child: Text(l10n.shareLocation_actions_saveFile),
             material: (_, __) => MaterialDialogActionData(
               icon: const Icon(Icons.save_alt_rounded),
             ),
             onPressed: () => Navigator.of(context).pop("save"),
           ),
           PlatformDialogAction(
-            child: Text("Create QR Code"),
+            child: Text(l10n.shareLocation_actions_createQRCode),
             material: (_, __) => MaterialDialogActionData(
               icon: const Icon(Icons.qr_code),
             ),
             onPressed: () => Navigator.of(context).pop("qr"),
           ),
           PlatformDialogAction(
-            child: Text("Share file"),
+            child: Text(l10n.shareLocation_actions_shareFile),
             material: (_, __) => MaterialDialogActionData(
               icon: const Icon(Icons.share_rounded),
             ),
             onPressed: () => Navigator.of(context).pop("share"),
           ),
           PlatformDialogAction(
-            child: Text("Share link"),
+            child: Text(l10n.shareLocation_actions_shareLink),
             cupertino: (_, __) => CupertinoDialogActionData(
               isDefaultAction: true,
             ),
@@ -101,8 +98,7 @@ class _ShareLocationButtonState extends State<ShareLocationButton> {
 
           await FileSaver.instance.saveFile(
             name: "viewkey.json",
-            bytes: const Utf8Encoder()
-                .convert(widget.task.generateViewKeyContent()),
+            bytes: const Utf8Encoder().convert(widget.task.generateViewKeyContent()),
           );
           break;
         case "qr":
@@ -120,13 +116,11 @@ class _ShareLocationButtonState extends State<ShareLocationButton> {
                     children: List<Widget>.from(
                       [
                         Text(
-                          "Scan this QR Code to import task ${widget.task.name}",
+                          l10n.shareLocation_scanToImport(widget.task.name),
                           style: getTitle2TextStyle(context),
                           textAlign: TextAlign.center,
                         ),
-                        isMaterial(context)
-                            ? const SizedBox(height: LARGE_SPACE)
-                            : null,
+                        isMaterial(context) ? const SizedBox(height: LARGE_SPACE) : null,
                         QrImage(
                           data: url,
                           errorCorrectionLevel: QrErrorCorrectLevel.H,
@@ -143,7 +137,7 @@ class _ShareLocationButtonState extends State<ShareLocationButton> {
           await Share.shareXFiles(
             [file],
             text: "Locus view key",
-            subject: "Here's my Locus View Key to see my location",
+            subject: l10n.shareLocation_actions_shareFile_text,
           );
           break;
         case "link":
@@ -151,7 +145,7 @@ class _ShareLocationButtonState extends State<ShareLocationButton> {
 
           await Share.share(
             url,
-            subject: "Here's my Locus link to see my location",
+            subject: l10n.shareLocation_actions_shareLink_text,
           );
       }
     } catch (_) {
@@ -164,10 +158,12 @@ class _ShareLocationButtonState extends State<ShareLocationButton> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return PlatformElevatedButton(
-      child: Text("Share location"),
+      child: Text(l10n.shareLocation_title),
       material: (_, __) => MaterialElevatedButtonData(
-        icon: Icon(Icons.share_location_rounded),
+        icon: const Icon(Icons.share_location_rounded),
       ),
       onPressed: isLoading ? null : openShareLocationDialog,
     );

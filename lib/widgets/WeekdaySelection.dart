@@ -89,8 +89,7 @@ class _WeekdaySelectionState extends State<WeekdaySelection> {
               borderRadius: BorderRadius.circular(SMALL_SPACE),
             ),
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: MEDIUM_SPACE, vertical: SMALL_SPACE),
+              padding: const EdgeInsets.symmetric(horizontal: MEDIUM_SPACE, vertical: SMALL_SPACE),
               child: PlatformDropdownButton<int>(
                 value: weekday,
                 style: TextStyle(
@@ -158,8 +157,7 @@ class _WeekdaySelectionState extends State<WeekdaySelection> {
                   ),
                 ),
                 child: Text(
-                  DateFormat("HH:mm").format(
-                      DateTime(0, 0, 0, startTime.hour, startTime.minute)),
+                  DateFormat("HH:mm").format(DateTime(0, 0, 0, startTime.hour, startTime.minute)),
                 ),
                 onPressed: () async {
                   final time = await _showTimePicker(startTime);
@@ -176,8 +174,7 @@ class _WeekdaySelectionState extends State<WeekdaySelection> {
                     padding: MaterialStateProperty.all<EdgeInsets>(
                       const EdgeInsets.all(MEDIUM_SPACE),
                     ),
-                    backgroundColor: MaterialStateProperty.all<Color>(
-                        Theme.of(context).colorScheme.surface),
+                    backgroundColor: MaterialStateProperty.all<Color>(Theme.of(context).colorScheme.surface),
                     shape: MaterialStateProperty.all<OutlinedBorder>(
                       RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(SMALL_SPACE),
@@ -186,8 +183,7 @@ class _WeekdaySelectionState extends State<WeekdaySelection> {
                   ),
                 ),
                 child: Text(
-                  DateFormat("HH:mm")
-                      .format(DateTime(0, 0, 0, endTime.hour, endTime.minute)),
+                  DateFormat("HH:mm").format(DateTime(0, 0, 0, endTime.hour, endTime.minute)),
                 ),
                 onPressed: () async {
                   final time = await showPlatformTimePicker(
@@ -207,7 +203,9 @@ class _WeekdaySelectionState extends State<WeekdaySelection> {
             const SizedBox(height: SMALL_SPACE),
             Text(
               "Start time must be before end time",
-              style: getErrorTextStyle(context),
+              style: TextStyle(
+                color: getErrorColor(context),
+              ),
             ),
           ]
         ],

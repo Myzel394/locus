@@ -77,6 +77,17 @@ dependencies:
   map_launcher: ^2.5.0+1
   flutter_svg: ^2.0.5
   duration_picker: ^1.1.1
+  disable_battery_optimization: ^1.1.0+1
+  accordion: ^2.5.1
+
+flutter_launcher_icons:
+  android: true
+  image_path: "assets/launcher-icon.png"
+  adaptive_icon_background: "#ffffff"
+  adaptive_icon_foreground: "assets/launcher-icon.png"
+
+  ios: true
+  remove_alpha_ios: true
 
 dev_dependencies:
   flutter_test:
@@ -88,6 +99,7 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^2.0.0
+  flutter_launcher_icons: any
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -108,6 +120,7 @@ flutter:
 
   assets:
     - assets/lotties/
+    - assets/launcher-icon.svg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

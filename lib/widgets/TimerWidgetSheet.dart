@@ -2,7 +2,7 @@ import 'package:duration_picker/duration_picker.dart';
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/constants/timers.dart';
 import 'package:locus/services/task_service.dart';
@@ -47,6 +47,8 @@ class _TimerWidgetSheetState extends State<TimerWidgetSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return DraggableScrollableSheet(
       initialChildSize: 0.6,
       minChildSize: 0.6,
@@ -55,7 +57,10 @@ class _TimerWidgetSheetState extends State<TimerWidgetSheet> {
       builder: (_, __) => ModalSheet(
         child: Column(
           children: <Widget>[
-            Text("Timers", style: getTitleTextStyle(context)),
+            Text(
+              l10n.detailsTimersLabel,
+              style: getTitleTextStyle(context),
+            ),
             const SizedBox(height: MEDIUM_SPACE),
             Expanded(
               child: Column(
@@ -69,17 +74,12 @@ class _TimerWidgetSheetState extends State<TimerWidgetSheet> {
                     ),
                     const SizedBox(height: SMALL_SPACE),
                     if (findNextStartDate(widget.controller.timers) == null)
-                      Text("Execution will start immediately.")
+                      Text(l10n.timer_executionStartsImmediately)
                     else
-                      Text(
-                        "Next execution will start at ${DateFormat('MMMM d, HH:mm').format(findNextStartDate(widget.controller.timers)!)}",
-                      ),
-                    if (widget.controller.timers
-                        .any((timer) => timer.isInfinite())) ...[
+                      Text(l10n.timer_nextExecution(findNextStartDate(widget.controller.timers)!)),
+                    if (widget.controller.timers.any((timer) => timer.isInfinite())) ...[
                       const SizedBox(height: SMALL_SPACE),
-                      WarningText(
-                        "This task will run until you stop it manually.",
-                      ),
+                      WarningText(l10n.timer_runsInfiniteMessage),
                     ],
                   ],
                   const SizedBox(height: MEDIUM_SPACE),
@@ -95,17 +95,16 @@ class _TimerWidgetSheetState extends State<TimerWidgetSheet> {
                               onPressed: () {
                                 widget.controller.clear();
 
-                                final timers =
-                                    entry.value["timers"] as List<WeekdayTimer>;
+                                final timers = entry.value["timers"] as List<WeekdayTimer>;
                                 widget.controller.addAll(timers);
                               },
                             ),
                           ),
                         ),
                         child: PlatformTextButton(
-                          child: Text("Add Weekday"),
+                          child: Text(l10n.timer_addWeekday),
                           material: (_, __) => MaterialTextButtonData(
-                            icon: Icon(Icons.date_range_rounded),
+                            icon: const Icon(Icons.date_range_rounded),
                           ),
                           onPressed: () async {
                             final data = await showPlatformDialog(
@@ -126,9 +125,9 @@ class _TimerWidgetSheetState extends State<TimerWidgetSheet> {
                         ),
                       ),
                       PlatformTextButton(
-                        child: Text("Add Duration"),
+                        child: Text(l10n.timer_addDuration),
                         material: (_, __) => MaterialTextButtonData(
-                          icon: Icon(Icons.timelapse_rounded),
+                          icon: const Icon(Icons.timelapse_rounded),
                         ),
                         onPressed: () async {
                           Duration? duration;
@@ -140,11 +139,9 @@ class _TimerWidgetSheetState extends State<TimerWidgetSheet> {
                                 height: 300,
                                 padding: const EdgeInsets.only(top: 6.0),
                                 margin: EdgeInsets.only(
-                                  bottom:
-                                      MediaQuery.of(context).viewInsets.bottom,
+                                  bottom: MediaQuery.of(context).viewInsets.bottom,
                                 ),
-                                color: CupertinoColors.systemBackground
-                                    .resolveFrom(context),
+                                color: CupertinoColors.systemBackground.resolveFrom(context),
                                 child: SafeArea(
                                   top: false,
                                   child: CupertinoTimerPicker(
@@ -180,9 +177,9 @@ class _TimerWidgetSheetState extends State<TimerWidgetSheet> {
                   if (widget.controller.timers.isNotEmpty) ...[
                     const SizedBox(height: MEDIUM_SPACE),
                     PlatformElevatedButton(
-                      child: Text("Done"),
+                      child: Text(l10n.closePositiveSheetAction),
                       material: (_, __) => MaterialElevatedButtonData(
-                        icon: Icon(Icons.check),
+                        icon: const Icon(Icons.check),
                       ),
                       onPressed: () {
                         Navigator.of(context).pop(widget.controller.timers);

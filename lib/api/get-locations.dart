@@ -61,7 +61,7 @@ Future<void Function()> getLocations({
 
         hasReceivedEndOfStream = true;
 
-        if (decryptionProcesses.isEmpty && hasReceivedEvent) {
+        if ((decryptionProcesses.isEmpty && hasReceivedEvent) || !hasReceivedEvent) {
           onEnd();
         }
         break;
