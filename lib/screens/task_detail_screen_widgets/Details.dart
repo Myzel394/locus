@@ -276,7 +276,7 @@ class _DetailsState extends State<Details> {
                                 })(),
                                 builder: (context, scheduleSnapshot) {
                                   if (scheduleSnapshot.connectionState == ConnectionState.done) {
-                                    if (scheduleSnapshot.hasData) {
+                                    if (scheduleSnapshot.hasData && (scheduleSnapshot.data?.isNotEmpty ?? false)) {
                                       return PlatformTextButton(
                                         child: Text(l10n.taskAction_stopSchedule),
                                         material: (_, __) => MaterialTextButtonData(
