@@ -4,6 +4,7 @@
   "taskImportError": "An error occurred while importing the task",
   "locationsLoadingError": "An error occurred while loading locations",
   "locationFetchError": "There was an error fetching the locations. Please try again later.",
+  "locationFetchEmptyError": "No locations found. Maybe there hasn't been shared a location yet or they expired.",
   "goBack": "Go back",
   "closePositiveSheetAction": "Done",
   "closeNeutralAction": "Ok",

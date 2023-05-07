@@ -10,6 +10,7 @@ import 'package:locus/widgets/LocationsLoadingScreen.dart';
 import 'package:locus/widgets/LocationsMap.dart';
 
 import '../api/get-locations.dart';
+import '../widgets/LocationFetchEmpty.dart';
 
 class TaskDetailScreen extends StatefulWidget {
   final Task task;
@@ -108,75 +109,78 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
       ),
       body: _isError
           ? const LocationFetchError()
-          : PageView(
-              physics: _isShowingDetails ? const AlwaysScrollableScrollPhysics() : const NeverScrollableScrollPhysics(),
-              scrollDirection: Axis.vertical,
-              controller: _pageController,
-              children: <Widget>[
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+          : _controller.locations.isEmpty
+              ? const LocationFetchEmpty()
+              : PageView(
+                  physics:
+                      _isShowingDetails ? const AlwaysScrollableScrollPhysics() : const NeverScrollableScrollPhysics(),
+                  scrollDirection: Axis.vertical,
+                  controller: _pageController,
                   children: <Widget>[
-                    Expanded(
-                      flex: 9,
-                      child: _isLoading
-                          ? SafeArea(
-                              child: LocationsLoadingScreen(
-                                locations: _controller.locations,
-                                onTimeout: () {
-                                  setState(() {
-                                    _isError = true;
-                                  });
-                                },
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: <Widget>[
+                        Expanded(
+                          flex: 9,
+                          child: _isLoading
+                              ? SafeArea(
+                                  child: LocationsLoadingScreen(
+                                    locations: _controller.locations,
+                                    onTimeout: () {
+                                      setState(() {
+                                        _isError = true;
+                                      });
+                                    },
+                                  ),
+                                )
+                              : LocationsMap(
+                                  controller: _controller,
+                                ),
+                        ),
+                        Expanded(
+                          flex: 1,
+                          child: PlatformTextButton(
+                            material: (_, __) => MaterialTextButtonData(
+                              style: ButtonStyle(
+                                // Not rounded, but square
+                                shape: MaterialStateProperty.all(
+                                  const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.zero,
+                                  ),
+                                ),
                               ),
-                            )
-                          : LocationsMap(
-                              controller: _controller,
                             ),
-                    ),
-                    Expanded(
-                      flex: 1,
-                      child: PlatformTextButton(
-                        material: (_, __) => MaterialTextButtonData(
-                          style: ButtonStyle(
-                            // Not rounded, but square
-                            shape: MaterialStateProperty.all(
-                              const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.zero,
-                              ),
-                            ),
+                            child: Text(l10n.taskDetails_goToDetails),
+                            onPressed: () {
+                              _pageController.animateToPage(
+                                1,
+                                duration: const Duration(milliseconds: 500),
+                                curve: Curves.easeInOut,
+                              );
+                            },
                           ),
                         ),
-                        child: Text(l10n.taskDetails_goToDetails),
-                        onPressed: () {
-                          _pageController.animateToPage(
-                            1,
-                            duration: const Duration(milliseconds: 500),
-                            curve: Curves.easeInOut,
-                          );
-                        },
+                      ],
+                    ),
+                    Expanded(
+                      child: SafeArea(
+                        child: SingleChildScrollView(
+                          child: Details(
+                            locations: _controller.locations,
+                            task: widget.task,
+                            onGoBack: () {
+                              _pageController.animateToPage(
+                                0,
+                                duration: const Duration(milliseconds: 500),
+                                curve: Curves.easeInOut,
+                              );
+                            },
+                          ),
+                        ),
                       ),
                     ),
                   ],
                 ),
-                Expanded(
-                  child: SafeArea(
-                    child: SingleChildScrollView(
-                      child: Details(
-                        locations: _controller.locations,
-                        task: widget.task,
-                        onGoBack: () {
-                          _pageController.animateToPage(
-                            0,
-                            duration: const Duration(milliseconds: 500),
-                            curve: Curves.easeInOut,
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
     );
   }
 }
