@@ -78,6 +78,7 @@ dependencies:
   flutter_svg: ^2.0.5
   duration_picker: ^1.1.1
   disable_battery_optimization: ^1.1.0+1
+  accordion: ^2.5.1
 
 flutter_launcher_icons:
   android: true

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:locus/api/get-address.dart';
 import 'package:locus/constants/spacing.dart';
+import 'package:locus/screens/LocationPointsDetailsScreen.dart';
 import 'package:locus/screens/task_detail_screen_widgets/ShareLocationButton.dart';
 import 'package:locus/services/location_point_service.dart';
 import 'package:locus/services/task_service.dart';
@@ -13,7 +14,7 @@ import 'package:locus/widgets/TimerWidget.dart';
 import 'package:provider/provider.dart';
 
 class Details extends StatefulWidget {
-  final Iterable<LocationPointService> locations;
+  final List<LocationPointService> locations;
   final Task task;
   final void Function() onGoBack;
 
@@ -155,15 +156,30 @@ class _DetailsState extends State<Details> {
                         ],
                       ),
               ),
-              DetailInformationBox(
-                title: l10n.taskDetails_locationDetails,
+              GestureDetector(
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => LocationPointsDetailsScreen(
+                        locations: widget.locations,
+                        isPreview: false,
+                      ),
+                      maintainState: true,
+                    ),
+                  );
+                },
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Text(
-                      l10n.taskDetails_savedLocations(widget.locations.length),
-                      style: getBodyTextTextStyle(context),
+                      l10n.taskDetails_locationDetails,
                       textAlign: TextAlign.start,
+                      style: getSubTitleTextStyle(context),
+                    ),
+                    const SizedBox(height: MEDIUM_SPACE),
+                    LocationPointsDetailsScreen(
+                      locations: widget.locations,
+                      isPreview: true,
                     ),
                   ],
                 ),
