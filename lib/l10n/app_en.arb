@@ -105,6 +105,24 @@
   "taskAction_generateLink_process_publishing": "Publishing encrypted data...",
   "taskAction_generateLink_process_creatingURI": "Creating link...",
   "taskAction_generateLink_shareTextSubject": "Here's the link to see my location",
+  "tasks_examples_weekend": "Weekend Getaway",
+  "tasks_examples_school": "School",
+  "tasks_example_hourDuration": "{count, plural, =1{One hour} other{{count} hours}}",
+  "@tasks_example_hourDuration": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "tasks_example_daysDuration": "{count, plural, =1{One day} other{{count} days}}",
+  "@tasks_example_daysDuration": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "unnamedView": "Unnamed",
   "viewAction_delete": "Delete",
   "viewAction_delete_confirm_title": "Are you sure you want to delete {view}?",
