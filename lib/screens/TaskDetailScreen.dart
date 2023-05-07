@@ -10,6 +10,7 @@ import 'package:locus/widgets/LocationsLoadingScreen.dart';
 import 'package:locus/widgets/LocationsMap.dart';
 
 import '../api/get-locations.dart';
+import '../constants/spacing.dart';
 import '../widgets/LocationFetchEmpty.dart';
 
 class TaskDetailScreen extends StatefulWidget {
@@ -104,13 +105,16 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
           centerTitle: true,
         ),
         cupertino: (_, __) => CupertinoNavigationBarData(
-          backgroundColor: CupertinoTheme.of(context).barBackgroundColor.withOpacity(.5),
+          backgroundColor:
+              CupertinoTheme.of(context).barBackgroundColor.withOpacity(.5),
         ),
       ),
       body: _isError
           ? const LocationFetchError()
           : PageView(
-              physics: _isShowingDetails ? const AlwaysScrollableScrollPhysics() : const NeverScrollableScrollPhysics(),
+              physics: _isShowingDetails
+                  ? const AlwaysScrollableScrollPhysics()
+                  : const NeverScrollableScrollPhysics(),
               scrollDirection: Axis.vertical,
               controller: _pageController,
               children: <Widget>[

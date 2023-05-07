@@ -1,6 +1,7 @@
 {
   "appName": "Locus",
   "unknownError": "An unknown error occurred",
+  "unknownValue": "Unknown",
   "taskImportError": "An error occurred while importing the task",
   "locationsLoadingError": "An error occurred while loading locations",
   "locationFetchError": "There was an error fetching the locations. Please try again later.",
@@ -217,6 +218,49 @@
   "taskDetails_taskStatus": "Task Status",
   "taskDetails_deleteTask": "Delete Task",
   "taskDetails_deleteTask_confirm": "Are you sure you want to delete this task? This means that no more locations will be saved for this task. Existing locations will not be deleted.",
+  "taskDetails_locationDetails_createdAt_label": "Created At",
+  "taskDetails_locationDetails_createdAt_value": "{date}",
+  "@taskDetails_locationDetails_createdAt_value": {
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "yyyy MMMM dd, HH:mm:ss",
+        "isCustomDateFormat": "true"
+      }
+    }
+  },
+  "taskDetails_locationDetails_battery_label": "Battery Level",
+  "taskDetails_locationDetails_battery_value": "{level}%",
+  "@taskDetails_locationDetails_battery_value": {
+    "placeholders": {
+      "level": {
+        "type": "int"
+      }
+    }
+  },
+  "taskDetails_locationDetails_batteryState_label": "Battery State",
+  "taskDetails_locationDetails_batteryState_charging": "Charging",
+  "taskDetails_locationDetails_batteryState_discharging": "Discharging",
+  "taskDetails_locationDetails_batteryState_full": "Full",
+  "taskDetails_locationDetails_batteryState_unknown": "Unknown",
+  "taskDetails_locationDetails_accuracy_label": "Accuracy",
+  "taskDetails_locationDetails_accuracy_value": "{accuracy}m",
+  "@taskDetails_locationDetails_accuracy_value": {
+    "placeholders": {
+      "accuracy": {
+        "type": "int"
+      }
+    }
+  },
+  "taskDetails_locationDetails_speed_label": "Speed",
+  "taskDetails_locationDetails_speed_value": "{speed}m/s",
+  "@taskDetails_locationDetails_speed_value": {
+    "placeholders": {
+      "speed": {
+        "type": "int"
+      }
+    }
+  },
   "viewDetails_title": "View Details",
   "viewDetails_actions_openLatestLocation": "Open Maps to latest location",
   "loadingLocationsTitle": "Loading locations: {count}",

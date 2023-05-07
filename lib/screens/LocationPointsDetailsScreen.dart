@@ -38,14 +38,7 @@ class LocationPointsDetailsScreen extends StatelessWidget {
                     maxHeight: 200,
                   )
                 : null,
-            child: isPreview
-                ? locationElements
-                : SafeArea(
-                    child: Padding(
-                      padding: const EdgeInsets.all(MEDIUM_SPACE),
-                      child: locationElements,
-                    ),
-                  ),
+            child: locationElements,
           ),
         ),
       ),
@@ -61,7 +54,9 @@ class LocationPointsDetailsScreen extends StatelessWidget {
           "Location Points",
         ),
       ),
-      body: content,
+      body: SafeArea(
+        child: content,
+      ),
     );
   }
 }

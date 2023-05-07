@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:disable_battery_optimization/disable_battery_optimization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -26,7 +28,9 @@ void main() async {
     Permission.locationAlways.isGranted,
     TaskService.restore(),
     ViewService.restore(),
-    DisableBatteryOptimization.isBatteryOptimizationDisabled,
+    Platform.isAndroid
+        ? DisableBatteryOptimization.isBatteryOptimizationDisabled
+        : Future.value(true),
   ]);
   final bool hasLocationAlwaysGranted = futures[0];
   final TaskService taskService = futures[1];

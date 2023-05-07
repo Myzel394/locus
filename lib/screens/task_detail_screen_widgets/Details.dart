@@ -123,7 +123,8 @@ class _DetailsState extends State<Details> {
                                   SizedBox.square(
                                     dimension: getIconSizeForBodyText(context),
                                     child: PlatformCircularProgressIndicator(
-                                      material: (_, __) => MaterialProgressIndicatorData(
+                                      material: (_, __) =>
+                                          MaterialProgressIndicatorData(
                                         strokeWidth: 2,
                                       ),
                                     ),
@@ -134,7 +135,8 @@ class _DetailsState extends State<Details> {
                           ),
                           const SizedBox(height: MEDIUM_SPACE),
                           Tooltip(
-                            message: l10n.taskDetails_mostRecentLocationExplanation,
+                            message:
+                                l10n.taskDetails_mostRecentLocationExplanation,
                             textAlign: TextAlign.center,
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.start,
@@ -159,12 +161,15 @@ class _DetailsState extends State<Details> {
               GestureDetector(
                 onTap: () {
                   Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => LocationPointsDetailsScreen(
+                    PageRouteBuilder(
+                      opaque: false,
+                      fullscreenDialog: true,
+                      barrierDismissible: true,
+                      pageBuilder: (context, _, __) =>
+                          LocationPointsDetailsScreen(
                         locations: widget.locations,
                         isPreview: false,
                       ),
-                      maintainState: true,
                     ),
                   );
                 },
@@ -217,7 +222,8 @@ class _DetailsState extends State<Details> {
                               ),
                             );
 
-                            widget.task.update(relays: _relaysController.relays);
+                            widget.task
+                                .update(relays: _relaysController.relays);
                             taskService.update(widget.task);
                           },
                         ),
@@ -238,7 +244,8 @@ class _DetailsState extends State<Details> {
                   })(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.done) {
-                      final isRunning = snapshot.hasData && snapshot.data?["startedAt"] != null;
+                      final isRunning = snapshot.hasData &&
+                          snapshot.data?["startedAt"] != null;
 
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -247,7 +254,8 @@ class _DetailsState extends State<Details> {
                             Text(
                               l10n.taskAction_started_description(
                                 snapshot.data!["startedAt"],
-                                (snapshot.data!["runFrequency"] as Duration).inMinutes,
+                                (snapshot.data!["runFrequency"] as Duration)
+                                    .inMinutes,
                               ),
                             )
                           else
@@ -262,7 +270,8 @@ class _DetailsState extends State<Details> {
                                     icon: const Icon(Icons.stop_rounded),
                                   ),
                                   onPressed: () async {
-                                    await widget.task.stopExecutionImmediately();
+                                    await widget.task
+                                        .stopExecutionImmediately();
 
                                     taskService.update(widget.task);
                                   },
@@ -274,7 +283,8 @@ class _DetailsState extends State<Details> {
                                     icon: const Icon(Icons.play_arrow_rounded),
                                   ),
                                   onPressed: () async {
-                                    await widget.task.startExecutionImmediately();
+                                    await widget.task
+                                        .startExecutionImmediately();
 
                                     taskService.update(widget.task);
                                   },
@@ -282,7 +292,8 @@ class _DetailsState extends State<Details> {
                               const SizedBox(width: MEDIUM_SPACE),
                               FutureBuilder<Map<String, dynamic>>(
                                 future: (() async {
-                                  final status = await widget.task.getScheduleStatus();
+                                  final status =
+                                      await widget.task.getScheduleStatus();
 
                                   if (status == null) {
                                     return Map<String, dynamic>.from({});
@@ -291,11 +302,16 @@ class _DetailsState extends State<Details> {
                                   return status;
                                 })(),
                                 builder: (context, scheduleSnapshot) {
-                                  if (scheduleSnapshot.connectionState == ConnectionState.done) {
-                                    if (scheduleSnapshot.hasData && (scheduleSnapshot.data?.isNotEmpty ?? false)) {
+                                  if (scheduleSnapshot.connectionState ==
+                                      ConnectionState.done) {
+                                    if (scheduleSnapshot.hasData &&
+                                        (scheduleSnapshot.data?.isNotEmpty ??
+                                            false)) {
                                       return PlatformTextButton(
-                                        child: Text(l10n.taskAction_stopSchedule),
-                                        material: (_, __) => MaterialTextButtonData(
+                                        child:
+                                            Text(l10n.taskAction_stopSchedule),
+                                        material: (_, __) =>
+                                            MaterialTextButtonData(
                                           icon: const Icon(Icons.stop_outlined),
                                         ),
                                         onPressed: () async {
@@ -309,12 +325,16 @@ class _DetailsState extends State<Details> {
 
                                           await showPlatformDialog(
                                             context: context,
-                                            builder: (context) => PlatformAlertDialog(
-                                              title: Text(l10n.taskAction_stopSchedule_title),
-                                              content: Text(l10n.taskAction_stopSchedule_description),
+                                            builder: (context) =>
+                                                PlatformAlertDialog(
+                                              title: Text(l10n
+                                                  .taskAction_stopSchedule_title),
+                                              content: Text(l10n
+                                                  .taskAction_stopSchedule_description),
                                               actions: <Widget>[
                                                 PlatformDialogAction(
-                                                  child: Text(l10n.closeNeutralAction),
+                                                  child: Text(
+                                                      l10n.closeNeutralAction),
                                                   onPressed: () {
                                                     Navigator.of(context).pop();
                                                   },
@@ -326,12 +346,16 @@ class _DetailsState extends State<Details> {
                                       );
                                     } else {
                                       return PlatformTextButton(
-                                        child: Text(l10n.taskAction_startSchedule),
-                                        material: (_, __) => MaterialTextButtonData(
-                                          icon: const Icon(Icons.schedule_rounded),
+                                        child:
+                                            Text(l10n.taskAction_startSchedule),
+                                        material: (_, __) =>
+                                            MaterialTextButtonData(
+                                          icon: const Icon(
+                                              Icons.schedule_rounded),
                                         ),
                                         onPressed: () async {
-                                          final startDate = await widget.task.startSchedule();
+                                          final startDate =
+                                              await widget.task.startSchedule();
 
                                           taskService.update(widget.task);
 
@@ -342,14 +366,19 @@ class _DetailsState extends State<Details> {
                                           if (startDate == null) {
                                             await showPlatformDialog(
                                               context: context,
-                                              builder: (context) => PlatformAlertDialog(
-                                                title: Text(l10n.taskAction_startSchedule_notScheduled_title),
-                                                content: Text(l10n.taskAction_startSchedule_notScheduled_description),
+                                              builder: (context) =>
+                                                  PlatformAlertDialog(
+                                                title: Text(l10n
+                                                    .taskAction_startSchedule_notScheduled_title),
+                                                content: Text(l10n
+                                                    .taskAction_startSchedule_notScheduled_description),
                                                 actions: <Widget>[
                                                   PlatformDialogAction(
-                                                    child: Text(l10n.closeNeutralAction),
+                                                    child: Text(l10n
+                                                        .closeNeutralAction),
                                                     onPressed: () {
-                                                      Navigator.of(context).pop();
+                                                      Navigator.of(context)
+                                                          .pop();
                                                     },
                                                   ),
                                                 ],
@@ -358,14 +387,20 @@ class _DetailsState extends State<Details> {
                                           } else {
                                             await showPlatformDialog(
                                               context: context,
-                                              builder: (context) => PlatformAlertDialog(
-                                                title: Text(l10n.taskAction_startSchedule_title),
-                                                content: Text(l10n.taskAction_startSchedule_description(startDate!)),
+                                              builder: (context) =>
+                                                  PlatformAlertDialog(
+                                                title: Text(l10n
+                                                    .taskAction_startSchedule_title),
+                                                content: Text(l10n
+                                                    .taskAction_startSchedule_description(
+                                                        startDate!)),
                                                 actions: <Widget>[
                                                   PlatformDialogAction(
-                                                    child: Text(l10n.closeNeutralAction),
+                                                    child: Text(l10n
+                                                        .closeNeutralAction),
                                                     onPressed: () {
-                                                      Navigator.of(context).pop();
+                                                      Navigator.of(context)
+                                                          .pop();
                                                     },
                                                   ),
                                                 ],
@@ -378,7 +413,8 @@ class _DetailsState extends State<Details> {
                                   }
 
                                   return PlatformCircularProgressIndicator(
-                                    material: (_, __) => MaterialProgressIndicatorData(
+                                    material: (_, __) =>
+                                        MaterialProgressIndicatorData(
                                       strokeWidth: 2,
                                     ),
                                   );
