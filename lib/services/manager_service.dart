@@ -1,7 +1,5 @@
 import 'dart:ui';
 
-import 'package:locus/api/nostr-events.dart';
-import 'package:locus/services/location_point_service.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:logger/logger.dart';
 import 'package:workmanager/workmanager.dart';
@@ -24,21 +22,7 @@ void callbackDispatcher() {
           taskService = await TaskService.restore();
           task = taskService.getByID(taskID);
 
-          final eventManager = NostrEventsManager.fromTask(task);
-
-          final locationPoint =
-              await LocationPointService.createUsingCurrentLocation();
-          final message = await locationPoint.toEncryptedMessage(
-            signPrivateKey: task.signPGPPrivateKey,
-            signPublicKey: task.signPGPPublicKey,
-            viewPublicKey: task.viewPGPPublicKey,
-          );
-
-          await eventManager.publishMessage(message);
-
-          if (!task.shouldRunNow()) {
-            await task.stopExecutionImmediately();
-          }
+          await task.publishCurrentLocationNow();
 
           break;
         case TASK_SCHEDULE_KEY:

@@ -191,59 +191,55 @@ class _MainScreenState extends State<MainScreen> {
                             crossAxisAlignment: WrapCrossAlignment.start,
                             children: <Widget>[
                               if (taskService.tasks.isNotEmpty)
-                                FutureBuilder(
-                                  future: taskService.checkup(),
-                                  builder: (context, snapshot) => PlatformWidget(
-                                    material: (context, __) => Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: <Widget>[
-                                        Padding(
-                                          padding: const EdgeInsets.symmetric(horizontal: MEDIUM_SPACE),
-                                          child: ChipCaption(
-                                            l10n.mainScreen_tasksSection,
-                                            icon: Icons.task_rounded,
-                                          ),
-                                        ).animate().fadeIn(duration: 1.seconds),
-                                        ListView.builder(
-                                          shrinkWrap: true,
-                                          padding: const EdgeInsets.only(top: MEDIUM_SPACE),
-                                          physics: const NeverScrollableScrollPhysics(),
-                                          itemCount: taskService.tasks.length,
-                                          itemBuilder: (context, index) {
-                                            final task = taskService.tasks[index];
-
-                                            return TaskTile(
-                                              task: task,
-                                              disabled: snapshot.connectionState != ConnectionState.done,
-                                            )
-                                                .animate()
-                                                .then(delay: 100.ms * index)
-                                                .slide(
-                                                  duration: 1.seconds,
-                                                  curve: Curves.easeOut,
-                                                  begin: Offset(0, 0.2),
-                                                )
-                                                .fadeIn(
-                                                  delay: 100.ms,
-                                                  duration: 1.seconds,
-                                                  curve: Curves.easeOut,
-                                                );
-                                          },
+                                PlatformWidget(
+                                  material: (context, __) => Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(horizontal: MEDIUM_SPACE),
+                                        child: ChipCaption(
+                                          l10n.mainScreen_tasksSection,
+                                          icon: Icons.task_rounded,
                                         ),
-                                      ],
-                                    ),
-                                    cupertino: (context, __) => CupertinoListSection(
-                                      header: Text(
-                                        l10n.mainScreen_tasksSection,
-                                      ),
-                                      children: taskService.tasks
-                                          .map(
-                                            (task) => TaskTile(
-                                              task: task,
-                                            ),
+                                      ).animate().fadeIn(duration: 1.seconds),
+                                      ListView.builder(
+                                        shrinkWrap: true,
+                                        padding: const EdgeInsets.only(top: MEDIUM_SPACE),
+                                        physics: const NeverScrollableScrollPhysics(),
+                                        itemCount: taskService.tasks.length,
+                                        itemBuilder: (context, index) {
+                                          final task = taskService.tasks[index];
+
+                                          return TaskTile(
+                                            task: task,
                                           )
-                                          .toList(),
+                                              .animate()
+                                              .then(delay: 100.ms * index)
+                                              .slide(
+                                                duration: 1.seconds,
+                                                curve: Curves.easeOut,
+                                                begin: Offset(0, 0.2),
+                                              )
+                                              .fadeIn(
+                                                delay: 100.ms,
+                                                duration: 1.seconds,
+                                                curve: Curves.easeOut,
+                                              );
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                  cupertino: (context, __) => CupertinoListSection(
+                                    header: Text(
+                                      l10n.mainScreen_tasksSection,
                                     ),
+                                    children: taskService.tasks
+                                        .map(
+                                          (task) => TaskTile(
+                                            task: task,
+                                          ),
+                                        )
+                                        .toList(),
                                   ),
                                 ),
                               if (viewService.views.isNotEmpty)

@@ -173,6 +173,7 @@ class Task extends ChangeNotifier {
   Future<Map<String, dynamic>?> getExecutionStatus() async {
     final rawData = await storage.read(key: taskKey);
 
+    print("raw $rawData");
     if (rawData == null || rawData == "") {
       return null;
     }
@@ -257,6 +258,14 @@ class Task extends ChangeNotifier {
 
       _nextRunWorkManagerID = uuid.v4();
 
+      await storage.write(
+        key: scheduleKey,
+        value: jsonEncode({
+          "startedAt": DateTime.now().toIso8601String(),
+          "startsAt": nextStartDate.toIso8601String(),
+        }),
+      );
+
       Workmanager().registerOneOffTask(
         _nextRunWorkManagerID!,
         TASK_SCHEDULE_KEY,
@@ -270,14 +279,6 @@ class Task extends ChangeNotifier {
         existingWorkPolicy: ExistingWorkPolicy.replace,
       );
     }
-
-    await storage.write(
-      key: scheduleKey,
-      value: jsonEncode({
-        "startedAt": DateTime.now().toIso8601String(),
-        "startsAt": nextStartDate.toIso8601String(),
-      }),
-    );
 
     return nextStartDate;
   }
@@ -302,7 +303,7 @@ class Task extends ChangeNotifier {
       Workmanager().registerOneOffTask(
         "task-identifier",
         TASK_EXECUTION_KEY,
-        initialDelay: Duration.zero,
+        initialDelay: frequency,
         constraints: Constraints(
           networkType: NetworkType.connected,
           requiresCharging: true,
@@ -316,6 +317,7 @@ class Task extends ChangeNotifier {
       Workmanager().registerOneOffTask(
         id,
         TASK_EXECUTION_KEY,
+        initialDelay: frequency,
         constraints: Constraints(
           networkType: NetworkType.connected,
         ),
@@ -329,6 +331,7 @@ class Task extends ChangeNotifier {
         id,
         TASK_EXECUTION_KEY,
         frequency: frequency,
+        initialDelay: frequency,
         constraints: Constraints(
           networkType: NetworkType.connected,
         ),
@@ -343,10 +346,6 @@ class Task extends ChangeNotifier {
   // Starts the actual execution of the task. You should only call this if either the user wants to manually start the
   // task or if the task is scheduled to run.
   Future<void> startExecutionImmediately() async {
-    await stopSchedule();
-
-    await startRepeatingTask();
-
     await storage.write(
       key: taskKey,
       value: jsonEncode({
@@ -355,9 +354,13 @@ class Task extends ChangeNotifier {
       }),
     );
 
+    await stopSchedule();
+
     for (final timer in timers) {
       timer.executionStarted();
     }
+
+    await startRepeatingTask();
 
     notifyListeners();
   }
