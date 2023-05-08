@@ -31,7 +31,7 @@ class InitialScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               SvgPicture.asset(
-                "assets/launcher-icon.svg",
+                "assets/logo.svg",
                 width: 150,
                 height: 150,
               ).animate().scale(
