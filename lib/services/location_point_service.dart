@@ -23,14 +23,19 @@ class LocationPointService {
     required this.latitude,
     required this.longitude,
     required this.accuracy,
-    this.altitude,
-    this.speed,
-    this.speedAccuracy,
-    this.heading,
-    this.headingAccuracy,
-    this.batteryLevel,
+    double? altitude,
+    double? speed,
+    double? speedAccuracy,
+    double? heading,
+    double? headingAccuracy,
+    double? batteryLevel,
     this.batteryState,
-  });
+  })  : altitude = altitude == 0.0 ? null : altitude,
+        speed = speed == 0.0 ? null : speed,
+        speedAccuracy = speedAccuracy == 0.0 ? null : speedAccuracy,
+        heading = heading == 0.0 ? null : heading,
+        headingAccuracy = headingAccuracy == 0.0 ? null : headingAccuracy,
+        batteryLevel = batteryLevel == 0.0 ? null : batteryLevel;
 
   static LocationPointService fromJSON(Map<String, dynamic> json) {
     return LocationPointService(
@@ -45,7 +50,7 @@ class LocationPointService {
       headingAccuracy: json["headingAccuracy"],
       batteryLevel: json["batteryLevel"],
       batteryState: BatteryState.values.firstWhere(
-            (value) => value.name == json["batteryState"],
+        (value) => value.name == json["batteryState"],
       ),
     );
   }
@@ -72,8 +77,8 @@ class LocationPointService {
     required final String signPrivateKey,
   }) async {
     final rawMessage = jsonEncode(toJSON());
-    final signedMessage = await OpenPGP.sign(
-        rawMessage, signPublicKey, signPrivateKey, "");
+    final signedMessage =
+        await OpenPGP.sign(rawMessage, signPublicKey, signPrivateKey, "");
     final content = {
       "message": rawMessage,
       "signature": signedMessage,
@@ -120,9 +125,10 @@ class LocationPointService {
   }
 
   static Future<LocationPointService> fromEncrypted(
-      final String encryptedMessage,
-      final String viewPrivateKey,
-      final String signPublicKey,) async {
+    final String encryptedMessage,
+    final String viewPrivateKey,
+    final String signPublicKey,
+  ) async {
     final rawContent = await OpenPGP.decrypt(
       encryptedMessage,
       viewPrivateKey,
@@ -132,8 +138,8 @@ class LocationPointService {
     final message = content["message"];
     final signature = content["signature"];
 
-    final isSignatureValid = await OpenPGP.verify(
-        signature, message, signPublicKey);
+    final isSignatureValid =
+        await OpenPGP.verify(signature, message, signPublicKey);
 
     if (!isSignatureValid) {
       throw Exception("Invalid signature");

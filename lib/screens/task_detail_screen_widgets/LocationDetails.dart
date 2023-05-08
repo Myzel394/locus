@@ -132,10 +132,10 @@ class _LocationDetailsState extends State<LocationDetails> {
                     ),
                     PlatformListTile(
                       title: Text(
-                        widget.location.accuracy == 0.0
+                        widget.location.accuracy == null
                             ? l10n.unknownValue
                             : l10n.taskDetails_locationDetails_accuracy_value(
-                                widget.location.accuracy.round(),
+                                widget.location.accuracy!.round(),
                               ),
                       ),
                       subtitle:
@@ -185,7 +185,23 @@ class _LocationDetailsState extends State<LocationDetails> {
                         cupertino: (_, __) => Icon(CupertinoIcons.speedometer),
                       ),
                       trailing: SizedBox.shrink(),
-                    )
+                    ),
+                    PlatformListTile(
+                      title: Text(
+                        widget.location.altitude == null
+                            ? l10n.unknownValue
+                            : l10n.taskDetails_locationDetails_altitude_value(
+                                widget.location.altitude!.toInt().abs(),
+                              ),
+                      ),
+                      subtitle:
+                          Text(l10n.taskDetails_locationDetails_altitude_label),
+                      leading: PlatformWidget(
+                        material: (_, __) => Icon(Icons.height_rounded),
+                        cupertino: (_, __) => Icon(CupertinoIcons.alt),
+                      ),
+                      trailing: SizedBox.shrink(),
+                    ),
                   ],
                 ),
               )

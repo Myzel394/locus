@@ -261,6 +261,15 @@
       }
     }
   },
+  "taskDetails_locationDetails_altitude_label": "Altitude",
+  "taskDetails_locationDetails_altitude_value": "{altitude}m",
+  "@taskDetails_locationDetails_altitude_value": {
+    "placeholders": {
+      "altitude": {
+        "type": "int"
+      }
+    }
+  },
   "viewDetails_title": "View Details",
   "viewDetails_actions_openLatestLocation": "Open Maps to latest location",
   "loadingLocationsTitle": "Loading locations: {count}",
