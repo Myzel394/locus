@@ -33,7 +33,7 @@ class SimpleContinuePage extends StatelessWidget {
       children: <Widget>[
         Expanded(
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               Text(
@@ -44,10 +44,9 @@ class SimpleContinuePage extends StatelessWidget {
                   .animate()
                   .then(delay: 200.ms)
                   .fadeIn(duration: FADE_IN_DURATION)
-                  .slide(begin: const Offset(0, 0.5), duration: FADE_IN_DURATION),
-              const SizedBox(height: HUGE_SPACE),
+                  .slide(
+                      begin: const Offset(0, 0.5), duration: FADE_IN_DURATION),
               header,
-              const SizedBox(height: LARGE_SPACE),
               Text(
                 description,
                 style: getBodyTextTextStyle(context),
@@ -55,7 +54,8 @@ class SimpleContinuePage extends StatelessWidget {
                   .animate()
                   .then(delay: 500.ms)
                   .fadeIn(duration: FADE_IN_DURATION)
-                  .slide(begin: const Offset(0, 0.5), duration: FADE_IN_DURATION),
+                  .slide(
+                      begin: const Offset(0, 0.5), duration: FADE_IN_DURATION),
             ],
           ),
         ),

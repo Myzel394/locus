@@ -53,7 +53,8 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
     _nameController.addListener(() {
       final taskService = context.read<TaskService>();
       final lowerCasedName = _nameController.text.toLowerCase();
-      final alreadyExists = taskService.tasks.any((element) => element.name.toLowerCase() == lowerCasedName);
+      final alreadyExists = taskService.tasks
+          .any((element) => element.name.toLowerCase() == lowerCasedName);
 
       setState(() {
         anotherTaskAlreadyExists = alreadyExists;
@@ -136,8 +137,10 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
     final l10n = AppLocalizations.of(context);
 
     return {
-      TaskCreationProgress.creatingSignKeys: l10n.createTask_process_creatingSignKeys,
-      TaskCreationProgress.creatingViewKeys: l10n.createTask_process_creatingViewKeys,
+      TaskCreationProgress.creatingSignKeys:
+          l10n.createTask_process_creatingSignKeys,
+      TaskCreationProgress.creatingViewKeys:
+          l10n.createTask_process_creatingViewKeys,
     };
   }
 
@@ -214,12 +217,15 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                 autofillHints: const [AutofillHints.name],
                                 material: (_, __) => MaterialTextFormFieldData(
                                   decoration: InputDecoration(
-                                    labelText: l10n.createTask_fields_name_label,
+                                    labelText:
+                                        l10n.createTask_fields_name_label,
                                     prefixIcon: Icon(context.platformIcons.tag),
                                   ),
                                 ),
-                                cupertino: (_, __) => CupertinoTextFormFieldData(
-                                  placeholder: l10n.createTask_fields_name_label,
+                                cupertino: (_, __) =>
+                                    CupertinoTextFormFieldData(
+                                  placeholder:
+                                      l10n.createTask_fields_name_label,
                                   prefix: Icon(context.platformIcons.tag),
                                 ),
                               )
@@ -242,7 +248,8 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                   FocusManager.instance.primaryFocus?.unfocus();
 
                                   _nameController.text = example.name;
-                                  _frequencyController.text = example.frequency.inMinutes.toString();
+                                  _frequencyController.text =
+                                      example.frequency.inMinutes.toString();
                                   _timersController
                                     ..clear()
                                     ..addAll(example.timers);
@@ -250,7 +257,8 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                               ),
                             if (anotherTaskAlreadyExists) ...[
                               const SizedBox(height: MEDIUM_SPACE),
-                              WarningText(l10n.createTask_sameTaskNameAlreadyExists),
+                              WarningText(
+                                  l10n.createTask_sameTaskNameAlreadyExists),
                             ],
                             const SizedBox(height: MEDIUM_SPACE),
                             PlatformTextFormField(
@@ -258,8 +266,11 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                               enabled: _taskProgress == null,
                               textInputAction: TextInputAction.done,
                               keyboardType: TextInputType.number,
-                              inputFormatters: <TextInputFormatter>[FilteringTextInputFormatter.digitsOnly],
-                              textAlign: isMaterial(context) ? TextAlign.center : null,
+                              inputFormatters: <TextInputFormatter>[
+                                FilteringTextInputFormatter.digitsOnly
+                              ],
+                              textAlign:
+                                  isMaterial(context) ? TextAlign.center : null,
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
                                   return l10n.fields_errors_isEmpty;
@@ -276,13 +287,17 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                               material: (_, __) => MaterialTextFormFieldData(
                                 decoration: InputDecoration(
                                   prefixIcon: const Icon(Icons.timer),
-                                  labelText: l10n.createTask_fields_frequency_label,
-                                  prefixText: l10n.createTask_fields_frequency_prefix,
-                                  suffixText: l10n.createTask_fields_frequency_suffix,
+                                  labelText:
+                                      l10n.createTask_fields_frequency_label,
+                                  prefixText:
+                                      l10n.createTask_fields_frequency_prefix,
+                                  suffixText:
+                                      l10n.createTask_fields_frequency_suffix,
                                 ),
                               ),
                               cupertino: (_, __) => CupertinoTextFormFieldData(
-                                placeholder: l10n.createTask_fields_frequency_placeholder,
+                                placeholder: l10n
+                                    .createTask_fields_frequency_placeholder,
                                 prefix: const Icon(CupertinoIcons.timer),
                               ),
                             )
@@ -306,13 +321,17 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                               direction: Axis.horizontal,
                               children: <Widget>[
                                 PlatformElevatedButton(
-                                  material: (_, __) => MaterialElevatedButtonData(
+                                  material: (_, __) =>
+                                      MaterialElevatedButtonData(
                                     icon: PlatformWidget(
-                                      material: (_, __) => const Icon(Icons.dns_rounded),
-                                      cupertino: (_, __) => const Icon(CupertinoIcons.list_bullet),
+                                      material: (_, __) =>
+                                          const Icon(Icons.dns_rounded),
+                                      cupertino: (_, __) => const Icon(
+                                          CupertinoIcons.list_bullet),
                                     ),
                                   ),
-                                  cupertino: (_, __) => CupertinoElevatedButtonData(
+                                  cupertino: (_, __) =>
+                                      CupertinoElevatedButtonData(
                                     padding: getSmallButtonPadding(context),
                                   ),
                                   onPressed: _taskProgress != null
@@ -321,7 +340,8 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                           showPlatformModalSheet(
                                             context: context,
                                             material: MaterialModalSheetData(
-                                              backgroundColor: Colors.transparent,
+                                              backgroundColor:
+                                                  Colors.transparent,
                                               isScrollControlled: true,
                                               isDismissible: true,
                                             ),
@@ -330,8 +350,9 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                             ),
                                           );
                                         },
-                                  child:
-                                      Text(l10n.createTask_fields_relays_selectLabel(_relaysController.relays.length)),
+                                  child: Text(
+                                      l10n.createTask_fields_relays_selectLabel(
+                                          _relaysController.relays.length)),
                                 )
                                     .animate()
                                     .then(delay: IN_DELAY * 4)
@@ -346,10 +367,12 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                       curve: Curves.easeOut,
                                     ),
                                 PlatformElevatedButton(
-                                  material: (_, __) => MaterialElevatedButtonData(
+                                  material: (_, __) =>
+                                      MaterialElevatedButtonData(
                                     icon: const Icon(Icons.timer_rounded),
                                   ),
-                                  cupertino: (_, __) => CupertinoElevatedButtonData(
+                                  cupertino: (_, __) =>
+                                      CupertinoElevatedButtonData(
                                     padding: getSmallButtonPadding(context),
                                   ),
                                   onPressed: _taskProgress != null
@@ -358,7 +381,8 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                           await showPlatformModalSheet(
                                             context: context,
                                             material: MaterialModalSheetData(
-                                              backgroundColor: Colors.transparent,
+                                              backgroundColor:
+                                                  Colors.transparent,
                                               isScrollControlled: true,
                                               isDismissible: true,
                                             ),
@@ -368,7 +392,8 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                           );
                                         },
                                   child: Text(
-                                    l10n.createTask_fields_timers_selectLabel(_timersController.timers.length),
+                                    l10n.createTask_fields_timers_selectLabel(
+                                        _timersController.timers.length),
                                   ),
                                 )
                                     .animate()
@@ -386,8 +411,9 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                               ],
                             ),
                             const SizedBox(height: MEDIUM_SPACE),
-                            ListTile(
-                              title: Text(l10n.mainScreen_createTask_scheduleNow),
+                            PlatformListTile(
+                              title:
+                                  Text(l10n.mainScreen_createTask_scheduleNow),
                               leading: PlatformSwitch(
                                 value: _scheduleNow,
                                 onChanged: _taskProgress != null
@@ -398,17 +424,20 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                         });
                                       },
                               ),
-                              trailing: IconButton(
+                              trailing: PlatformIconButton(
                                 icon: Icon(context.platformIcons.help),
                                 onPressed: () {
                                   showPlatformDialog(
                                     context: context,
                                     builder: (context) => PlatformAlertDialog(
-                                      title: Text(l10n.mainScreen_createTask_scheduleNow_help_title),
-                                      content: Text(l10n.mainScreen_createTask_scheduleNow_help_description),
+                                      title: Text(l10n
+                                          .mainScreen_createTask_scheduleNow_help_title),
+                                      content: Text(l10n
+                                          .mainScreen_createTask_scheduleNow_help_description),
                                       actions: [
                                         PlatformDialogAction(
-                                          child: PlatformText(l10n.closeNeutralAction),
+                                          child: PlatformText(
+                                              l10n.closeNeutralAction),
                                           onPressed: () {
                                             Navigator.of(context).pop();
                                           },
@@ -474,7 +503,8 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
 
                             if (_relaysController.relays.isEmpty) {
                               setState(() {
-                                errorMessage = l10n.createTask_errors_emptyRelays;
+                                errorMessage =
+                                    l10n.createTask_errors_emptyRelays;
                               });
                               return;
                             }
