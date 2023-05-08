@@ -2,9 +2,8 @@ import 'package:disable_battery_optimization/disable_battery_optimization.dart';
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-
-import '../../constants/spacing.dart';
-import '../../utils/theme.dart';
+import 'package:locus/screens/welcome_screen_widgets/SimpleContinuePage.dart';
+import 'package:locus/utils/theme.dart';
 
 class BatteryOptimizationsScreen extends StatefulWidget {
   final void Function() onDone;
@@ -45,52 +44,34 @@ class _BatteryOptimizationsScreenState extends State<BatteryOptimizationsScreen>
 
   @override
   Widget build(BuildContext context) {
+    final shades = getPrimaryColorShades(context);
     final l10n = AppLocalizations.of(context);
 
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        Expanded(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              RotationTransition(
-                turns: _animation,
-                child: Icon(context.platformIcons.settingsSolid, size: 120),
-              ),
-              const SizedBox(height: HUGE_SPACE),
-              Text(
-                l10n.welcomeScreen_battery_title,
-                style: getTitleTextStyle(context),
-              ),
-              const SizedBox(height: SMALL_SPACE),
-              Text(
-                l10n.welcomeScreen_battery_description,
-                style: getBodyTextTextStyle(context),
-              ),
-            ],
-          ),
+    return SimpleContinuePage(
+      title: l10n.welcomeScreen_battery_title,
+      description: l10n.welcomeScreen_battery_description,
+      continueLabel: l10n.welcomeScreen_battery_openSettings,
+      header: RotationTransition(
+        turns: _animation,
+        child: Icon(
+          context.platformIcons.settingsSolid,
+          size: 120,
+          color: shades[0],
         ),
-        PlatformElevatedButton(
-          padding: const EdgeInsets.all(MEDIUM_SPACE),
-          onPressed: () async {
-            await DisableBatteryOptimization.showDisableBatteryOptimizationSettings();
-            await DisableBatteryOptimization.showDisableManufacturerBatteryOptimizationSettings(
-              l10n.welcomeScreen_battery_disableManufacturerOptimization_title,
-              l10n.welcomeScreen_battery_disableManufacturerOptimization_description,
-            );
-            final isIgnoringBatteryOptimizations =
-                await DisableBatteryOptimization.isAllBatteryOptimizationDisabled ?? false;
+      ),
+      onContinue: () async {
+        await DisableBatteryOptimization.showDisableBatteryOptimizationSettings();
+        await DisableBatteryOptimization.showDisableManufacturerBatteryOptimizationSettings(
+          l10n.welcomeScreen_battery_disableManufacturerOptimization_title,
+          l10n.welcomeScreen_battery_disableManufacturerOptimization_description,
+        );
+        final isIgnoringBatteryOptimizations =
+            await DisableBatteryOptimization.isAllBatteryOptimizationDisabled ?? false;
 
-            if (isIgnoringBatteryOptimizations) {
-              widget.onDone();
-            }
-          },
-          child: Text(l10n.welcomeScreen_battery_openSettings),
-        ),
-      ],
+        if (isIgnoringBatteryOptimizations) {
+          widget.onDone();
+        }
+      },
     );
   }
 }

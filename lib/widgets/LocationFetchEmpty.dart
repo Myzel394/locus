@@ -11,7 +11,6 @@ class LocationFetchEmpty extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final shades = getPrimaryColorShades(context);
-    final isDarkMode = MediaQuery.of(context).platformBrightness == Brightness.dark;
 
     return SafeArea(
       child: Padding(
@@ -109,7 +108,7 @@ class LocationFetchEmpty extends StatelessWidget {
                   // Background blob
                   ValueDelegate.color(
                     const ["bg Outlines", "Group 1", "Fill 1"],
-                    value: isDarkMode ? shades[900] : shades[200],
+                    value: getIsDarkMode(context) ? shades[900] : shades[200],
                   ),
                 ],
               ),

@@ -21,12 +21,12 @@ Color getBodyTextColor(final BuildContext context) => platformThemeData(
       cupertino: (data) => data.textTheme.textStyle.color!,
     );
 
+bool getIsDarkMode(final BuildContext context) => MediaQuery.of(context).platformBrightness == Brightness.dark;
+
 Color getButtonBackgroundColor(final BuildContext context) => platformThemeData(
       context,
       material: (data) {
-        final isDarkMode = MediaQuery.of(context).platformBrightness == Brightness.dark;
-
-        if (isDarkMode) {
+        if (getIsDarkMode(context)) {
           return data.colorScheme.primary.withOpacity(.2);
         } else {
           return Colors.white;

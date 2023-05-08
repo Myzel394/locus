@@ -12,12 +12,9 @@ class WarningText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color =
-        isCupertino(context) ? CupertinoColors.systemYellow : Colors.yellow;
-    final isDarkMode =
-        MediaQuery.of(context).platformBrightness == Brightness.dark;
+    final color = isCupertino(context) ? CupertinoColors.systemYellow : Colors.yellow;
 
-    if (isDarkMode) {
+    if (getIsDarkMode(context)) {
       return Row(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
