@@ -42,7 +42,7 @@ class _LocationDetailsState extends State<LocationDetails> {
     };
   }
 
-  IconData getIconForBatteryLevel(final int? level) {
+  IconData getIconForBatteryLevel(final double? level) {
     if (isCupertino(context)) {
       if (level == null) {
         return CupertinoIcons.battery_full;
@@ -153,7 +153,8 @@ class _LocationDetailsState extends State<LocationDetails> {
                           Text(l10n.taskDetails_locationDetails_battery_label),
                       leading: Icon(
                         getIconForBatteryLevel(
-                            widget.location.batteryLevel?.toInt()),
+                          widget.location.batteryLevel,
+                        ),
                       ),
                       trailing: SizedBox.shrink(),
                     ),
