@@ -24,13 +24,19 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return DismissKeyboard(
       child: DynamicColorBuilder(
-        builder: (ColorScheme? lightColorScheme, ColorScheme? darkColorScheme) => PlatformApp(
+        builder:
+            (ColorScheme? lightColorScheme, ColorScheme? darkColorScheme) =>
+                PlatformApp(
           title: 'Locus',
           material: (_, __) => MaterialAppData(
             theme: lightColorScheme != null
                 ? LIGHT_THEME_MATERIAL.copyWith(
                     colorScheme: lightColorScheme,
-                    scaffoldBackgroundColor: lightColorScheme.background.withAlpha(200),
+                    scaffoldBackgroundColor:
+                        HSLColor.fromColor(lightColorScheme.background)
+                            .withSaturation(0.1)
+                            .withLightness(0.92)
+                            .toColor(),
                     inputDecorationTheme: InputDecorationTheme(
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(MEDIUM_SPACE),
@@ -42,7 +48,10 @@ class App extends StatelessWidget {
             darkTheme: darkColorScheme != null
                 ? DARK_THEME_MATERIAL.copyWith(
                     colorScheme: darkColorScheme,
-                    scaffoldBackgroundColor: darkColorScheme.background.withAlpha(200),
+                    scaffoldBackgroundColor:
+                        HSLColor.fromColor(darkColorScheme.background)
+                            .withLightness(0.08)
+                            .toColor(),
                     inputDecorationTheme: InputDecorationTheme(
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(MEDIUM_SPACE),

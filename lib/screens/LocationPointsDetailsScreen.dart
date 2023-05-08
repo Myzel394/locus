@@ -21,7 +21,7 @@ class LocationPointsDetailsScreen extends StatelessWidget {
     final locationElements = ListView.builder(
       physics: isPreview ? const NeverScrollableScrollPhysics() : null,
       itemCount: locations.length,
-      itemBuilder: (context, index) => LocationDetails(
+      itemBuilder: (_, index) => LocationDetails(
         location: locations[index],
         isPreview: isPreview,
       ),

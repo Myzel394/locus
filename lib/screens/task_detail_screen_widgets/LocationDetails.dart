@@ -88,9 +88,6 @@ class _LocationDetailsState extends State<LocationDetails> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         PlatformTextButton(
-          cupertino: (_, __) => CupertinoTextButtonData(
-            alignment: Alignment.centerLeft,
-          ),
           onPressed: widget.isPreview
               ? null
               : () {
@@ -98,10 +95,13 @@ class _LocationDetailsState extends State<LocationDetails> {
                     isOpened = !isOpened;
                   });
                 },
-          child: Text(
-            formattedString,
-            textAlign: TextAlign.start,
-            style: getBodyTextTextStyle(context),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              formattedString,
+              textAlign: TextAlign.start,
+              style: getBodyTextTextStyle(context),
+            ),
           ),
         ),
         isOpened
@@ -132,11 +132,9 @@ class _LocationDetailsState extends State<LocationDetails> {
                     ),
                     PlatformListTile(
                       title: Text(
-                        widget.location.accuracy == null
-                            ? l10n.unknownValue
-                            : l10n.taskDetails_locationDetails_accuracy_value(
-                                widget.location.accuracy!.round(),
-                              ),
+                        l10n.taskDetails_locationDetails_accuracy_value(
+                          widget.location.accuracy.round(),
+                        ),
                       ),
                       subtitle:
                           Text(l10n.taskDetails_locationDetails_accuracy_label),
