@@ -79,6 +79,8 @@ dependencies:
   duration_picker: ^1.1.1
   disable_battery_optimization: ^1.1.0+1
   accordion: ^2.5.1
+  modal_bottom_sheet: 3.0.0-pre
+  settings_ui: ^2.0.2
 
 flutter_launcher_icons:
   android: true

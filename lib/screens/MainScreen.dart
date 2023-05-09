@@ -5,13 +5,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:locus/constants/spacing.dart';
+import 'package:locus/screens/SettingsScreen.dart';
 import 'package:locus/screens/main_screen_widgets/ImportTask.dart';
 import 'package:locus/screens/main_screen_widgets/TaskTile.dart';
 import 'package:locus/screens/main_screen_widgets/ViewTile.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/services/view_service.dart';
+import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/ChipCaption.dart';
 import 'package:locus/widgets/Paper.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:provider/provider.dart';
 
 import 'CreateTaskScreen.dart';
@@ -36,7 +39,8 @@ class _MainScreenState extends State<MainScreen> {
   double listViewHeight = 0;
   int activeTab = 0;
 
-  double get windowHeight => MediaQuery.of(context).size.height - kToolbarHeight;
+  double get windowHeight =>
+      MediaQuery.of(context).size.height - kToolbarHeight;
 
   // If the ListView covers more than 75% of the screen, then actions get a whole screen of space.
   // Otherwise fill up the remaining space.
@@ -94,7 +98,8 @@ class _MainScreenState extends State<MainScreen> {
     final taskService = context.watch<TaskService>();
     final viewService = context.watch<ViewService>();
 
-    final showEmptyScreen = taskService.tasks.isEmpty && viewService.views.isEmpty;
+    final showEmptyScreen =
+        taskService.tasks.isEmpty && viewService.views.isEmpty;
 
     if (showEmptyScreen) {
       return PlatformScaffold(
@@ -149,7 +154,9 @@ class _MainScreenState extends State<MainScreen> {
           ),
           openColor: Theme.of(context).scaffoldBackgroundColor,
           closedColor: Theme.of(context).colorScheme.primary,
-        ).animate().scale(duration: 500.ms, delay: 1.seconds, curve: Curves.bounceOut),
+        )
+            .animate()
+            .scale(duration: 500.ms, delay: 1.seconds, curve: Curves.bounceOut),
       ),
       // Settings bottomNavBar via cupertino data class does not work
       bottomNavBar: isCupertino(context)
@@ -172,6 +179,27 @@ class _MainScreenState extends State<MainScreen> {
               ],
             )
           : null,
+      appBar: PlatformAppBar(
+        title: Text(l10n.appName),
+        trailingActions: [
+          PlatformPopupMenuButton(
+            itemBuilder: (context) => [
+              PlatformPopupMenuItem(child: Text("Settings"), value: "settings"),
+            ],
+            onSelected: (value) {
+              switch (value) {
+                case "settings":
+                  // Show cupertino popup
+                  showCupertinoModalBottomSheet(
+                    context: context,
+                    backgroundColor: Colors.transparent,
+                    builder: (_) => SettingsScreen(themeContext: context),
+                  );
+              }
+            },
+          ),
+        ],
+      ),
       body: activeTab == 0
           ? SafeArea(
               child: SingleChildScrollView(
@@ -193,10 +221,12 @@ class _MainScreenState extends State<MainScreen> {
                               if (taskService.tasks.isNotEmpty)
                                 PlatformWidget(
                                   material: (context, __) => Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: <Widget>[
                                       Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: MEDIUM_SPACE),
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: MEDIUM_SPACE),
                                         child: ChipCaption(
                                           l10n.mainScreen_tasksSection,
                                           icon: Icons.task_rounded,
@@ -204,8 +234,10 @@ class _MainScreenState extends State<MainScreen> {
                                       ).animate().fadeIn(duration: 1.seconds),
                                       ListView.builder(
                                         shrinkWrap: true,
-                                        padding: const EdgeInsets.only(top: MEDIUM_SPACE),
-                                        physics: const NeverScrollableScrollPhysics(),
+                                        padding: const EdgeInsets.only(
+                                            top: MEDIUM_SPACE),
+                                        physics:
+                                            const NeverScrollableScrollPhysics(),
                                         itemCount: taskService.tasks.length,
                                         itemBuilder: (context, index) {
                                           final task = taskService.tasks[index];
@@ -229,7 +261,8 @@ class _MainScreenState extends State<MainScreen> {
                                       ),
                                     ],
                                   ),
-                                  cupertino: (context, __) => CupertinoListSection(
+                                  cupertino: (context, __) =>
+                                      CupertinoListSection(
                                     header: Text(
                                       l10n.mainScreen_tasksSection,
                                     ),
@@ -245,10 +278,12 @@ class _MainScreenState extends State<MainScreen> {
                               if (viewService.views.isNotEmpty)
                                 PlatformWidget(
                                   material: (context, __) => Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: <Widget>[
                                       Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: MEDIUM_SPACE),
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: MEDIUM_SPACE),
                                         child: ChipCaption(
                                           l10n.mainScreen_viewsSection,
                                           icon: context.platformIcons.eyeSolid,
@@ -256,28 +291,32 @@ class _MainScreenState extends State<MainScreen> {
                                       ).animate().fadeIn(duration: 1.seconds),
                                       ListView.builder(
                                         shrinkWrap: true,
-                                        padding: const EdgeInsets.only(top: MEDIUM_SPACE),
-                                        physics: const NeverScrollableScrollPhysics(),
+                                        padding: const EdgeInsets.only(
+                                            top: MEDIUM_SPACE),
+                                        physics:
+                                            const NeverScrollableScrollPhysics(),
                                         itemCount: viewService.views.length,
-                                        itemBuilder: (context, index) => ViewTile(
+                                        itemBuilder: (context, index) =>
+                                            ViewTile(
                                           view: viewService.views[index],
                                         )
-                                            .animate()
-                                            .then(delay: 100.ms * index)
-                                            .slide(
-                                              duration: 1.seconds,
-                                              curve: Curves.easeOut,
-                                              begin: const Offset(0, 0.2),
-                                            )
-                                            .fadeIn(
-                                              delay: 100.ms,
-                                              duration: 1.seconds,
-                                              curve: Curves.easeOut,
-                                            ),
+                                                .animate()
+                                                .then(delay: 100.ms * index)
+                                                .slide(
+                                                  duration: 1.seconds,
+                                                  curve: Curves.easeOut,
+                                                  begin: const Offset(0, 0.2),
+                                                )
+                                                .fadeIn(
+                                                  delay: 100.ms,
+                                                  duration: 1.seconds,
+                                                  curve: Curves.easeOut,
+                                                ),
                                       ),
                                     ],
                                   ),
-                                  cupertino: (context, __) => CupertinoListSection(
+                                  cupertino: (context, __) =>
+                                      CupertinoListSection(
                                     header: Text(l10n.mainScreen_viewsSection),
                                     children: viewService.views
                                         .map(

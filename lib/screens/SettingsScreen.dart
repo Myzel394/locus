@@ -1,0 +1,81 @@
+import 'package:enough_platform_widgets/enough_platform_widgets.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:locus/widgets/SettingsDropdownTile.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:settings_ui/settings_ui.dart';
+
+import '../services/settings_service.dart';
+import '../utils/platform.dart';
+import '../utils/theme.dart';
+
+class SettingsScreen extends StatelessWidget {
+  final BuildContext themeContext;
+
+  const SettingsScreen({
+    required this.themeContext,
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final settings = context.watch<SettingsService>();
+
+    return PlatformScaffold(
+      appBar: PlatformAppBar(
+        title: Text(l10n.settingsScreen_title),
+      ),
+      body: SafeArea(
+        child: SettingsList(
+          sections: [
+            SettingsSection(
+              title: Text(l10n.settingsScreen_section_design),
+              tiles: [
+                SettingsTile(
+                  title: Text(l10n.settingsScreen_setting_primaryColor_label),
+                ),
+              ],
+            ),
+            SettingsSection(
+              title: Text(l10n.settingsScreen_section_privacy),
+              tiles: [
+                SettingsTile.switchTile(
+                  initialValue: settings.getAutomaticallyLookupAddresses(),
+                  onToggle: (newValue) {
+                    settings.setAutomaticallyLookupAddresses(newValue);
+                  },
+                  title:
+                      Text(l10n.settingsScreen_setting_lookupAddresses_label),
+                  description: Text(
+                      l10n.settingsScreen_setting_lookupAddresses_description),
+                ),
+                isPlatformApple()
+                    ? SettingsDropdownTile(
+                        title: Text(
+                            l10n.settingsScreen_settings_mapProvider_label),
+                        values: MapProvider.values,
+                        textMapping: {
+                          MapProvider.apple:
+                              l10n.settingsScreen_settings_mapProvider_apple,
+                          MapProvider.openStreetMap: l10n
+                              .settingsScreen_settings_mapProvider_openStreetMap,
+                        },
+                        value: settings.getMapProvider(),
+                        onUpdate: (newValue) {
+                          settings.setMapProvider(newValue);
+                        },
+                      )
+                    : null,
+              ]
+                  .where((element) => element != null)
+                  .cast<AbstractSettingsTile>()
+                  .toList(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

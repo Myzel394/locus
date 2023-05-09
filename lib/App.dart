@@ -5,6 +5,7 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/screens/MainScreen.dart';
 import 'package:locus/screens/WelcomeScreen.dart';
 import 'package:locus/widgets/DismissKeyboard.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 import 'constants/spacing.dart';
 import 'constants/themes.dart';
@@ -67,16 +68,21 @@ class App extends StatelessWidget {
           ),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: (() {
-            if (hasLocationAlwaysGranted && isIgnoringBatteryOptimizations) {
-              return const MainScreen();
-            }
+          onGenerateRoute: (settings) {
+            final screen =
+                hasLocationAlwaysGranted && isIgnoringBatteryOptimizations
+                    ? const MainScreen()
+                    : WelcomeScreen(
+                        hasLocationAlwaysGranted: hasLocationAlwaysGranted,
+                        isIgnoringBatteryOptimizations:
+                            isIgnoringBatteryOptimizations,
+                      );
 
-            return WelcomeScreen(
-              hasLocationAlwaysGranted: hasLocationAlwaysGranted,
-              isIgnoringBatteryOptimizations: isIgnoringBatteryOptimizations,
+            return MaterialWithModalsPageRoute(
+              builder: (context) => screen,
+              settings: settings,
             );
-          })(),
+          },
         ),
       ),
     );
