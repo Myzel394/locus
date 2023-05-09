@@ -32,6 +32,7 @@ class SettingsColorPickerWidgetRaw extends StatefulWidget {
 class _SettingsColorPickerWidgetRawState extends State<SettingsColorPickerWidgetRaw> with TickerProviderStateMixin {
   late final AnimationController controller;
   Animation<Offset>? animation;
+  Color? oldColor;
   Color? animationColor;
   Offset? animationPosition;
 
@@ -45,12 +46,11 @@ class _SettingsColorPickerWidgetRawState extends State<SettingsColorPickerWidget
     );
     controller.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
-        widget.onUpdate(animationColor);
-
         setState(() {
           animation = null;
           animationColor = null;
           animationPosition = null;
+          oldColor = null;
         });
       }
     });
@@ -78,6 +78,7 @@ class _SettingsColorPickerWidgetRawState extends State<SettingsColorPickerWidget
     );
 
     setState(() {
+      oldColor = widget.value;
       animationColor = color;
       animationPosition = position;
     });
@@ -134,7 +135,7 @@ class _SettingsColorPickerWidgetRawState extends State<SettingsColorPickerWidget
                     width: 30,
                     height: 30,
                     decoration: BoxDecoration(
-                      color: widget.value ?? Colors.black,
+                      color: oldColor ?? widget.value ?? Colors.black,
                       border: Border.all(
                         color: Colors.black,
                         width: 2,
@@ -150,11 +151,21 @@ class _SettingsColorPickerWidgetRawState extends State<SettingsColorPickerWidget
                   children: presetColors.map((color) {
                     final key = GlobalKey();
 
+                    if (color == widget.value) {
+                      // Fake element
+                      return Container(
+                        width: MEDIUM_SPACE + 30,
+                        height: 30,
+                      );
+                    }
+
                     return Container(
                       key: key,
                       margin: const EdgeInsets.only(right: MEDIUM_SPACE),
                       child: PlatformInkWell(
                         onTap: () {
+                          widget.onUpdate(color);
+
                           // Get position relative to `anchorKey`
                           final positionAnchor = (positionAnchorKey.currentContext!.findRenderObject() as RenderBox)
                               .localToGlobal(Offset.zero);
