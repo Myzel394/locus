@@ -98,7 +98,7 @@ class LocationPointService {
     BatteryState? batteryState;
 
     try {
-      final battery = await Battery();
+      final battery = Battery();
 
       batteryLevel = (await battery.batteryLevel) / 100;
       batteryState = await battery.batteryState;
