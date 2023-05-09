@@ -48,7 +48,7 @@ class _LocationDetailsState extends State<LocationDetails> {
         return CupertinoIcons.battery_full;
       }
 
-      if (level == 1) {
+      if (level > 0.9) {
         return CupertinoIcons.battery_100;
       } else if (level > 0.25) {
         return CupertinoIcons.battery_25;

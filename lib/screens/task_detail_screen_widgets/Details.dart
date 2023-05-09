@@ -159,20 +159,22 @@ class _DetailsState extends State<Details> {
                       ),
               ),
               GestureDetector(
-                onTap: () {
-                  Navigator.of(context).push(
-                    PageRouteBuilder(
-                      opaque: false,
-                      fullscreenDialog: true,
-                      barrierDismissible: true,
-                      pageBuilder: (context, _, __) =>
-                          LocationPointsDetailsScreen(
-                        locations: widget.locations,
-                        isPreview: false,
-                      ),
-                    ),
-                  );
-                },
+                onTap: widget.locations.isEmpty
+                    ? null
+                    : () {
+                        Navigator.of(context).push(
+                          PageRouteBuilder(
+                            opaque: false,
+                            fullscreenDialog: true,
+                            barrierDismissible: true,
+                            pageBuilder: (context, _, __) =>
+                                LocationPointsDetailsScreen(
+                              locations: widget.locations,
+                              isPreview: false,
+                            ),
+                          ),
+                        );
+                      },
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
@@ -391,9 +393,11 @@ class _DetailsState extends State<Details> {
                                                   PlatformAlertDialog(
                                                 title: Text(l10n
                                                     .taskAction_startSchedule_title),
-                                                content: Text(l10n
-                                                    .taskAction_startSchedule_description(
-                                                        startDate!)),
+                                                content: Text(
+                                                  l10n.taskAction_startSchedule_description(
+                                                    startDate,
+                                                  ),
+                                                ),
                                                 actions: <Widget>[
                                                   PlatformDialogAction(
                                                     child: Text(l10n

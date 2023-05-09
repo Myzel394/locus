@@ -6,10 +6,12 @@ import 'package:locus/constants/spacing.dart';
 class Paper extends StatelessWidget {
   final Widget child;
   final double roundness;
+  final BoxConstraints? constraints;
 
   const Paper({
     required this.child,
     double? roundness,
+    this.constraints,
     Key? key,
   })  : roundness = roundness ?? MEDIUM_SPACE,
         super(key: key);
@@ -18,6 +20,7 @@ class Paper extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(MEDIUM_SPACE),
+      constraints: constraints,
       width: double.infinity,
       decoration: BoxDecoration(
         color: platformThemeData(
