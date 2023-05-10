@@ -9,6 +9,45 @@ import 'package:settings_ui/settings_ui.dart';
 
 import '../constants/spacing.dart';
 
+class ColorDialogPicker extends StatefulWidget {
+  const ColorDialogPicker({Key? key}) : super(key: key);
+
+  @override
+  State<ColorDialogPicker> createState() => _ColorDialogPickerState();
+}
+
+class _ColorDialogPickerState extends State<ColorDialogPicker> {
+  Color? value;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
+    return AlertDialog(
+      title: Text(l10n.settingsScreen_setting_primaryColor_label),
+      content: SingleChildScrollView(
+        child: ColorPicker(
+          pickerColor: value ?? Colors.black,
+          onColorChanged: (color) {
+            setState(() {
+              value = color;
+            });
+          },
+          enableAlpha: false,
+        ),
+      ),
+      actions: <Widget>[
+        ElevatedButton(
+          child: Text(l10n.closePositiveSheetAction),
+          onPressed: () {
+            Navigator.of(context).pop(value);
+          },
+        ),
+      ],
+    );
+  }
+}
+
 class SettingsColorPickerWidgetRaw extends StatefulWidget {
   final Widget title;
   final Color? value;
@@ -186,27 +225,17 @@ class _SettingsColorPickerWidgetRawState extends State<SettingsColorPickerWidget
       ),
       elementBuilder: buildElement,
       swapElementBuilder: (value, key) => GestureDetector(
-        onTap: () {
-          showPlatformDialog(
-              context: context,
-              builder: (context) => AlertDialog(
-                    title: Text(l10n.settingsScreen_setting_primaryColor_label),
-                    content: SingleChildScrollView(
-                      child: ColorPicker(
-                        pickerColor: widget.value ?? Colors.black,
-                        onColorChanged: widget.onUpdate,
-                        enableAlpha: false,
-                      ),
-                    ),
-                    actions: <Widget>[
-                      ElevatedButton(
-                        child: Text(l10n.closePositiveSheetAction),
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                    ],
-                  ));
+        onTap: () async {
+          final color = await showPlatformDialog(
+            context: context,
+            builder: (context) => const ColorDialogPicker(),
+          );
+
+          if (!mounted) {
+            return;
+          }
+
+          widget.onUpdate(color);
         },
         child: buildElement(value, key),
       ),
