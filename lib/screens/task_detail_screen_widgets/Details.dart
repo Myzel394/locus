@@ -8,6 +8,7 @@ import 'package:locus/screens/task_detail_screen_widgets/ShareLocationButton.dar
 import 'package:locus/services/location_point_service.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/utils/theme.dart';
+import 'package:locus/widgets/AddressFetcher.dart';
 import 'package:locus/widgets/DetailInformationBox.dart';
 import 'package:locus/widgets/RelaySelectSheet.dart';
 import 'package:locus/widgets/TimerWidget.dart';
@@ -86,52 +87,49 @@ class _DetailsState extends State<Details> {
                     : Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          FutureBuilder<String>(
-                            future: getAddress(
-                              widget.locations.last.latitude,
-                              widget.locations.last.longitude,
-                            ),
-                            builder: (context, snapshot) {
-                              if (snapshot.hasData) {
-                                return Text.rich(
+                          AddressFetcher(
+                            latitude: widget.locations.last.latitude,
+                            longitude: widget.locations.last.longitude,
+                            builder: (address) => Text.rich(
+                              TextSpan(
+                                children: [
                                   TextSpan(
-                                    children: [
-                                      TextSpan(
-                                        text: snapshot.data!,
-                                        style: getBodyTextTextStyle(context),
-                                      ),
-                                      TextSpan(
-                                        text:
-                                            " (${widget.locations.last.latitude}, ${widget.locations.last.longitude})",
-                                        style: getCaptionTextStyle(context),
-                                      ),
-                                    ],
+                                    text: address,
+                                    style: getBodyTextTextStyle(context),
                                   ),
-                                );
-                              }
-
-                              return Row(
-                                children: <Widget>[
-                                  Flexible(
-                                    child: Text(
-                                      "${widget.locations.last.latitude}, ${widget.locations.last.longitude}",
-                                      style: getBodyTextTextStyle(context),
-                                      overflow: TextOverflow.clip,
-                                    ),
-                                  ),
-                                  const SizedBox(width: SMALL_SPACE),
-                                  SizedBox.square(
-                                    dimension: getIconSizeForBodyText(context),
-                                    child: PlatformCircularProgressIndicator(
-                                      material: (_, __) =>
-                                          MaterialProgressIndicatorData(
-                                        strokeWidth: 2,
-                                      ),
-                                    ),
+                                  TextSpan(
+                                    text:
+                                        " (${widget.locations.last.latitude}, ${widget.locations.last.longitude})",
+                                    style: getCaptionTextStyle(context),
                                   ),
                                 ],
-                              );
-                            },
+                              ),
+                            ),
+                            rawLocationBuilder: (isLoading) => Row(
+                              children: <Widget>[
+                                Flexible(
+                                  child: Text(
+                                    "${widget.locations.last.latitude}, ${widget.locations.last.longitude}",
+                                    style: getBodyTextTextStyle(context),
+                                    overflow: TextOverflow.clip,
+                                  ),
+                                ),
+                                const SizedBox(width: SMALL_SPACE),
+                                isLoading
+                                    ? SizedBox.square(
+                                        dimension:
+                                            getIconSizeForBodyText(context),
+                                        child:
+                                            PlatformCircularProgressIndicator(
+                                          material: (_, __) =>
+                                              MaterialProgressIndicatorData(
+                                            strokeWidth: 2,
+                                          ),
+                                        ),
+                                      )
+                                    : const SizedBox.shrink(),
+                              ],
+                            ),
                           ),
                           const SizedBox(height: MEDIUM_SPACE),
                           Tooltip(
