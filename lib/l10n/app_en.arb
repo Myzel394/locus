@@ -326,6 +326,18 @@
   "support_options_develop_description": "Add a new feature, fix a bug or improve the app in any other way",
   "support_options_translate": "Translate Locus",
   "support_options_translate_description": "Help translating Locus into your language",
-  "support_options_donate": "Donate via Crypto",
-  "support_options_donate_description": "Donate via Bitcoin, Monero or Github Sponsors"
+  "support_options_donate": "Donate 1€",
+  "support_options_donate_description": "Donate via Bitcoin, Monero or Github Sponsors",
+  "honorableMentions_title": "Honorable Mentions",
+  "honorableMentions_description": "These are honorable mentions of other great open source projects I personally use and would like to thank for their work :). They are listed in no particular order. These apps are not affiliated with Locus and aren't sponsored in any way and won't be. I just like them and want to thank them for their work.",
+  "honorableMentions_values_libreTube": "LibreTube",
+  "honorableMentions_values_libreTube_description": "Awesome YouTube client for Android with the ability to proxy videos through external servers.",
+  "honorableMentions_values_findMyDevice": "Find My Device",
+  "honorableMentions_values_findMyDevice_description": "Open Source alternative to Google's Find My Device. Allows you to track your device and wipe it remotely.",
+  "honorableMentions_values_simpleQR": "Simple QR",
+  "honorableMentions_values_simpleQR_description": "Simple QR Code scanner and generator without ads and tracking that just works.",
+  "honorableMentions_values_session": "Session",
+  "honorableMentions_values_session_description": "Decentralized messaging app with end-to-end encryption and no phone number or email required.",
+  "honorableMentions_values_odysee": "Odysee",
+  "honorableMentions_values_odysee_description": "Awesome YouTube alternative with better privacy and monetization options."
 }

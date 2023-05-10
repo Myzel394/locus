@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/constants/values.dart';
+import 'package:locus/screens/settings_screen_widgets/MentionTile.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/Paper.dart';
 import 'package:locus/widgets/SettingsColorPicker.dart';
@@ -204,6 +205,68 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         onTap: () {
                           launchUrl(Uri.parse(DONATION_URL));
                         },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Paper(
+                child: Padding(
+                  padding: const EdgeInsets.all(MEDIUM_SPACE),
+                  child: Column(
+                    children: <Widget>[
+                      Text(
+                        l10n.honorableMentions_title,
+                        style: getTitle2TextStyle(context),
+                      ),
+                      const SizedBox(height: LARGE_SPACE),
+                      Icon(
+                        context.platformIcons.thumbUp,
+                        color: Colors.green,
+                        size: 60,
+                      ),
+                      const SizedBox(height: LARGE_SPACE),
+                      Text(
+                        l10n.honorableMentions_description,
+                        style: getBodyTextTextStyle(context),
+                      ),
+                      const SizedBox(height: LARGE_SPACE),
+                      // Odysee
+                      // Session
+                      MentionTile(
+                        title: l10n.honorableMentions_values_findMyDevice,
+                        description: l10n
+                            .honorableMentions_values_findMyDevice_description,
+                        iconName: "find-my-device.png",
+                        url: "https://gitlab.com/Nulide/findmydevice",
+                      ),
+                      MentionTile(
+                        title: l10n.honorableMentions_values_simpleQR,
+                        description:
+                            l10n.honorableMentions_values_simpleQR_description,
+                        iconName: "simple-qr.png",
+                        url: "https://github.com/tomfong/simple-qr",
+                      ),
+                      MentionTile(
+                        title: l10n.honorableMentions_values_libreTube,
+                        description:
+                            l10n.honorableMentions_values_libreTube_description,
+                        iconName: "libretube.png",
+                        url: "https://libretube.net/",
+                      ),
+                      MentionTile(
+                        title: l10n.honorableMentions_values_session,
+                        description:
+                            l10n.honorableMentions_values_session_description,
+                        iconName: "session.png",
+                        url: "https://getsession.org/",
+                      ),
+                      MentionTile(
+                        title: l10n.honorableMentions_values_odysee,
+                        description:
+                            l10n.honorableMentions_values_odysee_description,
+                        iconName: "odysee.png",
+                        url: "https://odysee.com/",
                       ),
                     ],
                   ),
