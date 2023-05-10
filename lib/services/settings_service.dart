@@ -38,18 +38,16 @@ class SettingsService extends ChangeNotifier {
     return SettingsService(
       automaticallyLookupAddresses: true,
       primaryColor: null,
-      mapProvider:
-          isPlatformApple() ? MapProvider.apple : MapProvider.openStreetMap,
+      mapProvider: isPlatformApple() ? MapProvider.apple : MapProvider.openStreetMap,
     );
   }
 
   static SettingsService fromJSON(final Map<String, dynamic> data) {
     return SettingsService(
       automaticallyLookupAddresses: data['automaticallyLoadLocation'],
-      primaryColor:
-          data['primaryColor'] != null ? Color(data['primaryColor']) : null,
+      primaryColor: data['primaryColor'] != null ? Color(data['primaryColor']) : null,
       mapProvider: MapProvider.values[data['mapProvider']],
-      relays: List<String>.from(data['relays']),
+      relays: List<String>.from(data['relays'] ?? []),
     );
   }
 

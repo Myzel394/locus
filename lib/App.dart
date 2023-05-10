@@ -51,10 +51,12 @@ class App extends StatelessWidget {
               }
 
               return LIGHT_THEME_MATERIAL.copyWith(
-                colorScheme: ColorScheme.fromSwatch(
-                  primarySwatch: createMaterialColor(settings.primaryColor!),
-                  brightness: Brightness.dark,
-                ),
+                colorScheme: settings.primaryColor == null
+                    ? null
+                    : ColorScheme.fromSwatch(
+                        primarySwatch: createMaterialColor(settings.primaryColor!),
+                        brightness: Brightness.dark,
+                      ),
               );
             })(),
             darkTheme: (() {
@@ -74,10 +76,12 @@ class App extends StatelessWidget {
               }
 
               return DARK_THEME_MATERIAL.copyWith(
-                colorScheme: ColorScheme.fromSwatch(
-                  primarySwatch: createMaterialColor(settings.primaryColor!),
-                  brightness: Brightness.dark,
-                ),
+                colorScheme: settings.primaryColor == null
+                    ? null
+                    : ColorScheme.fromSwatch(
+                        primarySwatch: createMaterialColor(settings.primaryColor!),
+                        brightness: Brightness.dark,
+                      ),
               );
             })(),
             themeMode: ThemeMode.system,
