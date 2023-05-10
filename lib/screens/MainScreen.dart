@@ -38,7 +38,8 @@ class _MainScreenState extends State<MainScreen> {
   double listViewHeight = 0;
   int activeTab = 0;
 
-  double get windowHeight => MediaQuery.of(context).size.height - kToolbarHeight;
+  double get windowHeight =>
+      MediaQuery.of(context).size.height - kToolbarHeight;
 
   // If the ListView covers more than 75% of the screen, then actions get a whole screen of space.
   // Otherwise fill up the remaining space.
@@ -113,7 +114,8 @@ class _MainScreenState extends State<MainScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => SettingsScreen(themeContext: context),
+                      builder: (context) =>
+                          SettingsScreen(themeContext: context),
                     ),
                   );
                 }
@@ -130,7 +132,8 @@ class _MainScreenState extends State<MainScreen> {
     final taskService = context.watch<TaskService>();
     final viewService = context.watch<ViewService>();
 
-    final showEmptyScreen = taskService.tasks.isEmpty && viewService.views.isEmpty;
+    final showEmptyScreen =
+        taskService.tasks.isEmpty && viewService.views.isEmpty;
 
     if (showEmptyScreen) {
       return PlatformScaffold(
@@ -186,7 +189,9 @@ class _MainScreenState extends State<MainScreen> {
           ),
           openColor: Theme.of(context).scaffoldBackgroundColor,
           closedColor: Theme.of(context).colorScheme.primary,
-        ).animate().scale(duration: 500.ms, delay: 1.seconds, curve: Curves.bounceOut),
+        )
+            .animate()
+            .scale(duration: 500.ms, delay: 1.seconds, curve: Curves.bounceOut),
       ),
       // Settings bottomNavBar via cupertino data class does not work
       bottomNavBar: isCupertino(context)
@@ -209,7 +214,7 @@ class _MainScreenState extends State<MainScreen> {
               ],
             )
           : null,
-      appBar: getAppBar(),
+      appBar: activeTab == 0 ? getAppBar() : null,
       body: activeTab == 0
           ? SafeArea(
               child: SingleChildScrollView(
@@ -230,7 +235,8 @@ class _MainScreenState extends State<MainScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: <Widget>[
                                     Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: MEDIUM_SPACE),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: MEDIUM_SPACE),
                                       child: ChipCaption(
                                         l10n.mainScreen_tasksSection,
                                         icon: Icons.task_rounded,
@@ -238,8 +244,10 @@ class _MainScreenState extends State<MainScreen> {
                                     ).animate().fadeIn(duration: 1.seconds),
                                     ListView.builder(
                                       shrinkWrap: true,
-                                      padding: const EdgeInsets.only(top: MEDIUM_SPACE),
-                                      physics: const NeverScrollableScrollPhysics(),
+                                      padding: const EdgeInsets.only(
+                                          top: MEDIUM_SPACE),
+                                      physics:
+                                          const NeverScrollableScrollPhysics(),
                                       itemCount: taskService.tasks.length,
                                       itemBuilder: (context, index) {
                                         final task = taskService.tasks[index];
@@ -263,7 +271,8 @@ class _MainScreenState extends State<MainScreen> {
                                     ),
                                   ],
                                 ),
-                                cupertino: (context, __) => CupertinoListSection(
+                                cupertino: (context, __) =>
+                                    CupertinoListSection(
                                   header: Text(
                                     l10n.mainScreen_tasksSection,
                                   ),
@@ -282,7 +291,8 @@ class _MainScreenState extends State<MainScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: <Widget>[
                                     Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: MEDIUM_SPACE),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: MEDIUM_SPACE),
                                       child: ChipCaption(
                                         l10n.mainScreen_viewsSection,
                                         icon: context.platformIcons.eyeSolid,
@@ -290,8 +300,10 @@ class _MainScreenState extends State<MainScreen> {
                                     ).animate().fadeIn(duration: 1.seconds),
                                     ListView.builder(
                                       shrinkWrap: true,
-                                      padding: const EdgeInsets.only(top: MEDIUM_SPACE),
-                                      physics: const NeverScrollableScrollPhysics(),
+                                      padding: const EdgeInsets.only(
+                                          top: MEDIUM_SPACE),
+                                      physics:
+                                          const NeverScrollableScrollPhysics(),
                                       itemCount: viewService.views.length,
                                       itemBuilder: (context, index) => ViewTile(
                                         view: viewService.views[index],
@@ -311,7 +323,8 @@ class _MainScreenState extends State<MainScreen> {
                                     ),
                                   ],
                                 ),
-                                cupertino: (context, __) => CupertinoListSection(
+                                cupertino: (context, __) =>
+                                    CupertinoListSection(
                                   header: Text(l10n.mainScreen_viewsSection),
                                   children: viewService.views
                                       .map(
