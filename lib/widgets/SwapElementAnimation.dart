@@ -27,7 +27,9 @@ class SwapElementAnimation<T> extends StatefulWidget {
   final Widget Function(Widget swapElement, Widget Function(int index) renderElement) builder;
 
   // Builds a single element; Used for building both elements inside the list and the swap element
-  final Widget Function(T? value, Key key) elementBuilder;
+  final Widget Function(T? value, GlobalKey key) elementBuilder;
+
+  final Widget Function(T? value, GlobalKey key)? swapElementBuilder;
 
   const SwapElementAnimation({
     required this.value,
@@ -36,6 +38,7 @@ class SwapElementAnimation<T> extends StatefulWidget {
     required this.elementBuilder,
     this.easing = Curves.linear,
     this.duration = const Duration(milliseconds: 800),
+    this.swapElementBuilder,
     Key? key,
   }) : super(key: key);
 
@@ -163,10 +166,12 @@ class _SwapElementAnimationState<T> extends State<SwapElementAnimation<T>> with 
       key: relativeAnchorKey,
       children: [
         widget.builder(
-          widget.elementBuilder(
-            animationData == null ? widget.value : null,
-            swapKey,
-          ),
+          widget.swapElementBuilder == null
+              ? widget.elementBuilder(
+                  animationData == null ? widget.value : null,
+                  swapKey,
+                )
+              : widget.swapElementBuilder!(animationData == null ? widget.value : null, swapKey),
           (index) {
             final value = widget.items[index];
 
@@ -194,7 +199,7 @@ class _SwapElementAnimationState<T> extends State<SwapElementAnimation<T>> with 
                 ),
               ),
         outAnimationData == null
-            ? SizedBox.shrink()
+            ? const SizedBox.shrink()
             : Positioned(
                 left: outAnimationData!.startPosition.dx,
                 top: outAnimationData!.startPosition.dy,

@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:locus/widgets/SwapElementAnimation.dart';
 import 'package:settings_ui/settings_ui.dart';
@@ -117,6 +118,22 @@ class _SettingsColorPickerWidgetRawState extends State<SettingsColorPickerWidget
   final selectKey = GlobalKey();
   final positionAnchorKey = GlobalKey();
 
+  Widget buildElement(final Color? value, final GlobalKey key) {
+    return Container(
+      key: key,
+      width: 30,
+      height: 30,
+      decoration: BoxDecoration(
+        color: oldColor ?? value ?? Colors.black,
+        borderRadius: BorderRadius.circular(SMALL_SPACE),
+        border: Border.all(
+          color: Colors.black,
+          width: 2,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -145,7 +162,7 @@ class _SettingsColorPickerWidgetRawState extends State<SettingsColorPickerWidget
                 crossAxisAlignment: WrapCrossAlignment.center,
                 children: <Widget>[
                       PlatformTextButton(
-                        child: Text(l10n.resetLabel),
+                        child: Text(l10n.settingsScreen_setting_primaryColor_systemDefault),
                         onPressed: () {
                           widget.onUpdate(null);
                         },
@@ -167,18 +184,31 @@ class _SettingsColorPickerWidgetRawState extends State<SettingsColorPickerWidget
           ],
         ),
       ),
-      elementBuilder: (value, key) => Container(
-        key: key,
-        width: 30,
-        height: 30,
-        decoration: BoxDecoration(
-          color: oldColor ?? value ?? Colors.black,
-          borderRadius: BorderRadius.circular(SMALL_SPACE),
-          border: Border.all(
-            color: Colors.black,
-            width: 2,
-          ),
-        ),
+      elementBuilder: buildElement,
+      swapElementBuilder: (value, key) => GestureDetector(
+        onTap: () {
+          showPlatformDialog(
+              context: context,
+              builder: (context) => AlertDialog(
+                    title: Text(l10n.settingsScreen_setting_primaryColor_label),
+                    content: SingleChildScrollView(
+                      child: ColorPicker(
+                        pickerColor: widget.value ?? Colors.black,
+                        onColorChanged: widget.onUpdate,
+                        enableAlpha: false,
+                      ),
+                    ),
+                    actions: <Widget>[
+                      ElevatedButton(
+                        child: Text(l10n.closePositiveSheetAction),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ],
+                  ));
+        },
+        child: buildElement(value, key),
       ),
     );
   }
