@@ -319,5 +319,13 @@
         "type": "int"
       }
     }
-  }
+  },
+  "support_title": "Support Locus",
+  "support_description": "Locus is a free open source project. This means that I don't make any money from it. If you like the app and want to support me, you can do so by multiple ways. Thank you very much! :)",
+  "support_options_develop": "Help developing Locus",
+  "support_options_develop_description": "Add a new feature, fix a bug or improve the app in any other way",
+  "support_options_translate": "Translate Locus",
+  "support_options_translate_description": "Help translating Locus into your language",
+  "support_options_donate": "Donate via Crypto",
+  "support_options_donate_description": "Donate via Bitcoin, Monero or Github Sponsors"
 }
