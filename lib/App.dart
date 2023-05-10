@@ -87,9 +87,11 @@ class App extends StatelessWidget {
             themeMode: ThemeMode.system,
           ),
           cupertino: (_, __) => CupertinoAppData(
-            theme: LIGHT_THEME_CUPERTINO.copyWith(
-              primaryColor: settings.primaryColor,
-            ),
+            theme: settings.primaryColor == null
+                ? LIGHT_THEME_CUPERTINO
+                : LIGHT_THEME_CUPERTINO.copyWith(
+                    primaryColor: settings.primaryColor,
+                  ),
           ),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
