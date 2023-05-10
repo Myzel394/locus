@@ -103,12 +103,20 @@ class _MainScreenState extends State<MainScreen> {
           onSelected: (value) {
             switch (value) {
               case "settings":
-                // Show cupertino popup
-                showCupertinoModalBottomSheet(
-                  context: context,
-                  backgroundColor: Colors.transparent,
-                  builder: (_) => SettingsScreen(themeContext: context),
-                );
+                if (isCupertino(context)) {
+                  showCupertinoModalBottomSheet(
+                    context: context,
+                    backgroundColor: Colors.transparent,
+                    builder: (_) => SettingsScreen(themeContext: context),
+                  );
+                } else {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SettingsScreen(themeContext: context),
+                    ),
+                  );
+                }
             }
           },
         ),
