@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
+import 'package:locus/services/settings_service.dart';
+import 'package:provider/provider.dart';
 
 import '../services/location_point_service.dart';
 
@@ -20,13 +22,14 @@ class LocationsMapController extends ChangeNotifier {
   // To inform our wrappers to update the map, we use a stream.
   // This emits event to which our wrappers listen to.
   final StreamController<Map<String, dynamic>> _eventEmitter =
-      StreamController.broadcast();
+  StreamController.broadcast();
 
   LocationsMapController({
     List<LocationPointService>? locations,
   }) : _locations = locations ?? [];
 
-  static DateTime normalizeDateTime(final DateTime dateTime) => DateTime(
+  static DateTime normalizeDateTime(final DateTime dateTime) =>
+      DateTime(
         dateTime.year,
         dateTime.month,
         dateTime.day,
@@ -71,7 +74,7 @@ class LocationsMapController extends ChangeNotifier {
   Map<DateTime, List<LocationPointService>> getLocationsPerHour() =>
       locations.fold(
         {},
-        (final Map<DateTime, List<LocationPointService>> value, element) {
+            (final Map<DateTime, List<LocationPointService>> value, element) {
           final date = normalizeDateTime(element.createdAt);
 
           if (value.containsKey(date)) {
@@ -218,24 +221,26 @@ class _LocationsMapAppleMapsState extends State<LocationsMapAppleMaps> {
       myLocationEnabled: true,
       annotations: widget.controller.locations.isNotEmpty
           ? {
-              AppleMaps.Annotation(
-                annotationId: AppleMaps.AnnotationId(
-                  "annotation_${widget.controller.locations.last.latitude}:${widget.controller.locations.last.longitude}",
-                ),
-                position: AppleMaps.LatLng(
-                  widget.controller.locations.last.latitude,
-                  widget.controller.locations.last.longitude,
-                ),
-                infoWindow: AppleMaps.InfoWindow(
-                  title: "Last location",
-                  snippet: snippetText,
-                ),
-              ),
-            }
+        AppleMaps.Annotation(
+          annotationId: AppleMaps.AnnotationId(
+            "annotation_${widget.controller.locations.last.latitude}:${widget
+                .controller.locations.last.longitude}",
+          ),
+          position: AppleMaps.LatLng(
+            widget.controller.locations.last.latitude,
+            widget.controller.locations.last.longitude,
+          ),
+          infoWindow: AppleMaps.InfoWindow(
+            title: "Last location",
+            snippet: snippetText,
+          ),
+        ),
+      }
           : {},
       circles: widget.controller.locations
           .map(
-            (location) => AppleMaps.Circle(
+            (location) =>
+            AppleMaps.Circle(
               circleId: AppleMaps.CircleId(
                 "circle_${location.latitude}:${location.longitude}",
               ),
@@ -248,7 +253,7 @@ class _LocationsMapAppleMapsState extends State<LocationsMapAppleMaps> {
               strokeWidth: location.accuracy < 10 ? 1 : 3,
               radius: location.accuracy,
             ),
-          )
+      )
           .toSet(),
     );
   }
@@ -363,15 +368,19 @@ class LocationsMap extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (Platform.isIOS) {
-      return LocationsMapAppleMaps(
-        controller: controller,
-        initialZoomLevel: initialZoomLevel,
-      );
+    final settings = context.watch<SettingsService>();
+
+    switch (settings.getMapProvider()) {
+      case MapProvider.apple:
+        return LocationsMapAppleMaps(
+          controller: controller,
+          initialZoomLevel: initialZoomLevel,
+        );
+      case MapProvider.openStreetMap:
+        return LocationsMapOSM(
+          controller: controller,
+          initialZoomLevel: initialZoomLevel,
+        );
     }
-    return LocationsMapOSM(
-      controller: controller,
-      initialZoomLevel: initialZoomLevel,
-    );
   }
 }
