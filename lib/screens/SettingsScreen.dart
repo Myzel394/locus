@@ -9,14 +9,42 @@ import 'package:settings_ui/settings_ui.dart';
 
 import '../services/settings_service.dart';
 import '../utils/platform.dart';
+import '../widgets/RelaySelectSheet.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   final BuildContext themeContext;
 
   const SettingsScreen({
     required this.themeContext,
     Key? key,
   }) : super(key: key);
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  final _relayController = RelayController();
+
+  @override
+  void initState() {
+    super.initState();
+
+    final settings = context.read<SettingsService>();
+    _relayController.addAll(settings.getRelays());
+
+    _relayController.addListener(() {
+      settings.setRelays(_relayController.relays);
+      settings.save();
+    });
+  }
+
+  @override
+  void dispose() {
+    _relayController.dispose();
+
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,8 +80,10 @@ class SettingsScreen extends StatelessWidget {
                     settings.setAutomaticallyLookupAddresses(newValue);
                     settings.save();
                   },
-                  title: Text(l10n.settingsScreen_setting_lookupAddresses_label),
-                  description: Text(l10n.settingsScreen_setting_lookupAddresses_description),
+                  title:
+                      Text(l10n.settingsScreen_setting_lookupAddresses_label),
+                  description: Text(
+                      l10n.settingsScreen_setting_lookupAddresses_description),
                 ),
                 isPlatformApple()
                     ? SettingsDropdownTile(
@@ -62,8 +92,10 @@ class SettingsScreen extends StatelessWidget {
                         ),
                         values: MapProvider.values,
                         textMapping: {
-                          MapProvider.apple: l10n.settingsScreen_settings_mapProvider_apple,
-                          MapProvider.openStreetMap: l10n.settingsScreen_settings_mapProvider_openStreetMap,
+                          MapProvider.apple:
+                              l10n.settingsScreen_settings_mapProvider_apple,
+                          MapProvider.openStreetMap: l10n
+                              .settingsScreen_settings_mapProvider_openStreetMap,
                         },
                         value: settings.mapProvider,
                         onUpdate: (newValue) {
@@ -72,8 +104,42 @@ class SettingsScreen extends StatelessWidget {
                         },
                       )
                     : null,
-              ].where((element) => element != null).cast<AbstractSettingsTile>().toList(),
+              ]
+                  .where((element) => element != null)
+                  .cast<AbstractSettingsTile>()
+                  .toList(),
             ),
+            SettingsSection(
+              title: Text(l10n.settingsScreen_section_defaults),
+              tiles: [
+                SettingsTile(
+                  title: Text(l10n.settingsScreen_settings_relays_label),
+                  trailing: PlatformTextButton(
+                    child: Text(
+                      l10n.settingsScreen_settings_relays_selectLabel(
+                        _relayController.relays.length,
+                      ),
+                    ),
+                    material: (_, __) => MaterialTextButtonData(
+                      icon: const Icon(Icons.dns_rounded),
+                    ),
+                    onPressed: () async {
+                      await showPlatformModalSheet(
+                        context: context,
+                        material: MaterialModalSheetData(
+                          backgroundColor: Colors.transparent,
+                          isScrollControlled: true,
+                          isDismissible: true,
+                        ),
+                        builder: (_) => RelaySelectSheet(
+                          controller: _relayController,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            )
           ],
         ),
       ),

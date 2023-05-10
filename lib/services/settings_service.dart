@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:convert';
 
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
@@ -18,6 +19,7 @@ enum MapProvider {
 
 class SettingsService extends ChangeNotifier {
   bool automaticallyLookupAddresses;
+  List<String> _relays;
 
   // null = system default
   Color? primaryColor;
@@ -29,7 +31,8 @@ class SettingsService extends ChangeNotifier {
     required this.automaticallyLookupAddresses,
     required this.primaryColor,
     required this.mapProvider,
-  });
+    List<String>? relays,
+  }) : _relays = relays ?? [];
 
   static SettingsService createDefault() {
     return SettingsService(
@@ -46,6 +49,7 @@ class SettingsService extends ChangeNotifier {
       primaryColor:
           data['primaryColor'] != null ? Color(data['primaryColor']) : null,
       mapProvider: MapProvider.values[data['mapProvider']],
+      relays: List<String>.from(data['relays']),
     );
   }
 
@@ -67,6 +71,7 @@ class SettingsService extends ChangeNotifier {
       'automaticallyLoadLocation': automaticallyLookupAddresses,
       'primaryColor': primaryColor?.value,
       'mapProvider': mapProvider.index,
+      "relays": _relays,
     };
   }
 
@@ -112,6 +117,15 @@ class SettingsService extends ChangeNotifier {
     }
 
     mapProvider = value;
+    notifyListeners();
+  }
+
+  UnmodifiableListView<String> getRelays() {
+    return UnmodifiableListView(_relays);
+  }
+
+  void setRelays(final List<String> value) {
+    _relays = value;
     notifyListeners();
   }
 }

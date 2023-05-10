@@ -303,11 +303,21 @@
   "settingsScreen_title": "Settings",
   "settingsScreen_section_design": "Design",
   "settingsScreen_section_privacy": "Privacy",
+  "settingsScreen_section_defaults": "Default Values",
   "settingsScreen_setting_primaryColor_label": "Primary Color",
   "settingsScreen_setting_primaryColor_systemDefault": "System Default",
   "settingsScreen_setting_lookupAddresses_label": "Automatically lookup addresses",
   "settingsScreen_setting_lookupAddresses_description": "Looks up addresses for locations. This means that a raw location, such as (37.422131, -122.084801) can be mapped to an address. This will send the location to a third party service to get the address. This will only happen when you open the location details screen. If you disable this, you can manually load the address by tapping on the location.",
   "settingsScreen_settings_mapProvider_label": "Map Provider",
   "settingsScreen_settings_mapProvider_apple": "Apple Maps",
-  "settingsScreen_settings_mapProvider_openStreetMap": "OpenStreetMap"
+  "settingsScreen_settings_mapProvider_openStreetMap": "OpenStreetMap",
+  "settingsScreen_settings_relays_label": "Default Relays",
+  "settingsScreen_settings_relays_selectLabel": "{count, plural, =0{Select Relays} =1{Selected One Relay} other{Selected {count} Relays}}",
+  "@settingsScreen_settings_relays_selectLabel": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }
