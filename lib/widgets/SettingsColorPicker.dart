@@ -1,7 +1,8 @@
+import 'package:collection/collection.dart';
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:locus/utils/position.dart';
+import 'package:locus/widgets/SwapElementAnimation.dart';
 import 'package:settings_ui/settings_ui.dart';
 
 import '../constants/spacing.dart';
@@ -119,114 +120,56 @@ class _SettingsColorPickerWidgetRawState extends State<SettingsColorPickerWidget
   Widget build(BuildContext context) {
     final presetColors = getPresetColors(context);
 
-    return Stack(
-      key: positionAnchorKey,
-      children: <Widget>[
-        SettingsTile(
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  widget.title,
-                  Container(
-                    key: selectKey,
-                    width: 30,
-                    height: 30,
-                    decoration: BoxDecoration(
-                      color: oldColor ?? widget.value ?? Colors.black,
-                      border: Border.all(
-                        color: Colors.black,
-                        width: 2,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: LARGE_SPACE),
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: presetColors.map((color) {
-                    final key = GlobalKey();
-
-                    if (color == widget.value) {
-                      // Fake element
-                      return Container(
-                        width: MEDIUM_SPACE + 30,
-                        height: 30,
-                      );
-                    }
-
-                    return Container(
-                      key: key,
-                      margin: const EdgeInsets.only(right: MEDIUM_SPACE),
-                      child: PlatformInkWell(
-                        onTap: () {
-                          widget.onUpdate(color);
-
-                          // Get position relative to `anchorKey`
-                          final positionAnchor = (positionAnchorKey.currentContext!.findRenderObject() as RenderBox)
-                              .localToGlobal(Offset.zero);
-                          final offsetAnchor = getPositionTopLeft(positionAnchorKey, selectKey);
-                          final position = (key.currentContext!.findRenderObject() as RenderBox)
-                              .localToGlobal(Offset.zero)
-                              .translate(-positionAnchor.dx, -positionAnchor.dy);
-                          final offset = Offset(
-                            offsetAnchor.dx - position.dx,
-                            offsetAnchor.dy - position.dy,
-                          );
-
-                          _startAnimation(offset, color, position);
-                        },
-                        child: Container(
-                          width: 30,
-                          height: 30,
-                          decoration: BoxDecoration(
-                            color: color,
-                            border: Border.all(
-                              color: Colors.black,
-                              width: 2,
-                            ),
-                          ),
+    return SwapElementAnimation<Color?>(
+      value: widget.value,
+      items: presetColors.toList(),
+      builder: (swapElement, renderElement) => SettingsTile(
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                widget.title,
+                swapElement,
+              ],
+            ),
+            const SizedBox(height: LARGE_SPACE),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: presetColors
+                    .mapIndexed(
+                      (index, _) => Container(
+                        margin: const EdgeInsets.only(right: SMALL_SPACE),
+                        child: GestureDetector(
+                          onTap: () {
+                            widget.onUpdate(presetColors.elementAt(index));
+                          },
+                          child: renderElement(index),
                         ),
                       ),
-                    );
-                  }).toList(),
-                ),
+                    )
+                    .cast<Widget>()
+                    .toList(),
               ),
-            ],
-          ),
-          enabled: widget.enabled,
-          leading: widget.leading,
-          description: widget.description,
+            ),
+          ],
         ),
-        animationColor == null
-            ? SizedBox.shrink()
-            : Positioned(
-                left: animationPosition!.dx,
-                top: animationPosition!.dy,
-                child: AnimatedBuilder(
-                  animation: animation!,
-                  builder: (context, child) => Transform.translate(
-                    offset: animation!.value,
-                    child: child,
-                  ),
-                  child: Container(
-                    width: 30,
-                    height: 30,
-                    decoration: BoxDecoration(
-                      color: animationColor,
-                      border: Border.all(
-                        color: Colors.black,
-                        width: 2,
-                      ),
-                    ),
-                  ),
-                ),
-              )
-      ],
+      ),
+      elementBuilder: (value, key) => Container(
+        key: key,
+        width: 30,
+        height: 30,
+        decoration: BoxDecoration(
+          color: oldColor ?? value ?? Colors.black,
+          borderRadius: BorderRadius.circular(SMALL_SPACE),
+          border: Border.all(
+            color: Colors.black,
+            width: 2,
+          ),
+        ),
+      ),
     );
   }
 }

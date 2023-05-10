@@ -38,6 +38,7 @@ class SettingsScreen extends StatelessWidget {
                   value: settings.primaryColor,
                   onUpdate: (value) {
                     settings.setPrimaryColor(value);
+                    settings.save();
                   },
                 )
               ],
@@ -49,6 +50,7 @@ class SettingsScreen extends StatelessWidget {
                   initialValue: settings.automaticallyLookupAddresses,
                   onToggle: (newValue) {
                     settings.setAutomaticallyLookupAddresses(newValue);
+                    settings.save();
                   },
                   title: Text(l10n.settingsScreen_setting_lookupAddresses_label),
                   description: Text(l10n.settingsScreen_setting_lookupAddresses_description),
@@ -66,6 +68,7 @@ class SettingsScreen extends StatelessWidget {
                         value: settings.mapProvider,
                         onUpdate: (newValue) {
                           settings.setMapProvider(newValue);
+                          settings.save();
                         },
                       )
                     : null,
