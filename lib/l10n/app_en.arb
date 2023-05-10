@@ -2,6 +2,7 @@
   "appName": "Locus",
   "unknownError": "An unknown error occurred",
   "unknownValue": "Unknown",
+  "resetLabel": "Reset",
   "taskImportError": "An error occurred while importing the task",
   "locationsLoadingError": "An error occurred while loading locations",
   "locationFetchError": "There was an error fetching the locations. Please try again later.",

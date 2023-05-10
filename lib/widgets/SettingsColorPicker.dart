@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:locus/widgets/SwapElementAnimation.dart';
 import 'package:settings_ui/settings_ui.dart';
 
@@ -118,6 +119,7 @@ class _SettingsColorPickerWidgetRawState extends State<SettingsColorPickerWidget
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final presetColors = getPresetColors(context);
 
     return SwapElementAnimation<Color?>(
@@ -137,21 +139,29 @@ class _SettingsColorPickerWidgetRawState extends State<SettingsColorPickerWidget
             const SizedBox(height: LARGE_SPACE),
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
-              child: Row(
-                children: presetColors
-                    .mapIndexed(
-                      (index, _) => Container(
-                        margin: const EdgeInsets.only(right: SMALL_SPACE),
-                        child: GestureDetector(
-                          onTap: () {
-                            widget.onUpdate(presetColors.elementAt(index));
-                          },
-                          child: renderElement(index),
-                        ),
-                      ),
-                    )
-                    .cast<Widget>()
-                    .toList(),
+              child: Wrap(
+                spacing: SMALL_SPACE,
+                direction: Axis.horizontal,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: <Widget>[
+                      PlatformTextButton(
+                        child: Text(l10n.resetLabel),
+                        onPressed: () {
+                          widget.onUpdate(null);
+                        },
+                      )
+                    ] +
+                    presetColors
+                        .mapIndexed(
+                          (index, _) => GestureDetector(
+                            onTap: () {
+                              widget.onUpdate(presetColors.elementAt(index));
+                            },
+                            child: renderElement(index),
+                          ),
+                        )
+                        .cast<Widget>()
+                        .toList(),
               ),
             ),
           ],
