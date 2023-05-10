@@ -181,7 +181,7 @@ class _SettingsColorPickerWidgetRawState extends State<SettingsColorPickerWidget
     return SwapElementAnimation<Color?>(
       value: widget.value,
       items: presetColors.toList(),
-      builder: (swapElement, renderElement) => SettingsTile(
+      builder: (swapElement, renderElement) => PlatformListTile(
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
