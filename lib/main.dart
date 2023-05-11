@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:locus/App.dart';
+import 'package:locus/init_quick_actions.dart';
 import 'package:locus/services/manager_service.dart';
 import 'package:locus/services/settings_service.dart';
 import 'package:locus/services/task_service.dart';
@@ -39,6 +40,8 @@ void main() async {
   final ViewService viewService = futures[2];
   final bool isIgnoringBatteryOptimizations = futures[3];
   final SettingsService settingsService = futures[4];
+
+  initQuickActions();
 
   runApp(
     MultiProvider(
