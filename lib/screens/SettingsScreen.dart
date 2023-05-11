@@ -98,6 +98,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             children: <Widget>[
               SettingsList(
                 shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
                 lightTheme: getTheme(),
                 sections: [
                   SettingsSection(
