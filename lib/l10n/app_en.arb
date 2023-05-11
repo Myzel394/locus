@@ -339,5 +339,19 @@
   "honorableMentions_values_session": "Session",
   "honorableMentions_values_session_description": "Decentralized messaging app with end-to-end encryption and no phone number or email required.",
   "honorableMentions_values_odysee": "Odysee",
-  "honorableMentions_values_odysee_description": "Awesome YouTube alternative with better privacy and monetization options."
+  "honorableMentions_values_odysee_description": "Awesome YouTube alternative with better privacy and monetization options.",
+  "quickActions_createOneHour": "Create One-Hour Task",
+  "quickActions_createOneHour_labelFromNow": "One-Hour task from {date}",
+  "@quickActions_createOneHour_labelFromNow": {
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "MMMM d, HH:mm",
+        "isCustomDateFormat": "true"
+      }
+    }
+  },
+  "quickActions_shareNow": "Update Location now",
+  "quickActions_stopTasks": "Stop all Tasks",
+  "quickActions_generationExplanation": "Hold on, we are working on it!"
 }

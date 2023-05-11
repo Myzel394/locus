@@ -41,8 +41,6 @@ void main() async {
   final bool isIgnoringBatteryOptimizations = futures[3];
   final SettingsService settingsService = futures[4];
 
-  initQuickActions();
-
   runApp(
     MultiProvider(
       providers: [

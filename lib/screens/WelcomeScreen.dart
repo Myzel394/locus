@@ -7,6 +7,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:locus/constants/spacing.dart';
+import 'package:locus/init_quick_actions.dart';
 import 'package:locus/screens/welcome_screen_widgets/BatteryOptimizationsScreen.dart';
 import 'package:locus/screens/welcome_screen_widgets/PermissionsScreen.dart';
 import 'package:locus/screens/welcome_screen_widgets/SimpleContinuePage.dart';
@@ -43,6 +44,14 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   final PageController _controller = PageController();
 
   @override
+  void initState() {
+    super.initState();
+
+    // Reset
+    actions.clearShortcutItems();
+  }
+
+  @override
   void dispose() {
     _controller.dispose();
 
@@ -50,7 +59,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   }
 
   void _nextScreen(final int page) {
-    _controller.animateToPage(page, duration: 500.ms, curve: Curves.easeOutExpo);
+    _controller.animateToPage(page,
+        duration: 500.ms, curve: Curves.easeOutExpo);
   }
 
   void _onDone() {
@@ -114,7 +124,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       // Background
                       ValueDelegate.color(
                         const ["unlock Konturen", "Kreis", "Fläche 1"],
-                        value: getIsDarkMode(context) ? shades[900] : shades[200],
+                        value:
+                            getIsDarkMode(context) ? shades[900] : shades[200],
                       ),
                     ],
                   ),
