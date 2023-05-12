@@ -19,6 +19,7 @@ enum MapProvider {
 
 class SettingsService extends ChangeNotifier {
   bool automaticallyLookupAddresses;
+  bool showHints;
   List<String> _relays;
 
   // null = system default
@@ -31,6 +32,7 @@ class SettingsService extends ChangeNotifier {
     required this.automaticallyLookupAddresses,
     required this.primaryColor,
     required this.mapProvider,
+    required this.showHints,
     List<String>? relays,
   }) : _relays = relays ?? [];
 
@@ -38,16 +40,20 @@ class SettingsService extends ChangeNotifier {
     return SettingsService(
       automaticallyLookupAddresses: true,
       primaryColor: null,
-      mapProvider: isPlatformApple() ? MapProvider.apple : MapProvider.openStreetMap,
+      mapProvider:
+          isPlatformApple() ? MapProvider.apple : MapProvider.openStreetMap,
+      showHints: true,
     );
   }
 
   static SettingsService fromJSON(final Map<String, dynamic> data) {
     return SettingsService(
       automaticallyLookupAddresses: data['automaticallyLoadLocation'],
-      primaryColor: data['primaryColor'] != null ? Color(data['primaryColor']) : null,
+      primaryColor:
+          data['primaryColor'] != null ? Color(data['primaryColor']) : null,
       mapProvider: MapProvider.values[data['mapProvider']],
       relays: List<String>.from(data['relays'] ?? []),
+      showHints: data['showHints'],
     );
   }
 
@@ -59,9 +65,12 @@ class SettingsService extends ChangeNotifier {
       return createDefault();
     }
 
+    final defaultValues = createDefault().toJSON();
     final data = Map<String, dynamic>.from(jsonDecode(rawData));
+    final mergedData = HashMap<String, dynamic>.from(defaultValues)
+      ..addAll(data);
 
-    return fromJSON(data);
+    return fromJSON(mergedData);
   }
 
   Map<String, dynamic> toJSON() {
@@ -70,6 +79,7 @@ class SettingsService extends ChangeNotifier {
       'primaryColor': primaryColor?.value,
       'mapProvider': mapProvider.index,
       "relays": _relays,
+      "showHints": showHints,
     };
   }
 
@@ -124,6 +134,13 @@ class SettingsService extends ChangeNotifier {
 
   void setRelays(final List<String> value) {
     _relays = value;
+    notifyListeners();
+  }
+
+  bool getShowHints() => showHints;
+
+  void setShowHints(final bool value) {
+    showHints = value;
     notifyListeners();
   }
 }

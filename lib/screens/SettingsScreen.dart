@@ -184,7 +184,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                       ),
                     ],
-                  )
+                  ),
+                  SettingsSection(
+                    title: Text(l10n.settingsScreen_sections_misc),
+                    tiles: [
+                      SettingsTile.switchTile(
+                        initialValue: settings.showHints,
+                        onToggle: (newValue) {
+                          settings.setShowHints(newValue);
+                          settings.save();
+                        },
+                        title:
+                            Text(l10n.settingsScreen_settings_showHints_label),
+                        description: Text(
+                            l10n.settingsScreen_settings_showHints_description),
+                      ),
+                    ],
+                  ),
                 ],
               ),
               const SizedBox(height: MEDIUM_SPACE),
