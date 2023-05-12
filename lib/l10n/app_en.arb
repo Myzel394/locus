@@ -12,6 +12,7 @@
   "closeNeutralAction": "Ok",
   "continueLabel": "Continue",
   "deleteLabel": "Delete",
+  "dismissLabel": "Dismiss",
   "editRelays": "Edit Relays",
   "actionNotUndoable": "This action cannot be undone!",
   "linkCopiedToClipboard": "Link copied to clipboard!",
@@ -356,5 +357,11 @@
   },
   "quickActions_shareNow": "Update Location now",
   "quickActions_stopTasks": "Stop all Tasks",
-  "quickActions_generationExplanation": "Hold on, we are working on it!"
+  "quickActions_generationExplanation": "Hold on, we are working on it!",
+  "appHint_quickActions_title": "Check out Quick Actions",
+  "appHint_quickActions_description": "You can quickly create a new task or update your location by long pressing the Locus icon on your home screen.",
+  "appHint_defaultRelays_title": "Add default Relays",
+  "appHint_defaultRelays_description": "You can add default relays in the settings. This will automatically select them when creating a new task.",
+  "appHint_appColor_title": "Change App Colors",
+  "appHint_appColor_description": "You can personalize Locus by changing the primary color in the settings."
 }
