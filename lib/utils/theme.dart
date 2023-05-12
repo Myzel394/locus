@@ -2,6 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
+import 'package:locus/services/settings_service.dart';
+import 'package:provider/provider.dart';
 
 TextStyle getBodyTextTextStyle(final BuildContext context) => platformThemeData(
       context,
@@ -21,7 +23,8 @@ Color getBodyTextColor(final BuildContext context) => platformThemeData(
       cupertino: (data) => data.textTheme.textStyle.color!,
     );
 
-bool getIsDarkMode(final BuildContext context) => MediaQuery.of(context).platformBrightness == Brightness.dark;
+bool getIsDarkMode(final BuildContext context) =>
+    MediaQuery.of(context).platformBrightness == Brightness.dark;
 
 Color getButtonBackgroundColor(final BuildContext context) => platformThemeData(
       context,
@@ -67,7 +70,10 @@ TextStyle getCaptionTextStyle(final BuildContext context) => platformThemeData(
 
 Color getSheetColor(final BuildContext context) => platformThemeData(
       context,
-      material: (data) => HSLColor.fromColor(data.scaffoldBackgroundColor.withAlpha(255)).withLightness(.18).toColor(),
+      material: (data) =>
+          HSLColor.fromColor(data.scaffoldBackgroundColor.withAlpha(255))
+              .withLightness(.18)
+              .toColor(),
       cupertino: (data) => data.barBackgroundColor,
     );
 
@@ -84,14 +90,17 @@ double getActionButtonSize(final BuildContext context) => platformThemeData(
     );
 
 Map<int, Color> getPrimaryColorShades(final BuildContext context) {
-  final primaryColor = Theme.of(context).colorScheme.primary;
+  final settings = context.read<SettingsService>();
+  final primaryColor = settings.getPrimaryColor(context);
 
   final colorShades = Map.fromEntries(
     List.generate(
       9,
       (index) => MapEntry(
         (index + 1) * 100,
-        HSLColor.fromColor(primaryColor).withLightness(1 - (index / 10)).toColor(),
+        HSLColor.fromColor(primaryColor)
+            .withLightness(1 - (index / 10))
+            .toColor(),
       ),
     ),
   );
@@ -102,7 +111,8 @@ Map<int, Color> getPrimaryColorShades(final BuildContext context) {
   };
 }
 
-EdgeInsets getSmallButtonPadding(final BuildContext context) => platformThemeData(
+EdgeInsets getSmallButtonPadding(final BuildContext context) =>
+    platformThemeData(
       context,
       material: (data) => const EdgeInsets.symmetric(
         horizontal: MEDIUM_SPACE,
@@ -140,3 +150,9 @@ List<Widget> createCancellableDialogActions(
     ...actions,
   ];
 }
+
+Color getHighlightColor(final BuildContext context) => platformThemeData(
+      context,
+      material: (data) => data.primaryColorLight.withOpacity(.8),
+      cupertino: (_) => CupertinoColors.systemYellow,
+    );

@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:locus/constants/spacing.dart';
@@ -11,17 +14,24 @@ import 'package:locus/widgets/SettingsColorPicker.dart';
 import 'package:locus/widgets/SettingsDropdownTile.dart';
 import 'package:provider/provider.dart';
 import 'package:settings_ui/settings_ui.dart';
+import 'package:smooth_highlight/smooth_highlight.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:workmanager/workmanager.dart';
 
 import '../services/settings_service.dart';
 import '../utils/platform.dart';
 import '../widgets/RelaySelectSheet.dart';
 
+enum SettingsHighlight {
+  appColor,
+  defaultRelays,
+}
+
 class SettingsScreen extends StatefulWidget {
-  final BuildContext themeContext;
+  final SettingsHighlight? highlight;
 
   const SettingsScreen({
-    required this.themeContext,
+    this.highlight,
     Key? key,
   }) : super(key: key);
 
@@ -31,6 +41,7 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   final _relayController = RelayController();
+  bool _enableHighlight = true;
 
   @override
   void initState() {
@@ -42,6 +53,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _relayController.addListener(() {
       settings.setRelays(_relayController.relays);
       settings.save();
+    });
+
+    WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((_) {
+      setState(() {
+        _enableHighlight = false;
+      });
     });
   }
 
@@ -113,7 +130,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           settings.setPrimaryColor(value);
                           settings.save();
                         },
-                      )
+                      ),
                     ],
                   ),
                   SettingsSection(
@@ -201,7 +218,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                     ],
                   ),
-                ],
+                  kDebugMode
+                      ? SettingsSection(
+                          title: Text("Debug"),
+                          tiles: [
+                            SettingsTile(
+                              title: Text("Reset App"),
+                              onPressed: (_) async {
+                                storage.deleteAll();
+                                await Workmanager().cancelAll();
+
+                                exit(0);
+                              },
+                            )
+                          ],
+                        )
+                      : null,
+                ]
+                    .where((element) => element != null)
+                    .cast<SettingsSection>()
+                    .toList(),
               ),
               const SizedBox(height: MEDIUM_SPACE),
               Padding(

@@ -946,6 +946,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.99"
+  smooth_highlight:
+    dependency: "direct main"
+    description:
+      name: smooth_highlight
+      sha256: ca369deda1d0f715337386b6d290c6b4e93f84693aa83034438770c26608b945
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.7"
   source_span:
     dependency: transitive
     description:

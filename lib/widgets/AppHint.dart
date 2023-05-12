@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -5,8 +7,10 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/utils/theme.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:shimmer/shimmer.dart';
+
+import '../screens/SettingsScreen.dart';
 
 enum HintType {
   quickActions,
@@ -15,6 +19,22 @@ enum HintType {
 }
 
 const storage = FlutterSecureStorage();
+
+Future<HintType?> getHintTypeForMainScreen() async {
+  // Only show hints 10% of the time
+  if (Random().nextInt(10) != 0) {
+    return null;
+  }
+
+  const hintTypes = HintType.values;
+  final hintType = hintTypes[Random().nextInt(hintTypes.length)];
+
+  if (await checkIfHintIsHidden(hintType)) {
+    return null;
+  }
+
+  return hintType;
+}
 
 final Map<HintType, IconData> HINT_TYPE_ICON_MAP_MATERIAL = {
   HintType.quickActions: Icons.grid_view_rounded,
@@ -62,6 +82,54 @@ Future<void> markHintAsHidden(
   }
 }
 
+void Function(BuildContext context)? getTutorialCallback(
+    final HintType hintType) {
+  switch (hintType) {
+    case HintType.defaultRelays:
+      return (context) {
+        if (isCupertino(context)) {
+          showCupertinoModalBottomSheet(
+            context: context,
+            backgroundColor: Colors.transparent,
+            builder: (_) => SettingsScreen(
+              highlight: SettingsHighlight.defaultRelays,
+            ),
+          );
+        } else {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => SettingsScreen(
+                highlight: SettingsHighlight.defaultRelays,
+              ),
+            ),
+          );
+        }
+      };
+    case HintType.appColor:
+      return (context) {
+        if (isCupertino(context)) {
+          showCupertinoModalBottomSheet(
+            context: context,
+            backgroundColor: Colors.transparent,
+            builder: (_) => SettingsScreen(
+              highlight: SettingsHighlight.appColor,
+            ),
+          );
+        } else {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => SettingsScreen(
+                highlight: SettingsHighlight.appColor,
+              ),
+            ),
+          );
+        }
+      };
+  }
+}
+
 class AppHint extends StatelessWidget {
   final HintType hintType;
 
@@ -74,66 +142,96 @@ class AppHint extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final shades = getPrimaryColorShades(context);
+    final callback = getTutorialCallback(hintType);
 
     return Shimmer.fromColors(
       baseColor: shades[0]!,
       highlightColor: Colors.white,
       period: const Duration(seconds: 4),
-      child: Container(
-        padding: const EdgeInsets.all(MEDIUM_SPACE),
-        decoration: BoxDecoration(
-          color: HSLColor.fromColor(shades[0]!)
-              .withSaturation(1)
-              .toColor()
-              .withOpacity(.1),
-          border: Border.all(
-            color: Theme.of(context).colorScheme.secondary,
-            width: 2,
-          ),
-          borderRadius: BorderRadius.circular(MEDIUM_SPACE),
-        ),
-        child: Row(
-          children: <Widget>[
-            Icon(
-              HINT_TYPE_ICON_MAP_MATERIAL[hintType],
-              color: Theme.of(context).colorScheme.secondary,
-              size: 30,
+      child: Stack(
+        children: <Widget>[
+          Positioned(
+            left: 0,
+            top: 0,
+            child: Opacity(
+              opacity: .1,
+              child: Icon(
+                HINT_TYPE_ICON_MAP_MATERIAL[hintType],
+                color: Theme.of(context).colorScheme.secondary,
+                size: 180,
+              ),
             ),
-            const SizedBox(width: MEDIUM_SPACE),
-            Flexible(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    getHintTypeTitleMap(context)[hintType]!,
-                    style: getSubTitleTextStyle(context).copyWith(
-                      color: shades[0],
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                  const SizedBox(height: SMALL_SPACE),
-                  Text(
-                    getHintDescriptionMap(context)[hintType]!,
-                    style: getBodyTextTextStyle(context).copyWith(
-                      color: shades[0],
-                    ),
-                  ),
-                  Row(
+          ),
+          Container(
+            padding: const EdgeInsets.all(MEDIUM_SPACE),
+            decoration: BoxDecoration(
+              color: HSLColor.fromColor(shades[0]!)
+                  .withSaturation(1)
+                  .toColor()
+                  .withOpacity(.1),
+              border: Border.all(
+                color: Theme.of(context).colorScheme.secondary,
+                width: 2,
+              ),
+              borderRadius: BorderRadius.circular(MEDIUM_SPACE),
+            ),
+            child: Row(
+              children: <Widget>[
+                Icon(
+                  HINT_TYPE_ICON_MAP_MATERIAL[hintType],
+                  color: Theme.of(context).colorScheme.secondary,
+                  size: 60,
+                ),
+                const SizedBox(width: MEDIUM_SPACE),
+                Flexible(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      PlatformTextButton(
-                        child: Text(l10n.dismissLabel),
-                        material: (_, __) => MaterialTextButtonData(
-                          icon: Icon(Icons.cancel),
+                      Text(
+                        getHintTypeTitleMap(context)[hintType]!,
+                        style: getSubTitleTextStyle(context).copyWith(
+                          color: shades[0],
+                          fontWeight: FontWeight.w900,
                         ),
-                        onPressed: () => markHintAsHidden(hintType, true),
+                      ),
+                      const SizedBox(height: SMALL_SPACE),
+                      Text(
+                        getHintDescriptionMap(context)[hintType]!,
+                        style: getBodyTextTextStyle(context).copyWith(
+                          color: shades[0],
+                        ),
+                      ),
+                      Row(
+                        children: <Widget>[
+                          PlatformTextButton(
+                            child: Text(l10n.dismissLabel),
+                            material: (_, __) => MaterialTextButtonData(
+                              icon: const Icon(Icons.cancel),
+                            ),
+                            onPressed: () => markHintAsHidden(hintType, true),
+                          ),
+                          callback == null
+                              ? const SizedBox.shrink()
+                              : PlatformTextButton(
+                                  child: Text(l10n.appHint_showMeLabel),
+                                  material: (_, __) => MaterialTextButtonData(
+                                    icon: const Icon(
+                                        Icons.arrow_circle_right_rounded),
+                                  ),
+                                  onPressed: () {
+                                    callback(context);
+                                    markHintAsHidden(hintType, true);
+                                  },
+                                ),
+                        ],
                       ),
                     ],
                   ),
-                ],
-              ),
-            )
-          ],
-        ),
+                )
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -85,6 +85,7 @@ dependencies:
   url_launcher: ^6.1.11
   quick_actions: ^1.0.3
   shimmer: ^2.0.0
+  smooth_highlight: ^0.0.7
 
 flutter_launcher_icons:
   android: true

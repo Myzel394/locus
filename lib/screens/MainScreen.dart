@@ -10,8 +10,10 @@ import 'package:locus/screens/SettingsScreen.dart';
 import 'package:locus/screens/main_screen_widgets/ImportTask.dart';
 import 'package:locus/screens/main_screen_widgets/TaskTile.dart';
 import 'package:locus/screens/main_screen_widgets/ViewTile.dart';
+import 'package:locus/services/settings_service.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/services/view_service.dart';
+import 'package:locus/widgets/AppHint.dart';
 import 'package:locus/widgets/ChipCaption.dart';
 import 'package:locus/widgets/Paper.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
@@ -34,6 +36,7 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   final listViewKey = GlobalKey();
   late final TaskService taskService;
+  final _hintTypeFuture = getHintTypeForMainScreen();
   bool shouldUseScreenHeight = false;
   bool listViewShouldFillUp = false;
   double listViewHeight = 0;
@@ -110,14 +113,13 @@ class _MainScreenState extends State<MainScreen> {
                   showCupertinoModalBottomSheet(
                     context: context,
                     backgroundColor: Colors.transparent,
-                    builder: (_) => SettingsScreen(themeContext: context),
+                    builder: (_) => SettingsScreen(),
                   );
                 } else {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) =>
-                          SettingsScreen(themeContext: context),
+                      builder: (context) => SettingsScreen(),
                     ),
                   );
                 }
@@ -133,6 +135,7 @@ class _MainScreenState extends State<MainScreen> {
     final l10n = AppLocalizations.of(context);
     final taskService = context.watch<TaskService>();
     final viewService = context.watch<ViewService>();
+    final settings = context.watch<SettingsService>();
 
     final showEmptyScreen =
         taskService.tasks.isEmpty && viewService.views.isEmpty;
@@ -225,6 +228,24 @@ class _MainScreenState extends State<MainScreen> {
                     mainAxisSize: MainAxisSize.max,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
+                      FutureBuilder<HintType?>(
+                        future: _hintTypeFuture,
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData && settings.getShowHints()) {
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: LARGE_SPACE,
+                                horizontal: MEDIUM_SPACE,
+                              ),
+                              child: AppHint(
+                                hintType: snapshot.data!,
+                              ),
+                            );
+                          }
+
+                          return SizedBox.shrink();
+                        },
+                      ),
                       SizedBox(
                         height: windowHeight - kToolbarHeight,
                         child: Wrap(

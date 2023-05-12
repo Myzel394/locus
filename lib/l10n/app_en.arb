@@ -363,5 +363,6 @@
   "appHint_defaultRelays_title": "Add default Relays",
   "appHint_defaultRelays_description": "You can add default relays in the settings. This will automatically select them when creating a new task.",
   "appHint_appColor_title": "Change App Colors",
-  "appHint_appColor_description": "You can personalize Locus by changing the primary color in the settings."
+  "appHint_appColor_description": "You can personalize Locus by changing the primary color in the settings.",
+  "appHint_showMeLabel": "Show me"
 }
