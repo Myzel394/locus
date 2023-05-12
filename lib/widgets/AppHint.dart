@@ -6,6 +6,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:shimmer/shimmer.dart';
 
 enum HintType {
   quickActions,
@@ -74,57 +75,65 @@ class AppHint extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final shades = getPrimaryColorShades(context);
 
-    return Container(
-      padding: const EdgeInsets.all(MEDIUM_SPACE),
-      decoration: BoxDecoration(
-        color: HSLColor.fromColor(shades[0]!)
-            .withSaturation(1)
-            .toColor()
-            .withOpacity(.1),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.secondary,
-          width: 2,
-        ),
-        borderRadius: BorderRadius.circular(MEDIUM_SPACE),
-      ),
-      child: Row(
-        children: <Widget>[
-          Icon(
-            HINT_TYPE_ICON_MAP_MATERIAL[hintType],
+    return Shimmer.fromColors(
+      baseColor: shades[0]!,
+      highlightColor: Colors.white,
+      period: const Duration(seconds: 4),
+      child: Container(
+        padding: const EdgeInsets.all(MEDIUM_SPACE),
+        decoration: BoxDecoration(
+          color: HSLColor.fromColor(shades[0]!)
+              .withSaturation(1)
+              .toColor()
+              .withOpacity(.1),
+          border: Border.all(
             color: Theme.of(context).colorScheme.secondary,
-            size: 30,
+            width: 2,
           ),
-          const SizedBox(width: MEDIUM_SPACE),
-          Flexible(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  getHintTypeTitleMap(context)[hintType]!,
-                  style: getSubTitleTextStyle(context).copyWith(
-                    color: shades[0],
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                const SizedBox(height: SMALL_SPACE),
-                Text(
-                  getHintDescriptionMap(context)[hintType]!,
-                  style: getBodyTextTextStyle(context).copyWith(
-                    color: shades[0],
-                  ),
-                ),
-                Row(
-                  children: <Widget>[
-                    PlatformTextButton(
-                      child: Text(l10n.dismissLabel),
-                      onPressed: () => markHintAsHidden(hintType, true),
-                    ),
-                  ],
-                ),
-              ],
+          borderRadius: BorderRadius.circular(MEDIUM_SPACE),
+        ),
+        child: Row(
+          children: <Widget>[
+            Icon(
+              HINT_TYPE_ICON_MAP_MATERIAL[hintType],
+              color: Theme.of(context).colorScheme.secondary,
+              size: 30,
             ),
-          )
-        ],
+            const SizedBox(width: MEDIUM_SPACE),
+            Flexible(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(
+                    getHintTypeTitleMap(context)[hintType]!,
+                    style: getSubTitleTextStyle(context).copyWith(
+                      color: shades[0],
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const SizedBox(height: SMALL_SPACE),
+                  Text(
+                    getHintDescriptionMap(context)[hintType]!,
+                    style: getBodyTextTextStyle(context).copyWith(
+                      color: shades[0],
+                    ),
+                  ),
+                  Row(
+                    children: <Widget>[
+                      PlatformTextButton(
+                        child: Text(l10n.dismissLabel),
+                        material: (_, __) => MaterialTextButtonData(
+                          icon: Icon(Icons.cancel),
+                        ),
+                        onPressed: () => markHintAsHidden(hintType, true),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            )
+          ],
+        ),
       ),
     );
   }

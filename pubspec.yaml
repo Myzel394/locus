@@ -84,6 +84,7 @@ dependencies:
   flutter_colorpicker: ^1.0.3
   url_launcher: ^6.1.11
   quick_actions: ^1.0.3
+  shimmer: ^2.0.0
 
 flutter_launcher_icons:
   android: true
