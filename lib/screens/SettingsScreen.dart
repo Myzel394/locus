@@ -62,7 +62,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         settingsSectionBackground: platformThemeData(
           context,
-          material: (data) => data.cardColor,
+          material: (data) => data.dialogBackgroundColor,
           cupertino: (data) => HSLColor.fromColor(data.barBackgroundColor)
               .withLightness(.2)
               .toColor(),
@@ -100,6 +100,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 lightTheme: getTheme(),
+                darkTheme: getTheme(),
                 sections: [
                   SettingsSection(
                     title: Text(l10n.settingsScreen_section_design),
@@ -186,122 +187,139 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   )
                 ],
               ),
-              Paper(
-                child: Padding(
-                  padding: const EdgeInsets.all(MEDIUM_SPACE),
-                  child: Column(
-                    children: <Widget>[
-                      Text(
-                        l10n.support_title,
-                        style: getTitle2TextStyle(context),
-                      ),
-                      const SizedBox(height: LARGE_SPACE),
-                      Icon(
-                        context.platformIcons.heartSolid,
-                        color: Colors.red,
-                        size: 60,
-                      ),
-                      const SizedBox(height: LARGE_SPACE),
-                      Text(
-                        l10n.support_description,
-                        style: getBodyTextTextStyle(context),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: LARGE_SPACE),
-                      PlatformListTile(
-                        leading: Icon(Icons.code),
-                        title: Text(l10n.support_options_develop),
-                        subtitle:
-                            Text(l10n.support_options_develop_description),
-                        onTap: () {
-                          launchUrl(Uri.parse(REPOSITORY_URL));
-                        },
-                      ),
-                      PlatformListTile(
-                        leading: Icon(Icons.translate_rounded),
-                        title: Text(l10n.support_options_translate),
-                        subtitle:
-                            Text(l10n.support_options_translate_description),
-                        onTap: () {
-                          launchUrl(Uri.parse(TRANSLATION_HELP_URL));
-                        },
-                      ),
-                      PlatformListTile(
-                        leading: PlatformWidget(
-                          material: (_, __) =>
-                              const Icon(Icons.attach_money_rounded),
-                          cupertino: (_, __) =>
-                              const Icon(CupertinoIcons.money_euro),
+              const SizedBox(height: MEDIUM_SPACE),
+              Padding(
+                padding: const EdgeInsets.all(MEDIUM_SPACE),
+                child: Paper(
+                  child: Padding(
+                    padding: const EdgeInsets.all(MEDIUM_SPACE),
+                    child: Column(
+                      children: <Widget>[
+                        Text(
+                          l10n.support_title,
+                          style: getTitle2TextStyle(context),
                         ),
-                        title: Text(l10n.support_options_donate),
-                        subtitle: Text(l10n.support_options_donate_description),
-                        onTap: () {
-                          launchUrl(Uri.parse(DONATION_URL));
-                        },
-                      ),
-                    ],
+                        const SizedBox(height: LARGE_SPACE),
+                        Icon(
+                          context.platformIcons.heartSolid,
+                          color: Colors.red,
+                          size: 60,
+                        ),
+                        const SizedBox(height: LARGE_SPACE),
+                        Text(
+                          l10n.support_description,
+                          style: getBodyTextTextStyle(context),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: LARGE_SPACE),
+                        PlatformListTile(
+                          leading: Icon(Icons.code),
+                          title: Text(l10n.support_options_develop),
+                          subtitle:
+                              Text(l10n.support_options_develop_description),
+                          onTap: () {
+                            launchUrl(
+                              Uri.parse(REPOSITORY_URL),
+                              mode: LaunchMode.externalApplication,
+                            );
+                          },
+                        ),
+                        PlatformListTile(
+                          leading: Icon(Icons.translate_rounded),
+                          title: Text(l10n.support_options_translate),
+                          subtitle:
+                              Text(l10n.support_options_translate_description),
+                          onTap: () {
+                            launchUrl(
+                              Uri.parse(TRANSLATION_HELP_URL),
+                              mode: LaunchMode.externalApplication,
+                            );
+                          },
+                        ),
+                        PlatformListTile(
+                          leading: PlatformWidget(
+                            material: (_, __) =>
+                                const Icon(Icons.attach_money_rounded),
+                            cupertino: (_, __) =>
+                                const Icon(CupertinoIcons.money_euro),
+                          ),
+                          title: Text(l10n.support_options_donate),
+                          subtitle:
+                              Text(l10n.support_options_donate_description),
+                          onTap: () {
+                            launchUrl(
+                              Uri.parse(DONATION_URL),
+                              mode: LaunchMode.externalApplication,
+                            );
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-              Paper(
-                child: Padding(
-                  padding: const EdgeInsets.all(MEDIUM_SPACE),
-                  child: Column(
-                    children: <Widget>[
-                      Text(
-                        l10n.honorableMentions_title,
-                        style: getTitle2TextStyle(context),
-                      ),
-                      const SizedBox(height: LARGE_SPACE),
-                      Icon(
-                        context.platformIcons.thumbUp,
-                        color: Colors.green,
-                        size: 60,
-                      ),
-                      const SizedBox(height: LARGE_SPACE),
-                      Text(
-                        l10n.honorableMentions_description,
-                        style: getBodyTextTextStyle(context),
-                      ),
-                      const SizedBox(height: LARGE_SPACE),
-                      // Odysee
-                      // Session
-                      MentionTile(
-                        title: l10n.honorableMentions_values_findMyDevice,
-                        description: l10n
-                            .honorableMentions_values_findMyDevice_description,
-                        iconName: "find-my-device.png",
-                        url: "https://gitlab.com/Nulide/findmydevice",
-                      ),
-                      MentionTile(
-                        title: l10n.honorableMentions_values_simpleQR,
-                        description:
-                            l10n.honorableMentions_values_simpleQR_description,
-                        iconName: "simple-qr.png",
-                        url: "https://github.com/tomfong/simple-qr",
-                      ),
-                      MentionTile(
-                        title: l10n.honorableMentions_values_libreTube,
-                        description:
-                            l10n.honorableMentions_values_libreTube_description,
-                        iconName: "libretube.png",
-                        url: "https://libretube.net/",
-                      ),
-                      MentionTile(
-                        title: l10n.honorableMentions_values_session,
-                        description:
-                            l10n.honorableMentions_values_session_description,
-                        iconName: "session.png",
-                        url: "https://getsession.org/",
-                      ),
-                      MentionTile(
-                        title: l10n.honorableMentions_values_odysee,
-                        description:
-                            l10n.honorableMentions_values_odysee_description,
-                        iconName: "odysee.png",
-                        url: "https://odysee.com/",
-                      ),
-                    ],
+              Padding(
+                padding: const EdgeInsets.all(MEDIUM_SPACE),
+                child: Paper(
+                  child: Padding(
+                    padding: const EdgeInsets.all(MEDIUM_SPACE),
+                    child: Column(
+                      children: <Widget>[
+                        Text(
+                          l10n.honorableMentions_title,
+                          style: getTitle2TextStyle(context),
+                        ),
+                        const SizedBox(height: LARGE_SPACE),
+                        Icon(
+                          context.platformIcons.thumbUp,
+                          color: Colors.green,
+                          size: 60,
+                        ),
+                        const SizedBox(height: LARGE_SPACE),
+                        Text(
+                          l10n.honorableMentions_description,
+                          style: getBodyTextTextStyle(context),
+                        ),
+                        const SizedBox(height: LARGE_SPACE),
+                        // Odysee
+                        // Session
+                        MentionTile(
+                          title: l10n.honorableMentions_values_findMyDevice,
+                          description: l10n
+                              .honorableMentions_values_findMyDevice_description,
+                          iconName: "find-my-device.png",
+                          url: "https://gitlab.com/Nulide/findmydevice",
+                        ),
+                        MentionTile(
+                          title: l10n.honorableMentions_values_simpleQR,
+                          description: l10n
+                              .honorableMentions_values_simpleQR_description,
+                          iconName: "simple-qr.png",
+                          url: "https://github.com/tomfong/simple-qr",
+                        ),
+                        MentionTile(
+                          title: l10n.honorableMentions_values_libreTube,
+                          description: l10n
+                              .honorableMentions_values_libreTube_description,
+                          iconName: "libretube.png",
+                          url: "https://libretube.net/",
+                        ),
+                        MentionTile(
+                          title: l10n.honorableMentions_values_session,
+                          description:
+                              l10n.honorableMentions_values_session_description,
+                          iconName: "session.png",
+                          url: "https://getsession.org/",
+                        ),
+                        MentionTile(
+                          title: l10n.honorableMentions_values_odysee,
+                          description:
+                              l10n.honorableMentions_values_odysee_description,
+                          iconName: "odysee.png",
+                          url: "https://odysee.com/",
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

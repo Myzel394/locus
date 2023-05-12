@@ -30,7 +30,10 @@ class MentionTile extends StatelessWidget {
       title: Text(title),
       subtitle: Text(description),
       onTap: () {
-        launchUrl(Uri.parse(url));
+        launchUrl(
+          Uri.parse(url),
+          mode: LaunchMode.externalApplication,
+        );
       },
     );
   }
