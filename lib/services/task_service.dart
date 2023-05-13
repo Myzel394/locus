@@ -124,18 +124,18 @@ class Task extends ChangeNotifier {
     };
   }
 
-  static Future<Task> create(final String name,
-      final Duration frequency,
-      final List<String> relays, {
-        Function(TaskCreationProgress)? onProgress,
-        List<TaskRuntimeTimer> timers = const [],
-        bool deleteAfterRun = false,
-      }) async {
+  static Future<Task> create(
+    final String name,
+    final Duration frequency,
+    final List<String> relays, {
+    Function(TaskCreationProgress)? onProgress,
+    List<TaskRuntimeTimer> timers = const [],
+    bool deleteAfterRun = false,
+  }) async {
     onProgress?.call(TaskCreationProgress.creatingViewKeys);
     final viewKeyPair = await OpenPGP.generate(
       options: (Options()
-        ..keyOptions = (KeyOptions()
-          ..rsaBits = 4096)
+        ..keyOptions = (KeyOptions()..rsaBits = 4096)
         ..name = "Locus"
         ..email = "user@locus.example"),
     );
@@ -143,8 +143,7 @@ class Task extends ChangeNotifier {
     onProgress?.call(TaskCreationProgress.creatingSignKeys);
     final signKeyPair = await OpenPGP.generate(
       options: (Options()
-        ..keyOptions = (KeyOptions()
-          ..rsaBits = 4096)
+        ..keyOptions = (KeyOptions()..rsaBits = 4096)
         ..name = "Locus"
         ..email = "user@locus.example"),
     );
@@ -158,9 +157,7 @@ class Task extends ChangeNotifier {
       viewPGPPublicKey: viewKeyPair.publicKey,
       signPGPPrivateKey: signKeyPair.privateKey,
       signPGPPublicKey: signKeyPair.publicKey,
-      nostrPrivateKey: Keychain
-          .generate()
-          .private,
+      nostrPrivateKey: Keychain.generate().private,
       relays: relays,
       createdAt: DateTime.now(),
       timers: timers,
@@ -177,7 +174,6 @@ class Task extends ChangeNotifier {
   Future<Map<String, dynamic>?> getExecutionStatus() async {
     final rawData = await storage.read(key: taskKey);
 
-    print("raw $rawData");
     if (rawData == null || rawData == "") {
       return null;
     }
@@ -294,8 +290,8 @@ class Task extends ChangeNotifier {
   // Returns the next date the task will run OR `null` if the task is not scheduled to run.
   Future<DateTime?> startScheduleTomorrow() {
     final tomorrow = DateTime.now().add(const Duration(days: 1));
-    final nextDate = DateTime(
-        tomorrow.year, tomorrow.month, tomorrow.day, 6, 0, 0);
+    final nextDate =
+        DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 6, 0, 0);
 
     return startSchedule(startDate: nextDate);
   }
@@ -462,8 +458,8 @@ class Task extends ChangeNotifier {
       privateKey: nostrPrivateKey,
     );
     final nostrMessage = jsonEncode(encrypted.cipherText);
-    final publishedEvent = await manager.publishMessage(
-        nostrMessage, kind: 1001);
+    final publishedEvent =
+        await manager.publishMessage(nostrMessage, kind: 1001);
 
     onProgress?.call(TaskLinkPublishProgress.creatingURI);
 
@@ -498,8 +494,8 @@ class Task extends ChangeNotifier {
   Future<void> publishCurrentLocationNow() async {
     final eventManager = NostrEventsManager.fromTask(this);
 
-    final locationPoint = await LocationPointService
-        .createUsingCurrentLocation();
+    final locationPoint =
+        await LocationPointService.createUsingCurrentLocation();
     final message = await locationPoint.toEncryptedMessage(
       signPrivateKey: signPGPPrivateKey,
       signPublicKey: signPGPPublicKey,
@@ -543,7 +539,7 @@ class TaskService extends ChangeNotifier {
     final data = jsonEncode(
       List<Map<String, dynamic>>.from(
         _tasks.map(
-              (task) => task.toJSON(),
+          (task) => task.toJSON(),
         ),
       ),
     );
@@ -641,17 +637,14 @@ DateTime? findNextEndDate(final List<TaskRuntimeTimer> timers,
   final now = startDate ?? DateTime.now();
   final nextDates = List<DateTime>.from(
     timers.map((timer) => timer.nextEndDate(now)).where((date) => date != null),
-  )
-    ..sort();
+  )..sort();
 
   DateTime endDate = nextDates.first!;
 
   for (final date in nextDates.sublist(1)) {
     final nextStartDate = findNextStartDate(timers, startDate: date);
-    if (nextStartDate == null || nextStartDate
-        .difference(date)
-        .inMinutes
-        .abs() > 15) {
+    if (nextStartDate == null ||
+        nextStartDate.difference(date).inMinutes.abs() > 15) {
       // No next start date found or the difference is more than 15 minutes, so this is the last date
       break;
     }
