@@ -36,9 +36,7 @@ class _ImportTaskState extends State<ImportTask> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final topColor = Theme.of(context).colorScheme.primary;
-    final topColor2 = HSLColor.fromColor(topColor).withLightness(0.5).toColor();
-    final topColor3 = HSLColor.fromColor(topColor).withLightness(0.3).toColor();
+    final shades = getPrimaryColorShades(context);
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -61,28 +59,28 @@ class _ImportTaskState extends State<ImportTask> with TickerProviderStateMixin {
             delegates: LottieDelegates(values: [
               ValueDelegate.strokeColor(
                 const ["linkTop 3", "Shape 1", "Stroke 1"],
-                value: topColor,
+                value: shades[0],
               ),
               ValueDelegate.strokeColor(
                 const ["linkTop 2", "Shape 1", "Stroke 1"],
-                value: topColor2,
+                value: shades[700],
               ),
               ValueDelegate.strokeColor(
                 const ["linkTop", "Shape 1", "Stroke 1"],
-                value: topColor3,
+                value: shades[900],
               ),
               // `linkBottom 2` coming before `linkBottom 3` is correct (lottie file is probably wrong)
               ValueDelegate.strokeColor(
                 const ["linkBottom 2", "Shape 1", "Stroke 1"],
-                value: topColor,
+                value: shades[0],
               ),
               ValueDelegate.strokeColor(
                 const ["linkBottom 3", "Shape 1", "Stroke 1"],
-                value: topColor2,
+                value: shades[700],
               ),
               ValueDelegate.strokeColor(
                 const ["linkBottom", "Shape 1", "Stroke 1"],
-                value: topColor3,
+                value: shades[900],
               ),
             ]),
             onLoaded: (composition) {
@@ -118,21 +116,24 @@ class _ImportTaskState extends State<ImportTask> with TickerProviderStateMixin {
                     context,
                     [
                       CupertinoActionSheetAction(
-                        child: Text(l10n.mainScreen_importTask_action_importMethod_url),
+                        child: Text(
+                            l10n.mainScreen_importTask_action_importMethod_url),
                         isDefaultAction: true,
                         onPressed: () {
                           Navigator.of(context).pop(ImportScreen.askURL);
                         },
                       ),
                       CupertinoActionSheetAction(
-                        child: Text(l10n.mainScreen_importTask_action_importMethod_file),
+                        child: Text(l10n
+                            .mainScreen_importTask_action_importMethod_file),
                         isDefaultAction: true,
                         onPressed: () {
                           Navigator.of(context).pop(ImportScreen.importFile);
                         },
                       ),
                       CupertinoActionSheetAction(
-                        child: Text(l10n.mainScreen_importTask_action_importMethod_qrCode),
+                        child: Text(l10n
+                            .mainScreen_importTask_action_importMethod_qrCode),
                         isDefaultAction: true,
                         onPressed: () {
                           Navigator.of(context).pop(ImportScreen.scanQR);
@@ -155,7 +156,8 @@ class _ImportTaskState extends State<ImportTask> with TickerProviderStateMixin {
                 isScrollControlled: true,
                 isDismissible: true,
               ),
-              builder: (context) => ImportTaskSheet(initialScreen: initialScreen),
+              builder: (context) =>
+                  ImportTaskSheet(initialScreen: initialScreen),
             );
 
             _controller.forward();
