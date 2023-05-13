@@ -41,6 +41,7 @@ class _MainScreenState extends State<MainScreen> {
   bool listViewShouldFillUp = false;
   double listViewHeight = 0;
   int activeTab = 0;
+  bool showHint = true;
 
   double get windowHeight =>
       MediaQuery.of(context).size.height - kToolbarHeight;
@@ -231,7 +232,9 @@ class _MainScreenState extends State<MainScreen> {
                       FutureBuilder<HintType?>(
                         future: _hintTypeFuture,
                         builder: (context, snapshot) {
-                          if (snapshot.hasData && settings.getShowHints()) {
+                          if (snapshot.hasData &&
+                              settings.getShowHints() &&
+                              showHint) {
                             return Padding(
                               padding: const EdgeInsets.symmetric(
                                 vertical: LARGE_SPACE,
@@ -239,6 +242,11 @@ class _MainScreenState extends State<MainScreen> {
                               ),
                               child: AppHint(
                                 hintType: snapshot.data!,
+                                onDismiss: () {
+                                  setState(() {
+                                    showHint = false;
+                                  });
+                                },
                               ),
                             );
                           }

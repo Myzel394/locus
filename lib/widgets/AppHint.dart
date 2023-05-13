@@ -132,9 +132,11 @@ void Function(BuildContext context)? getTutorialCallback(
 
 class AppHint extends StatelessWidget {
   final HintType hintType;
+  final VoidCallback? onDismiss;
 
   const AppHint({
     required this.hintType,
+    this.onDismiss,
     Key? key,
   }) : super(key: key);
 
@@ -208,7 +210,10 @@ class AppHint extends StatelessWidget {
                             material: (_, __) => MaterialTextButtonData(
                               icon: const Icon(Icons.cancel),
                             ),
-                            onPressed: () => markHintAsHidden(hintType, true),
+                            onPressed: () {
+                              onDismiss?.call();
+                              markHintAsHidden(hintType, true);
+                            },
                           ),
                           callback == null
                               ? const SizedBox.shrink()
