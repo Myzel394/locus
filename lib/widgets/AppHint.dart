@@ -6,6 +6,7 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:locus/constants/spacing.dart';
+import 'package:locus/utils/navigation.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:shimmer/shimmer.dart';
@@ -82,47 +83,8 @@ Future<void> markHintAsHidden(final HintType hintType, final bool hidden) async 
 void Function(BuildContext context)? getTutorialCallback(final HintType hintType) {
   switch (hintType) {
     case HintType.defaultRelays:
-      return (context) {
-        if (isCupertino(context)) {
-          showCupertinoModalBottomSheet(
-            context: context,
-            backgroundColor: Colors.transparent,
-            builder: (_) => SettingsScreen(
-              highlight: SettingsHighlight.defaultRelays,
-            ),
-          );
-        } else {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => SettingsScreen(
-                highlight: SettingsHighlight.defaultRelays,
-              ),
-            ),
-          );
-        }
-      };
     case HintType.appColor:
-      return (context) {
-        if (isCupertino(context)) {
-          showCupertinoModalBottomSheet(
-            context: context,
-            backgroundColor: Colors.transparent,
-            builder: (_) => SettingsScreen(
-              highlight: SettingsHighlight.appColor,
-            ),
-          );
-        } else {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => SettingsScreen(
-                highlight: SettingsHighlight.appColor,
-              ),
-            ),
-          );
-        }
-      };
+      return showSettings;
     default:
       return null;
   }

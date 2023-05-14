@@ -21,16 +21,8 @@ import '../services/settings_service.dart';
 import '../utils/platform.dart';
 import '../widgets/RelaySelectSheet.dart';
 
-enum SettingsHighlight {
-  appColor,
-  defaultRelays,
-}
-
 class SettingsScreen extends StatefulWidget {
-  final SettingsHighlight? highlight;
-
   const SettingsScreen({
-    this.highlight,
     Key? key,
   }) : super(key: key);
 
