@@ -1,9 +1,9 @@
 import 'dart:io';
 
-import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -81,7 +81,7 @@ class _TaskTileState extends State<TaskTile> {
                               title: Text(l10n.taskAction_started_title),
                               content: Text(l10n.taskAction_started_runsUntil(nextEndDate)),
                               actions: <Widget>[
-                                PlatformDialogActionButton(
+                                PlatformDialogAction(
                                   child: Text(l10n.closeNeutralAction),
                                   onPressed: () {
                                     Navigator.of(context).pop();
@@ -108,7 +108,7 @@ class _TaskTileState extends State<TaskTile> {
                               title: Text(l10n.taskAction_stopped_title),
                               content: Text(l10n.taskAction_stopped_startsAgain(nextStartDate)),
                               actions: <Widget>[
-                                PlatformDialogActionButton(
+                                PlatformDialogAction(
                                   child: Text(l10n.closeNeutralAction),
                                   onPressed: () {
                                     Navigator.of(context).pop();

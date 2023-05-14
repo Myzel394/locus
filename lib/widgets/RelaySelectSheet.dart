@@ -2,10 +2,11 @@ import 'dart:collection';
 
 import 'package:animated_list_plus/animated_list_plus.dart';
 import 'package:animated_list_plus/transitions.dart';
-import 'package:enough_platform_widgets/enough_platform_widgets.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/utils/load_status.dart';
 import 'package:locus/utils/theme.dart';
@@ -186,22 +187,20 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
                             animation: animation,
                             sizeFraction: 0.7,
                             curve: Curves.easeInOut,
-                            child: CupertinoCheckboxListTile(
+                            child: CupertinoListTile(
                               title: Text(
                                 relay.substring(6),
                               ),
-                              value: widget.controller.relays.contains(relay),
-                              onChanged: (newValue) {
-                                if (newValue == null) {
-                                  return;
-                                }
-
-                                if (newValue) {
-                                  widget.controller.add(relay);
-                                } else {
-                                  widget.controller.remove(relay);
-                                }
-                              },
+                              leading: CupertinoSwitch(
+                                value: widget.controller.relays.contains(relay),
+                                onChanged: (newValue) {
+                                  if (newValue) {
+                                    widget.controller.add(relay);
+                                  } else {
+                                    widget.controller.remove(relay);
+                                  }
+                                },
+                              ),
                             ),
                           );
                         },

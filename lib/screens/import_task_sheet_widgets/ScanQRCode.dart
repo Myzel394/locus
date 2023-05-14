@@ -1,13 +1,11 @@
 import 'dart:math';
-import 'dart:ui';
 
-import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/app.dart';
 import 'package:locus/constants/spacing.dart';
-import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/QRScannerOverlayShape.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
@@ -64,8 +62,7 @@ class _ScanQRCodeState extends State<ScanQRCode> {
 
   @override
   Widget build(BuildContext context) {
-    final activeColor =
-        isMaterial(context) ? Colors.amber : CupertinoColors.systemYellow;
+    final activeColor = isMaterial(context) ? Colors.amber : CupertinoColors.systemYellow;
     final size = min(
       MediaQuery.of(context).size.width * 0.7,
       MediaQuery.of(context).size.height * 0.7,
@@ -92,8 +89,7 @@ class _ScanQRCodeState extends State<ScanQRCode> {
                     continue;
                   }
 
-                  if (parsedURL.host != APP_URL_DOMAIN ||
-                      !parsedURL.hasAbsolutePath) {
+                  if (parsedURL.host != APP_URL_DOMAIN || !parsedURL.hasAbsolutePath) {
                     continue;
                   }
 
@@ -156,8 +152,7 @@ class _ScanQRCodeState extends State<ScanQRCode> {
                                     });
                                   },
                                   padding: const EdgeInsets.all(MEDIUM_SPACE),
-                                  color:
-                                      torchEnabled ? activeColor : Colors.white,
+                                  color: torchEnabled ? activeColor : Colors.white,
                                 ),
                               ],
                             ),

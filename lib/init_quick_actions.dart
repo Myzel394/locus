@@ -1,8 +1,6 @@
-import 'package:enough_platform_widgets/enough_platform_widgets.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/screens/ShortcutScreen.dart';
-import 'package:locus/services/task_service.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:quick_actions/quick_actions.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';

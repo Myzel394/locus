@@ -1,10 +1,11 @@
-import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/extensions/date.dart';
 import 'package:locus/utils/theme.dart';
+import 'package:locus/widgets/PlatformSelect.dart';
 
 class WeekdaySelection extends StatefulWidget {
   final int weekday;
@@ -90,14 +91,8 @@ class _WeekdaySelectionState extends State<WeekdaySelection> {
             ),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: MEDIUM_SPACE, vertical: SMALL_SPACE),
-              child: PlatformDropdownButton<int>(
+              child: PlatformSelect<int>(
                 value: weekday,
-                material: (_, __) => MaterialDropdownButtonData(
-                  style: TextStyle(
-                    backgroundColor: Colors.blue,
-                  ),
-                  underline: Container(),
-                ),
                 onChanged: widget.lockWeekday
                     ? null
                     : ((value) {
@@ -188,7 +183,8 @@ class _WeekdaySelectionState extends State<WeekdaySelection> {
                   DateFormat("HH:mm").format(DateTime(0, 0, 0, endTime.hour, endTime.minute)),
                 ),
                 onPressed: () async {
-                  final time = await showPlatformTimePicker(
+                  // TODO: Add cupertino time picker
+                  final time = await showTimePicker(
                     context: context,
                     initialTime: endTime,
                   );

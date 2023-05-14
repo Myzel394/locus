@@ -1,9 +1,9 @@
 import 'dart:io';
 
-import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:locus/constants/spacing.dart';
@@ -59,8 +59,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   }
 
   void _nextScreen(final int page) {
-    _controller.animateToPage(page,
-        duration: 500.ms, curve: Curves.easeOutExpo);
+    _controller.animateToPage(page, duration: 500.ms, curve: Curves.easeOutExpo);
   }
 
   void _onDone() {
@@ -124,8 +123,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       // Background
                       ValueDelegate.color(
                         const ["unlock Konturen", "Kreis", "Fläche 1"],
-                        value:
-                            getIsDarkMode(context) ? shades[900] : shades[200],
+                        value: getIsDarkMode(context) ? shades[900] : shades[200],
                       ),
                     ],
                   ),

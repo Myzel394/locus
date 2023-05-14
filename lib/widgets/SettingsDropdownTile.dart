@@ -1,7 +1,6 @@
-import 'package:enough_platform_widgets/cupertino.dart';
-import 'package:enough_platform_widgets/platform.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+import 'package:locus/widgets/PlatformSelect.dart';
 import 'package:settings_ui/settings_ui.dart';
 
 const IN_DURATION = Duration(seconds: 1);
@@ -34,14 +33,11 @@ class DropdownTile extends StatefulWidget {
   State<DropdownTile> createState() => _DropdownTileState();
 }
 
-class _DropdownTileState<T> extends State<DropdownTile>
-    with TickerProviderStateMixin {
+class _DropdownTileState<T> extends State<DropdownTile> with TickerProviderStateMixin {
   late final AnimationController controller;
   late final Animation<double> animation;
 
-  bool get isExpanding =>
-      animation.status == AnimationStatus.forward ||
-      animation.status == AnimationStatus.completed;
+  bool get isExpanding => animation.status == AnimationStatus.forward || animation.status == AnimationStatus.completed;
 
   @override
   void initState() {
@@ -143,30 +139,6 @@ class SettingsDropdownTile<T> extends AbstractSettingsTile {
   final Widget? leading;
   final Widget? description;
 
-  Widget getCupertinoPicker() {
-    final items = values
-        .map(
-          (value) => DropdownMenuItem<T>(
-            value: value,
-            child: Text(textMapping[value]!),
-          ),
-        )
-        .toList();
-
-    return CupertinoDropdownButton<T>(
-      itemExtent: 30,
-      onChanged: (value) {
-        if (value == null) {
-          return;
-        }
-
-        onUpdate(value);
-      },
-      value: value,
-      items: items,
-    );
-  }
-
   const SettingsDropdownTile({
     Key? key,
     required this.title,
@@ -196,18 +168,27 @@ class SettingsDropdownTile<T> extends AbstractSettingsTile {
       );
     } else {
       return SettingsTile(
-        leading: DefaultTextStyle(
-          style: TextStyle(
-            color: enabled
-                ? theme.themeData.settingsTileTextColor
-                : theme.themeData.inactiveTitleColor,
-            fontSize: 17,
-          ),
-          child: title,
-        ),
-        title: getCupertinoPicker(),
-        enabled: enabled,
+        title: title,
         description: description,
+        leading: leading,
+        trailing: PlatformSelect<T>(
+          value: value,
+          onChanged: (value) {
+            if (value == null) {
+              return;
+            }
+
+            onUpdate(value);
+          },
+          items: values
+              .map(
+                (value) => DropdownMenuItem<T>(
+                  value: value,
+                  child: Text(textMapping[value]!),
+                ),
+              )
+              .toList(),
+        ),
       );
     }
   }

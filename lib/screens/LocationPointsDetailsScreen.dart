@@ -1,5 +1,5 @@
-import 'package:enough_platform_widgets/platform.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/screens/task_detail_screen_widgets/LocationDetails.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:locus/utils/theme.dart';

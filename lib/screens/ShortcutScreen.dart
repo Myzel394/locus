@@ -1,6 +1,6 @@
-import 'package:enough_platform_widgets/platform.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/init_quick_actions.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';

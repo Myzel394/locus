@@ -1,10 +1,10 @@
 import 'dart:io';
 
-import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/constants/values.dart';
 import 'package:locus/screens/settings_screen_widgets/MentionTile.dart';
@@ -14,7 +14,6 @@ import 'package:locus/widgets/SettingsColorPicker.dart';
 import 'package:locus/widgets/SettingsDropdownTile.dart';
 import 'package:provider/provider.dart';
 import 'package:settings_ui/settings_ui.dart';
-import 'package:smooth_highlight/smooth_highlight.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:workmanager/workmanager.dart';
 
@@ -80,9 +79,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         settingsSectionBackground: platformThemeData(
           context,
           material: (data) => data.dialogBackgroundColor,
-          cupertino: (data) => HSLColor.fromColor(data.barBackgroundColor)
-              .withLightness(.2)
-              .toColor(),
+          cupertino: (data) => HSLColor.fromColor(data.barBackgroundColor).withLightness(.2).toColor(),
         ),
         titleTextColor: platformThemeData(
           context,
@@ -123,8 +120,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     title: Text(l10n.settingsScreen_section_design),
                     tiles: [
                       SettingsColorPicker(
-                        title: Text(
-                            l10n.settingsScreen_setting_primaryColor_label),
+                        title: Text(l10n.settingsScreen_setting_primaryColor_label),
                         value: settings.primaryColor,
                         onUpdate: (value) {
                           settings.setPrimaryColor(value);
@@ -142,10 +138,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           settings.setAutomaticallyLookupAddresses(newValue);
                           settings.save();
                         },
-                        title: Text(
-                            l10n.settingsScreen_setting_lookupAddresses_label),
-                        description: Text(l10n
-                            .settingsScreen_setting_lookupAddresses_description),
+                        title: Text(l10n.settingsScreen_setting_lookupAddresses_label),
+                        description: Text(l10n.settingsScreen_setting_lookupAddresses_description),
                       ),
                       isPlatformApple()
                           ? SettingsDropdownTile(
@@ -154,10 +148,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               ),
                               values: MapProvider.values,
                               textMapping: {
-                                MapProvider.apple: l10n
-                                    .settingsScreen_settings_mapProvider_apple,
-                                MapProvider.openStreetMap: l10n
-                                    .settingsScreen_settings_mapProvider_openStreetMap,
+                                MapProvider.apple: l10n.settingsScreen_settings_mapProvider_apple,
+                                MapProvider.openStreetMap: l10n.settingsScreen_settings_mapProvider_openStreetMap,
                               },
                               value: settings.mapProvider,
                               onUpdate: (newValue) {
@@ -166,10 +158,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               },
                             )
                           : null,
-                    ]
-                        .where((element) => element != null)
-                        .cast<AbstractSettingsTile>()
-                        .toList(),
+                    ].where((element) => element != null).cast<AbstractSettingsTile>().toList(),
                   ),
                   SettingsSection(
                     title: Text(l10n.settingsScreen_section_defaults),
@@ -211,10 +200,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           settings.setShowHints(newValue);
                           settings.save();
                         },
-                        title:
-                            Text(l10n.settingsScreen_settings_showHints_label),
-                        description: Text(
-                            l10n.settingsScreen_settings_showHints_description),
+                        title: Text(l10n.settingsScreen_settings_showHints_label),
+                        description: Text(l10n.settingsScreen_settings_showHints_description),
                       ),
                     ],
                   ),
@@ -234,10 +221,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ],
                         )
                       : null,
-                ]
-                    .where((element) => element != null)
-                    .cast<SettingsSection>()
-                    .toList(),
+                ].where((element) => element != null).cast<SettingsSection>().toList(),
               ),
               const SizedBox(height: MEDIUM_SPACE),
               Padding(
@@ -267,8 +251,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         PlatformListTile(
                           leading: Icon(Icons.code),
                           title: Text(l10n.support_options_develop),
-                          subtitle:
-                              Text(l10n.support_options_develop_description),
+                          subtitle: Text(l10n.support_options_develop_description),
                           onTap: () {
                             launchUrl(
                               Uri.parse(REPOSITORY_URL),
@@ -279,8 +262,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         PlatformListTile(
                           leading: Icon(Icons.translate_rounded),
                           title: Text(l10n.support_options_translate),
-                          subtitle:
-                              Text(l10n.support_options_translate_description),
+                          subtitle: Text(l10n.support_options_translate_description),
                           onTap: () {
                             launchUrl(
                               Uri.parse(TRANSLATION_HELP_URL),
@@ -290,14 +272,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                         PlatformListTile(
                           leading: PlatformWidget(
-                            material: (_, __) =>
-                                const Icon(Icons.attach_money_rounded),
-                            cupertino: (_, __) =>
-                                const Icon(CupertinoIcons.money_euro),
+                            material: (_, __) => const Icon(Icons.attach_money_rounded),
+                            cupertino: (_, __) => const Icon(CupertinoIcons.money_euro),
                           ),
                           title: Text(l10n.support_options_donate),
-                          subtitle:
-                              Text(l10n.support_options_donate_description),
+                          subtitle: Text(l10n.support_options_donate_description),
                           onTap: () {
                             launchUrl(
                               Uri.parse(DONATION_URL),
@@ -337,36 +316,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         // Session
                         MentionTile(
                           title: l10n.honorableMentions_values_findMyDevice,
-                          description: l10n
-                              .honorableMentions_values_findMyDevice_description,
+                          description: l10n.honorableMentions_values_findMyDevice_description,
                           iconName: "find-my-device.png",
                           url: "https://gitlab.com/Nulide/findmydevice",
                         ),
                         MentionTile(
                           title: l10n.honorableMentions_values_simpleQR,
-                          description: l10n
-                              .honorableMentions_values_simpleQR_description,
+                          description: l10n.honorableMentions_values_simpleQR_description,
                           iconName: "simple-qr.png",
                           url: "https://github.com/tomfong/simple-qr",
                         ),
                         MentionTile(
                           title: l10n.honorableMentions_values_libreTube,
-                          description: l10n
-                              .honorableMentions_values_libreTube_description,
+                          description: l10n.honorableMentions_values_libreTube_description,
                           iconName: "libretube.png",
                           url: "https://libretube.net/",
                         ),
                         MentionTile(
                           title: l10n.honorableMentions_values_session,
-                          description:
-                              l10n.honorableMentions_values_session_description,
+                          description: l10n.honorableMentions_values_session_description,
                           iconName: "session.png",
                           url: "https://getsession.org/",
                         ),
                         MentionTile(
                           title: l10n.honorableMentions_values_odysee,
-                          description:
-                              l10n.honorableMentions_values_odysee_description,
+                          description: l10n.honorableMentions_values_odysee_description,
                           iconName: "odysee.png",
                           url: "https://odysee.com/",
                         ),

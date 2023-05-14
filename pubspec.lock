@@ -217,30 +217,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.5"
-  cupertino_progress_bar:
-    dependency: transitive
-    description:
-      name: cupertino_progress_bar
-      sha256: "4962a7c6db9b94d1c19462ad6036fdf20db43defa4114c908a3c4cbef1b3a2e0"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.2.0"
-  cupertino_stepper:
-    dependency: transitive
-    description:
-      name: cupertino_stepper
-      sha256: "124690b8b23db7b43fc6d547688e42a9f3d73c8f46d0b210568e98a04b5645b2"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.2.1"
-  dart_levenshtein:
-    dependency: "direct main"
-    description:
-      name: dart_levenshtein
-      sha256: f38182278b774cbb0d5993de50848e65da5a9f722b7f07787f0c26de009e0322
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.1"
   dbus:
     dependency: transitive
     description:
@@ -281,22 +257,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.1"
-  dynamic_color:
-    dependency: "direct main"
-    description:
-      name: dynamic_color
-      sha256: bbebb1b7ebed819e0ec83d4abdc2a8482d934f6a85289ffc1c6acf7589fa2aad
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.6.3"
-  enough_platform_widgets:
-    dependency: "direct main"
-    description:
-      name: enough_platform_widgets
-      sha256: "7d9ae2de02decbff6d565348d5c4255a91879ce3ba77ebeaaf39a354f86bf52a"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.7.2"
   enum_to_string:
     dependency: transitive
     description:
@@ -420,7 +380,7 @@ packages:
     source: hosted
     version: "0.2.2"
   flutter_platform_widgets:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: flutter_platform_widgets
       sha256: "53b3f61a9a974eebf3a366ca816dc56b22883619143ab041e100d0622f166e87"
@@ -1002,14 +962,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.99"
-  smooth_highlight:
-    dependency: "direct main"
-    description:
-      name: smooth_highlight
-      sha256: ca369deda1d0f715337386b6d290c6b4e93f84693aa83034438770c26608b945
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.7"
   source_span:
     dependency: transitive
     description:
