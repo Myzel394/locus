@@ -3,17 +3,23 @@ import 'dart:io';
 import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/utils/theme.dart';
 
-class LongPressPopupMenuItem<T> {
+enum PlatformPopupType {
+  longPress,
+  tap,
+}
+
+class PlatformPopupMenuItem<T> {
   final Widget label;
   final IconData? icon;
   final void Function() onPressed;
   final bool isDefaultAction;
   final bool isDestructiveAction;
 
-  const LongPressPopupMenuItem({
+  const PlatformPopupMenuItem({
     required this.label,
     required this.onPressed,
     this.icon,
@@ -22,21 +28,23 @@ class LongPressPopupMenuItem<T> {
   });
 }
 
-class LongPressPopup<T> extends StatefulWidget {
-  final Widget child;
-  final List<LongPressPopupMenuItem> items;
+class PlatformPopup<T> extends StatefulWidget {
+  final Widget? child;
+  final List<PlatformPopupMenuItem<T>> items;
+  final PlatformPopupType type;
 
-  const LongPressPopup({
+  const PlatformPopup({
     Key? key,
-    required this.child,
+    this.child,
     required this.items,
+    this.type = PlatformPopupType.longPress,
   }) : super(key: key);
 
   @override
-  State<LongPressPopup> createState() => _LongPressPopupState<T>();
+  State<PlatformPopup> createState() => _PlatformPopupState<T>();
 }
 
-class _LongPressPopupState<T> extends State<LongPressPopup> {
+class _PlatformPopupState<T> extends State<PlatformPopup> {
   Offset _tapPosition = Offset.zero;
 
   List<CupertinoContextMenuAction> get cupertinoActions => widget.items
@@ -79,12 +87,40 @@ class _LongPressPopupState<T> extends State<LongPressPopup> {
         ),
       );
 
+  void showMaterialPopupMenu() async {
+    final overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+
+    await showMenu<int>(
+      context: context,
+      position: RelativeRect.fromRect(
+        Rect.fromLTWH(_tapPosition.dx, _tapPosition.dy, 10, 10),
+        Rect.fromLTWH(0, 0, overlay.paintBounds.size.width, overlay.paintBounds.size.height),
+      ),
+      items: materialActions,
+    );
+  }
+
+  void showCupertinoActionSheet() async {
+    await showCupertinoModalPopup(
+      context: context,
+      builder: (context) => CupertinoActionSheet(
+        actions: cupertinoActions,
+      ),
+    );
+  }
+
+  Widget getChild() => PlatformWidget(
+        material: (_, __) => widget.child ?? const Icon(Icons.more_horiz_rounded),
+        cupertino: (_, __) => widget.child ?? const Icon(CupertinoIcons.ellipsis_vertical),
+      );
+
   @override
   Widget build(BuildContext context) {
-    if (Platform.isIOS) {
-      return CupertinoContextMenu(
-        actions: cupertinoActions,
-        child: widget.child,
+    if (isCupertino(context)) {
+      return GestureDetector(
+        onTap: widget.type == PlatformPopupType.tap ? showCupertinoActionSheet : null,
+        onLongPress: widget.type == PlatformPopupType.longPress ? showCupertinoActionSheet : null,
+        child: getChild(),
       );
     } else {
       return GestureDetector(
@@ -102,19 +138,9 @@ class _LongPressPopupState<T> extends State<LongPressPopup> {
             _tapPosition = newOffset;
           });
         },
-        onLongPress: () async {
-          final overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
-
-          await showMenu<int>(
-            context: context,
-            position: RelativeRect.fromRect(
-              Rect.fromLTWH(_tapPosition.dx, _tapPosition.dy, 10, 10),
-              Rect.fromLTWH(0, 0, overlay.paintBounds.size.width, overlay.paintBounds.size.height),
-            ),
-            items: materialActions,
-          );
-        },
-        child: widget.child,
+        onTap: widget.type == PlatformPopupType.tap ? showMaterialPopupMenu : null,
+        onLongPress: widget.type == PlatformPopupType.longPress ? showMaterialPopupMenu : null,
+        child: getChild(),
       );
     }
   }

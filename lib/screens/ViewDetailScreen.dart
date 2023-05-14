@@ -9,6 +9,7 @@ import 'package:locus/widgets/FillUpPaint.dart';
 import 'package:locus/widgets/LocationFetchError.dart';
 import 'package:locus/widgets/LocationsMap.dart';
 import 'package:locus/widgets/OpenInMaps.dart';
+import 'package:locus/widgets/PlatformPopup.dart';
 import 'package:map_launcher/map_launcher.dart';
 
 import '../constants/spacing.dart';
@@ -135,20 +136,16 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
         title: Text(l10n.viewDetails_title),
         trailingActions: _controller.locations.isNotEmpty
             ? <Widget>[
-                PlatformPopupMenuButton<String>(
-                  itemBuilder: (context) => [
-                    PlatformPopupMenuItem<String>(
-                      child: PlatformListTile(
+                PlatformPopup<String>(
+                  type: PlatformPopupType.tap,
+                  items: [
+                    PlatformPopupMenuItem(
+                      label: PlatformListTile(
                         leading: Icon(context.platformIcons.location),
                         trailing: SizedBox.shrink(),
                         title: Text(l10n.viewDetails_actions_openLatestLocation),
                       ),
-                      value: "open_maps",
-                    ),
-                  ],
-                  onSelected: (action) async {
-                    switch (action) {
-                      case "open_maps":
+                      onPressed: () async {
                         await showPlatformModalSheet(
                           context: context,
                           builder: (context) => OpenInMaps(
@@ -156,8 +153,9 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
                                 Coords(_controller.locations.last.latitude, _controller.locations.last.longitude),
                           ),
                         );
-                    }
-                  },
+                      },
+                    )
+                  ],
                 ),
               ]
             : [],

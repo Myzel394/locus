@@ -16,6 +16,7 @@ import 'package:locus/services/view_service.dart';
 import 'package:locus/widgets/AppHint.dart';
 import 'package:locus/widgets/ChipCaption.dart';
 import 'package:locus/widgets/Paper.dart';
+import 'package:locus/widgets/PlatformPopup.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:provider/provider.dart';
 
@@ -102,30 +103,29 @@ class _MainScreenState extends State<MainScreen> {
     return PlatformAppBar(
       title: Text(l10n.appName),
       trailingActions: [
-        PlatformPopupMenuButton(
-          itemBuilder: (context) => [
-            PlatformPopupMenuItem(child: Text("Settings"), value: "settings"),
+        PlatformPopup<String>(
+          type: PlatformPopupType.tap,
+          items: [
+            PlatformPopupMenuItem(
+                label: Text("Settings"),
+                onPressed: () async {
+                  if (isCupertino(context)) {
+                    showCupertinoModalBottomSheet(
+                      context: context,
+                      backgroundColor: Colors.transparent,
+                      builder: (_) => SettingsScreen(),
+                    );
+                  } else {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => SettingsScreen(),
+                      ),
+                    );
+                  }
+                })
           ],
-          onSelected: (value) {
-            switch (value) {
-              case "settings":
-                if (isCupertino(context)) {
-                  showCupertinoModalBottomSheet(
-                    context: context,
-                    backgroundColor: Colors.transparent,
-                    builder: (_) => SettingsScreen(),
-                  );
-                } else {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => SettingsScreen(),
-                    ),
-                  );
-                }
-            }
-          },
-        ),
+        )
       ],
     );
   }

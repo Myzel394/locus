@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:duration_picker/duration_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +10,7 @@ import 'package:locus/constants/timers.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/services/timers_service.dart';
 import 'package:locus/utils/theme.dart';
-import 'package:locus/widgets/LongPressPopup.dart';
+import 'package:locus/widgets/PlatformPopup.dart';
 import 'package:locus/widgets/ModalSheet.dart';
 import 'package:locus/widgets/TimerWidget.dart';
 import 'package:locus/widgets/WarningText.dart';
@@ -87,10 +89,11 @@ class _TimerWidgetSheetState extends State<TimerWidgetSheet> {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
-                      LongPressPopup<String>(
-                        items: List<LongPressPopupMenuItem>.from(
+                      PlatformPopup<String>(
+                        type: PlatformPopupType.longPress,
+                        items: List<PlatformPopupMenuItem<String>>.from(
                           WEEKDAY_TIMERS.entries.map(
-                            (entry) => LongPressPopupMenuItem(
+                            (entry) => PlatformPopupMenuItem(
                               label: Text(entry.value["name"] as String),
                               onPressed: () {
                                 widget.controller.clear();

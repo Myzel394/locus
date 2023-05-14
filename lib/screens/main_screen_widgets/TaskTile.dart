@@ -8,6 +8,7 @@ import 'package:locus/services/task_service.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../widgets/PlatformPopup.dart';
 import '../TaskDetailScreen.dart';
 
 class TaskTile extends StatefulWidget {
@@ -133,61 +134,60 @@ class _TaskTileState extends State<TaskTile> {
           return const SizedBox();
         },
       ),
-      trailing: PlatformPopupMenuButton(
-        onSelected: (value) async {
-          final url = await widget.task.generateLink(
-            onProgress: (progress) {
-              if (snackBar != null) {
-                try {
-                  snackBar!.close();
-                } catch (e) {}
-              }
-
-              if (progress != TaskLinkPublishProgress.done && Platform.isAndroid) {
-                final scaffold = ScaffoldMessenger.of(context);
-
-                snackBar = scaffold.showSnackBar(
-                  SnackBar(
-                    content: Text(getProgressTextMap()[progress] ?? ""),
-                    duration: const Duration(seconds: 1),
-                    backgroundColor: Colors.indigoAccent,
-                  ),
-                );
-              }
-            },
-          );
-
-          await Clipboard.setData(ClipboardData(text: url));
-          await Share.share(
-            url,
-            subject: l10n.taskAction_generateLink_shareTextSubject,
-          );
-
-          if (!mounted) {
-            return;
-          }
-
-          if (isMaterial(context)) {
-            final scaffold = ScaffoldMessenger.of(context);
-
-            scaffold.showSnackBar(
-              SnackBar(
-                content: Text(l10n.linkCopiedToClipboard),
-                duration: const Duration(seconds: 3),
-                backgroundColor: Colors.green,
-              ),
-            );
-          }
-        },
-        itemBuilder: (context) => [
+      trailing: PlatformPopup<String>(
+        type: PlatformPopupType.tap,
+        items: [
           PlatformPopupMenuItem(
-            child: PlatformListTile(
-              leading: Icon(Icons.link_rounded),
-              trailing: SizedBox.shrink(),
-              title: Text(l10n.taskAction_generateLink),
-            ),
-            value: 0,
-          ),
+              label: PlatformListTile(
+                leading: Icon(Icons.link_rounded),
+                trailing: SizedBox.shrink(),
+                title: Text(l10n.taskAction_generateLink),
+              ),
+              onPressed: () async {
+                final url = await widget.task.generateLink(
+                  onProgress: (progress) {
+                    if (snackBar != null) {
+                      try {
+                        snackBar!.close();
+                      } catch (e) {}
+                    }
+
+                    if (progress != TaskLinkPublishProgress.done && Platform.isAndroid) {
+                      final scaffold = ScaffoldMessenger.of(context);
+
+                      snackBar = scaffold.showSnackBar(
+                        SnackBar(
+                          content: Text(getProgressTextMap()[progress] ?? ""),
+                          duration: const Duration(seconds: 1),
+                          backgroundColor: Colors.indigoAccent,
+                        ),
+                      );
+                    }
+                  },
+                );
+
+                await Clipboard.setData(ClipboardData(text: url));
+                await Share.share(
+                  url,
+                  subject: l10n.taskAction_generateLink_shareTextSubject,
+                );
+
+                if (!mounted) {
+                  return;
+                }
+
+                if (isMaterial(context)) {
+                  final scaffold = ScaffoldMessenger.of(context);
+
+                  scaffold.showSnackBar(
+                    SnackBar(
+                      content: Text(l10n.linkCopiedToClipboard),
+                      duration: const Duration(seconds: 3),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                }
+              })
         ],
       ),
       onTap: () {
