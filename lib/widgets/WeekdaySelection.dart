@@ -92,8 +92,11 @@ class _WeekdaySelectionState extends State<WeekdaySelection> {
               padding: const EdgeInsets.symmetric(horizontal: MEDIUM_SPACE, vertical: SMALL_SPACE),
               child: PlatformDropdownButton<int>(
                 value: weekday,
-                style: TextStyle(
-                  backgroundColor: Colors.blue,
+                material: (_, __) => MaterialDropdownButtonData(
+                  style: TextStyle(
+                    backgroundColor: Colors.blue,
+                  ),
+                  underline: Container(),
                 ),
                 onChanged: widget.lockWeekday
                     ? null
@@ -102,7 +105,6 @@ class _WeekdaySelectionState extends State<WeekdaySelection> {
                           weekday = value as int;
                         });
                       }),
-                underline: Container(),
                 items: const <DropdownMenuItem<int>>[
                   DropdownMenuItem(
                     child: Text("Monday"),

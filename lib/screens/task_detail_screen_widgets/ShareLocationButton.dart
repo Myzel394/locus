@@ -121,7 +121,7 @@ class _ShareLocationButtonState extends State<ShareLocationButton> {
                           textAlign: TextAlign.center,
                         ),
                         isMaterial(context) ? const SizedBox(height: LARGE_SPACE) : null,
-                        QrImage(
+                        QrImageView(
                           data: url,
                           errorCorrectionLevel: QrErrorCorrectLevel.H,
                           gapless: false,
