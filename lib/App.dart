@@ -31,7 +31,6 @@ class App extends StatelessWidget {
         material: (_, __) => MaterialAppData(
           theme: LIGHT_THEME_MATERIAL,
           darkTheme: DARK_THEME_MATERIAL,
-          themeMode: ThemeMode.dark,
         ),
         cupertino: (_, __) => CupertinoAppData(
           theme: settings.primaryColor == null

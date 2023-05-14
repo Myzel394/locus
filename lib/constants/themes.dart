@@ -4,10 +4,6 @@ import 'package:locus/constants/spacing.dart';
 
 final LIGHT_THEME_MATERIAL = ThemeData(
   useMaterial3: true,
-  colorScheme: ThemeData.light().colorScheme.copyWith(
-        primary: const Color(0xffd77422),
-        secondary: const Color(0xffcb4a1c),
-      ),
   textTheme: ThemeData().textTheme.copyWith(
         headline1: const TextStyle(
           fontSize: 32,
@@ -29,10 +25,6 @@ final LIGHT_THEME_MATERIAL = ThemeData(
 
 final DARK_THEME_MATERIAL = ThemeData.dark().copyWith(
   useMaterial3: true,
-  colorScheme: ThemeData.dark().colorScheme.copyWith(
-        primary: const Color(0xffd77422),
-        secondary: const Color(0xffcb4a1c),
-      ),
   textTheme: ThemeData.dark().textTheme.copyWith(
         headline1: const TextStyle(
           fontSize: 32,

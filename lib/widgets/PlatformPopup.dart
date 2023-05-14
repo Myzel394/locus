@@ -66,7 +66,6 @@ class _PlatformPopupState<T> extends State<PlatformPopup> {
         widget.items.mapIndexed(
           (index, item) => PopupMenuItem(
             value: index,
-            onTap: item.onPressed,
             child: Row(
               children: [
                 if (item.icon != null) ...[
@@ -109,9 +108,12 @@ class _PlatformPopupState<T> extends State<PlatformPopup> {
     );
   }
 
-  Widget getChild() => PlatformWidget(
-        material: (_, __) => widget.child ?? const Icon(Icons.more_horiz_rounded),
-        cupertino: (_, __) => widget.child ?? const Icon(CupertinoIcons.ellipsis_vertical),
+  Widget getChild() => Padding(
+        padding: const EdgeInsets.all(SMALL_SPACE),
+        child: PlatformWidget(
+          material: (_, __) => widget.child ?? const Icon(Icons.more_horiz_rounded),
+          cupertino: (_, __) => widget.child ?? const Icon(CupertinoIcons.ellipsis_vertical),
+        ),
       );
 
   @override
@@ -123,25 +125,33 @@ class _PlatformPopupState<T> extends State<PlatformPopup> {
         child: getChild(),
       );
     } else {
-      return GestureDetector(
-        onTapDown: (position) {
-          final renderBox = context.findRenderObject() as RenderBox;
-          final offset = renderBox.globalToLocal(position.globalPosition);
+      switch (widget.type) {
+        case PlatformPopupType.longPress:
+          return GestureDetector(
+            onTapDown: (position) {
+              final renderBox = context.findRenderObject() as RenderBox;
+              final offset = renderBox.globalToLocal(position.globalPosition);
 
-          // Change dy to globalPosition
-          final newOffset = Offset(
-            offset.dx,
-            position.globalPosition.dy,
+              // Change dy to globalPosition
+              final newOffset = Offset(
+                offset.dx,
+                position.globalPosition.dy,
+              );
+
+              setState(() {
+                _tapPosition = newOffset;
+              });
+            },
+            onLongPress: showMaterialPopupMenu,
+            child: getChild(),
           );
-
-          setState(() {
-            _tapPosition = newOffset;
-          });
-        },
-        onTap: widget.type == PlatformPopupType.tap ? showMaterialPopupMenu : null,
-        onLongPress: widget.type == PlatformPopupType.longPress ? showMaterialPopupMenu : null,
-        child: getChild(),
-      );
+        case PlatformPopupType.tap:
+          return PopupMenuButton(
+            itemBuilder: (_) => materialActions,
+            child: getChild(),
+            onSelected: (index) => widget.items[index].onPressed(),
+          );
+      }
     }
   }
 }
