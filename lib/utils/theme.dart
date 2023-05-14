@@ -4,6 +4,7 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/services/settings_service.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 TextStyle getBodyTextTextStyle(final BuildContext context) => platformThemeData(
       context,
@@ -23,8 +24,7 @@ Color getBodyTextColor(final BuildContext context) => platformThemeData(
       cupertino: (data) => data.textTheme.textStyle.color!,
     );
 
-bool getIsDarkMode(final BuildContext context) =>
-    MediaQuery.of(context).platformBrightness == Brightness.dark;
+bool getIsDarkMode(final BuildContext context) => MediaQuery.of(context).platformBrightness == Brightness.dark;
 
 Color getButtonBackgroundColor(final BuildContext context) => platformThemeData(
       context,
@@ -70,10 +70,7 @@ TextStyle getCaptionTextStyle(final BuildContext context) => platformThemeData(
 
 Color getSheetColor(final BuildContext context) => platformThemeData(
       context,
-      material: (data) =>
-          HSLColor.fromColor(data.scaffoldBackgroundColor.withAlpha(255))
-              .withLightness(.18)
-              .toColor(),
+      material: (data) => HSLColor.fromColor(data.scaffoldBackgroundColor.withAlpha(255)).withLightness(.18).toColor(),
       cupertino: (data) => data.barBackgroundColor,
     );
 
@@ -98,9 +95,7 @@ Map<int, Color> getPrimaryColorShades(final BuildContext context) {
       9,
       (index) => MapEntry(
         (index + 1) * 100,
-        HSLColor.fromColor(primaryColor)
-            .withLightness(1 - (index / 10))
-            .toColor(),
+        HSLColor.fromColor(primaryColor).withLightness(1 - (index / 10)).toColor(),
       ),
     ),
   );
@@ -111,8 +106,7 @@ Map<int, Color> getPrimaryColorShades(final BuildContext context) {
   };
 }
 
-EdgeInsets getSmallButtonPadding(final BuildContext context) =>
-    platformThemeData(
+EdgeInsets getSmallButtonPadding(final BuildContext context) => platformThemeData(
       context,
       material: (data) => const EdgeInsets.symmetric(
         horizontal: MEDIUM_SPACE,
@@ -128,12 +122,14 @@ List<Widget> createCancellableDialogActions(
   final BuildContext context,
   final Iterable<Widget> actions,
 ) {
+  final l10n = AppLocalizations.of(context);
+
   final cancelWidget = PlatformDialogAction(
-    child: const Text("Cancel"),
+    child: Text(l10n.cancelLabel),
     material: (_, __) => MaterialDialogActionData(
         icon: PlatformWidget(
-      material: (_, __) => Icon(Icons.cancel_outlined),
-      cupertino: (_, __) => Icon(CupertinoIcons.clear_thick),
+      material: (_, __) => const Icon(Icons.cancel_outlined),
+      cupertino: (_, __) => const Icon(CupertinoIcons.clear_thick),
     )),
     onPressed: () => Navigator.of(context).pop(""),
   );

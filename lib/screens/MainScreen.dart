@@ -6,7 +6,6 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/init_quick_actions.dart';
-import 'package:locus/screens/SettingsScreen.dart';
 import 'package:locus/screens/main_screen_widgets/ImportTask.dart';
 import 'package:locus/screens/main_screen_widgets/TaskTile.dart';
 import 'package:locus/screens/main_screen_widgets/ViewTile.dart';
@@ -18,7 +17,6 @@ import 'package:locus/widgets/AppHint.dart';
 import 'package:locus/widgets/ChipCaption.dart';
 import 'package:locus/widgets/Paper.dart';
 import 'package:locus/widgets/PlatformPopup.dart';
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:provider/provider.dart';
 
 import 'CreateTaskScreen.dart';
@@ -108,7 +106,7 @@ class _MainScreenState extends State<MainScreen> {
           type: PlatformPopupType.tap,
           items: [
             PlatformPopupMenuItem(
-              label: Text("Settings"),
+              label: Text(l10n.settingsScreen_title),
               onPressed: () => showSettings(context),
             ),
           ],

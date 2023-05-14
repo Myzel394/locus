@@ -3,6 +3,8 @@
   "unknownError": "An unknown error occurred",
   "unknownValue": "Unknown",
   "resetLabel": "Reset",
+  "cancelLabel": "Cancel",
+  "addLabel": "Add",
   "taskImportError": "An error occurred while importing the task",
   "locationsLoadingError": "An error occurred while loading locations",
   "locationFetchError": "There was an error fetching the locations. Please try again later.",
@@ -364,5 +366,14 @@
   "appHint_defaultRelays_description": "You can add default relays in the settings. This will automatically select them when creating a new task.",
   "appHint_appColor_title": "Change App Colors",
   "appHint_appColor_description": "You can personalize Locus by changing the primary color in the settings.",
-  "appHint_showMeLabel": "Show me"
+  "appHint_showMeLabel": "Show me",
+  "weekdays_monday": "Monday",
+  "weekdays_tuesday": "Tuesday",
+  "weekdays_wednesday": "Wednesday",
+  "weekdays_thursday": "Thursday",
+  "weekdays_friday": "Friday",
+  "weekdays_saturday": "Saturday",
+  "weekdays_sunday": "Sunday",
+  "weekdaySelection_selectTitle": "Select Date and Time",
+  "weekdaySelection_error_startTimeBeforeEndTime": "Start time must be before end time"
 }
