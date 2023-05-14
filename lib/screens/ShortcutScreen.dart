@@ -59,7 +59,7 @@ class _ShortcutScreenState extends State<ShortcutScreen> {
           );
 
           await task.startSchedule(startNowIfNextRunIsUnknown: true);
-          task.publishCurrentLocationNow();
+          await task.publishCurrentLocationNow();
 
           taskService.add(task);
           await taskService.save();
@@ -113,7 +113,9 @@ class _ShortcutScreenState extends State<ShortcutScreen> {
   void initState() {
     super.initState();
 
-    _runAction();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _runAction();
+    });
   }
 
   @override
