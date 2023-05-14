@@ -4,8 +4,12 @@ import 'package:battery_plus/battery_plus.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:openpgp/openpgp.dart';
+import 'package:uuid/uuid.dart';
+
+const uuid = Uuid();
 
 class LocationPointService {
+  final String id;
   final DateTime createdAt;
   final double latitude;
   final double longitude;
@@ -19,6 +23,7 @@ class LocationPointService {
   final BatteryState? batteryState;
 
   LocationPointService({
+    required this.id,
     required this.createdAt,
     required this.latitude,
     required this.longitude,
@@ -39,6 +44,7 @@ class LocationPointService {
 
   static LocationPointService fromJSON(Map<String, dynamic> json) {
     return LocationPointService(
+      id: json["id"],
       createdAt: DateTime.parse(json["createdAt"]),
       latitude: json["latitude"],
       longitude: json["longitude"],
@@ -57,6 +63,7 @@ class LocationPointService {
 
   Map<String, dynamic> toJSON() {
     return {
+      "id": id,
       "createdAt": createdAt.toIso8601String(),
       "latitude": latitude,
       "longitude": longitude,
@@ -77,8 +84,7 @@ class LocationPointService {
     required final String signPrivateKey,
   }) async {
     final rawMessage = jsonEncode(toJSON());
-    final signedMessage =
-        await OpenPGP.sign(rawMessage, signPublicKey, signPrivateKey, "");
+    final signedMessage = await OpenPGP.sign(rawMessage, signPublicKey, signPrivateKey, "");
     final content = {
       "message": rawMessage,
       "signature": signedMessage,
@@ -111,6 +117,7 @@ class LocationPointService {
     }
 
     return LocationPointService(
+      id: uuid.v4(),
       createdAt: DateTime.now(),
       latitude: locationData.latitude,
       longitude: locationData.longitude,
@@ -138,8 +145,7 @@ class LocationPointService {
     final message = content["message"];
     final signature = content["signature"];
 
-    final isSignatureValid =
-        await OpenPGP.verify(signature, message, signPublicKey);
+    final isSignatureValid = await OpenPGP.verify(signature, message, signPublicKey);
 
     if (!isSignatureValid) {
       throw Exception("Invalid signature");
