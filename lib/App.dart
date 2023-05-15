@@ -37,10 +37,16 @@ class App extends StatelessWidget {
             theme: (() {
               if (lightColorScheme != null) {
                 return LIGHT_THEME_MATERIAL.copyWith(
+                  colorScheme: lightColorScheme,
                   scaffoldBackgroundColor:
                       HSLColor.fromColor(lightColorScheme.background)
                           .withLightness(0.08)
                           .toColor(),
+                  inputDecorationTheme: InputDecorationTheme(
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(MEDIUM_SPACE),
+                    ),
+                  ),
                   dialogBackgroundColor: lightColorScheme.background,
                 );
               }
@@ -50,6 +56,7 @@ class App extends StatelessWidget {
             darkTheme: (() {
               if (darkColorScheme != null) {
                 return DARK_THEME_MATERIAL.copyWith(
+                  colorScheme: darkColorScheme,
                   scaffoldBackgroundColor:
                       HSLColor.fromColor(darkColorScheme.background)
                           .withLightness(0.08)
