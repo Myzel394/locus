@@ -1,3 +1,4 @@
+import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
@@ -8,6 +9,7 @@ import 'package:locus/widgets/DismissKeyboard.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:provider/provider.dart';
 
+import 'constants/spacing.dart';
 import 'constants/themes.dart';
 
 class App extends StatelessWidget {
@@ -26,34 +28,70 @@ class App extends StatelessWidget {
     final settings = context.watch<SettingsService>();
 
     return DismissKeyboard(
-      child: PlatformApp(
-        title: 'Locus',
-        material: (_, __) => MaterialAppData(
-          theme: LIGHT_THEME_MATERIAL,
-          darkTheme: DARK_THEME_MATERIAL,
-        ),
-        cupertino: (_, __) => CupertinoAppData(
-          theme: settings.primaryColor == null
-              ? LIGHT_THEME_CUPERTINO
-              : LIGHT_THEME_CUPERTINO.copyWith(
-                  primaryColor: settings.primaryColor,
-                ),
-        ),
-        localizationsDelegates: AppLocalizations.localizationsDelegates,
-        supportedLocales: AppLocalizations.supportedLocales,
-        onGenerateRoute: (settings) {
-          final screen = hasLocationAlwaysGranted && isIgnoringBatteryOptimizations
-              ? const MainScreen()
-              : WelcomeScreen(
-                  hasLocationAlwaysGranted: hasLocationAlwaysGranted,
-                  isIgnoringBatteryOptimizations: isIgnoringBatteryOptimizations,
+      child: DynamicColorBuilder(
+        builder:
+            (ColorScheme? lightColorScheme, ColorScheme? darkColorScheme) =>
+                PlatformApp(
+          title: 'Locus',
+          material: (_, __) => MaterialAppData(
+            theme: (() {
+              if (lightColorScheme != null) {
+                return LIGHT_THEME_MATERIAL.copyWith(
+                  scaffoldBackgroundColor:
+                      HSLColor.fromColor(lightColorScheme.background)
+                          .withLightness(0.08)
+                          .toColor(),
+                  dialogBackgroundColor: lightColorScheme.background,
                 );
+              }
 
-          return MaterialWithModalsPageRoute(
-            builder: (context) => screen,
-            settings: settings,
-          );
-        },
+              return LIGHT_THEME_MATERIAL;
+            })(),
+            darkTheme: (() {
+              if (darkColorScheme != null) {
+                return DARK_THEME_MATERIAL.copyWith(
+                  scaffoldBackgroundColor:
+                      HSLColor.fromColor(darkColorScheme.background)
+                          .withLightness(0.08)
+                          .toColor(),
+                  inputDecorationTheme: InputDecorationTheme(
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(MEDIUM_SPACE),
+                    ),
+                  ),
+                  dialogBackgroundColor: darkColorScheme.background,
+                );
+              }
+
+              return DARK_THEME_MATERIAL;
+            })(),
+            themeMode: ThemeMode.system,
+          ),
+          cupertino: (_, __) => CupertinoAppData(
+            theme: settings.primaryColor == null
+                ? LIGHT_THEME_CUPERTINO
+                : LIGHT_THEME_CUPERTINO.copyWith(
+                    primaryColor: settings.primaryColor,
+                  ),
+          ),
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          onGenerateRoute: (settings) {
+            final screen =
+                hasLocationAlwaysGranted && isIgnoringBatteryOptimizations
+                    ? const MainScreen()
+                    : WelcomeScreen(
+                        hasLocationAlwaysGranted: hasLocationAlwaysGranted,
+                        isIgnoringBatteryOptimizations:
+                            isIgnoringBatteryOptimizations,
+                      );
+
+            return MaterialWithModalsPageRoute(
+              builder: (context) => screen,
+              settings: settings,
+            );
+          },
+        ),
       ),
     );
   }

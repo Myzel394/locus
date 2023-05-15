@@ -83,6 +83,7 @@ dependencies:
   quick_actions: ^1.0.3
   shimmer: ^2.0.0
   flutter_platform_widgets: ^3.3.2
+  dynamic_color: ^1.6.5
 
 flutter_launcher_icons:
   android: true
