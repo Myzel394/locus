@@ -1,11 +1,10 @@
-import 'dart:io';
-
 import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/utils/theme.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 enum PlatformPopupType {
   longPress,
@@ -33,11 +32,14 @@ class PlatformPopup<T> extends StatefulWidget {
   final List<PlatformPopupMenuItem<T>> items;
   final PlatformPopupType type;
 
+  final bool cupertinoCancellable;
+
   const PlatformPopup({
     Key? key,
     this.child,
     required this.items,
     this.type = PlatformPopupType.longPress,
+    this.cupertinoCancellable = true,
   }) : super(key: key);
 
   @override
@@ -47,20 +49,32 @@ class PlatformPopup<T> extends StatefulWidget {
 class _PlatformPopupState<T> extends State<PlatformPopup> {
   Offset _tapPosition = Offset.zero;
 
-  List<CupertinoContextMenuAction> get cupertinoActions => widget.items
-      .map(
-        (item) => CupertinoContextMenuAction(
-          trailingIcon: item.icon,
-          onPressed: () {
-            Navigator.pop(context);
-            item.onPressed();
-          },
-          isDefaultAction: item.isDefaultAction,
-          isDestructiveAction: item.isDestructiveAction,
-          child: item.label,
+  List<CupertinoActionSheetAction> get cupertinoActions {
+    final l10n = AppLocalizations.of(context);
+
+    final items = widget.items
+        .map(
+          (item) => CupertinoActionSheetAction(
+            onPressed: item.onPressed,
+            isDefaultAction: item.isDefaultAction,
+            isDestructiveAction: item.isDestructiveAction,
+            child: item.label,
+          ),
+        )
+        .toList();
+
+    if (widget.cupertinoCancellable) {
+      return [
+        ...items,
+        CupertinoActionSheetAction(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(l10n.cancelLabel),
         ),
-      )
-      .toList();
+      ];
+    }
+
+    return items;
+  }
 
   List<PopupMenuItem<int>> get materialActions => List<PopupMenuItem<int>>.from(
         widget.items.mapIndexed(
@@ -93,7 +107,8 @@ class _PlatformPopupState<T> extends State<PlatformPopup> {
       context: context,
       position: RelativeRect.fromRect(
         Rect.fromLTWH(_tapPosition.dx, _tapPosition.dy, 10, 10),
-        Rect.fromLTWH(0, 0, overlay.paintBounds.size.width, overlay.paintBounds.size.height),
+        Rect.fromLTWH(0, 0, overlay.paintBounds.size.width,
+            overlay.paintBounds.size.height),
       ),
       items: materialActions,
     );
@@ -102,6 +117,7 @@ class _PlatformPopupState<T> extends State<PlatformPopup> {
   void showCupertinoActionSheet() async {
     await showCupertinoModalPopup(
       context: context,
+      barrierDismissible: true,
       builder: (context) => CupertinoActionSheet(
         actions: cupertinoActions,
       ),
@@ -111,19 +127,32 @@ class _PlatformPopupState<T> extends State<PlatformPopup> {
   Widget getChild() => Padding(
         padding: const EdgeInsets.all(SMALL_SPACE),
         child: PlatformWidget(
-          material: (_, __) => widget.child ?? const Icon(Icons.more_horiz_rounded),
-          cupertino: (_, __) => widget.child ?? const Icon(CupertinoIcons.ellipsis_vertical),
+          material: (_, __) =>
+              widget.child ?? const Icon(Icons.more_horiz_rounded),
+          cupertino: (_, __) =>
+              widget.child ?? const Icon(CupertinoIcons.ellipsis_vertical),
         ),
       );
 
   @override
   Widget build(BuildContext context) {
     if (isCupertino(context)) {
-      return GestureDetector(
-        onTap: widget.type == PlatformPopupType.tap ? showCupertinoActionSheet : null,
-        onLongPress: widget.type == PlatformPopupType.longPress ? showCupertinoActionSheet : null,
-        child: getChild(),
-      );
+      if (widget.child == null) {
+        return CupertinoButton(
+          onPressed: showCupertinoActionSheet,
+          child: const Icon(CupertinoIcons.ellipsis),
+        );
+      } else {
+        return GestureDetector(
+          onTap: widget.type == PlatformPopupType.tap
+              ? showCupertinoActionSheet
+              : null,
+          onLongPress: widget.type == PlatformPopupType.longPress
+              ? showCupertinoActionSheet
+              : null,
+          child: widget.child,
+        );
+      }
     } else {
       switch (widget.type) {
         case PlatformPopupType.longPress:

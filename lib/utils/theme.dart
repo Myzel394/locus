@@ -24,7 +24,8 @@ Color getBodyTextColor(final BuildContext context) => platformThemeData(
       cupertino: (data) => data.textTheme.textStyle.color!,
     );
 
-bool getIsDarkMode(final BuildContext context) => MediaQuery.of(context).platformBrightness == Brightness.dark;
+bool getIsDarkMode(final BuildContext context) =>
+    MediaQuery.of(context).platformBrightness == Brightness.dark;
 
 Color getButtonBackgroundColor(final BuildContext context) => platformThemeData(
       context,
@@ -70,7 +71,10 @@ TextStyle getCaptionTextStyle(final BuildContext context) => platformThemeData(
 
 Color getSheetColor(final BuildContext context) => platformThemeData(
       context,
-      material: (data) => HSLColor.fromColor(data.scaffoldBackgroundColor.withAlpha(255)).withLightness(.18).toColor(),
+      material: (data) =>
+          HSLColor.fromColor(data.scaffoldBackgroundColor.withAlpha(255))
+              .withLightness(.18)
+              .toColor(),
       cupertino: (data) => data.barBackgroundColor,
     );
 
@@ -95,7 +99,9 @@ Map<int, Color> getPrimaryColorShades(final BuildContext context) {
       9,
       (index) => MapEntry(
         (index + 1) * 100,
-        HSLColor.fromColor(primaryColor).withLightness(1 - (index / 10)).toColor(),
+        HSLColor.fromColor(primaryColor)
+            .withLightness(1 - (index / 10))
+            .toColor(),
       ),
     ),
   );
@@ -106,7 +112,8 @@ Map<int, Color> getPrimaryColorShades(final BuildContext context) {
   };
 }
 
-EdgeInsets getSmallButtonPadding(final BuildContext context) => platformThemeData(
+EdgeInsets getSmallButtonPadding(final BuildContext context) =>
+    platformThemeData(
       context,
       material: (data) => const EdgeInsets.symmetric(
         horizontal: MEDIUM_SPACE,
@@ -127,10 +134,8 @@ List<Widget> createCancellableDialogActions(
   final cancelWidget = PlatformDialogAction(
     child: Text(l10n.cancelLabel),
     material: (_, __) => MaterialDialogActionData(
-        icon: PlatformWidget(
-      material: (_, __) => const Icon(Icons.cancel_outlined),
-      cupertino: (_, __) => const Icon(CupertinoIcons.clear_thick),
-    )),
+      icon: const Icon(Icons.cancel_outlined),
+    ),
     onPressed: () => Navigator.of(context).pop(""),
   );
 
