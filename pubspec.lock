@@ -217,6 +217,30 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.5"
+  cupertino_list_tile:
+    dependency: transitive
+    description:
+      name: cupertino_list_tile
+      sha256: "081745577503a526b46feba753a53d7b0ba51196192c30097685f3f30297052f"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.1+1"
+  cupertino_progress_bar:
+    dependency: transitive
+    description:
+      name: cupertino_progress_bar
+      sha256: "4962a7c6db9b94d1c19462ad6036fdf20db43defa4114c908a3c4cbef1b3a2e0"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.0"
+  cupertino_stepper:
+    dependency: transitive
+    description:
+      name: cupertino_stepper
+      sha256: "124690b8b23db7b43fc6d547688e42a9f3d73c8f46d0b210568e98a04b5645b2"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.1"
   dbus:
     dependency: transitive
     description:
@@ -265,6 +289,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.6.5"
+  enough_platform_widgets:
+    dependency: "direct main"
+    description:
+      name: enough_platform_widgets
+      sha256: "7484e2cec63ad41897d9c6ae8f739013c0f1281203eade3b4635875036eed21f"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.5.0"
   enum_to_string:
     dependency: transitive
     description:
@@ -391,10 +423,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_platform_widgets
-      sha256: "53b3f61a9a974eebf3a366ca816dc56b22883619143ab041e100d0622f166e87"
+      sha256: "04a373ebf654162791bfce4b7c157f48ec35ea8b0abe2a68de837ceda8bd39ff"
       url: "https://pub.dev"
     source: hosted
-    version: "3.3.2"
+    version: "2.2.6"
   flutter_plugin_android_lifecycle:
     dependency: transitive
     description:

@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
@@ -68,10 +69,12 @@ class SettingsColorPickerWidgetRaw extends StatefulWidget {
       : super(key: key);
 
   @override
-  State<SettingsColorPickerWidgetRaw> createState() => _SettingsColorPickerWidgetRawState();
+  State<SettingsColorPickerWidgetRaw> createState() =>
+      _SettingsColorPickerWidgetRawState();
 }
 
-class _SettingsColorPickerWidgetRawState extends State<SettingsColorPickerWidgetRaw> with TickerProviderStateMixin {
+class _SettingsColorPickerWidgetRawState
+    extends State<SettingsColorPickerWidgetRaw> with TickerProviderStateMixin {
   late final AnimationController controller;
   Animation<Offset>? animation;
   Color? oldColor;
@@ -104,7 +107,8 @@ class _SettingsColorPickerWidgetRawState extends State<SettingsColorPickerWidget
     super.dispose();
   }
 
-  void _startAnimation(final Offset offset, final Color color, final Offset position) {
+  void _startAnimation(
+      final Offset offset, final Color color, final Offset position) {
     animation = Tween<Offset>(
       begin: Offset.zero,
       end: offset,
@@ -201,7 +205,8 @@ class _SettingsColorPickerWidgetRawState extends State<SettingsColorPickerWidget
                 crossAxisAlignment: WrapCrossAlignment.center,
                 children: <Widget>[
                       PlatformTextButton(
-                        child: Text(l10n.settingsScreen_setting_primaryColor_systemDefault),
+                        child: Text(l10n
+                            .settingsScreen_setting_primaryColor_systemDefault),
                         onPressed: () {
                           widget.onUpdate(null);
                         },

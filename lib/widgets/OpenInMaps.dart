@@ -1,3 +1,4 @@
+import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -66,14 +67,16 @@ class _OpenInMapsState extends State<OpenInMaps> {
                                 Navigator.pop(context);
                               },
                               leading: ClipRRect(
-                                borderRadius: BorderRadius.circular(SMALL_SPACE),
+                                borderRadius:
+                                    BorderRadius.circular(SMALL_SPACE),
                                 child: SvgPicture.asset(
                                   map.icon,
                                   height: ICON_SIZE,
                                   width: ICON_SIZE,
                                 ),
                               ),
-                              trailing: Icon(context.platformIcons.rightChevron),
+                              trailing:
+                                  Icon(context.platformIcons.rightChevron),
                             );
                           },
                         );
@@ -90,13 +93,15 @@ class _OpenInMapsState extends State<OpenInMaps> {
                             leading: PlatformIconButton(
                               icon: PlatformWidget(
                                 material: (_, __) => const Icon(Icons.copy),
-                                cupertino: (_, __) => const Icon(CupertinoIcons.doc_on_clipboard),
+                                cupertino: (_, __) =>
+                                    const Icon(CupertinoIcons.doc_on_clipboard),
                               ),
                               onPressed: () {
                                 // Copy to clipboard
                                 Clipboard.setData(
                                   ClipboardData(
-                                    text: "${widget.destination.latitude}, ${widget.destination.longitude}",
+                                    text:
+                                        "${widget.destination.latitude}, ${widget.destination.longitude}",
                                   ),
                                 );
                               },

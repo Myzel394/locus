@@ -1,4 +1,5 @@
 import 'package:battery_plus/battery_plus.dart';
+import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
@@ -31,10 +32,13 @@ class _LocationDetailsState extends State<LocationDetails> {
     final l10n = AppLocalizations.of(context);
 
     return {
-      BatteryState.charging: l10n.taskDetails_locationDetails_batteryState_charging,
-      BatteryState.discharging: l10n.taskDetails_locationDetails_batteryState_discharging,
+      BatteryState.charging:
+          l10n.taskDetails_locationDetails_batteryState_charging,
+      BatteryState.discharging:
+          l10n.taskDetails_locationDetails_batteryState_discharging,
       BatteryState.full: l10n.taskDetails_locationDetails_batteryState_full,
-      BatteryState.unknown: l10n.taskDetails_locationDetails_batteryState_unknown,
+      BatteryState.unknown:
+          l10n.taskDetails_locationDetails_batteryState_unknown,
       null: l10n.taskDetails_locationDetails_batteryState_unknown,
     };
   }
@@ -133,7 +137,8 @@ class _LocationDetailsState extends State<LocationDetails> {
                           widget.location.accuracy.round(),
                         ),
                       ),
-                      subtitle: Text(l10n.taskDetails_locationDetails_accuracy_label),
+                      subtitle:
+                          Text(l10n.taskDetails_locationDetails_accuracy_label),
                       leading: Icon(Icons.location_on),
                       trailing: SizedBox.shrink(),
                     ),
@@ -145,7 +150,8 @@ class _LocationDetailsState extends State<LocationDetails> {
                                 (widget.location.batteryLevel! * 100).floor(),
                               ),
                       ),
-                      subtitle: Text(l10n.taskDetails_locationDetails_battery_label),
+                      subtitle:
+                          Text(l10n.taskDetails_locationDetails_battery_label),
                       leading: Icon(
                         getIconForBatteryLevel(
                           widget.location.batteryLevel,
@@ -188,7 +194,8 @@ class _LocationDetailsState extends State<LocationDetails> {
                                 widget.location.altitude!.toInt().abs(),
                               ),
                       ),
-                      subtitle: Text(l10n.taskDetails_locationDetails_altitude_label),
+                      subtitle:
+                          Text(l10n.taskDetails_locationDetails_altitude_label),
                       leading: PlatformWidget(
                         material: (_, __) => Icon(Icons.height_rounded),
                         cupertino: (_, __) => Icon(CupertinoIcons.alt),
