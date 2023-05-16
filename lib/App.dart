@@ -12,6 +12,28 @@ import 'package:provider/provider.dart';
 import 'constants/spacing.dart';
 import 'constants/themes.dart';
 
+ColorScheme createColorScheme(
+  final ColorScheme baseScheme,
+  final Color primaryColor,
+  final Brightness brightness,
+) {
+  switch (brightness) {
+    case Brightness.dark:
+      return baseScheme.copyWith(
+        background:
+            HSLColor.fromColor(primaryColor).withLightness(0.3).toColor(),
+        primary: primaryColor,
+        brightness: brightness,
+        surface: HSLColor.fromColor(primaryColor).withLightness(0.15).toColor(),
+      );
+    case Brightness.light:
+      return baseScheme.copyWith(
+        primary: primaryColor,
+        brightness: brightness,
+      );
+  }
+}
+
 class App extends StatelessWidget {
   final bool hasLocationAlwaysGranted;
   final bool isIgnoringBatteryOptimizations;
@@ -37,40 +59,110 @@ class App extends StatelessWidget {
             theme: (() {
               if (lightColorScheme != null) {
                 return LIGHT_THEME_MATERIAL.copyWith(
-                  colorScheme: lightColorScheme,
-                  scaffoldBackgroundColor:
-                      HSLColor.fromColor(lightColorScheme.background)
-                          .withLightness(0.08)
-                          .toColor(),
+                  colorScheme: settings.primaryColor == null
+                      ? lightColorScheme
+                      : createColorScheme(
+                          lightColorScheme,
+                          settings.primaryColor!,
+                          Brightness.light,
+                        ),
+                  primaryColor:
+                      settings.primaryColor ?? lightColorScheme.primary,
+                  scaffoldBackgroundColor: HSLColor.fromColor(
+                          settings.primaryColor ?? lightColorScheme.background)
+                      .withLightness(0.95)
+                      .toColor(),
                   inputDecorationTheme: InputDecorationTheme(
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(MEDIUM_SPACE),
                     ),
                   ),
-                  dialogBackgroundColor: lightColorScheme.background,
+                  dialogBackgroundColor: settings.primaryColor == null
+                      ? lightColorScheme.background
+                      : HSLColor.fromColor(settings.primaryColor!)
+                          .withLightness(0.95)
+                          .toColor(),
                 );
               }
 
-              return LIGHT_THEME_MATERIAL;
+              return LIGHT_THEME_MATERIAL.copyWith(
+                colorScheme: settings.primaryColor == null
+                    ? null
+                    : createColorScheme(
+                        lightColorScheme!,
+                        settings.primaryColor!,
+                        Brightness.light,
+                      ),
+                primaryColor: settings.primaryColor,
+                scaffoldBackgroundColor:
+                    HSLColor.fromColor(settings.primaryColor!)
+                        .withLightness(0.95)
+                        .toColor(),
+                inputDecorationTheme: InputDecorationTheme(
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(MEDIUM_SPACE),
+                  ),
+                ),
+                dialogBackgroundColor: settings.primaryColor == null
+                    ? null
+                    : HSLColor.fromColor(settings.primaryColor!)
+                        .withLightness(0.95)
+                        .toColor(),
+              );
             })(),
             darkTheme: (() {
               if (darkColorScheme != null) {
                 return DARK_THEME_MATERIAL.copyWith(
-                  colorScheme: darkColorScheme,
-                  scaffoldBackgroundColor:
-                      HSLColor.fromColor(darkColorScheme.background)
-                          .withLightness(0.08)
-                          .toColor(),
+                  colorScheme: settings.primaryColor == null
+                      ? darkColorScheme
+                      : createColorScheme(
+                          darkColorScheme,
+                          settings.primaryColor!,
+                          Brightness.dark,
+                        ),
+                  primaryColor:
+                      settings.primaryColor ?? darkColorScheme.primary,
+                  scaffoldBackgroundColor: HSLColor.fromColor(
+                          settings.primaryColor ?? darkColorScheme.background)
+                      .withLightness(0.08)
+                      .toColor(),
                   inputDecorationTheme: InputDecorationTheme(
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(MEDIUM_SPACE),
                     ),
                   ),
-                  dialogBackgroundColor: darkColorScheme.background,
+                  dialogBackgroundColor: settings.primaryColor == null
+                      ? darkColorScheme.background
+                      : HSLColor.fromColor(settings.primaryColor!)
+                          .withLightness(0.15)
+                          .toColor(),
                 );
               }
 
-              return DARK_THEME_MATERIAL;
+              return DARK_THEME_MATERIAL.copyWith(
+                colorScheme: settings.primaryColor == null
+                    ? null
+                    : createColorScheme(
+                        const ColorScheme.dark(),
+                        settings.primaryColor!,
+                        Brightness.dark,
+                      ),
+                primaryColor: settings.primaryColor,
+                scaffoldBackgroundColor:
+                    HSLColor.fromColor(settings.primaryColor ?? Colors.black)
+                        .withLightness(0.08)
+                        .toColor(),
+                inputDecorationTheme: InputDecorationTheme(
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(MEDIUM_SPACE),
+                  ),
+                ),
+                dialogBackgroundColor: settings.primaryColor == null
+                    ? null
+                    : HSLColor.fromColor(settings.primaryColor!)
+                        .withLightness(0.15)
+                        .toColor(),
+              );
             })(),
             themeMode: ThemeMode.system,
           ),
