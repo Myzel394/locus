@@ -639,7 +639,7 @@ DateTime? findNextEndDate(final List<TaskRuntimeTimer> timers,
     timers.map((timer) => timer.nextEndDate(now)).where((date) => date != null),
   )..sort();
 
-  DateTime endDate = nextDates.first!;
+  DateTime endDate = nextDates.first;
 
   for (final date in nextDates.sublist(1)) {
     final nextStartDate = findNextStartDate(timers, startDate: date);
