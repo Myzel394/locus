@@ -23,13 +23,15 @@ class PlatformSelect<T> extends StatefulWidget {
 class _PlatformSelectState<T> extends State<PlatformSelect<T>> {
   int _selectedIndex = 0;
 
-  Widget get previewChild => widget.items.firstWhere((item) => item.value == widget.value).child;
+  Widget get previewChild =>
+      widget.items.firstWhere((item) => item.value == widget.value).child;
 
   @override
   void didUpdateWidget(covariant PlatformSelect<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    _selectedIndex = widget.items.indexWhere((item) => item.value == widget.value);
+    _selectedIndex =
+        widget.items.indexWhere((item) => item.value == widget.value);
   }
 
   @override
@@ -56,9 +58,7 @@ class _PlatformSelectState<T> extends State<PlatformSelect<T>> {
                       _selectedIndex = index;
                     });
                   },
-                  children: [
-                    ...widget.items,
-                  ],
+                  children: widget.items,
                 ),
               ),
             ),

@@ -29,10 +29,12 @@ class BottomSheetFilterBuilder<T> extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<BottomSheetFilterBuilder> createState() => _BottomSheetFilterBuilderState<T>();
+  State<BottomSheetFilterBuilder> createState() =>
+      _BottomSheetFilterBuilderState<T>();
 }
 
-class _BottomSheetFilterBuilderState<T> extends State<BottomSheetFilterBuilder> {
+class _BottomSheetFilterBuilderState<T>
+    extends State<BottomSheetFilterBuilder> {
   List<T> _elements = [];
 
   @override

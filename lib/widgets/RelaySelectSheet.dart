@@ -148,9 +148,11 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
                   },
                   extractValue: (dynamic element) => element as String,
                   builder: (_, List<dynamic> foundRelays) {
-                    final uncheckedFoundRelays =
-                        foundRelays.where((element) => !checkedRelaysSet.contains(element)).toList();
-                    final allRelays = List<String>.from([...widget.controller.relays, ...uncheckedFoundRelays]);
+                    final uncheckedFoundRelays = foundRelays
+                        .where((element) => !checkedRelaysSet.contains(element))
+                        .toList();
+                    final allRelays = List<String>.from(
+                        [...widget.controller.relays, ...uncheckedFoundRelays]);
 
                     return PlatformWidget(
                       material: (context, _) => ListView.builder(
@@ -211,7 +213,6 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
               ),
             const SizedBox(height: MEDIUM_SPACE),
             PlatformTextButton(
-              child: Text(l10n.relaySelectSheet_selectRandomRelays(5)),
               material: (_, __) => MaterialTextButtonData(
                 icon: const Icon(Icons.shuffle),
               ),
@@ -224,6 +225,7 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
                       widget.controller.addAll(relays.take(5).toList());
                     }
                   : null,
+              child: Text(l10n.relaySelectSheet_selectRandomRelays(5)),
             ),
             const SizedBox(height: SMALL_SPACE),
             PlatformElevatedButton(
@@ -235,6 +237,9 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
               ),
               child: Text(l10n.closePositiveSheetAction),
             ),
+            SizedBox(
+              height: MediaQuery.of(context).viewInsets.bottom,
+            )
           ],
         ),
       ),

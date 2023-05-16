@@ -33,11 +33,14 @@ class DropdownTile extends StatefulWidget {
   State<DropdownTile> createState() => _DropdownTileState();
 }
 
-class _DropdownTileState<T> extends State<DropdownTile> with TickerProviderStateMixin {
+class _DropdownTileState<T> extends State<DropdownTile>
+    with TickerProviderStateMixin {
   late final AnimationController controller;
   late final Animation<double> animation;
 
-  bool get isExpanding => animation.status == AnimationStatus.forward || animation.status == AnimationStatus.completed;
+  bool get isExpanding =>
+      animation.status == AnimationStatus.forward ||
+      animation.status == AnimationStatus.completed;
 
   @override
   void initState() {
@@ -184,7 +187,11 @@ class SettingsDropdownTile<T> extends AbstractSettingsTile {
               .map(
                 (value) => DropdownMenuItem<T>(
                   value: value,
-                  child: Text(textMapping[value]!),
+                  child: Center(
+                    child: Text(
+                      textMapping[value]!,
+                    ),
+                  ),
                 ),
               )
               .toList(),
