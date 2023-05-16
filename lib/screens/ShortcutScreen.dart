@@ -26,7 +26,7 @@ class ShortcutScreen extends StatefulWidget {
 }
 
 class _ShortcutScreenState extends State<ShortcutScreen> {
-  bool isRunning = false;
+  bool isDone = false;
   bool isError = false;
 
   Map<ShortcutType, String> getShortcutTranslationMap() {
@@ -104,7 +104,7 @@ class _ShortcutScreenState extends State<ShortcutScreen> {
       }
 
       setState(() {
-        isRunning = false;
+        isDone = false;
       });
     }
   }
@@ -149,7 +149,7 @@ class _ShortcutScreenState extends State<ShortcutScreen> {
               );
             }
 
-            if (!isRunning) {
+            if (isDone) {
               // Success
               return Column(
                 mainAxisAlignment: MainAxisAlignment.center,

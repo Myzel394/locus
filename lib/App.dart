@@ -5,6 +5,7 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/screens/MainScreen.dart';
 import 'package:locus/screens/WelcomeScreen.dart';
 import 'package:locus/services/settings_service.dart';
+import 'package:locus/utils/color.dart';
 import 'package:locus/widgets/DismissKeyboard.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:provider/provider.dart';
@@ -89,13 +90,18 @@ class App extends StatelessWidget {
                 colorScheme: settings.primaryColor == null
                     ? null
                     : createColorScheme(
-                        lightColorScheme!,
+                        lightColorScheme ??
+                            ColorScheme.fromSwatch(
+                              primarySwatch:
+                                  createMaterialColor(settings.primaryColor!),
+                            ),
                         settings.primaryColor!,
                         Brightness.light,
                       ),
                 primaryColor: settings.primaryColor,
-                scaffoldBackgroundColor:
-                    HSLColor.fromColor(settings.primaryColor!)
+                scaffoldBackgroundColor: settings.primaryColor == null
+                    ? null
+                    : HSLColor.fromColor(settings.primaryColor!)
                         .withLightness(0.95)
                         .toColor(),
                 inputDecorationTheme: InputDecorationTheme(
@@ -148,8 +154,9 @@ class App extends StatelessWidget {
                         Brightness.dark,
                       ),
                 primaryColor: settings.primaryColor,
-                scaffoldBackgroundColor:
-                    HSLColor.fromColor(settings.primaryColor ?? Colors.black)
+                scaffoldBackgroundColor: settings.primaryColor == null
+                    ? null
+                    : HSLColor.fromColor(settings.primaryColor!)
                         .withLightness(0.08)
                         .toColor(),
                 inputDecorationTheme: InputDecorationTheme(
