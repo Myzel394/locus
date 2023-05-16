@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:enough_platform_widgets/enough_platform_widgets.dart' as Enough;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
@@ -136,51 +137,21 @@ class _PlatformPopupState<T> extends State<PlatformPopup> {
 
   @override
   Widget build(BuildContext context) {
-    if (isCupertino(context)) {
-      if (widget.child == null) {
-        return CupertinoButton(
-          onPressed: showCupertinoActionSheet,
-          child: const Icon(CupertinoIcons.ellipsis),
-        );
-      } else {
-        return GestureDetector(
-          onTap: widget.type == PlatformPopupType.tap
-              ? showCupertinoActionSheet
-              : null,
-          onLongPress: widget.type == PlatformPopupType.longPress
-              ? showCupertinoActionSheet
-              : null,
-          child: widget.child,
-        );
-      }
-    } else {
-      switch (widget.type) {
-        case PlatformPopupType.longPress:
-          return GestureDetector(
-            onTapDown: (position) {
-              final renderBox = context.findRenderObject() as RenderBox;
-              final offset = renderBox.globalToLocal(position.globalPosition);
+    return Enough.PlatformPopupMenuButton(
+      itemBuilder: (context) => List.from(
+        widget.items.mapIndexed(
+          (index, item) => Enough.PlatformPopupMenuItem(
+            child: item.label,
+            value: index,
+          ),
+        ),
+      ),
+      onSelected: (index) {
+        final element = widget.items[index as int];
 
-              // Change dy to globalPosition
-              final newOffset = Offset(
-                offset.dx,
-                position.globalPosition.dy,
-              );
-
-              setState(() {
-                _tapPosition = newOffset;
-              });
-            },
-            onLongPress: showMaterialPopupMenu,
-            child: getChild(),
-          );
-        case PlatformPopupType.tap:
-          return PopupMenuButton(
-            itemBuilder: (_) => materialActions,
-            child: getChild(),
-            onSelected: (index) => widget.items[index].onPressed(),
-          );
-      }
-    }
+        element.onPressed();
+      },
+      child: getChild(),
+    );
   }
 }

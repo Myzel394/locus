@@ -87,7 +87,7 @@ class _TaskTileState extends State<TaskTile> {
                               content: Text(l10n
                                   .taskAction_started_runsUntil(nextEndDate)),
                               actions: <Widget>[
-                                PlatformDialogAction(
+                                PlatformDialogActionButton(
                                   child: Text(l10n.closeNeutralAction),
                                   onPressed: () {
                                     Navigator.of(context).pop();
@@ -116,7 +116,7 @@ class _TaskTileState extends State<TaskTile> {
                               content: Text(l10n.taskAction_stopped_startsAgain(
                                   nextStartDate)),
                               actions: <Widget>[
-                                PlatformDialogAction(
+                                PlatformDialogActionButton(
                                   child: Text(l10n.closeNeutralAction),
                                   onPressed: () {
                                     Navigator.of(context).pop();
