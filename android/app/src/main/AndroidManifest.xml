@@ -1,4 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.example.locus">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -15,6 +16,7 @@
 
 
     <application
+        tools:replace="android:label"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:label="locus">

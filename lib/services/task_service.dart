@@ -284,7 +284,7 @@ class Task extends ChangeNotifier {
     return nextStartDate;
   }
 
-  // Starts the schedule tomorrow night. This should be used when the user manually stops the execution of the task, but
+  // Starts the schedule tomorrow morning. This should be used when the user manually stops the execution of the task, but
   // still wants the task to run at the next expected time. If `startSchedule` is used, the schedule might start,
   // immediately, which is not what the user wants.
   // Returns the next date the task will run OR `null` if the task is not scheduled to run.

@@ -250,6 +250,7 @@ class _MainScreenState extends State<MainScreen> {
                           return SizedBox.shrink();
                         },
                       ),
+                      const SizedBox(height: MEDIUM_SPACE),
                       SizedBox(
                         height: windowHeight - kToolbarHeight,
                         child: Wrap(

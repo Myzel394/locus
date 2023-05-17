@@ -43,7 +43,6 @@ dependencies:
   openpgp: ^3.5.4
   http: ^0.13.5
   nostr: ^1.3.4
-  workmanager: ^0.5.1
   uuid: ^3.0.7
   permission_handler: ^10.2.0
   provider: ^6.0.5
