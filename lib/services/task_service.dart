@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:locus/api/nostr-events.dart';
 import 'package:locus/constants/app.dart';
-import 'package:locus/services/manager_service.dart';
 import 'package:nostr/nostr.dart';
 import 'package:openpgp/openpgp.dart';
 import 'package:uuid/uuid.dart';
@@ -20,7 +19,7 @@ import 'timers_service.dart';
 
 const storage = FlutterSecureStorage();
 const KEY = "tasks_settings";
-const SAME_TIME_THRESHOLD = Duration(minutes: 2);
+const SAME_TIME_THRESHOLD = Duration(minutes: 15);
 
 enum TaskCreationProgress {
   startsSoon,
@@ -124,18 +123,18 @@ class Task extends ChangeNotifier {
     };
   }
 
-  static Future<Task> create(
-    final String name,
-    final Duration frequency,
-    final List<String> relays, {
-    Function(TaskCreationProgress)? onProgress,
-    List<TaskRuntimeTimer> timers = const [],
-    bool deleteAfterRun = false,
-  }) async {
+  static Future<Task> create(final String name,
+      final Duration frequency,
+      final List<String> relays, {
+        Function(TaskCreationProgress)? onProgress,
+        List<TaskRuntimeTimer> timers = const [],
+        bool deleteAfterRun = false,
+      }) async {
     onProgress?.call(TaskCreationProgress.creatingViewKeys);
     final viewKeyPair = await OpenPGP.generate(
       options: (Options()
-        ..keyOptions = (KeyOptions()..rsaBits = 4096)
+        ..keyOptions = (KeyOptions()
+          ..rsaBits = 4096)
         ..name = "Locus"
         ..email = "user@locus.example"),
     );
@@ -143,7 +142,8 @@ class Task extends ChangeNotifier {
     onProgress?.call(TaskCreationProgress.creatingSignKeys);
     final signKeyPair = await OpenPGP.generate(
       options: (Options()
-        ..keyOptions = (KeyOptions()..rsaBits = 4096)
+        ..keyOptions = (KeyOptions()
+          ..rsaBits = 4096)
         ..name = "Locus"
         ..email = "user@locus.example"),
     );
@@ -157,7 +157,9 @@ class Task extends ChangeNotifier {
       viewPGPPublicKey: viewKeyPair.publicKey,
       signPGPPrivateKey: signKeyPair.privateKey,
       signPGPPublicKey: signKeyPair.publicKey,
-      nostrPrivateKey: Keychain.generate().private,
+      nostrPrivateKey: Keychain
+          .generate()
+          .private,
       relays: relays,
       createdAt: DateTime.now(),
       timers: timers,
@@ -210,24 +212,27 @@ class Task extends ChangeNotifier {
 
   bool isInfinite() => timers.any((timer) => timer.isInfinite());
 
-  bool shouldRunNow() => timers.any((timer) => timer.shouldRun(DateTime.now()));
+  Future<bool> shouldRunNow() async {
+    final executionStatus = await getExecutionStatus();
+    final shouldRunNowBasedOnTimers = timers.any((timer) =>
+        timer.shouldRun(DateTime.now()));
+
+    if (shouldRunNowBasedOnTimers) {
+      return true;
+    }
+
+    if (executionStatus != null) {
+      final earliestNextRun = nextStartDate(date: executionStatus["startedAt"]);
+
+      return (executionStatus["startedAt"] as DateTime).isBefore(
+          earliestNextRun!);
+    }
+
+    return false;
+  }
 
   Future<void> stopSchedule() async {
     await storage.delete(key: scheduleKey);
-
-    if (_nextRunWorkManagerID != null) {
-      Workmanager().cancelByUniqueName(_nextRunWorkManagerID!);
-      _nextRunWorkManagerID = null;
-    }
-  }
-
-  // Returns the delay until the next expected run of the task. This is used to schedule the task to run at the next
-  // expected time. If the task is not scheduled to run, this will return null.
-  // If the task is scheduled to run in the past, this will return `Duration.zero`.
-  Duration _getScheduleDelay(final DateTime date) {
-    final initialDelay = date.difference(DateTime.now());
-
-    return initialDelay > Duration.zero ? initialDelay : Duration.zero;
   }
 
   // Starts the task. This will schedule the task to run at the next expected time.
@@ -255,29 +260,12 @@ class Task extends ChangeNotifier {
     } else {
       await stopSchedule();
 
-      final initialDelay = _getScheduleDelay(nextStartDate);
-
-      _nextRunWorkManagerID = uuid.v4();
-
       await storage.write(
         key: scheduleKey,
         value: jsonEncode({
           "startedAt": DateTime.now().toIso8601String(),
           "startsAt": nextStartDate.toIso8601String(),
         }),
-      );
-
-      Workmanager().registerOneOffTask(
-        _nextRunWorkManagerID!,
-        TASK_SCHEDULE_KEY,
-        initialDelay: initialDelay,
-        constraints: Constraints(
-          networkType: NetworkType.connected,
-        ),
-        inputData: {
-          "taskID": id,
-        },
-        existingWorkPolicy: ExistingWorkPolicy.replace,
       );
     }
 
@@ -291,58 +279,9 @@ class Task extends ChangeNotifier {
   Future<DateTime?> startScheduleTomorrow() {
     final tomorrow = DateTime.now().add(const Duration(days: 1));
     final nextDate =
-        DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 6, 0, 0);
+    DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 6, 0, 0);
 
     return startSchedule(startDate: nextDate);
-  }
-
-  // Starts the actual repeating task
-  // Android uses `registerPeriodicTask`, which needs to be only called once,
-  // iOS uses `registerOneOffTask`, which needs to be called each time after
-  // an execution.
-  Future<void> startRepeatingTask() async {
-    if (Platform.isIOS) {
-      Workmanager().registerOneOffTask(
-        "task-identifier",
-        TASK_EXECUTION_KEY,
-        initialDelay: frequency,
-        constraints: Constraints(
-          networkType: NetworkType.connected,
-          requiresCharging: true,
-        ),
-        inputData: {
-          "taskID": id,
-        },
-        existingWorkPolicy: ExistingWorkPolicy.replace,
-      );
-    } else if (usePeriodOneOfTaskExecution) {
-      Workmanager().registerOneOffTask(
-        id,
-        TASK_EXECUTION_KEY,
-        initialDelay: frequency,
-        constraints: Constraints(
-          networkType: NetworkType.connected,
-        ),
-        inputData: {
-          "taskID": id,
-        },
-        existingWorkPolicy: ExistingWorkPolicy.replace,
-      );
-    } else {
-      Workmanager().registerPeriodicTask(
-        id,
-        TASK_EXECUTION_KEY,
-        frequency: frequency,
-        initialDelay: frequency,
-        constraints: Constraints(
-          networkType: NetworkType.connected,
-        ),
-        inputData: {
-          "taskID": id,
-        },
-        existingWorkPolicy: ExistingWorkPolicy.replace,
-      );
-    }
   }
 
   // Starts the actual execution of the task. You should only call this if either the user wants to manually start the
@@ -361,8 +300,6 @@ class Task extends ChangeNotifier {
     for (final timer in timers) {
       timer.executionStarted();
     }
-
-    await startRepeatingTask();
 
     notifyListeners();
   }
@@ -459,7 +396,7 @@ class Task extends ChangeNotifier {
     );
     final nostrMessage = jsonEncode(encrypted.cipherText);
     final publishedEvent =
-        await manager.publishMessage(nostrMessage, kind: 1001);
+    await manager.publishMessage(nostrMessage, kind: 1001);
 
     onProgress?.call(TaskLinkPublishProgress.creatingURI);
 
@@ -491,11 +428,14 @@ class Task extends ChangeNotifier {
     return uri.toString();
   }
 
-  Future<void> publishCurrentLocationNow() async {
+  Future<void> publishCurrentLocationNow([
+    final LocationPointService? location,
+  ]) async {
     final eventManager = NostrEventsManager.fromTask(this);
 
     final locationPoint =
-        await LocationPointService.createUsingCurrentLocation();
+        location ?? await LocationPointService.createUsingCurrentLocation();
+
     final message = await locationPoint.toEncryptedMessage(
       signPrivateKey: signPGPPrivateKey,
       signPublicKey: signPGPPublicKey,
@@ -539,7 +479,7 @@ class TaskService extends ChangeNotifier {
     final data = jsonEncode(
       List<Map<String, dynamic>>.from(
         _tasks.map(
-          (task) => task.toJSON(),
+              (task) => task.toJSON(),
         ),
       ),
     );
@@ -581,11 +521,7 @@ class TaskService extends ChangeNotifier {
         // Delete task
         remove(task);
         await save();
-      } else if (task.shouldRunNow()) {
-        if (task.usePeriodOneOfTaskExecution) {
-          await task.startRepeatingTask();
-        }
-      } else {
+      } else if (!(await task.shouldRunNow())) {
         await task.stopExecutionImmediately();
       }
     }
@@ -637,14 +573,18 @@ DateTime? findNextEndDate(final List<TaskRuntimeTimer> timers,
   final now = startDate ?? DateTime.now();
   final nextDates = List<DateTime>.from(
     timers.map((timer) => timer.nextEndDate(now)).where((date) => date != null),
-  )..sort();
+  )
+    ..sort();
 
   DateTime endDate = nextDates.first;
 
   for (final date in nextDates.sublist(1)) {
     final nextStartDate = findNextStartDate(timers, startDate: date);
     if (nextStartDate == null ||
-        nextStartDate.difference(date).inMinutes.abs() > 15) {
+        nextStartDate
+            .difference(date)
+            .inMinutes
+            .abs() > 15) {
       // No next start date found or the difference is more than 15 minutes, so this is the last date
       break;
     }

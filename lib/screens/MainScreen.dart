@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:animations/animations.dart';
+import 'package:background_fetch/background_fetch.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -15,7 +16,6 @@ import 'package:locus/services/settings_service.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:locus/utils/navigation.dart';
-import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/AppHint.dart';
 import 'package:locus/widgets/ChipCaption.dart';
 import 'package:locus/widgets/Paper.dart';
@@ -67,6 +67,10 @@ class _MainScreenState extends State<MainScreen> {
     final listViewHeight = listViewKey.currentContext?.size?.height ?? 0;
 
     return listViewHeight < windowHeight;
+  }
+
+  void initBackground() async {
+    BackgroundFetch.start();
   }
 
   @override
