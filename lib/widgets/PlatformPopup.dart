@@ -2,10 +2,10 @@ import 'package:collection/collection.dart';
 import 'package:enough_platform_widgets/enough_platform_widgets.dart' as Enough;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/utils/theme.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 enum PlatformPopupType {
   longPress,
@@ -55,13 +55,14 @@ class _PlatformPopupState<T> extends State<PlatformPopup> {
 
     final items = widget.items
         .map(
-          (item) => CupertinoActionSheetAction(
+          (item) =>
+          CupertinoActionSheetAction(
             onPressed: item.onPressed,
             isDefaultAction: item.isDefaultAction,
             isDestructiveAction: item.isDestructiveAction,
             child: item.label,
           ),
-        )
+    )
         .toList();
 
     if (widget.cupertinoCancellable) {
@@ -77,32 +78,37 @@ class _PlatformPopupState<T> extends State<PlatformPopup> {
     return items;
   }
 
-  List<PopupMenuItem<int>> get materialActions => List<PopupMenuItem<int>>.from(
+  List<PopupMenuItem<int>> get materialActions =>
+      List<PopupMenuItem<int>>.from(
         widget.items.mapIndexed(
-          (index, item) => PopupMenuItem(
-            value: index,
-            child: Row(
-              children: [
-                if (item.icon != null) ...[
-                  Icon(
-                    item.icon,
-                    color: item.isDestructiveAction
-                        ? getErrorColor(context)
-                        : item.isDefaultAction
+              (index, item) =>
+              PopupMenuItem(
+                value: index,
+                child: Row(
+                  children: [
+                    if (item.icon != null) ...[
+                      Icon(
+                        item.icon,
+                        color: item.isDestructiveAction
+                            ? getErrorColor(context)
+                            : item.isDefaultAction
                             ? Colors.blue
                             : null,
-                  ),
-                  const SizedBox(width: TINY_SPACE),
-                ],
-                item.label,
-              ],
-            ),
-          ),
+                      ),
+                      const SizedBox(width: TINY_SPACE),
+                    ],
+                    item.label,
+                  ],
+                ),
+              ),
         ),
       );
 
   void showMaterialPopupMenu() async {
-    final overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+    final overlay = Overlay
+        .of(context)
+        .context
+        .findRenderObject() as RenderBox;
 
     await showMenu<int>(
       context: context,
@@ -119,33 +125,35 @@ class _PlatformPopupState<T> extends State<PlatformPopup> {
     await showCupertinoModalPopup(
       context: context,
       barrierDismissible: true,
-      builder: (context) => CupertinoActionSheet(
-        actions: cupertinoActions,
-      ),
+      builder: (context) =>
+          CupertinoActionSheet(
+            actions: cupertinoActions,
+          ),
     );
   }
 
-  Widget getChild() => Padding(
-        padding: const EdgeInsets.all(SMALL_SPACE),
-        child: PlatformWidget(
-          material: (_, __) =>
-              widget.child ?? const Icon(Icons.more_horiz_rounded),
-          cupertino: (_, __) =>
-              widget.child ?? const Icon(CupertinoIcons.ellipsis_vertical),
-        ),
+  Widget getChild() =>
+      PlatformWidget(
+        material: (_, __) =>
+        widget.child ?? const Icon(Icons.more_horiz_rounded),
+        cupertino: (_, __) =>
+        widget.child ?? const Icon(CupertinoIcons.ellipsis_vertical),
       );
+
 
   @override
   Widget build(BuildContext context) {
     return Enough.PlatformPopupMenuButton(
-      itemBuilder: (context) => List.from(
-        widget.items.mapIndexed(
-          (index, item) => Enough.PlatformPopupMenuItem(
-            child: item.label,
-            value: index,
+      itemBuilder: (context) =>
+          List.from(
+            widget.items.mapIndexed(
+                  (index, item) =>
+                  Enough.PlatformPopupMenuItem(
+                    child: item.label,
+                    value: index,
+                  ),
+            ),
           ),
-        ),
-      ),
       onSelected: (index) {
         final element = widget.items[index as int];
 
