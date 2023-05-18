@@ -181,11 +181,6 @@ class _MainScreenState extends State<MainScreen> {
             PlatformPopupMenuItem(
               label: Text(l10n.settingsScreen_title),
               onPressed: () {
-                if (Platform.isIOS) {
-                  // Remove action sheet
-                  Navigator.pop(context);
-                }
-
                 showSettings(context);
               },
             ),
