@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:background_fetch/background_fetch.dart';
 import 'package:disable_battery_optimization/disable_battery_optimization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -52,5 +51,5 @@ void main() async {
     ),
   );
 
-  BackgroundFetch.registerHeadlessTask(backgroundFetchHeadlessTask);
+  configureBackgroundFetch();
 }
