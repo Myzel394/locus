@@ -1,9 +1,9 @@
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/init_quick_actions.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/services/timers_service.dart';
 import 'package:locus/utils/platform.dart';
@@ -50,7 +50,6 @@ class _ShortcutScreenState extends State<ShortcutScreen> {
         case ShortcutType.createOneHour:
           final task = await Task.create(
             l10n.quickActions_createOneHour_labelFromNow(DateTime.now()),
-            Duration(minutes: 15),
             settings.getRelays(),
             timers: [
               DurationTimer(duration: const Duration(hours: 1)),

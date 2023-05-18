@@ -2,10 +2,8 @@ import 'package:basic_utils/basic_utils.dart';
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/screens/create_task_screen_widgets/ExampleTasksRoulette.dart';
 import 'package:locus/screens/create_task_screen_widgets/SignKeyLottie.dart';
@@ -37,7 +35,6 @@ class CreateTaskScreen extends StatefulWidget {
 
 class _CreateTaskScreenState extends State<CreateTaskScreen> {
   final TextEditingController _nameController = TextEditingController();
-  final TextEditingController _frequencyController = TextEditingController();
   final TimerController _timersController = TimerController();
   final RelayController _relaysController = RelayController();
   final _formKey = GlobalKey<FormState>();
@@ -81,7 +78,6 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
   @override
   void dispose() {
     _nameController.dispose();
-    _frequencyController.dispose();
     _timersController.dispose();
     _relaysController.dispose();
 
@@ -102,7 +98,6 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
     try {
       final task = await Task.create(
         _nameController.text,
-        Duration(minutes: int.parse(_frequencyController.text)),
         _relaysController.relays,
         onProgress: (progress) {
           setState(() {
@@ -184,11 +179,6 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                               l10n.createTask_title,
                               style: getSubTitleTextStyle(context),
                             ),
-                            const SizedBox(height: SMALL_SPACE),
-                            Text(
-                              l10n.createTask_description,
-                              style: getCaptionTextStyle(context),
-                            ),
                           ],
                         ),
                         const SizedBox(height: LARGE_SPACE),
@@ -254,8 +244,6 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                   FocusManager.instance.primaryFocus?.unfocus();
 
                                   _nameController.text = example.name;
-                                  _frequencyController.text =
-                                      example.frequency.inMinutes.toString();
                                   _timersController
                                     ..clear()
                                     ..addAll(example.timers);
@@ -264,61 +252,9 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                             if (anotherTaskAlreadyExists) ...[
                               const SizedBox(height: MEDIUM_SPACE),
                               WarningText(
-                                  l10n.createTask_sameTaskNameAlreadyExists),
+                                l10n.createTask_sameTaskNameAlreadyExists,
+                              ),
                             ],
-                            const SizedBox(height: MEDIUM_SPACE),
-                            PlatformTextFormField(
-                              controller: _frequencyController,
-                              enabled: _taskProgress == null,
-                              textInputAction: TextInputAction.done,
-                              keyboardType: TextInputType.number,
-                              inputFormatters: <TextInputFormatter>[
-                                FilteringTextInputFormatter.digitsOnly
-                              ],
-                              textAlign:
-                                  isMaterial(context) ? TextAlign.center : null,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return l10n.fields_errors_isEmpty;
-                                }
-
-                                final frequency = int.parse(value);
-
-                                if (frequency <= 0) {
-                                  return l10n.fields_errors_greaterThan(0);
-                                }
-
-                                return null;
-                              },
-                              material: (_, __) => MaterialTextFormFieldData(
-                                decoration: InputDecoration(
-                                  prefixIcon: const Icon(Icons.timer),
-                                  labelText:
-                                      l10n.createTask_fields_frequency_label,
-                                  prefixText:
-                                      l10n.createTask_fields_frequency_prefix,
-                                  suffixText:
-                                      l10n.createTask_fields_frequency_suffix,
-                                ),
-                              ),
-                              cupertino: (_, __) => CupertinoTextFormFieldData(
-                                placeholder: l10n
-                                    .createTask_fields_frequency_placeholder,
-                                prefix: const Icon(CupertinoIcons.timer),
-                              ),
-                            )
-                                .animate()
-                                .then(delay: IN_DELAY * 2)
-                                .slide(
-                                  duration: IN_DURATION,
-                                  curve: Curves.easeOut,
-                                  begin: Offset(0, 0.2),
-                                )
-                                .fadeIn(
-                                  delay: IN_DELAY,
-                                  duration: IN_DURATION,
-                                  curve: Curves.easeOut,
-                                ),
                             const SizedBox(height: MEDIUM_SPACE),
                             Wrap(
                               alignment: WrapAlignment.spaceEvenly,

@@ -51,7 +51,6 @@ class _TaskTileState extends State<TaskTile> {
 
     return PlatformListTile(
       title: Text(widget.task.name),
-      subtitle: Text(widget.task.frequency.toString()),
       leading: FutureBuilder<bool>(
         future: widget.task.isRunning(),
         builder: (context, snapshot) {

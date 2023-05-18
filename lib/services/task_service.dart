@@ -1,6 +1,5 @@
 import 'dart:collection';
 import 'dart:convert';
-import 'dart:io';
 import 'dart:math';
 import 'dart:typed_data';
 
@@ -48,14 +47,12 @@ class Task extends ChangeNotifier {
   final List<String> relays;
   final List<TaskRuntimeTimer> timers;
   String name;
-  Duration frequency;
   bool deleteAfterRun;
   String? _nextRunWorkManagerID;
 
   Task({
     required this.id,
     required this.name,
-    required this.frequency,
     required this.viewPGPPublicKey,
     required this.signPGPPrivateKey,
     required this.signPGPPublicKey,
@@ -77,7 +74,6 @@ class Task extends ChangeNotifier {
       signPGPPrivateKey: json["signPGPPrivateKey"],
       signPGPPublicKey: json["signPGPPublicKey"],
       nostrPrivateKey: json["nostrPrivateKey"],
-      frequency: Duration(seconds: json["frequency"]),
       createdAt: DateTime.parse(json["createdAt"]),
       relays: List<String>.from(json["relays"]),
       deleteAfterRun: json["deleteAfterRun"] == "true",
@@ -101,14 +97,10 @@ class Task extends ChangeNotifier {
 
   String get nostrPublicKey => Keychain(nostrPrivateKey).public;
 
-  bool get usePeriodOneOfTaskExecution =>
-      Platform.isIOS || frequency < const Duration(minutes: 15);
-
   Map<String, dynamic> toJSON() {
     return {
       "id": id,
       "name": name,
-      "frequency": frequency.inSeconds,
       "viewPGPPrivateKey": viewPGPPrivateKey,
       "viewPGPPublicKey": viewPGPPublicKey,
       "signPGPPrivateKey": signPGPPrivateKey,
@@ -124,7 +116,6 @@ class Task extends ChangeNotifier {
 
   static Future<Task> create(
     final String name,
-    final Duration frequency,
     final List<String> relays, {
     Function(TaskCreationProgress)? onProgress,
     List<TaskRuntimeTimer> timers = const [],
@@ -150,7 +141,6 @@ class Task extends ChangeNotifier {
     return Task(
       id: uuid.v4(),
       name: name,
-      frequency: frequency,
       viewPGPPrivateKey: viewKeyPair.privateKey,
       viewPGPPublicKey: viewKeyPair.publicKey,
       signPGPPrivateKey: signKeyPair.privateKey,
@@ -180,7 +170,6 @@ class Task extends ChangeNotifier {
 
     return {
       ...data,
-      "runFrequency": Duration(seconds: data["runFrequency"]),
       "startedAt": DateTime.parse(data["startedAt"]),
     };
   }
@@ -225,7 +214,7 @@ class Task extends ChangeNotifier {
       }
 
       return (executionStatus["startedAt"] as DateTime)
-          .isBefore(earliestNextRun!);
+          .isBefore(earliestNextRun);
     }
 
     return false;
@@ -290,7 +279,6 @@ class Task extends ChangeNotifier {
     await storage.write(
       key: taskKey,
       value: jsonEncode({
-        "runFrequency": frequency.inSeconds,
         "startedAt": DateTime.now().toIso8601String(),
       }),
     );
@@ -318,17 +306,12 @@ class Task extends ChangeNotifier {
 
   Future<void> update({
     String? name,
-    Duration? frequency,
     List<String>? relays,
     List<TaskRuntimeTimer>? timers,
     bool? deleteAfterRun,
   }) async {
     if (name != null) {
       this.name = name;
-    }
-
-    if (frequency != null) {
-      this.frequency = frequency;
     }
 
     if (relays != null) {
@@ -536,13 +519,11 @@ class TaskService extends ChangeNotifier {
 
 class TaskExample {
   final String name;
-  final Duration frequency;
   final List<TaskRuntimeTimer> timers;
   final bool realtime;
 
   const TaskExample({
     required this.name,
-    required this.frequency,
     required this.timers,
     this.realtime = false,
   });

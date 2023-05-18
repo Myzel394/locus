@@ -1,7 +1,6 @@
 import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/screens/LocationPointsDetailsScreen.dart';
 import 'package:locus/screens/task_detail_screen_widgets/ShareLocationButton.dart';
@@ -254,8 +253,6 @@ class _DetailsState extends State<Details> {
                             Text(
                               l10n.taskAction_started_description(
                                 snapshot.data!["startedAt"],
-                                (snapshot.data!["runFrequency"] as Duration)
-                                    .inMinutes,
                               ),
                             )
                           else

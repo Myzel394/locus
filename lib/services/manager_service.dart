@@ -23,6 +23,7 @@ Future<void> updateLocation() async {
 void backgroundFetchHeadlessTask(HeadlessTask task) async {
   String taskId = task.taskId;
   bool isTimeout = task.timeout;
+
   if (isTimeout) {
     BackgroundFetch.finish(taskId);
     return;
@@ -48,13 +49,14 @@ void configureBackgroundFetch() {
       startOnBoot: true,
       stopOnTerminate: false,
     ),
-    (taskId) async {
-      // We only use one taskId to update the location for all tasks.
+        (taskId) async {
+      // We only use one taskId to update the location for all tasks,
+      // so we don't need to check the taskId.
       await updateLocation();
 
       BackgroundFetch.finish(taskId);
     },
-    (taskId) {
+        (taskId) {
       // Timeout, we need to finish immediately.
       BackgroundFetch.finish(taskId);
     },
