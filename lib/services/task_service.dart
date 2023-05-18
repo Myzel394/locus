@@ -224,6 +224,10 @@ class Task extends ChangeNotifier {
     if (executionStatus != null) {
       final earliestNextRun = nextStartDate(date: executionStatus["startedAt"]);
 
+      if (earliestNextRun == null) {
+        return false;
+      }
+
       return (executionStatus["startedAt"] as DateTime).isBefore(
           earliestNextRun!);
     }

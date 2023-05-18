@@ -6,11 +6,18 @@ const TASK_EXECUTION_KEY = "tasks_manager";
 const TASK_SCHEDULE_KEY = "tasks_schedule";
 
 Future<void> updateLocation() async {
-  final locationData = await LocationPointService.createUsingCurrentLocation();
   final taskService = await TaskService.restore();
-  final runningTasks = taskService.getRunningTasks();
 
-  await for (final task in runningTasks) {
+  await taskService.checkup();
+  final runningTasks = await taskService.getRunningTasks().toList();
+
+  if (runningTasks.isEmpty) {
+    return;
+  }
+
+  final locationData = await LocationPointService.createUsingCurrentLocation();
+
+  for (final task in runningTasks) {
     await task.publishCurrentLocationNow(locationData.copyWithDifferentId());
   }
 }
@@ -44,13 +51,13 @@ void configureBackgroundFetch() {
       startOnBoot: true,
       stopOnTerminate: false,
     ),
-    (taskId) async {
+        (taskId) async {
       // We only use one taskId to update the location for all tasks.
       await updateLocation();
 
       BackgroundFetch.finish(taskId);
     },
-    (taskId) {
+        (taskId) {
       // Timeout, we need to finish immediately.
       BackgroundFetch.finish(taskId);
     },

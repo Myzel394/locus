@@ -39,8 +39,7 @@ class WeekdayTimer extends TaskRuntimeTimer {
     required this.endTime,
   });
 
-  static WeekdayTimer allDay(final int day) =>
-      WeekdayTimer(
+  static WeekdayTimer allDay(final int day) => WeekdayTimer(
         day: day,
         startTime: TimeOfDay(hour: 0, minute: 0),
         endTime: TimeOfDay(hour: 23, minute: 59),
@@ -62,15 +61,14 @@ class WeekdayTimer extends TaskRuntimeTimer {
       return "$dayString (All Day)";
     }
 
-    return "$dayString ${startTime.format(context)} - ${endTime.format(
-        context)}";
+    return "$dayString ${startTime.format(context)} - ${endTime.format(context)}";
   }
 
   get isAllDay =>
       startTime.hour == 0 &&
-          startTime.minute == 0 &&
-          endTime.hour == 23 &&
-          endTime.minute == 59;
+      startTime.minute == 0 &&
+      endTime.hour == 23 &&
+      endTime.minute == 59;
 
   @override
   bool isInfinite() => true;
@@ -88,7 +86,7 @@ class WeekdayTimer extends TaskRuntimeTimer {
     final start = DateTime(
         now.year, now.month, now.day, startTime.hour, startTime.minute);
     final end =
-    DateTime(now.year, now.month, now.day, endTime.hour, endTime.minute);
+        DateTime(now.year, now.month, now.day, endTime.hour, endTime.minute);
 
     return now.isAfter(start) && now.isBefore(end);
   }
@@ -121,7 +119,7 @@ class WeekdayTimer extends TaskRuntimeTimer {
 
     // Check if end time is in the future, if yes, return now
     final end =
-    DateTime(now.year, now.month, now.day, endTime.hour, endTime.minute);
+        DateTime(now.year, now.month, now.day, endTime.hour, endTime.minute);
     if (now.isBefore(end)) {
       return now;
     }
@@ -141,8 +139,8 @@ class WeekdayTimer extends TaskRuntimeTimer {
           endTime.minute);
     }
 
-    final nextTime = DateTime(
-        now.year, now.month, now.day, endTime.hour, endTime.minute);
+    final nextTime =
+        DateTime(now.year, now.month, now.day, endTime.hour, endTime.minute);
 
     if (nextTime.isAfter(now)) {
       return nextTime;
@@ -219,9 +217,9 @@ class DurationTimer extends TaskRuntimeTimer {
   @override
   DateTime? nextEndDate(final DateTime now) {
     if (startDate == null) {
-      return startDate!.add(duration);
-    } else {
       return now.add(duration);
+    } else {
+      return startDate!.add(duration);
     }
   }
 
