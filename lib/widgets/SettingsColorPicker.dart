@@ -1,5 +1,4 @@
 import 'package:collection/collection.dart';
-import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
@@ -105,29 +104,6 @@ class _SettingsColorPickerWidgetRawState
   void dispose() {
     controller.dispose();
     super.dispose();
-  }
-
-  void _startAnimation(
-      final Offset offset, final Color color, final Offset position) {
-    animation = Tween<Offset>(
-      begin: Offset.zero,
-      end: offset,
-    ).animate(
-      CurvedAnimation(
-        parent: controller,
-        curve: Curves.linearToEaseOut,
-      ),
-    );
-
-    controller.forward(
-      from: 0,
-    );
-
-    setState(() {
-      oldColor = widget.value;
-      animationColor = color;
-      animationPosition = position;
-    });
   }
 
   Iterable<Color> getPresetColors(final BuildContext context) {
