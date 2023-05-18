@@ -83,6 +83,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
         // Sort locations
         final locations = _controller.locations.toList();
         locations.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+        _controller.clear();
         _controller.addAll(locations);
 
         setState(() {

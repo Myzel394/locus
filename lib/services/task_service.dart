@@ -12,7 +12,6 @@ import 'package:locus/constants/app.dart';
 import 'package:nostr/nostr.dart';
 import 'package:openpgp/openpgp.dart';
 import 'package:uuid/uuid.dart';
-import 'package:workmanager/workmanager.dart';
 
 import 'location_point_service.dart';
 import 'timers_service.dart';
@@ -123,18 +122,18 @@ class Task extends ChangeNotifier {
     };
   }
 
-  static Future<Task> create(final String name,
-      final Duration frequency,
-      final List<String> relays, {
-        Function(TaskCreationProgress)? onProgress,
-        List<TaskRuntimeTimer> timers = const [],
-        bool deleteAfterRun = false,
-      }) async {
+  static Future<Task> create(
+    final String name,
+    final Duration frequency,
+    final List<String> relays, {
+    Function(TaskCreationProgress)? onProgress,
+    List<TaskRuntimeTimer> timers = const [],
+    bool deleteAfterRun = false,
+  }) async {
     onProgress?.call(TaskCreationProgress.creatingViewKeys);
     final viewKeyPair = await OpenPGP.generate(
       options: (Options()
-        ..keyOptions = (KeyOptions()
-          ..rsaBits = 4096)
+        ..keyOptions = (KeyOptions()..rsaBits = 4096)
         ..name = "Locus"
         ..email = "user@locus.example"),
     );
@@ -142,8 +141,7 @@ class Task extends ChangeNotifier {
     onProgress?.call(TaskCreationProgress.creatingSignKeys);
     final signKeyPair = await OpenPGP.generate(
       options: (Options()
-        ..keyOptions = (KeyOptions()
-          ..rsaBits = 4096)
+        ..keyOptions = (KeyOptions()..rsaBits = 4096)
         ..name = "Locus"
         ..email = "user@locus.example"),
     );
@@ -157,9 +155,7 @@ class Task extends ChangeNotifier {
       viewPGPPublicKey: viewKeyPair.publicKey,
       signPGPPrivateKey: signKeyPair.privateKey,
       signPGPPublicKey: signKeyPair.publicKey,
-      nostrPrivateKey: Keychain
-          .generate()
-          .private,
+      nostrPrivateKey: Keychain.generate().private,
       relays: relays,
       createdAt: DateTime.now(),
       timers: timers,
@@ -214,8 +210,8 @@ class Task extends ChangeNotifier {
 
   Future<bool> shouldRunNow() async {
     final executionStatus = await getExecutionStatus();
-    final shouldRunNowBasedOnTimers = timers.any((timer) =>
-        timer.shouldRun(DateTime.now()));
+    final shouldRunNowBasedOnTimers =
+        timers.any((timer) => timer.shouldRun(DateTime.now()));
 
     if (shouldRunNowBasedOnTimers) {
       return true;
@@ -228,8 +224,8 @@ class Task extends ChangeNotifier {
         return false;
       }
 
-      return (executionStatus["startedAt"] as DateTime).isBefore(
-          earliestNextRun!);
+      return (executionStatus["startedAt"] as DateTime)
+          .isBefore(earliestNextRun!);
     }
 
     return false;
@@ -283,7 +279,7 @@ class Task extends ChangeNotifier {
   Future<DateTime?> startScheduleTomorrow() {
     final tomorrow = DateTime.now().add(const Duration(days: 1));
     final nextDate =
-    DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 6, 0, 0);
+        DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 6, 0, 0);
 
     return startSchedule(startDate: nextDate);
   }
@@ -311,8 +307,6 @@ class Task extends ChangeNotifier {
   // Stops the actual execution of the task. You should only call this if either the user wants to manually stop the
   // task or if the task is scheduled to stop.
   Future<void> stopExecutionImmediately() async {
-    Workmanager().cancelByUniqueName(id);
-
     await storage.delete(key: taskKey);
 
     for (final timer in timers) {
@@ -400,7 +394,7 @@ class Task extends ChangeNotifier {
     );
     final nostrMessage = jsonEncode(encrypted.cipherText);
     final publishedEvent =
-    await manager.publishMessage(nostrMessage, kind: 1001);
+        await manager.publishMessage(nostrMessage, kind: 1001);
 
     onProgress?.call(TaskLinkPublishProgress.creatingURI);
 
@@ -483,7 +477,7 @@ class TaskService extends ChangeNotifier {
     final data = jsonEncode(
       List<Map<String, dynamic>>.from(
         _tasks.map(
-              (task) => task.toJSON(),
+          (task) => task.toJSON(),
         ),
       ),
     );
@@ -577,18 +571,14 @@ DateTime? findNextEndDate(final List<TaskRuntimeTimer> timers,
   final now = startDate ?? DateTime.now();
   final nextDates = List<DateTime>.from(
     timers.map((timer) => timer.nextEndDate(now)).where((date) => date != null),
-  )
-    ..sort();
+  )..sort();
 
   DateTime endDate = nextDates.first;
 
   for (final date in nextDates.sublist(1)) {
     final nextStartDate = findNextStartDate(timers, startDate: date);
     if (nextStartDate == null ||
-        nextStartDate
-            .difference(date)
-            .inMinutes
-            .abs() > 15) {
+        nextStartDate.difference(date).inMinutes.abs() > 15) {
       // No next start date found or the difference is more than 15 minutes, so this is the last date
       break;
     }

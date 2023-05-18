@@ -89,6 +89,8 @@ class _MainScreenState extends State<MainScreen> {
 
     taskService.addListener(updateView);
 
+    taskService.checkup();
+
     initBackground();
   }
 

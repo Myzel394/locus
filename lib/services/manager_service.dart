@@ -2,9 +2,6 @@ import 'package:background_fetch/background_fetch.dart';
 import 'package:locus/services/location_point_service.dart';
 import 'package:locus/services/task_service.dart';
 
-const TASK_EXECUTION_KEY = "tasks_manager";
-const TASK_SCHEDULE_KEY = "tasks_schedule";
-
 Future<void> updateLocation() async {
   final taskService = await TaskService.restore();
 
@@ -51,13 +48,13 @@ void configureBackgroundFetch() {
       startOnBoot: true,
       stopOnTerminate: false,
     ),
-        (taskId) async {
+    (taskId) async {
       // We only use one taskId to update the location for all tasks.
       await updateLocation();
 
       BackgroundFetch.finish(taskId);
     },
-        (taskId) {
+    (taskId) {
       // Timeout, we need to finish immediately.
       BackgroundFetch.finish(taskId);
     },
