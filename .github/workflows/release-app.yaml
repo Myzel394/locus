@@ -1,0 +1,51 @@
+name: Build and push Flutter App
+
+on:
+  release:
+    types: [ published ]
+
+env:
+  SERVER_IMAGE_NAME: myzel394/kleckrelay-server
+  SERVER_MAID_NAME: myzel394/kleckrelay-maid
+
+jobs:
+  build-app:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Extract metadata 🔍
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: myzel394/locus
+
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Java ☕
+      - uses: actions/setup-java@v3
+        with:
+          java-version: "15.x"
+          cache: 'gradle'
+
+      - name: Setup Flutter 📱
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Install dependencies 📦
+        run: flutter pub get
+
+      - name: Build Android App (Multiple APKs) 📱
+        run: flutter build apk --split-per-abi
+
+      - name: Build Android App (fat APK) 📱
+        run: flutter build apk
+
+      - name: Release Apps 🚀
+        uses: ncipollo/release-action@v1
+        with:
+          tag: ${{ steps.meta.outputs.tags }}
+          name: ${{ steps.meta.outputs.tags }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: 'build/app/outputs/apk/release/*.apk'

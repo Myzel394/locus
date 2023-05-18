@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.example.locus">
+    package="app.myzel394.locus">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
@@ -16,10 +16,10 @@
 
 
     <application
-        tools:replace="android:label"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
-        android:label="locus">
+        android:label="locus"
+        tools:replace="android:label">
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
