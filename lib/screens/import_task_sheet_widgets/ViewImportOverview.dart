@@ -9,6 +9,7 @@ import '../../constants/spacing.dart';
 import '../../services/location_point_service.dart';
 import '../../utils/theme.dart';
 import '../../widgets/LocationsMap.dart';
+import '../../widgets/PlatformListTile.dart';
 
 class ViewImportOverview extends StatefulWidget {
   final TaskView view;

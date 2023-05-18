@@ -8,6 +8,7 @@ import 'package:locus/widgets/SwapElementAnimation.dart';
 import 'package:settings_ui/settings_ui.dart';
 
 import '../constants/spacing.dart';
+import 'PlatformListTile.dart';
 
 class ColorDialogPicker extends StatefulWidget {
   const ColorDialogPicker({Key? key}) : super(key: key);

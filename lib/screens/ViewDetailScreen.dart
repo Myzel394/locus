@@ -16,6 +16,7 @@ import '../constants/spacing.dart';
 import '../services/location_point_service.dart';
 import '../utils/theme.dart';
 import '../widgets/LocationsLoadingScreen.dart';
+import '../widgets/PlatformListTile.dart';
 
 class LineSliderTickMarkShape extends SliderTickMarkShape {
   final double tickWidth;

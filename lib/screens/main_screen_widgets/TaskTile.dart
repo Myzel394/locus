@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../widgets/PlatformDialogActionButton.dart';
+import '../../widgets/PlatformListTile.dart';
 import '../../widgets/PlatformPopup.dart';
 import '../TaskDetailScreen.dart';
 

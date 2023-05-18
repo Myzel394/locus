@@ -16,6 +16,7 @@ import 'package:locus/widgets/TimerWidgetSheet.dart';
 import 'package:provider/provider.dart';
 
 import '../services/settings_service.dart';
+import '../widgets/PlatformListTile.dart';
 import '../widgets/WarningText.dart';
 
 final IN_DURATION = 700.ms;

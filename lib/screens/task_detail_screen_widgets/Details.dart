@@ -13,6 +13,8 @@ import 'package:locus/widgets/RelaySelectSheet.dart';
 import 'package:locus/widgets/TimerWidget.dart';
 import 'package:provider/provider.dart';
 
+import '../../widgets/PlatformListTile.dart';
+
 class Details extends StatefulWidget {
   final List<LocationPointService> locations;
   final Task task;

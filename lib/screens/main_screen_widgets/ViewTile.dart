@@ -6,6 +6,7 @@ import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/PlatformPopup.dart';
 import 'package:provider/provider.dart';
 
+import '../../widgets/PlatformListTile.dart';
 import '../ViewDetailScreen.dart';
 
 class ViewTile extends StatelessWidget {

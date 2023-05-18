@@ -7,6 +7,8 @@ import 'package:locus/constants/spacing.dart';
 import 'package:locus/services/location_point_service.dart';
 import 'package:locus/utils/theme.dart';
 
+import '../../widgets/PlatformListTile.dart';
+
 class LocationDetails extends StatefulWidget {
   final LocationPointService location;
   final bool isPreview;

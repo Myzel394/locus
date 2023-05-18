@@ -9,6 +9,8 @@ import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/ModalSheet.dart';
 import 'package:map_launcher/map_launcher.dart';
 
+import 'PlatformListTile.dart';
+
 const ICON_SIZE = 36.0;
 
 class OpenInMaps extends StatefulWidget {
