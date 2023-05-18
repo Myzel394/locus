@@ -367,5 +367,7 @@
   "weekdays_saturday": "Saturday",
   "weekdays_sunday": "Sunday",
   "weekdaySelection_selectTitle": "Select Date and Time",
-  "weekdaySelection_error_startTimeBeforeEndTime": "Start time must be before end time"
+  "weekdaySelection_error_startTimeBeforeEndTime": "Start time must be before end time",
+  "backgroundLocationFetch_title": "Updating location in real-time",
+  "backgroundLocationFetch_text": "Close the app to stop updating your location in real-time. Locus will still update your location in the background, but with less battery usage."
 }

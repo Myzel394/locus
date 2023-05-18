@@ -35,8 +35,7 @@ class LocationPointService {
     double? headingAccuracy,
     double? batteryLevel,
     this.batteryState,
-  })
-      : altitude = altitude == 0.0 ? null : altitude,
+  })  : altitude = altitude == 0.0 ? null : altitude,
         speed = speed == 0.0 ? null : speed,
         speedAccuracy = speedAccuracy == 0.0 ? null : speedAccuracy,
         heading = heading == 0.0 ? null : heading,
@@ -57,7 +56,7 @@ class LocationPointService {
       headingAccuracy: json["headingAccuracy"],
       batteryLevel: json["batteryLevel"],
       batteryState: BatteryState.values.firstWhere(
-            (value) => value.name == json["batteryState"],
+        (value) => value.name == json["batteryState"],
       ),
     );
   }
@@ -85,8 +84,8 @@ class LocationPointService {
     required final String signPrivateKey,
   }) async {
     final rawMessage = jsonEncode(toJSON());
-    final signedMessage = await OpenPGP.sign(
-        rawMessage, signPublicKey, signPrivateKey, "");
+    final signedMessage =
+        await OpenPGP.sign(rawMessage, signPublicKey, signPrivateKey, "");
     final content = {
       "message": rawMessage,
       "signature": signedMessage,
@@ -96,12 +95,14 @@ class LocationPointService {
     return OpenPGP.encrypt(rawContent, viewPublicKey);
   }
 
-  static Future<LocationPointService> createUsingCurrentLocation() async {
-    final locationData = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.best,
-      timeLimit: const Duration(minutes: 5),
-      forceAndroidLocationManager: true,
-    );
+  static Future<LocationPointService> createUsingCurrentLocation([
+    final Position? position,
+  ]) async {
+    final locationData = position ??
+        await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.best,
+          timeLimit: const Duration(minutes: 5),
+        );
     double? batteryLevel;
     BatteryState? batteryState;
 
@@ -135,8 +136,7 @@ class LocationPointService {
 
   /// Copies `current` with a new id - mainly used in conjunction with `createUsingCurrentLocation`
   /// in background fetch to avoid fetching the location multiple times.
-  LocationPointService copyWithDifferentId() =>
-      LocationPointService(
+  LocationPointService copyWithDifferentId() => LocationPointService(
         id: uuid.v4(),
         createdAt: DateTime.now(),
         latitude: latitude,
@@ -151,9 +151,10 @@ class LocationPointService {
       );
 
   static Future<LocationPointService> fromEncrypted(
-      final String encryptedMessage,
-      final String viewPrivateKey,
-      final String signPublicKey,) async {
+    final String encryptedMessage,
+    final String viewPrivateKey,
+    final String signPublicKey,
+  ) async {
     final rawContent = await OpenPGP.decrypt(
       encryptedMessage,
       viewPrivateKey,
@@ -163,8 +164,8 @@ class LocationPointService {
     final message = content["message"];
     final signature = content["signature"];
 
-    final isSignatureValid = await OpenPGP.verify(
-        signature, message, signPublicKey);
+    final isSignatureValid =
+        await OpenPGP.verify(signature, message, signPublicKey);
 
     if (!isSignatureValid) {
       throw Exception("Invalid signature");
