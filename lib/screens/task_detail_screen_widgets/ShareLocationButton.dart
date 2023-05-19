@@ -1,14 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:file_saver/file_saver.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/widgets/SingularElementDialog.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -47,13 +45,6 @@ class _ShareLocationButtonState extends State<ShareLocationButton> {
         content: Text(l10n.shareLocation_description),
         actions: createCancellableDialogActions(context, [
           PlatformDialogAction(
-            child: Text(l10n.shareLocation_actions_saveFile),
-            material: (_, __) => MaterialDialogActionData(
-              icon: const Icon(Icons.save_alt_rounded),
-            ),
-            onPressed: () => Navigator.of(context).pop("save"),
-          ),
-          PlatformDialogAction(
             child: Text(l10n.shareLocation_actions_createQRCode),
             material: (_, __) => MaterialDialogActionData(
               icon: const Icon(Icons.qr_code),
@@ -91,16 +82,6 @@ class _ShareLocationButtonState extends State<ShareLocationButton> {
 
     try {
       switch (shouldShare) {
-        case "save":
-          if (!(await Permission.storage.isGranted)) {
-            await Permission.storage.request();
-          }
-
-          await FileSaver.instance.saveFile(
-            name: "viewkey.json",
-            bytes: const Utf8Encoder().convert(widget.task.generateViewKeyContent()),
-          );
-          break;
         case "qr":
           final url = await widget.task.generateLink();
 

@@ -123,18 +123,18 @@ class _ImportTaskState extends State<ImportTask> with TickerProviderStateMixin {
                         child: Text(l10n.mainScreen_importTask_action_importMethod_url),
                       ),
                       CupertinoActionSheetAction(
-                        child: Text(l10n.mainScreen_importTask_action_importMethod_file),
                         isDefaultAction: true,
                         onPressed: () {
                           Navigator.of(context).pop(ImportScreen.importFile);
                         },
+                        child: Text(l10n.mainScreen_importTask_action_importMethod_file),
                       ),
                       CupertinoActionSheetAction(
-                        child: Text(l10n.mainScreen_importTask_action_importMethod_qrCode),
                         isDefaultAction: true,
                         onPressed: () {
                           Navigator.of(context).pop(ImportScreen.scanQR);
                         },
+                        child: Text(l10n.mainScreen_importTask_action_importMethod_qrCode),
                       ),
                     ],
                   ),
