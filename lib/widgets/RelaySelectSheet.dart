@@ -4,7 +4,6 @@ import 'package:animated_list_plus/animated_list_plus.dart';
 import 'package:animated_list_plus/transitions.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
@@ -139,11 +138,7 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
                   searchController: _searchController,
                   onSearchFocusChanged: (hasFocus) async {
                     if (hasFocus) {
-                      _sheetController.animateTo(
-                        1,
-                        duration: 500.ms,
-                        curve: Curves.linearToEaseOut,
-                      );
+                      _sheetController.jumpTo(1);
                     }
                   },
                   extractValue: (dynamic element) => element as String,
