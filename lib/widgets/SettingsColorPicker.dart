@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart' hide PlatformListTile;
 import 'package:locus/widgets/SwapElementAnimation.dart';
 import 'package:settings_ui/settings_ui.dart';
 
@@ -69,12 +69,10 @@ class SettingsColorPickerWidgetRaw extends StatefulWidget {
       : super(key: key);
 
   @override
-  State<SettingsColorPickerWidgetRaw> createState() =>
-      _SettingsColorPickerWidgetRawState();
+  State<SettingsColorPickerWidgetRaw> createState() => _SettingsColorPickerWidgetRawState();
 }
 
-class _SettingsColorPickerWidgetRawState
-    extends State<SettingsColorPickerWidgetRaw> with TickerProviderStateMixin {
+class _SettingsColorPickerWidgetRawState extends State<SettingsColorPickerWidgetRaw> with TickerProviderStateMixin {
   late final AnimationController controller;
   Animation<Offset>? animation;
   Color? oldColor;
@@ -182,8 +180,7 @@ class _SettingsColorPickerWidgetRawState
                 crossAxisAlignment: WrapCrossAlignment.center,
                 children: <Widget>[
                       PlatformTextButton(
-                        child: Text(l10n
-                            .settingsScreen_setting_primaryColor_systemDefault),
+                        child: Text(l10n.settingsScreen_setting_primaryColor_systemDefault),
                         onPressed: () {
                           widget.onUpdate(null);
                         },

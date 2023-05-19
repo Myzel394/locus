@@ -35,6 +35,9 @@ final DARK_THEME_MATERIAL = ThemeData.dark().copyWith(
             ),
       ),
   inputDecorationTheme: InputDecorationTheme(
+    filled: true,
+    helperMaxLines: 10,
+    errorMaxLines: 10,
     border: OutlineInputBorder(
       borderRadius: BorderRadius.circular(MEDIUM_SPACE),
     ),
