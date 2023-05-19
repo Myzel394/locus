@@ -62,5 +62,5 @@ jobs:
         with:
           tag: ${{ steps.meta.outputs.tags }}
           name: ${{ steps.meta.outputs.tags }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GH_TOKEN }}
           artifacts: 'build/app/outputs/apk/release/*.apk'
