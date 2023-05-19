@@ -43,9 +43,12 @@ final DARK_THEME_MATERIAL = ThemeData.dark().copyWith(
 
 final LIGHT_THEME_CUPERTINO = const CupertinoThemeData().copyWith(
   textTheme: const CupertinoThemeData().textTheme.copyWith(
-        navLargeTitleTextStyle: const TextStyle(
-          fontSize: 32,
-          fontWeight: FontWeight.w500,
-        ),
+        navLargeTitleTextStyle: const CupertinoThemeData()
+            .textTheme
+            .navLargeTitleTextStyle
+            .copyWith(
+              fontSize: 32,
+              fontWeight: FontWeight.w500,
+            ),
       ),
 );
