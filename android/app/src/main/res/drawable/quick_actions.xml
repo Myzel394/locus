@@ -3,5 +3,6 @@
 
     <item android:drawable="@drawable/ic_quick_actions_share_now" />
     <item android:drawable="@drawable/ic_quick_actions_create_one_hour_task" />
+    <item android:drawable="@drawable/ic_quick_actions_stop_all_tasks" />
 
 </layer-list>
