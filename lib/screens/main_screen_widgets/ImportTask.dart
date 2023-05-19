@@ -1,7 +1,7 @@
-import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/screens/ImportTaskSheet.dart';
 import 'package:lottie/lottie.dart';
 import 'package:visibility_detector/visibility_detector.dart';
@@ -116,24 +116,21 @@ class _ImportTaskState extends State<ImportTask> with TickerProviderStateMixin {
                     context,
                     [
                       CupertinoActionSheetAction(
-                        child: Text(
-                            l10n.mainScreen_importTask_action_importMethod_url),
                         isDefaultAction: true,
                         onPressed: () {
                           Navigator.of(context).pop(ImportScreen.askURL);
                         },
+                        child: Text(l10n.mainScreen_importTask_action_importMethod_url),
                       ),
                       CupertinoActionSheetAction(
-                        child: Text(l10n
-                            .mainScreen_importTask_action_importMethod_file),
+                        child: Text(l10n.mainScreen_importTask_action_importMethod_file),
                         isDefaultAction: true,
                         onPressed: () {
                           Navigator.of(context).pop(ImportScreen.importFile);
                         },
                       ),
                       CupertinoActionSheetAction(
-                        child: Text(l10n
-                            .mainScreen_importTask_action_importMethod_qrCode),
+                        child: Text(l10n.mainScreen_importTask_action_importMethod_qrCode),
                         isDefaultAction: true,
                         onPressed: () {
                           Navigator.of(context).pop(ImportScreen.scanQR);
@@ -156,8 +153,7 @@ class _ImportTaskState extends State<ImportTask> with TickerProviderStateMixin {
                 isScrollControlled: true,
                 isDismissible: true,
               ),
-              builder: (context) =>
-                  ImportTaskSheet(initialScreen: initialScreen),
+              builder: (context) => ImportTaskSheet(initialScreen: initialScreen),
             );
 
             _controller.forward();

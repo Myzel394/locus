@@ -1,20 +1,22 @@
-import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/api/get-locations.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:locus/widgets/FillUpPaint.dart';
 import 'package:locus/widgets/LocationFetchError.dart';
 import 'package:locus/widgets/LocationsMap.dart';
 import 'package:locus/widgets/OpenInMaps.dart';
+import 'package:locus/widgets/PlatformPopup.dart';
 import 'package:map_launcher/map_launcher.dart';
 
 import '../constants/spacing.dart';
 import '../services/location_point_service.dart';
 import '../utils/theme.dart';
 import '../widgets/LocationsLoadingScreen.dart';
+import '../widgets/PlatformListTile.dart';
 
 class LineSliderTickMarkShape extends SliderTickMarkShape {
   final double tickWidth;
@@ -24,7 +26,8 @@ class LineSliderTickMarkShape extends SliderTickMarkShape {
   }) : super();
 
   @override
-  Size getPreferredSize({required SliderThemeData sliderTheme, required bool isEnabled}) {
+  Size getPreferredSize(
+      {required SliderThemeData sliderTheme, required bool isEnabled}) {
     // We don't need this
     return Size.zero;
   }
@@ -42,10 +45,14 @@ class LineSliderTickMarkShape extends SliderTickMarkShape {
   }) {
     // This block is just copied from `slider_theme`
     final bool isTickMarkRightOfThumb = center.dx > thumbCenter.dx;
-    final begin =
-        isTickMarkRightOfThumb ? sliderTheme.disabledInactiveTickMarkColor : sliderTheme.disabledActiveTickMarkColor;
-    final end = isTickMarkRightOfThumb ? sliderTheme.inactiveTickMarkColor : sliderTheme.activeTickMarkColor;
-    final Paint paint = Paint()..color = ColorTween(begin: begin, end: end).evaluate(enableAnimation)!;
+    final begin = isTickMarkRightOfThumb
+        ? sliderTheme.disabledInactiveTickMarkColor
+        : sliderTheme.disabledActiveTickMarkColor;
+    final end = isTickMarkRightOfThumb
+        ? sliderTheme.inactiveTickMarkColor
+        : sliderTheme.activeTickMarkColor;
+    final Paint paint = Paint()
+      ..color = ColorTween(begin: begin, end: end).evaluate(enableAnimation)!;
 
     final trackHeight = sliderTheme.trackHeight!;
 
@@ -127,7 +134,10 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
     final locationsPerHour = _controller.getLocationsPerHour();
     final maxLocations = locationsPerHour.values.isEmpty
         ? 0
-        : locationsPerHour.values.fold(0, (value, element) => value > element.length ? value : element.length);
+        : locationsPerHour.values.fold(
+            0,
+            (value, element) =>
+                value > element.length ? value : element.length);
     final shades = getPrimaryColorShades(context);
 
     return PlatformScaffold(
@@ -135,29 +145,28 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
         title: Text(l10n.viewDetails_title),
         trailingActions: _controller.locations.isNotEmpty
             ? <Widget>[
-                PlatformPopupMenuButton<String>(
-                  itemBuilder: (context) => [
-                    PlatformPopupMenuItem<String>(
-                      child: PlatformListTile(
+                PlatformPopup<String>(
+                  type: PlatformPopupType.tap,
+                  items: [
+                    PlatformPopupMenuItem(
+                      label: PlatformListTile(
                         leading: Icon(context.platformIcons.location),
-                        trailing: SizedBox.shrink(),
-                        title: Text(l10n.viewDetails_actions_openLatestLocation),
+                        trailing: const SizedBox.shrink(),
+                        title:
+                            Text(l10n.viewDetails_actions_openLatestLocation),
                       ),
-                      value: "open_maps",
-                    ),
-                  ],
-                  onSelected: (action) async {
-                    switch (action) {
-                      case "open_maps":
+                      onPressed: () async {
                         await showPlatformModalSheet(
                           context: context,
                           builder: (context) => OpenInMaps(
-                            destination:
-                                Coords(_controller.locations.last.latitude, _controller.locations.last.longitude),
+                            destination: Coords(
+                                _controller.locations.last.latitude,
+                                _controller.locations.last.longitude),
                           ),
                         );
-                    }
-                  },
+                      },
+                    )
+                  ],
                 ),
               ]
             : [],
@@ -165,7 +174,8 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
           centerTitle: true,
         ),
         cupertino: (_, __) => CupertinoNavigationBarData(
-          backgroundColor: CupertinoTheme.of(context).barBackgroundColor.withOpacity(.5),
+          backgroundColor:
+              CupertinoTheme.of(context).barBackgroundColor.withOpacity(.5),
         ),
       ),
       body: _isError
@@ -196,15 +206,20 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
                       flex: 1,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: List.generate(24, (index) => 23 - index).map((hour) {
-                          final date = DateTime.now().subtract(Duration(hours: hour));
-                          final normalizedDate = LocationsMapController.normalizeDateTime(date);
+                        children: List.generate(24, (index) => 23 - index)
+                            .map((hour) {
+                          final date =
+                              DateTime.now().subtract(Duration(hours: hour));
+                          final normalizedDate =
+                              LocationsMapController.normalizeDateTime(date);
 
-                          return PlatformInkWell(
+                          // TODO: Add material Inkwell
+                          return GestureDetector(
                             onTap: () {
                               _controller.clear();
 
-                              final locations = locationsPerHour[normalizedDate] ?? [];
+                              final locations =
+                                  locationsPerHour[normalizedDate] ?? [];
 
                               if (locations.isNotEmpty) {
                                 _controller.addAll(locations);
@@ -213,7 +228,11 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
                             },
                             child: FillUpPaint(
                               color: shades[0]!,
-                              fillPercentage: (locationsPerHour[normalizedDate]?.length ?? 0).toDouble() / maxLocations,
+                              fillPercentage:
+                                  (locationsPerHour[normalizedDate]?.length ??
+                                              0)
+                                          .toDouble() /
+                                      maxLocations,
                               size: Size(
                                 MediaQuery.of(context).size.width / 24,
                                 MediaQuery.of(context).size.height * (1 / 12),

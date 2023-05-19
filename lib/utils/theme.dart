@@ -4,6 +4,7 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/services/settings_service.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 TextStyle getBodyTextTextStyle(final BuildContext context) => platformThemeData(
       context,
@@ -128,13 +129,13 @@ List<Widget> createCancellableDialogActions(
   final BuildContext context,
   final Iterable<Widget> actions,
 ) {
+  final l10n = AppLocalizations.of(context);
+
   final cancelWidget = PlatformDialogAction(
-    child: const Text("Cancel"),
+    child: Text(l10n.cancelLabel),
     material: (_, __) => MaterialDialogActionData(
-        icon: PlatformWidget(
-      material: (_, __) => Icon(Icons.cancel_outlined),
-      cupertino: (_, __) => Icon(CupertinoIcons.clear_thick),
-    )),
+      icon: const Icon(Icons.cancel_outlined),
+    ),
     onPressed: () => Navigator.of(context).pop(""),
   );
 

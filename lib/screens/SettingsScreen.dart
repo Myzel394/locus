@@ -1,10 +1,10 @@
 import 'dart:io';
 
-import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/constants/values.dart';
 import 'package:locus/screens/settings_screen_widgets/MentionTile.dart';
@@ -14,24 +14,16 @@ import 'package:locus/widgets/SettingsColorPicker.dart';
 import 'package:locus/widgets/SettingsDropdownTile.dart';
 import 'package:provider/provider.dart';
 import 'package:settings_ui/settings_ui.dart';
-import 'package:smooth_highlight/smooth_highlight.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:workmanager/workmanager.dart';
 
 import '../services/settings_service.dart';
 import '../utils/platform.dart';
+import '../widgets/PlatformListTile.dart';
 import '../widgets/RelaySelectSheet.dart';
 
-enum SettingsHighlight {
-  appColor,
-  defaultRelays,
-}
-
 class SettingsScreen extends StatefulWidget {
-  final SettingsHighlight? highlight;
-
   const SettingsScreen({
-    this.highlight,
     Key? key,
   }) : super(key: key);
 

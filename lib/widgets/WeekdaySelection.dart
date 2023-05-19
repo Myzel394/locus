@@ -1,10 +1,12 @@
-import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/extensions/date.dart';
 import 'package:locus/utils/theme.dart';
+import 'package:locus/widgets/PlatformSelect.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class WeekdaySelection extends StatefulWidget {
   final int weekday;
@@ -78,8 +80,10 @@ class _WeekdaySelectionState extends State<WeekdaySelection> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return PlatformAlertDialog(
-      title: Text("Select Date and Time"),
+      title: Text(l10n.weekdaySelection_selectTitle),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
@@ -90,11 +94,8 @@ class _WeekdaySelectionState extends State<WeekdaySelection> {
             ),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: MEDIUM_SPACE, vertical: SMALL_SPACE),
-              child: PlatformDropdownButton<int>(
+              child: PlatformSelect<int>(
                 value: weekday,
-                style: TextStyle(
-                  backgroundColor: Colors.blue,
-                ),
                 onChanged: widget.lockWeekday
                     ? null
                     : ((value) {
@@ -102,35 +103,34 @@ class _WeekdaySelectionState extends State<WeekdaySelection> {
                           weekday = value as int;
                         });
                       }),
-                underline: Container(),
-                items: const <DropdownMenuItem<int>>[
+                items: <DropdownMenuItem<int>>[
                   DropdownMenuItem(
-                    child: Text("Monday"),
                     value: DateTime.monday,
+                    child: Text(l10n.weekdays_monday),
                   ),
                   DropdownMenuItem(
-                    child: Text("Tuesday"),
                     value: DateTime.tuesday,
+                    child: Text(l10n.weekdays_tuesday),
                   ),
                   DropdownMenuItem(
-                    child: Text("Wednesday"),
                     value: DateTime.wednesday,
+                    child: Text(l10n.weekdays_wednesday),
                   ),
                   DropdownMenuItem(
-                    child: Text("Thursday"),
                     value: DateTime.thursday,
+                    child: Text(l10n.weekdays_thursday),
                   ),
                   DropdownMenuItem(
-                    child: Text("Friday"),
                     value: DateTime.friday,
+                    child: Text(l10n.weekdays_friday),
                   ),
                   DropdownMenuItem(
-                    child: Text("Saturday"),
                     value: DateTime.saturday,
+                    child: Text(l10n.weekdays_saturday),
                   ),
                   DropdownMenuItem(
-                    child: Text("Sunday"),
                     value: DateTime.sunday,
+                    child: Text(l10n.weekdays_sunday),
                   ),
                 ],
               ),
@@ -186,7 +186,8 @@ class _WeekdaySelectionState extends State<WeekdaySelection> {
                   DateFormat("HH:mm").format(DateTime(0, 0, 0, endTime.hour, endTime.minute)),
                 ),
                 onPressed: () async {
-                  final time = await showPlatformTimePicker(
+                  // TODO: Add cupertino time picker
+                  final time = await showTimePicker(
                     context: context,
                     initialTime: endTime,
                   );
@@ -202,7 +203,7 @@ class _WeekdaySelectionState extends State<WeekdaySelection> {
           if (!isValid) ...[
             const SizedBox(height: SMALL_SPACE),
             Text(
-              "Start time must be before end time",
+              l10n.weekdaySelection_error_startTimeBeforeEndTime,
               style: TextStyle(
                 color: getErrorColor(context),
               ),
@@ -210,34 +211,27 @@ class _WeekdaySelectionState extends State<WeekdaySelection> {
           ]
         ],
       ),
-      actions: <Widget>[
-        PlatformDialogAction(
-          child: Text("Cancel"),
-          cupertino: (_, __) => CupertinoDialogActionData(
-            isDestructiveAction: true,
-          ),
-          material: (_, __) => MaterialDialogActionData(
-            icon: const Icon(Icons.cancel_outlined),
-          ),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        PlatformDialogAction(
-          child: Text("Add"),
-          cupertino: (_, __) => CupertinoDialogActionData(
-            isDefaultAction: true,
-          ),
-          material: (_, __) => MaterialDialogActionData(
-            icon: const Icon(Icons.chevron_right_rounded),
-          ),
-          onPressed: isValid
-              ? () => Navigator.of(context).pop({
-                    "weekday": weekday,
-                    "startTime": startTime,
-                    "endTime": endTime,
-                  })
-              : null,
-        )
-      ],
+      actions: createCancellableDialogActions(
+        context,
+        <Widget>[
+          PlatformDialogAction(
+            child: Text(l10n.addLabel),
+            cupertino: (_, __) => CupertinoDialogActionData(
+              isDefaultAction: true,
+            ),
+            material: (_, __) => MaterialDialogActionData(
+              icon: const Icon(Icons.chevron_right_rounded),
+            ),
+            onPressed: isValid
+                ? () => Navigator.of(context).pop({
+                      "weekday": weekday,
+                      "startTime": startTime,
+                      "endTime": endTime,
+                    })
+                : null,
+          )
+        ],
+      ),
     );
   }
 }

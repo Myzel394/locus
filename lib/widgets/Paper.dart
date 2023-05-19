@@ -1,6 +1,6 @@
-import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
 
 class Paper extends StatelessWidget {

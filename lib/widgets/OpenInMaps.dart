@@ -1,13 +1,15 @@
-import 'package:enough_platform_widgets/platform.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/ModalSheet.dart';
 import 'package:map_launcher/map_launcher.dart';
+
+import 'PlatformListTile.dart';
 
 const ICON_SIZE = 36.0;
 
@@ -66,14 +68,16 @@ class _OpenInMapsState extends State<OpenInMaps> {
                                 Navigator.pop(context);
                               },
                               leading: ClipRRect(
-                                borderRadius: BorderRadius.circular(SMALL_SPACE),
+                                borderRadius:
+                                    BorderRadius.circular(SMALL_SPACE),
                                 child: SvgPicture.asset(
                                   map.icon,
                                   height: ICON_SIZE,
                                   width: ICON_SIZE,
                                 ),
                               ),
-                              trailing: Icon(context.platformIcons.rightChevron),
+                              trailing:
+                                  Icon(context.platformIcons.rightChevron),
                             );
                           },
                         );
@@ -90,13 +94,15 @@ class _OpenInMapsState extends State<OpenInMaps> {
                             leading: PlatformIconButton(
                               icon: PlatformWidget(
                                 material: (_, __) => const Icon(Icons.copy),
-                                cupertino: (_, __) => const Icon(CupertinoIcons.doc_on_clipboard),
+                                cupertino: (_, __) =>
+                                    const Icon(CupertinoIcons.doc_on_clipboard),
                               ),
                               onPressed: () {
                                 // Copy to clipboard
                                 Clipboard.setData(
                                   ClipboardData(
-                                    text: "${widget.destination.latitude}, ${widget.destination.longitude}",
+                                    text:
+                                        "${widget.destination.latitude}, ${widget.destination.longitude}",
                                   ),
                                 );
                               },

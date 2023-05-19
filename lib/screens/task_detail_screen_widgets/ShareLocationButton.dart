@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/widgets/SingularElementDialog.dart';
@@ -98,7 +98,8 @@ class _ShareLocationButtonState extends State<ShareLocationButton> {
 
           await FileSaver.instance.saveFile(
             name: "viewkey.json",
-            bytes: const Utf8Encoder().convert(widget.task.generateViewKeyContent()),
+            bytes: const Utf8Encoder()
+                .convert(widget.task.generateViewKeyContent()),
           );
           break;
         case "qr":
@@ -120,7 +121,9 @@ class _ShareLocationButtonState extends State<ShareLocationButton> {
                           style: getTitle2TextStyle(context),
                           textAlign: TextAlign.center,
                         ),
-                        isMaterial(context) ? const SizedBox(height: LARGE_SPACE) : null,
+                        isMaterial(context)
+                            ? const SizedBox(height: LARGE_SPACE)
+                            : null,
                         QrImage(
                           data: url,
                           errorCorrectionLevel: QrErrorCorrectLevel.H,

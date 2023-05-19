@@ -1,6 +1,6 @@
-import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:openpgp/openpgp.dart';
 
@@ -9,6 +9,7 @@ import '../../constants/spacing.dart';
 import '../../services/location_point_service.dart';
 import '../../utils/theme.dart';
 import '../../widgets/LocationsMap.dart';
+import '../../widgets/PlatformListTile.dart';
 
 class ViewImportOverview extends StatefulWidget {
   final TaskView view;

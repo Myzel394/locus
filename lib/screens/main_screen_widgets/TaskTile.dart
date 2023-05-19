@@ -1,13 +1,16 @@
 import 'dart:io';
 
-import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../widgets/PlatformDialogActionButton.dart';
+import '../../widgets/PlatformListTile.dart';
+import '../../widgets/PlatformPopup.dart';
 import '../TaskDetailScreen.dart';
 
 class TaskTile extends StatefulWidget {
@@ -33,9 +36,12 @@ class _TaskTileState extends State<TaskTile> {
     final l10n = AppLocalizations.of(context);
 
     return {
-      TaskLinkPublishProgress.encrypting: l10n.taskAction_generateLink_process_encrypting,
-      TaskLinkPublishProgress.publishing: l10n.taskAction_generateLink_process_publishing,
-      TaskLinkPublishProgress.creatingURI: l10n.taskAction_generateLink_process_creatingURI,
+      TaskLinkPublishProgress.encrypting:
+          l10n.taskAction_generateLink_process_encrypting,
+      TaskLinkPublishProgress.publishing:
+          l10n.taskAction_generateLink_process_publishing,
+      TaskLinkPublishProgress.creatingURI:
+          l10n.taskAction_generateLink_process_creatingURI,
     };
   }
 
@@ -46,7 +52,6 @@ class _TaskTileState extends State<TaskTile> {
 
     return PlatformListTile(
       title: Text(widget.task.name),
-      subtitle: Text(widget.task.frequency.toString()),
       leading: FutureBuilder<bool>(
         future: widget.task.isRunning(),
         builder: (context, snapshot) {
@@ -79,7 +84,8 @@ class _TaskTileState extends State<TaskTile> {
                             context: context,
                             builder: (_) => PlatformAlertDialog(
                               title: Text(l10n.taskAction_started_title),
-                              content: Text(l10n.taskAction_started_runsUntil(nextEndDate)),
+                              content: Text(l10n
+                                  .taskAction_started_runsUntil(nextEndDate)),
                               actions: <Widget>[
                                 PlatformDialogActionButton(
                                   child: Text(l10n.closeNeutralAction),
@@ -92,7 +98,8 @@ class _TaskTileState extends State<TaskTile> {
                           );
                         } else {
                           await widget.task.stopExecutionImmediately();
-                          final nextStartDate = await widget.task.startScheduleTomorrow();
+                          final nextStartDate =
+                              await widget.task.startScheduleTomorrow();
 
                           if (!mounted) {
                             return;
@@ -106,7 +113,8 @@ class _TaskTileState extends State<TaskTile> {
                             context: context,
                             builder: (_) => PlatformAlertDialog(
                               title: Text(l10n.taskAction_stopped_title),
-                              content: Text(l10n.taskAction_stopped_startsAgain(nextStartDate)),
+                              content: Text(l10n.taskAction_stopped_startsAgain(
+                                  nextStartDate)),
                               actions: <Widget>[
                                 PlatformDialogActionButton(
                                   child: Text(l10n.closeNeutralAction),
@@ -133,61 +141,61 @@ class _TaskTileState extends State<TaskTile> {
           return const SizedBox();
         },
       ),
-      trailing: PlatformPopupMenuButton(
-        onSelected: (value) async {
-          final url = await widget.task.generateLink(
-            onProgress: (progress) {
-              if (snackBar != null) {
-                try {
-                  snackBar!.close();
-                } catch (e) {}
-              }
-
-              if (progress != TaskLinkPublishProgress.done && Platform.isAndroid) {
-                final scaffold = ScaffoldMessenger.of(context);
-
-                snackBar = scaffold.showSnackBar(
-                  SnackBar(
-                    content: Text(getProgressTextMap()[progress] ?? ""),
-                    duration: const Duration(seconds: 1),
-                    backgroundColor: Colors.indigoAccent,
-                  ),
-                );
-              }
-            },
-          );
-
-          await Clipboard.setData(ClipboardData(text: url));
-          await Share.share(
-            url,
-            subject: l10n.taskAction_generateLink_shareTextSubject,
-          );
-
-          if (!mounted) {
-            return;
-          }
-
-          if (isMaterial(context)) {
-            final scaffold = ScaffoldMessenger.of(context);
-
-            scaffold.showSnackBar(
-              SnackBar(
-                content: Text(l10n.linkCopiedToClipboard),
-                duration: const Duration(seconds: 3),
-                backgroundColor: Colors.green,
+      trailing: PlatformPopup<String>(
+        type: PlatformPopupType.tap,
+        items: [
+          PlatformPopupMenuItem<String>(
+              label: PlatformListTile(
+                leading: Icon(Icons.link_rounded),
+                trailing: SizedBox.shrink(),
+                title: Text(l10n.taskAction_generateLink),
               ),
-            );
-          }
-        },
-        itemBuilder: (context) => [
-          PlatformPopupMenuItem(
-            child: PlatformListTile(
-              leading: Icon(Icons.link_rounded),
-              trailing: SizedBox.shrink(),
-              title: Text(l10n.taskAction_generateLink),
-            ),
-            value: 0,
-          ),
+              onPressed: () async {
+                final url = await widget.task.generateLink(
+                  onProgress: (progress) {
+                    if (snackBar != null) {
+                      try {
+                        snackBar!.close();
+                      } catch (e) {}
+                    }
+
+                    if (progress != TaskLinkPublishProgress.done &&
+                        Platform.isAndroid) {
+                      final scaffold = ScaffoldMessenger.of(context);
+
+                      snackBar = scaffold.showSnackBar(
+                        SnackBar(
+                          content: Text(getProgressTextMap()[progress] ?? ""),
+                          duration: const Duration(seconds: 1),
+                          backgroundColor: Colors.indigoAccent,
+                        ),
+                      );
+                    }
+                  },
+                );
+
+                await Clipboard.setData(ClipboardData(text: url));
+                await Share.share(
+                  url,
+                  subject: l10n.taskAction_generateLink_shareTextSubject,
+                );
+
+                if (!mounted) {
+                  return;
+                }
+
+                if (isMaterial(context)) {
+                  final scaffold = ScaffoldMessenger.of(context);
+
+                  scaffold.showSnackBar(
+                    SnackBar(
+                      content: Text(l10n.linkCopiedToClipboard),
+                      duration: const Duration(seconds: 3),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                }
+              })
         ],
       ),
       onTap: () {

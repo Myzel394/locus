@@ -1,9 +1,9 @@
-import 'package:enough_platform_widgets/platform.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/init_quick_actions.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/services/timers_service.dart';
 import 'package:locus/utils/platform.dart';
@@ -26,7 +26,7 @@ class ShortcutScreen extends StatefulWidget {
 }
 
 class _ShortcutScreenState extends State<ShortcutScreen> {
-  bool isRunning = false;
+  bool isDone = false;
   bool isError = false;
 
   Map<ShortcutType, String> getShortcutTranslationMap() {
@@ -50,7 +50,6 @@ class _ShortcutScreenState extends State<ShortcutScreen> {
         case ShortcutType.createOneHour:
           final task = await Task.create(
             l10n.quickActions_createOneHour_labelFromNow(DateTime.now()),
-            Duration(minutes: 15),
             settings.getRelays(),
             timers: [
               DurationTimer(duration: const Duration(hours: 1)),
@@ -104,7 +103,7 @@ class _ShortcutScreenState extends State<ShortcutScreen> {
       }
 
       setState(() {
-        isRunning = false;
+        isDone = false;
       });
     }
   }
@@ -149,7 +148,7 @@ class _ShortcutScreenState extends State<ShortcutScreen> {
               );
             }
 
-            if (!isRunning) {
+            if (isDone) {
               // Success
               return Column(
                 mainAxisAlignment: MainAxisAlignment.center,

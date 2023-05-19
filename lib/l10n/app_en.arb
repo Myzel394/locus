@@ -3,6 +3,8 @@
   "unknownError": "An unknown error occurred",
   "unknownValue": "Unknown",
   "resetLabel": "Reset",
+  "cancelLabel": "Cancel",
+  "addLabel": "Add",
   "taskImportError": "An error occurred while importing the task",
   "locationsLoadingError": "An error occurred while loading locations",
   "locationFetchError": "There was an error fetching the locations. Please try again later.",
@@ -51,16 +53,13 @@
   "relaySelectSheet_selectRandomRelays": "Select {count} random Nostr Relays",
   "taskAction_start": "Start Task",
   "taskAction_started_title": "Task started",
-  "taskAction_started_description": "Task started at {date} with a frequency of {frequency} minutes",
+  "taskAction_started_description": "Task started at {date}",
   "@taskAction_started_description": {
     "placeholders": {
       "date": {
         "type": "DateTime",
         "format": "MMMM d, HH:mm",
         "isCustomDateFormat": "true"
-      },
-      "frequency": {
-        "type": "int"
       }
     }
   },
@@ -178,14 +177,9 @@
   "mainScreen_importTask_importOverview_lastPosition": "Last Position:",
   "mainScreen_importTask_successMessage": "The task was successfully imported!",
   "mainScreen_importTask_importLabel": "Import",
-  "createTask_title": "Define a name and a frequency for your task",
-  "createTask_description": "Note that a frequency of less than 15 minutes will automatically be set to 15 minutes. This is not set by us, but by the operating system.",
+  "createTask_title": "Define a name for your task",
   "createTask_fields_name_label": "Name",
   "createTask_sameTaskNameAlreadyExists": "A task with this name already exists. You can create the task, but you will have two tasks with the same name.",
-  "createTask_fields_frequency_label": "Frequency",
-  "createTask_fields_frequency_prefix": "Every",
-  "createTask_fields_frequency_suffix": "Minutes",
-  "createTask_fields_frequency_placeholder": "Frequency (in minutes)",
   "createTask_fields_relays_selectLabel": "{count, plural, =0{Select Relays} =1{Selected One Relay} other{Selected {count} Relays}}",
   "@createTask_fields_relays_selectLabel": {
     "placeholders": {
@@ -364,5 +358,16 @@
   "appHint_defaultRelays_description": "You can add default relays in the settings. This will automatically select them when creating a new task.",
   "appHint_appColor_title": "Change App Colors",
   "appHint_appColor_description": "You can personalize Locus by changing the primary color in the settings.",
-  "appHint_showMeLabel": "Show me"
+  "appHint_showMeLabel": "Show me",
+  "weekdays_monday": "Monday",
+  "weekdays_tuesday": "Tuesday",
+  "weekdays_wednesday": "Wednesday",
+  "weekdays_thursday": "Thursday",
+  "weekdays_friday": "Friday",
+  "weekdays_saturday": "Saturday",
+  "weekdays_sunday": "Sunday",
+  "weekdaySelection_selectTitle": "Select Date and Time",
+  "weekdaySelection_error_startTimeBeforeEndTime": "Start time must be before end time",
+  "backgroundLocationFetch_title": "Updating location in real-time",
+  "backgroundLocationFetch_text": "Close the app to stop updating your location in real-time. Locus will still update your location in the background, but with less battery usage."
 }

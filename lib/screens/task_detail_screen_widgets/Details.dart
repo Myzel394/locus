@@ -1,6 +1,6 @@
-import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/screens/LocationPointsDetailsScreen.dart';
 import 'package:locus/screens/task_detail_screen_widgets/ShareLocationButton.dart';
@@ -12,6 +12,8 @@ import 'package:locus/widgets/DetailInformationBox.dart';
 import 'package:locus/widgets/RelaySelectSheet.dart';
 import 'package:locus/widgets/TimerWidget.dart';
 import 'package:provider/provider.dart';
+
+import '../../widgets/PlatformListTile.dart';
 
 class Details extends StatefulWidget {
   final List<LocationPointService> locations;
@@ -253,12 +255,14 @@ class _DetailsState extends State<Details> {
                             Text(
                               l10n.taskAction_started_description(
                                 snapshot.data!["startedAt"],
-                                (snapshot.data!["runFrequency"] as Duration)
-                                    .inMinutes,
                               ),
+                              style: getBodyTextTextStyle(context),
                             )
                           else
-                            Text(l10n.taskAction_notRunning_title),
+                            Text(
+                              l10n.taskAction_notRunning_title,
+                              style: getBodyTextTextStyle(context),
+                            ),
                           const SizedBox(height: MEDIUM_SPACE),
                           Row(
                             children: <Widget>[

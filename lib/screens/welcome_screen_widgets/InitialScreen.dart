@@ -1,7 +1,7 @@
-import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_svg/svg.dart';
 
 import '../../constants/spacing.dart';

@@ -1,7 +1,7 @@
-import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/screens/task_detail_screen_widgets/Details.dart';
 import 'package:locus/services/location_point_service.dart';
 import 'package:locus/services/task_service.dart';
@@ -83,6 +83,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
         // Sort locations
         final locations = _controller.locations.toList();
         locations.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+        _controller.clear();
         _controller.addAll(locations);
 
         setState(() {
@@ -168,20 +169,18 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                     ),
                   ],
                 ),
-                Expanded(
-                  child: SafeArea(
-                    child: SingleChildScrollView(
-                      child: Details(
-                        locations: _controller.locations,
-                        task: widget.task,
-                        onGoBack: () {
-                          _pageController.animateToPage(
-                            0,
-                            duration: const Duration(milliseconds: 500),
-                            curve: Curves.easeInOut,
-                          );
-                        },
-                      ),
+                SafeArea(
+                  child: SingleChildScrollView(
+                    child: Details(
+                      locations: _controller.locations,
+                      task: widget.task,
+                      onGoBack: () {
+                        _pageController.animateToPage(
+                          0,
+                          duration: const Duration(milliseconds: 500),
+                          curve: Curves.easeInOut,
+                        );
+                      },
                     ),
                   ),
                 ),

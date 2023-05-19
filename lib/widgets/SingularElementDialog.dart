@@ -1,9 +1,9 @@
 import 'dart:ui';
 
-import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 
 import '../constants/spacing.dart';
 

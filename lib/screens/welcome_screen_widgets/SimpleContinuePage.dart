@@ -1,6 +1,6 @@
-import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 
 import '../../constants/spacing.dart';
 import '../../utils/theme.dart';
@@ -44,8 +44,7 @@ class SimpleContinuePage extends StatelessWidget {
                   .animate()
                   .then(delay: 200.ms)
                   .fadeIn(duration: FADE_IN_DURATION)
-                  .slide(
-                      begin: const Offset(0, 0.5), duration: FADE_IN_DURATION),
+                  .slide(begin: const Offset(0, 0.5), duration: FADE_IN_DURATION),
               header,
               Text(
                 description,
@@ -54,8 +53,7 @@ class SimpleContinuePage extends StatelessWidget {
                   .animate()
                   .then(delay: 500.ms)
                   .fadeIn(duration: FADE_IN_DURATION)
-                  .slide(
-                      begin: const Offset(0, 0.5), duration: FADE_IN_DURATION),
+                  .slide(begin: const Offset(0, 0.5), duration: FADE_IN_DURATION),
             ],
           ),
         ),

@@ -2,10 +2,10 @@ import 'dart:collection';
 
 import 'package:animated_list_plus/animated_list_plus.dart';
 import 'package:animated_list_plus/transitions.dart';
-import 'package:enough_platform_widgets/enough_platform_widgets.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/utils/load_status.dart';
 import 'package:locus/utils/theme.dart';
@@ -138,18 +138,16 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
                   searchController: _searchController,
                   onSearchFocusChanged: (hasFocus) async {
                     if (hasFocus) {
-                      _sheetController.animateTo(
-                        1,
-                        duration: 500.ms,
-                        curve: Curves.linearToEaseOut,
-                      );
+                      _sheetController.jumpTo(1);
                     }
                   },
                   extractValue: (dynamic element) => element as String,
                   builder: (_, List<dynamic> foundRelays) {
-                    final uncheckedFoundRelays =
-                        foundRelays.where((element) => !checkedRelaysSet.contains(element)).toList();
-                    final allRelays = List<String>.from([...widget.controller.relays, ...uncheckedFoundRelays]);
+                    final uncheckedFoundRelays = foundRelays
+                        .where((element) => !checkedRelaysSet.contains(element))
+                        .toList();
+                    final allRelays = List<String>.from(
+                        [...widget.controller.relays, ...uncheckedFoundRelays]);
 
                     return PlatformWidget(
                       material: (context, _) => ListView.builder(
@@ -186,22 +184,20 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
                             animation: animation,
                             sizeFraction: 0.7,
                             curve: Curves.easeInOut,
-                            child: CupertinoCheckboxListTile(
+                            child: CupertinoListTile(
                               title: Text(
                                 relay.substring(6),
                               ),
-                              value: widget.controller.relays.contains(relay),
-                              onChanged: (newValue) {
-                                if (newValue == null) {
-                                  return;
-                                }
-
-                                if (newValue) {
-                                  widget.controller.add(relay);
-                                } else {
-                                  widget.controller.remove(relay);
-                                }
-                              },
+                              leading: CupertinoSwitch(
+                                value: widget.controller.relays.contains(relay),
+                                onChanged: (newValue) {
+                                  if (newValue) {
+                                    widget.controller.add(relay);
+                                  } else {
+                                    widget.controller.remove(relay);
+                                  }
+                                },
+                              ),
                             ),
                           );
                         },
@@ -212,7 +208,6 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
               ),
             const SizedBox(height: MEDIUM_SPACE),
             PlatformTextButton(
-              child: Text(l10n.relaySelectSheet_selectRandomRelays(5)),
               material: (_, __) => MaterialTextButtonData(
                 icon: const Icon(Icons.shuffle),
               ),
@@ -225,6 +220,7 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
                       widget.controller.addAll(relays.take(5).toList());
                     }
                   : null,
+              child: Text(l10n.relaySelectSheet_selectRandomRelays(5)),
             ),
             const SizedBox(height: SMALL_SPACE),
             PlatformElevatedButton(
@@ -236,6 +232,9 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
               ),
               child: Text(l10n.closePositiveSheetAction),
             ),
+            SizedBox(
+              height: MediaQuery.of(context).viewInsets.bottom,
+            )
           ],
         ),
       ),

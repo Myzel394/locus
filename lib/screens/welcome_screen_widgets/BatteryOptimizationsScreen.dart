@@ -1,7 +1,7 @@
 import 'package:disable_battery_optimization/disable_battery_optimization.dart';
-import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/screens/welcome_screen_widgets/SimpleContinuePage.dart';
 import 'package:locus/utils/theme.dart';
 
@@ -14,10 +14,12 @@ class BatteryOptimizationsScreen extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<BatteryOptimizationsScreen> createState() => _BatteryOptimizationsScreenState();
+  State<BatteryOptimizationsScreen> createState() =>
+      _BatteryOptimizationsScreenState();
 }
 
-class _BatteryOptimizationsScreenState extends State<BatteryOptimizationsScreen> with TickerProviderStateMixin {
+class _BatteryOptimizationsScreenState extends State<BatteryOptimizationsScreen>
+    with TickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _animation;
 
@@ -60,13 +62,16 @@ class _BatteryOptimizationsScreenState extends State<BatteryOptimizationsScreen>
         ),
       ),
       onContinue: () async {
-        await DisableBatteryOptimization.showDisableBatteryOptimizationSettings();
-        await DisableBatteryOptimization.showDisableManufacturerBatteryOptimizationSettings(
+        await DisableBatteryOptimization
+            .showDisableBatteryOptimizationSettings();
+        await DisableBatteryOptimization
+            .showDisableManufacturerBatteryOptimizationSettings(
           l10n.welcomeScreen_battery_disableManufacturerOptimization_title,
           l10n.welcomeScreen_battery_disableManufacturerOptimization_description,
         );
         final isIgnoringBatteryOptimizations =
-            await DisableBatteryOptimization.isAllBatteryOptimizationDisabled ?? false;
+            (await DisableBatteryOptimization.isBatteryOptimizationDisabled) ??
+                false;
 
         if (isIgnoringBatteryOptimizations) {
           widget.onDone();

@@ -1,11 +1,12 @@
 import 'dart:math';
 
-import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:locus/constants/spacing.dart';
+import 'package:locus/utils/navigation.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:shimmer/shimmer.dart';
@@ -67,14 +68,11 @@ Map<HintType, String> getHintDescriptionMap(final BuildContext context) {
   };
 }
 
-String _getHintKey(final HintType hintType) =>
-    "hint_type_was_shown_${hintType.name}";
+String _getHintKey(final HintType hintType) => "hint_type_was_shown_${hintType.name}";
 
-Future<bool> checkIfHintIsHidden(final HintType hintType) =>
-    storage.containsKey(key: _getHintKey(hintType));
+Future<bool> checkIfHintIsHidden(final HintType hintType) => storage.containsKey(key: _getHintKey(hintType));
 
-Future<void> markHintAsHidden(
-    final HintType hintType, final bool hidden) async {
+Future<void> markHintAsHidden(final HintType hintType, final bool hidden) async {
   if (hidden) {
     await storage.write(key: _getHintKey(hintType), value: "true");
   } else {
@@ -82,51 +80,13 @@ Future<void> markHintAsHidden(
   }
 }
 
-void Function(BuildContext context)? getTutorialCallback(
-    final HintType hintType) {
+void Function(BuildContext context)? getTutorialCallback(final HintType hintType) {
   switch (hintType) {
     case HintType.defaultRelays:
-      return (context) {
-        if (isCupertino(context)) {
-          showCupertinoModalBottomSheet(
-            context: context,
-            backgroundColor: Colors.transparent,
-            builder: (_) => SettingsScreen(
-              highlight: SettingsHighlight.defaultRelays,
-            ),
-          );
-        } else {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => SettingsScreen(
-                highlight: SettingsHighlight.defaultRelays,
-              ),
-            ),
-          );
-        }
-      };
     case HintType.appColor:
-      return (context) {
-        if (isCupertino(context)) {
-          showCupertinoModalBottomSheet(
-            context: context,
-            backgroundColor: Colors.transparent,
-            builder: (_) => SettingsScreen(
-              highlight: SettingsHighlight.appColor,
-            ),
-          );
-        } else {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => SettingsScreen(
-                highlight: SettingsHighlight.appColor,
-              ),
-            ),
-          );
-        }
-      };
+      return showSettings;
+    default:
+      return null;
   }
 }
 
@@ -167,10 +127,7 @@ class AppHint extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(MEDIUM_SPACE),
             decoration: BoxDecoration(
-              color: HSLColor.fromColor(shades[0]!)
-                  .withSaturation(1)
-                  .toColor()
-                  .withOpacity(.1),
+              color: HSLColor.fromColor(shades[0]!).withSaturation(1).toColor().withOpacity(.1),
               border: Border.all(
                 color: Theme.of(context).colorScheme.secondary,
                 width: 2,
@@ -220,8 +177,7 @@ class AppHint extends StatelessWidget {
                               : PlatformTextButton(
                                   child: Text(l10n.appHint_showMeLabel),
                                   material: (_, __) => MaterialTextButtonData(
-                                    icon: const Icon(
-                                        Icons.arrow_circle_right_rounded),
+                                    icon: const Icon(Icons.arrow_circle_right_rounded),
                                   ),
                                   onPressed: () {
                                     callback(context);

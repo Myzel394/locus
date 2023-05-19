@@ -1,47 +1,64 @@
-import 'dart:ui';
-
+import 'package:background_fetch/background_fetch.dart';
+import 'package:locus/services/location_point_service.dart';
 import 'package:locus/services/task_service.dart';
-import 'package:logger/logger.dart';
-import 'package:workmanager/workmanager.dart';
 
-const TASK_EXECUTION_KEY = "tasks_manager";
-const TASK_SCHEDULE_KEY = "tasks_schedule";
+Future<void> updateLocation() async {
+  final taskService = await TaskService.restore();
+
+  await taskService.checkup();
+  final runningTasks = await taskService.getRunningTasks().toList();
+
+  if (runningTasks.isEmpty) {
+    return;
+  }
+
+  final locationData = await LocationPointService.createUsingCurrentLocation();
+
+  for (final task in runningTasks) {
+    await task.publishCurrentLocationNow(locationData.copyWithDifferentId());
+  }
+}
 
 @pragma('vm:entry-point')
-void callbackDispatcher() {
-  Workmanager().executeTask((taskName, inputData) async {
-    TaskService? taskService;
-    Task? task;
+void backgroundFetchHeadlessTask(HeadlessTask task) async {
+  String taskId = task.taskId;
+  bool isTimeout = task.timeout;
 
-    try {
-      DartPluginRegistrant.ensureInitialized();
+  if (isTimeout) {
+    BackgroundFetch.finish(taskId);
+    return;
+  }
 
-      switch (taskName) {
-        case TASK_EXECUTION_KEY:
-          final taskID = inputData!["taskID"]!;
-          taskService = await TaskService.restore();
-          task = taskService.getByID(taskID);
+  await updateLocation();
 
-          await task.publishCurrentLocationNow();
+  BackgroundFetch.finish(taskId);
+}
 
-          break;
-        case TASK_SCHEDULE_KEY:
-          final taskID = inputData!["taskID"]!;
-          final taskService = await TaskService.restore();
-          final task = taskService.getByID(taskID);
+void configureBackgroundFetch() {
+  BackgroundFetch.registerHeadlessTask(backgroundFetchHeadlessTask);
 
-          task.startExecutionImmediately();
-          break;
-      }
-    } catch (error) {
-      Logger().e(error.toString());
-      throw Exception(error);
-    } finally {
-      if (taskService != null) {
-        await taskService.checkup();
-      }
-    }
+  BackgroundFetch.configure(
+    BackgroundFetchConfig(
+      minimumFetchInterval: 15,
+      requiresCharging: false,
+      enableHeadless: true,
+      requiredNetworkType: NetworkType.ANY,
+      requiresBatteryNotLow: false,
+      requiresDeviceIdle: false,
+      requiresStorageNotLow: false,
+      startOnBoot: true,
+      stopOnTerminate: false,
+    ),
+        (taskId) async {
+      // We only use one taskId to update the location for all tasks,
+      // so we don't need to check the taskId.
+      await updateLocation();
 
-    return true;
-  });
+      BackgroundFetch.finish(taskId);
+    },
+        (taskId) {
+      // Timeout, we need to finish immediately.
+      BackgroundFetch.finish(taskId);
+    },
+  );
 }

@@ -58,17 +58,18 @@ class TaskView extends ChangeNotifier {
     final uri = Uri.parse(url);
     final fragment = uri.fragment;
 
-    final rawParameters = const Utf8Decoder().convert(
-        base64Url.decode(fragment));
+    final rawParameters =
+        const Utf8Decoder().convert(base64Url.decode(fragment));
     final parameters = jsonDecode(rawParameters);
 
     return ViewServiceLinkParameters(
-        password: List<int>.from(parameters['p']),
-        nostrPublicKey: parameters['k'],
-        nostrMessageID: parameters['i'],
-        relay: parameters['r'],
-        initialVector: List<int>.from(parameters['v']),
-        mac: List<int>.from(parameters["m"]));
+      password: List<int>.from(parameters['p']),
+      nostrPublicKey: parameters['k'],
+      nostrMessageID: parameters['i'],
+      relay: parameters['r'],
+      initialVector: List<int>.from(parameters['v']),
+      mac: List<int>.from(parameters["m"]),
+    );
   }
 
   static TaskView fromJSON(final Map<String, dynamic> json) {
@@ -106,8 +107,8 @@ class TaskView extends ChangeNotifier {
         case "EVENT":
           hasEventReceived = true;
           try {
-            final encryptedMessage = List<int>.from(
-                jsonDecode(event.message.content));
+            final encryptedMessage =
+                List<int>.from(jsonDecode(event.message.content));
 
             final algorithm = AesCbc.with256bits(
               macAlgorithm: Hmac.sha256(),
@@ -118,8 +119,8 @@ class TaskView extends ChangeNotifier {
               mac: Mac(parameters.mac),
             );
             final secretKey = SecretKey(parameters.password);
-            final rawMessage = await algorithm.decryptString(
-                secretBox, secretKey: secretKey);
+            final rawMessage =
+                await algorithm.decryptString(secretBox, secretKey: secretKey);
 
             final data = jsonDecode(rawMessage);
 
@@ -188,7 +189,7 @@ class TaskView extends ChangeNotifier {
     }
 
     final sameTask = taskService.tasks.firstWhereOrNull((element) =>
-    element.signPGPPublicKey == signPublicKey ||
+        element.signPGPPublicKey == signPublicKey ||
         element.nostrPublicKey == nostrPublicKey ||
         element.viewPGPPrivateKey == viewPrivateKey);
 
@@ -197,7 +198,7 @@ class TaskView extends ChangeNotifier {
     }
 
     final sameView = viewService.views.firstWhereOrNull((element) =>
-    element.signPublicKey == signPublicKey ||
+        element.signPublicKey == signPublicKey ||
         element.nostrPublicKey == nostrPublicKey ||
         element.viewPrivateKey == viewPrivateKey);
 
@@ -242,7 +243,7 @@ class ViewService extends ChangeNotifier {
     final data = jsonEncode(
       List<Map<String, dynamic>>.from(
         _views.map(
-              (view) => view.toJSON(),
+          (view) => view.toJSON(),
         ),
       ),
     );

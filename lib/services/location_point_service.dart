@@ -4,8 +4,12 @@ import 'package:battery_plus/battery_plus.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:openpgp/openpgp.dart';
+import 'package:uuid/uuid.dart';
+
+const uuid = Uuid();
 
 class LocationPointService {
+  final String id;
   final DateTime createdAt;
   final double latitude;
   final double longitude;
@@ -19,6 +23,7 @@ class LocationPointService {
   final BatteryState? batteryState;
 
   LocationPointService({
+    required this.id,
     required this.createdAt,
     required this.latitude,
     required this.longitude,
@@ -39,6 +44,7 @@ class LocationPointService {
 
   static LocationPointService fromJSON(Map<String, dynamic> json) {
     return LocationPointService(
+      id: json["id"],
       createdAt: DateTime.parse(json["createdAt"]),
       latitude: json["latitude"],
       longitude: json["longitude"],
@@ -57,6 +63,7 @@ class LocationPointService {
 
   Map<String, dynamic> toJSON() {
     return {
+      "id": id,
       "createdAt": createdAt.toIso8601String(),
       "latitude": latitude,
       "longitude": longitude,
@@ -88,12 +95,14 @@ class LocationPointService {
     return OpenPGP.encrypt(rawContent, viewPublicKey);
   }
 
-  static Future<LocationPointService> createUsingCurrentLocation() async {
-    final locationData = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.best,
-      timeLimit: const Duration(minutes: 5),
-      forceAndroidLocationManager: true,
-    );
+  static Future<LocationPointService> createUsingCurrentLocation([
+    final Position? position,
+  ]) async {
+    final locationData = position ??
+        await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.best,
+          timeLimit: const Duration(minutes: 5),
+        );
     double? batteryLevel;
     BatteryState? batteryState;
 
@@ -111,6 +120,7 @@ class LocationPointService {
     }
 
     return LocationPointService(
+      id: uuid.v4(),
       createdAt: DateTime.now(),
       latitude: locationData.latitude,
       longitude: locationData.longitude,
@@ -123,6 +133,22 @@ class LocationPointService {
       batteryState: batteryState,
     );
   }
+
+  /// Copies `current` with a new id - mainly used in conjunction with `createUsingCurrentLocation`
+  /// in background fetch to avoid fetching the location multiple times.
+  LocationPointService copyWithDifferentId() => LocationPointService(
+        id: uuid.v4(),
+        createdAt: DateTime.now(),
+        latitude: latitude,
+        longitude: longitude,
+        altitude: altitude,
+        accuracy: accuracy,
+        speed: speed,
+        speedAccuracy: speedAccuracy,
+        heading: heading,
+        batteryLevel: batteryLevel,
+        batteryState: batteryState,
+      );
 
   static Future<LocationPointService> fromEncrypted(
     final String encryptedMessage,

@@ -1,5 +1,4 @@
 import 'package:animations/animations.dart';
-import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:lottie/lottie.dart';
@@ -107,7 +106,7 @@ class _CreateTaskState extends State<CreateTask> with TickerProviderStateMixin {
               Radius.circular(HUGE_SPACE),
             ),
           ),
-          closedBuilder: (context, action) => PlatformInkWell(
+          closedBuilder: (context, action) => GestureDetector(
             onTap: () {
               _controller.reverseDuration = const Duration(milliseconds: 150);
               _controller.reverse();

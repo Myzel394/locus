@@ -1,7 +1,7 @@
-import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
 
 dynamic defaultExtractor(dynamic element) => element;
@@ -29,10 +29,12 @@ class BottomSheetFilterBuilder<T> extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<BottomSheetFilterBuilder> createState() => _BottomSheetFilterBuilderState<T>();
+  State<BottomSheetFilterBuilder> createState() =>
+      _BottomSheetFilterBuilderState<T>();
 }
 
-class _BottomSheetFilterBuilderState<T> extends State<BottomSheetFilterBuilder> {
+class _BottomSheetFilterBuilderState<T>
+    extends State<BottomSheetFilterBuilder> {
   List<T> _elements = [];
 
   @override

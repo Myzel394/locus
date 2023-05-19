@@ -1,11 +1,13 @@
 import 'package:battery_plus/battery_plus.dart';
-import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/services/location_point_service.dart';
 import 'package:locus/utils/theme.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+import '../../widgets/PlatformListTile.dart';
 
 class LocationDetails extends StatefulWidget {
   final LocationPointService location;

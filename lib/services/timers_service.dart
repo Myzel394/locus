@@ -139,7 +139,15 @@ class WeekdayTimer extends TaskRuntimeTimer {
           endTime.minute);
     }
 
-    return DateTime(now.year, now.month, now.day, endTime.hour, endTime.minute);
+    final nextTime =
+        DateTime(now.year, now.month, now.day, endTime.hour, endTime.minute);
+
+    if (nextTime.isAfter(now)) {
+      return nextTime;
+    }
+
+    // Next week
+    return nextTime.add(const Duration(days: 7));
   }
 
   static WeekdayTimer fromJSON(final Map<String, dynamic> json) {
@@ -209,9 +217,9 @@ class DurationTimer extends TaskRuntimeTimer {
   @override
   DateTime? nextEndDate(final DateTime now) {
     if (startDate == null) {
-      return startDate!.add(duration);
-    } else {
       return now.add(duration);
+    } else {
+      return startDate!.add(duration);
     }
   }
 

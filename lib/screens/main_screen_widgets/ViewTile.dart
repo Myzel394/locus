@@ -1,10 +1,12 @@
-import 'package:enough_platform_widgets/enough_platform_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:locus/utils/theme.dart';
+import 'package:locus/widgets/PlatformPopup.dart';
 import 'package:provider/provider.dart';
 
+import '../../widgets/PlatformListTile.dart';
 import '../ViewDetailScreen.dart';
 
 class ViewTile extends StatelessWidget {
@@ -27,50 +29,47 @@ class ViewTile extends StatelessWidget {
               style: TextStyle(fontFamily: "Cursive"),
             )
           : Text(view.name!),
-      trailing: PlatformPopupMenuButton<String>(
-        itemBuilder: (context) => [
-          PlatformPopupMenuItem<String>(
-            child: PlatformListTile(
-              leading: Icon(context.platformIcons.delete),
-              title: Text(l10n.viewAction_delete),
-            ),
-            value: "delete",
-          ),
-        ],
-        onSelected: (value) async {
-          switch (value) {
-            case "delete":
-              final confirmDeletion = await showPlatformDialog(
-                context: context,
-                barrierDismissible: true,
-                builder: (context) => PlatformAlertDialog(
-                  title: Text(l10n.viewAction_delete_confirm_title(view.name!)),
-                  content: Text(l10n.actionNotUndoable),
-                  actions: createCancellableDialogActions(
-                    context,
-                    [
-                      PlatformDialogAction(
-                        onPressed: () {
-                          Navigator.of(context).pop(true);
-                        },
-                        material: (_, __) => MaterialDialogActionData(
-                          icon: Icon(context.platformIcons.delete),
+      trailing: PlatformPopup<String>(
+        type: PlatformPopupType.tap,
+        items: [
+          PlatformPopupMenuItem(
+              label: PlatformListTile(
+                leading: Icon(context.platformIcons.delete),
+                title: Text(l10n.viewAction_delete),
+              ),
+              onPressed: () async {
+                final confirmDeletion = await showPlatformDialog(
+                  context: context,
+                  barrierDismissible: true,
+                  builder: (context) => PlatformAlertDialog(
+                    title:
+                        Text(l10n.viewAction_delete_confirm_title(view.name!)),
+                    content: Text(l10n.actionNotUndoable),
+                    actions: createCancellableDialogActions(
+                      context,
+                      [
+                        PlatformDialogAction(
+                          onPressed: () {
+                            Navigator.of(context).pop(true);
+                          },
+                          material: (_, __) => MaterialDialogActionData(
+                            icon: Icon(context.platformIcons.delete),
+                          ),
+                          cupertino: (_, __) => CupertinoDialogActionData(
+                            isDestructiveAction: true,
+                          ),
+                          child: Text(l10n.deleteLabel),
                         ),
-                        cupertino: (_, __) => CupertinoDialogActionData(
-                          isDestructiveAction: true,
-                        ),
-                        child: Text(l10n.deleteLabel),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              );
+                );
 
-              if (confirmDeletion) {
-                viewService.remove(view);
-              }
-          }
-        },
+                if (confirmDeletion) {
+                  viewService.remove(view);
+                }
+              }),
+        ],
       ),
       onTap: () {
         Navigator.of(context).push(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:locus/constants/spacing.dart';
+import 'package:locus/utils/theme.dart';
 
 class ChipCaption extends StatelessWidget {
   final String caption;
@@ -13,14 +14,14 @@ class ChipCaption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final primaryColor = Theme.of(context).colorScheme.primary;
-    final backgroundColor = Theme.of(context).colorScheme.onPrimary.withAlpha(100);
+    final shades = getPrimaryColorShades(context);
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: MEDIUM_SPACE, vertical: SMALL_SPACE),
+      padding: const EdgeInsets.symmetric(
+          horizontal: MEDIUM_SPACE, vertical: SMALL_SPACE),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(MEDIUM_SPACE),
-        color: backgroundColor,
+        color: shades[0]!.withOpacity(.2),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -29,14 +30,14 @@ class ChipCaption extends StatelessWidget {
         children: <Widget>[
           Icon(
             icon,
-            color: primaryColor,
+            color: shades[0],
           ),
           const SizedBox(width: SMALL_SPACE),
           Text(
             caption,
             style: TextStyle(
               fontWeight: FontWeight.bold,
-              color: primaryColor,
+              color: shades[0],
             ),
           ),
         ],

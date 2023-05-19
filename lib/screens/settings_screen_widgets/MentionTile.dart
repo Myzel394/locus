@@ -1,6 +1,7 @@
-import 'package:enough_platform_widgets/platform.dart';
 import 'package:flutter/widgets.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import '../../widgets/PlatformListTile.dart';
 
 class MentionTile extends StatelessWidget {
   final String iconName;

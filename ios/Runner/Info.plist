@@ -4,7 +4,7 @@
 <dict>
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
-		<string>workmanager.background.task</string>
+		<string>task-identifier</string>
 	</array>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
@@ -41,10 +41,28 @@
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>comgooglemaps</string>
+		<string>baidumap</string>
+		<string>iosamap</string>
+		<string>waze</string>
+		<string>yandexmaps</string>
+		<string>yandexnavi</string>
+		<string>citymapper</string>
+		<string>mapswithme</string>
+		<string>osmandmaps</string>
+		<string>dgis</string>
+		<string>qqmap</string>
+		<string>here-location</string>
+		<string>tomtomgo</string>
+	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>LSSupportsOpeningDocumentsInPlace</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Use the camera to import tasks by QR codes.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>We need to access the location to store it.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
@@ -58,7 +76,7 @@
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>
-		<string>processing</string>
+		<string>location</string>
 	</array>
 	<key>UIFileSharingEnabled</key>
 	<true/>
@@ -81,31 +99,5 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
-	<key>UIBackgroundModes</key>
-	<array>
-        <string>processing</string>
-    </array>
-    <key>BGTaskSchedulerPermittedIdentifiers</key>
-    <array>
-        <string>task-identifier</string>
-    </array>
-    <key>NSCameraUsageDescription</key>
-    <string>Use the camera to import tasks by QR codes.</string>
-    <key>LSApplicationQueriesSchemes</key>
-    <array>
-        <string>comgooglemaps</string>
-        <string>baidumap</string>
-        <string>iosamap</string>
-        <string>waze</string>
-        <string>yandexmaps</string>
-        <string>yandexnavi</string>
-        <string>citymapper</string>
-        <string>mapswithme</string>
-        <string>osmandmaps</string>
-        <string>dgis</string>
-        <string>qqmap</string>
-        <string>here-location</string>
-        <string>tomtomgo</string>
-    </array>
 </dict>
 </plist>
