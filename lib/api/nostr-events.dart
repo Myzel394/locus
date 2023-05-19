@@ -44,7 +44,9 @@ class NostrEventsManager {
       privkey: _privateKey,
     );
 
-    for (final relay in relays) {}
+    for (final relay in relays) {
+      await _sendEvent(event, relay);
+    }
 
     return event;
   }
