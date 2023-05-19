@@ -338,6 +338,8 @@
   "honorableMentions_values_session_description": "Decentralized messaging app with end-to-end encryption and no phone number or email required.",
   "honorableMentions_values_odysee": "Odysee",
   "honorableMentions_values_odysee_description": "Awesome YouTube alternative with better privacy and monetization options.",
+  "honorableMentions_values_kleckRelay": "KleckRelay",
+  "honorableMentions_values_kleckRelay_description": "An open source email relay service with tracker remover, image preloaders and much more. Created by me :)",
   "quickActions_createOneHour": "Create One-Hour Task",
   "quickActions_createOneHour_labelFromNow": "One-Hour task from {date}",
   "@quickActions_createOneHour_labelFromNow": {
