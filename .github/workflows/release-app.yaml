@@ -56,4 +56,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
-          files: 'build/app/outputs/flutter-apk/release/*.apk'
+          files: 'build/app/outputs/flutter-apk/*.apk'
