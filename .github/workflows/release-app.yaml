@@ -50,6 +50,14 @@ jobs:
 
       - name: Build Android App (fat APK) 📱
         run: flutter build apk
+        
+      - name: Rename files
+        run: |
+          cd build/app/outputs/flutter-apk &&
+          mv app-release.apk locus.apk &&
+          mv app-arm64-v8a-release.apk locus-arm64-v8a-release.apk &&
+          mv app-armeabi-v7a-release.apk locus-armeabi-v7a-release.apk &&
+          mv app-x86_64-release.apk locus-x86_64-release.apk
 
       - name: Release Apps 🚀
         uses: softprops/action-gh-release@v1
