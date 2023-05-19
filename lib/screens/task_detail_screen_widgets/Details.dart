@@ -256,9 +256,13 @@ class _DetailsState extends State<Details> {
                               l10n.taskAction_started_description(
                                 snapshot.data!["startedAt"],
                               ),
+                              style: getBodyTextTextStyle(context),
                             )
                           else
-                            Text(l10n.taskAction_notRunning_title),
+                            Text(
+                              l10n.taskAction_notRunning_title,
+                              style: getBodyTextTextStyle(context),
+                            ),
                           const SizedBox(height: MEDIUM_SPACE),
                           Row(
                             children: <Widget>[
