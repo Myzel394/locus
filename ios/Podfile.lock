@@ -42,8 +42,6 @@ PODS:
   - file_picker (0.0.1):
     - DKImagePickerController/PhotoGallery
     - Flutter
-  - file_saver (0.0.1):
-    - Flutter
   - Flutter (1.0.0)
   - flutter_osm_plugin (0.0.1):
     - Alamofire
@@ -145,7 +143,6 @@ DEPENDENCIES:
   - battery_plus (from `.symlinks/plugins/battery_plus/ios`)
   - clipboard_watcher (from `.symlinks/plugins/clipboard_watcher/ios`)
   - file_picker (from `.symlinks/plugins/file_picker/ios`)
-  - file_saver (from `.symlinks/plugins/file_saver/ios`)
   - Flutter (from `Flutter`)
   - flutter_osm_plugin (from `.symlinks/plugins/flutter_osm_plugin/ios`)
   - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
@@ -195,8 +192,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/clipboard_watcher/ios"
   file_picker:
     :path: ".symlinks/plugins/file_picker/ios"
-  file_saver:
-    :path: ".symlinks/plugins/file_saver/ios"
   Flutter:
     :path: Flutter
   flutter_osm_plugin:
@@ -232,14 +227,13 @@ SPEC CHECKSUMS:
   Alamofire: d368e1ff8a298e6dde360e35a3e68e6c610e7204
   apple_maps_flutter: c59725efea39e13e703cde52a1d2b14866ad68a8
   background_fetch: bc9b44b0bf8b434e282a2ac9be8662800a0296ed
-  battery_plus: 7851ab482c336dd101ae735dc9363f01e1223c7c
+  battery_plus: 9bff772a7e5e4d5381ca3ca92a97373a3d8b2738
   clipboard_watcher: 86fb70421aca6f4944e0591a8292605da7784666
   DKImagePickerController: b512c28220a2b8ac7419f21c491fc8534b7601ac
   DKPhotoGallery: fdfad5125a9fdda9cc57df834d49df790dbb4179
   file_picker: ce3938a0df3cc1ef404671531facef740d03f920
-  file_saver: 503e386464dbe118f630e17b4c2e1190fa0cf808
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
-  flutter_osm_plugin: f06ae1e854af57270c61ae27bdb8a386cfd4afa5
+  flutter_osm_plugin: 029b14f54485ced3190bb2c4444616b76e10c6a8
   flutter_secure_storage: 23fc622d89d073675f2eaa109381aefbcf5a49be
   geolocator_apple: cc556e6844d508c95df1e87e3ea6fa4e58c50401
   GoogleDataTransport: 8378d1fa8ac49753ea6ce70d65a7cb70ce5f66e6
@@ -262,7 +256,7 @@ SPEC CHECKSUMS:
   PromisesObjC: 09985d6d70fbe7878040aa746d78236e6946d2ef
   quick_actions_ios: 9e80dcfadfbc5d47d9cf8f47bcf428b11cf383d4
   SDWebImage: d47d81bea8a77187896b620dc79c3c528e8906b9
-  share_plus: 056a1e8ac890df3e33cb503afffaf1e9b4fbae68
+  share_plus: 599aa54e4ea31d4b4c0e9c911bcc26c55e791028
   SwiftyGif: 93a1cc87bf3a51916001cf8f3d63835fb64c819f
   Tangram-es: 628b634f7fc09d2217469b9914de00d9de49ff9d
   uni_links: d97da20c7701486ba192624d99bffaaffcfc298a
@@ -270,6 +264,6 @@ SPEC CHECKSUMS:
   vibration: 7d883d141656a1c1a6d8d238616b2042a51a1241
   workmanager: 0afdcf5628bbde6924c21af7836fed07b42e30e6
 
-PODFILE CHECKSUM: a7116c94927f4064a9a2bb5f4c0cb6e99e578f2e
+PODFILE CHECKSUM: 819f6e738594296500811eae0a41f3dceed5a207
 
 COCOAPODS: 1.11.3
