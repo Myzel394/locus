@@ -98,8 +98,7 @@ class _ShareLocationButtonState extends State<ShareLocationButton> {
 
           await FileSaver.instance.saveFile(
             name: "viewkey.json",
-            bytes: const Utf8Encoder()
-                .convert(widget.task.generateViewKeyContent()),
+            bytes: const Utf8Encoder().convert(widget.task.generateViewKeyContent()),
           );
           break;
         case "qr":
@@ -121,10 +120,8 @@ class _ShareLocationButtonState extends State<ShareLocationButton> {
                           style: getTitle2TextStyle(context),
                           textAlign: TextAlign.center,
                         ),
-                        isMaterial(context)
-                            ? const SizedBox(height: LARGE_SPACE)
-                            : null,
-                        QrImage(
+                        isMaterial(context) ? const SizedBox(height: LARGE_SPACE) : null,
+                        QrImageView(
                           data: url,
                           errorCorrectionLevel: QrErrorCorrectLevel.H,
                           gapless: false,
