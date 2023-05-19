@@ -9,12 +9,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Extract metadata 🔍
-        id: meta
-        uses: docker/metadata-action@v4
-        with:
-          images: myzel394/locus
-
       - name: Checkout
         uses: actions/checkout@v3
 
@@ -60,7 +54,7 @@ jobs:
       - name: Release Apps 🚀
         uses: ncipollo/release-action@v1
         with:
-          tag: ${{ steps.meta.outputs.tags }}
-          name: ${{ steps.meta.outputs.tags }}
+          tag: ${{ github.ref }}
+          name: ${{ github.ref }}
           token: ${{ secrets.GH_TOKEN }}
           artifacts: 'build/app/outputs/apk/release/*.apk'
