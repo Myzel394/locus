@@ -56,7 +56,7 @@ dependencies:
   path_provider: ^2.0.15
   animations: ^2.0.7
   async: ^2.11.0
-  battery_plus: ^3.0.3
+  battery_plus: ^4.0.1
   cryptography: ^2.5.0
   lottie: ^2.3.2
   visibility_detector: ^0.4.0+2
