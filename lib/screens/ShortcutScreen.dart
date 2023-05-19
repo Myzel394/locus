@@ -10,6 +10,7 @@ import 'package:locus/utils/platform.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 
+import '../services/location_point_service.dart';
 import '../services/settings_service.dart';
 import '../utils/theme.dart';
 
@@ -66,8 +67,13 @@ class _ShortcutScreenState extends State<ShortcutScreen> {
           break;
         case ShortcutType.shareNow:
           final tasks = await taskService.getRunningTasks().toList();
+          final locationData = await LocationPointService.createUsingCurrentLocation();
           await Future.wait(
-            tasks.map((task) => task.publishCurrentLocationNow()),
+            tasks.map(
+              (task) => task.publishCurrentLocationNow(
+                locationData.copyWithDifferentId(),
+              ),
+            ),
           );
           break;
         case ShortcutType.stopAllTasks:
