@@ -1,7 +1,8 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+import 'package:locus/constants/spacing.dart';
+import 'package:locus/utils/theme.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-import '../../widgets/PlatformListTile.dart';
 
 class MentionTile extends StatelessWidget {
   final String iconName;
@@ -19,7 +20,42 @@ class MentionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PlatformListTile(
+    if (isCupertino(context)) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: SMALL_SPACE),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(999999),
+              child: Image.asset(
+                "assets/honorable-mentions/$iconName",
+                width: 40,
+                height: 40,
+              ),
+            ),
+            const SizedBox(width: SMALL_SPACE),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: getBodyTextTextStyle(context),
+                  ),
+                  const SizedBox(height: TINY_SPACE),
+                  Text(
+                    description,
+                    style: getCaptionTextStyle(context),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ListTile(
       leading: ClipRRect(
         borderRadius: BorderRadius.circular(999999),
         child: Image.asset(

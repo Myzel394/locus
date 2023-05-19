@@ -15,18 +15,18 @@ class PlatformListTile extends StatelessWidget {
   final Widget? cupertinoAdditionalInfo;
   final VisualDensity? materialVisualDensity;
 
-  const PlatformListTile({
-    required this.title,
-    this.subtitle,
-    this.leading,
-    this.trailing,
-    this.onTap,
-    this.padding,
-    this.cupertinoNotched = false,
-    this.cupertinoAdditionalInfo,
-    this.materialVisualDensity,
-    Key? key
-  }) : super(key: key);
+  const PlatformListTile(
+      {required this.title,
+      this.subtitle,
+      this.leading,
+      this.trailing,
+      this.onTap,
+      this.padding,
+      this.cupertinoNotched = false,
+      this.cupertinoAdditionalInfo,
+      this.materialVisualDensity,
+      Key? key})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
