@@ -52,9 +52,8 @@ jobs:
         run: flutter build apk
 
       - name: Release Apps 🚀
-        uses: ncipollo/release-action@v1
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
-          tag: ${{ github.ref }}
-          name: ${{ github.ref }}
-          token: ${{ secrets.GH_TOKEN }}
-          artifacts: 'build/app/outputs/apk/release/*.apk'
+          files: 'build/app/outputs/apk/release/*.apk'
