@@ -169,20 +169,18 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                     ),
                   ],
                 ),
-                Expanded(
-                  child: SafeArea(
-                    child: SingleChildScrollView(
-                      child: Details(
-                        locations: _controller.locations,
-                        task: widget.task,
-                        onGoBack: () {
-                          _pageController.animateToPage(
-                            0,
-                            duration: const Duration(milliseconds: 500),
-                            curve: Curves.easeInOut,
-                          );
-                        },
-                      ),
+                SafeArea(
+                  child: SingleChildScrollView(
+                    child: Details(
+                      locations: _controller.locations,
+                      task: widget.task,
+                      onGoBack: () {
+                        _pageController.animateToPage(
+                          0,
+                          duration: const Duration(milliseconds: 500),
+                          curve: Curves.easeInOut,
+                        );
+                      },
                     ),
                   ),
                 ),
