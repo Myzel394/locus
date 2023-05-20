@@ -1,16 +1,25 @@
-# locus
+# Locus
 
-A new Flutter project.
+Locus is a free, open source app for Android and iOS that allows you to share your location live. It encrypts your location end-to-end, meaning that no one, not even we, can read it. It stores the location decentralized on multiple servers of your choice using Nostr, meaning that you are not locked to a service. No authentication required.
 
-## Getting Started
+# Supporting Locus
 
-This project is a starting point for a Flutter application.
+You can support Locus in various ways:
 
-A few resources to get you started if this is your first Flutter project:
+## Contribute to the project
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+Add a new feature or fix bugs.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Add translations
+
+Translate Locus into your language so that other people can use it more easily.
+
+## Donate
+
+It might sound crazy, but if you would just donate 1$, it would totally mean to world to me, since it's a really small amount and if everyone did that, I can totally focus on Locus and my other open source projects. :)
+
+You can donate via:
+
+* [GitHub Sponsors](https://github.com/sponsors/Myzel394)
+* Bitcoin: `bc1qw054829yj8e2u8glxnfcg3w22dkek577mjt5x6`
+* Monero: `83dm5wyuckG4aPbuMREHCEgLNwVn5i7963SKBhECaA7Ueb7DKBTy639R3QfMtb3DsFHMp8u6WGiCFgbdRDBBcz5sLduUtm8`
