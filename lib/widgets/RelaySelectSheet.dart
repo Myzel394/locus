@@ -113,7 +113,7 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
 
       final newValue = addProtocol(value);
 
-      if (Uri.tryParse(newValue) == null) {
+      if (Uri.parse(newValue) == null) {
         setState(() {
           _newValue = "";
         });
@@ -215,7 +215,7 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
             return PlatformWidget(
               material: (context, _) => CheckboxListTile(
                 title: Text(
-                  relay.substring(6),
+                  relay.length >= 6 ? relay.substring(6) : relay,
                 ),
                 value: widget.controller.relays.contains(relay),
                 onChanged: (newValue) {
@@ -232,7 +232,7 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
               ),
               cupertino: (context, _) => CupertinoListTile(
                 title: Text(
-                  relay.substring(6),
+                  relay.length >= 6 ? relay.substring(6) : relay,
                 ),
                 trailing: CupertinoSwitch(
                   value: widget.controller.relays.contains(relay),

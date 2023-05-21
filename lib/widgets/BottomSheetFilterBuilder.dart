@@ -84,6 +84,7 @@ class _BottomSheetFilterBuilderState<T>
               onChanged: (value) {
                 updateElements();
               },
+              spellCheckConfiguration: const SpellCheckConfiguration.disabled(),
               decoration: InputDecoration(
                 hintText: l10n.searchLabel,
                 suffixIcon: IconButton(
