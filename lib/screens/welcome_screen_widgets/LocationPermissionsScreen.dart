@@ -5,15 +5,16 @@ import 'package:locus/utils/theme.dart';
 import 'package:lottie/lottie.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-class PermissionsScreen extends StatelessWidget {
+class LocationPermissionScreen extends StatelessWidget {
   final void Function() onGranted;
 
-  const PermissionsScreen({
+  const LocationPermissionScreen({
     required this.onGranted,
     Key? key,
   }) : super(key: key);
 
-  Future<PermissionStatus> _checkPermission({bool withoutRequest = false}) async {
+  Future<PermissionStatus> _checkPermission(
+      {bool withoutRequest = false}) async {
     var alwaysPermission = await Permission.locationAlways.status;
 
     // We first need to request locationWhenInUse, because it is required to request locationAlways
