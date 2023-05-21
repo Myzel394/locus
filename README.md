@@ -1,9 +1,9 @@
 # Locus
 
 <p float="left" align="center">
-    <img src="readme_content/0.png" width="33%" />
-    <img src="readme_content/1.png" width="33%" />
-    <img src="readme_content/2.png" width="33%" />
+    <img src="readme_content/0.png" width="30%" />
+    <img src="readme_content/1.png" width="30%" />
+    <img src="readme_content/2.png" width="30%" />
 </p>
 
 
