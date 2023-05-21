@@ -21,7 +21,7 @@ const storage = FlutterSecureStorage();
 enum Page {
   welcome,
   explanation,
-  permissions,
+  locationPermission,
   batteryOptimizations,
   done,
 }
@@ -59,7 +59,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   }
 
   void _nextScreen(final int page) {
-    _controller.animateToPage(page, duration: 500.ms, curve: Curves.easeOutExpo);
+    _controller.animateToPage(page,
+        duration: 500.ms, curve: Curves.easeOutExpo);
   }
 
   void _onDone() {
@@ -123,7 +124,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       // Background
                       ValueDelegate.color(
                         const ["unlock Konturen", "Kreis", "Fläche 1"],
-                        value: getIsDarkMode(context) ? shades[900] : shades[200],
+                        value:
+                            getIsDarkMode(context) ? shades[900] : shades[200],
                       ),
                     ],
                   ),
@@ -133,13 +135,13 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                     if (widget.hasLocationAlwaysGranted) {
                       _nextScreen(Page.batteryOptimizations.index);
                     } else {
-                      _nextScreen(Page.permissions.index);
+                      _nextScreen(Page.locationPermission.index);
                     }
                   } else {
                     if (widget.hasLocationAlwaysGranted) {
                       _onDone();
                     } else {
-                      _nextScreen(Page.permissions.index);
+                      _nextScreen(Page.locationPermission.index);
                     }
                   }
                 },
