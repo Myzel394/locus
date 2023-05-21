@@ -49,7 +49,7 @@ class _MainScreenState extends State<MainScreen> {
   double listViewHeight = 0;
   int activeTab = 0;
   bool showHint = true;
-  late final Stream<Position> _positionStream;
+  Stream<Position>? _positionStream;
 
   double get windowHeight =>
       MediaQuery.of(context).size.height - kToolbarHeight;
@@ -110,41 +110,50 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
+  _initLiveLocationUpdate() {
+    if (_positionStream != null) {
+      return;
+    }
+
+    _positionStream = Geolocator.getPositionStream(
+      locationSettings: getLocationSettings(),
+    );
+
+    _positionStream!.listen((position) async {
+      final taskService = context.read<TaskService>();
+      final runningTasks = await taskService.getRunningTasks().toList();
+
+      if (runningTasks.isEmpty) {
+        return;
+      }
+
+      final locationData =
+          await LocationPointService.createUsingCurrentLocation(position);
+
+      for (final task in runningTasks) {
+        await task.publishCurrentLocationNow(
+          locationData.copyWithDifferentId(),
+        );
+      }
+    });
+  }
+
+  _removeLiveLocationUpdate() {
+    _positionStream?.drain();
+    _positionStream = null;
+  }
+
   @override
   void initState() {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      updateView();
       initQuickActions(context);
-
-      _positionStream = Geolocator.getPositionStream(
-        locationSettings: getLocationSettings(),
-      );
-
-      _positionStream.listen((position) async {
-        final taskService = context.read<TaskService>();
-        final runningTasks = await taskService.getRunningTasks().toList();
-
-        if (runningTasks.isEmpty) {
-          return;
-        }
-
-        final locationData =
-            await LocationPointService.createUsingCurrentLocation(position);
-
-        for (final task in runningTasks) {
-          await task.publishCurrentLocationNow(
-            locationData.copyWithDifferentId(),
-          );
-        }
-      });
     });
 
     final taskService = context.read<TaskService>();
 
     taskService.addListener(updateView);
-
     taskService.checkup();
 
     initBackground();
@@ -154,12 +163,14 @@ class _MainScreenState extends State<MainScreen> {
   void dispose() {
     final taskService = context.read<TaskService>();
     taskService.removeListener(updateView);
-    _positionStream.drain();
+
+    _removeLiveLocationUpdate();
 
     super.dispose();
   }
 
-  void updateView() {
+  void updateView() async {
+    final taskService = context.read<TaskService>();
     final height = listViewKey.currentContext?.size?.height ?? 0;
 
     setState(() {
@@ -167,6 +178,14 @@ class _MainScreenState extends State<MainScreen> {
       listViewShouldFillUp = getListViewShouldFillUp(context);
       listViewHeight = height;
     });
+
+    final runningTasks = await taskService.getRunningTasks().toList();
+
+    if (runningTasks.isNotEmpty) {
+      _initLiveLocationUpdate();
+    } else {
+      _removeLiveLocationUpdate();
+    }
   }
 
   PlatformAppBar getAppBar() {
