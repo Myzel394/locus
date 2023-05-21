@@ -1,10 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/services/settings_service.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 TextStyle getBodyTextTextStyle(final BuildContext context) => platformThemeData(
       context,
@@ -71,10 +71,11 @@ TextStyle getCaptionTextStyle(final BuildContext context) => platformThemeData(
 
 Color getSheetColor(final BuildContext context) => platformThemeData(
       context,
-      material: (data) =>
-          HSLColor.fromColor(data.scaffoldBackgroundColor.withAlpha(255))
+      material: (data) => getIsDarkMode(context)
+          ? HSLColor.fromColor(data.scaffoldBackgroundColor.withAlpha(255))
               .withLightness(.18)
-              .toColor(),
+              .toColor()
+          : data.scaffoldBackgroundColor,
       cupertino: (data) => data.barBackgroundColor,
     );
 

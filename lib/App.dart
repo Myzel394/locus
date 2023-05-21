@@ -10,7 +10,6 @@ import 'package:locus/widgets/DismissKeyboard.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:provider/provider.dart';
 
-import 'constants/spacing.dart';
 import 'constants/themes.dart';
 
 ColorScheme createColorScheme(
@@ -71,20 +70,6 @@ class App extends StatelessWidget {
                         ),
                   primaryColor:
                       settings.primaryColor ?? lightColorScheme.primary,
-                  scaffoldBackgroundColor: HSLColor.fromColor(
-                          settings.primaryColor ?? lightColorScheme.background)
-                      .withLightness(0.95)
-                      .toColor(),
-                  inputDecorationTheme: InputDecorationTheme(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(MEDIUM_SPACE),
-                    ),
-                  ),
-                  dialogBackgroundColor: settings.primaryColor == null
-                      ? lightColorScheme.background
-                      : HSLColor.fromColor(settings.primaryColor!)
-                          .withLightness(0.95)
-                          .toColor(),
                 );
               }
 
@@ -101,21 +86,6 @@ class App extends StatelessWidget {
                         Brightness.light,
                       ),
                 primaryColor: settings.primaryColor,
-                scaffoldBackgroundColor: settings.primaryColor == null
-                    ? null
-                    : HSLColor.fromColor(settings.primaryColor!)
-                        .withLightness(0.95)
-                        .toColor(),
-                inputDecorationTheme: InputDecorationTheme(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(MEDIUM_SPACE),
-                  ),
-                ),
-                dialogBackgroundColor: settings.primaryColor == null
-                    ? null
-                    : HSLColor.fromColor(settings.primaryColor!)
-                        .withLightness(0.95)
-                        .toColor(),
               );
             })(),
             darkTheme: (() {
@@ -134,11 +104,6 @@ class App extends StatelessWidget {
                           settings.primaryColor ?? darkColorScheme.background)
                       .withLightness(0.08)
                       .toColor(),
-                  inputDecorationTheme: InputDecorationTheme(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(MEDIUM_SPACE),
-                    ),
-                  ),
                   dialogBackgroundColor: settings.primaryColor == null
                       ? darkColorScheme.background
                       : HSLColor.fromColor(settings.primaryColor!)
@@ -161,11 +126,6 @@ class App extends StatelessWidget {
                     : HSLColor.fromColor(settings.primaryColor!)
                         .withLightness(0.08)
                         .toColor(),
-                inputDecorationTheme: InputDecorationTheme(
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(MEDIUM_SPACE),
-                  ),
-                ),
                 dialogBackgroundColor: settings.primaryColor == null
                     ? null
                     : HSLColor.fromColor(settings.primaryColor!)
