@@ -12,7 +12,8 @@ class WarningText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = isCupertino(context) ? CupertinoColors.systemYellow : Colors.yellow;
+    final color =
+        isCupertino(context) ? CupertinoColors.systemYellow : Colors.yellow;
 
     if (getIsDarkMode(context)) {
       return Row(
@@ -52,11 +53,11 @@ class WarningText extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
             PlatformWidget(
-              material: (_, __) => Icon(
+              material: (_, __) => const Icon(
                 Icons.warning_rounded,
                 color: Colors.white,
               ),
-              cupertino: (_, __) => Icon(
+              cupertino: (_, __) => const Icon(
                 CupertinoIcons.exclamationmark_triangle_fill,
                 color: Colors.white,
               ),

@@ -101,7 +101,9 @@ class _ShareLocationButtonState extends State<ShareLocationButton> {
                           style: getTitle2TextStyle(context),
                           textAlign: TextAlign.center,
                         ),
-                        isMaterial(context) ? const SizedBox(height: LARGE_SPACE) : null,
+                        isMaterial(context)
+                            ? const SizedBox(height: LARGE_SPACE)
+                            : null,
                         QrImageView(
                           data: url,
                           errorCorrectionLevel: QrErrorCorrectLevel.H,
@@ -142,11 +144,11 @@ class _ShareLocationButtonState extends State<ShareLocationButton> {
     final l10n = AppLocalizations.of(context);
 
     return PlatformElevatedButton(
-      child: Text(l10n.shareLocation_title),
       material: (_, __) => MaterialElevatedButtonData(
         icon: const Icon(Icons.share_location_rounded),
       ),
       onPressed: isLoading ? null : openShareLocationDialog,
+      child: Text(l10n.shareLocation_title),
     );
   }
 }

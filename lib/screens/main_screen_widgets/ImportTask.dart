@@ -43,7 +43,7 @@ class _ImportTaskState extends State<ImportTask> with TickerProviderStateMixin {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         VisibilityDetector(
-          key: Key("import-task-lottie"),
+          key: const Key("import-task-lottie"),
           onVisibilityChanged: (info) {
             if (info.visibleFraction == 0) {
               _controller.reset();
@@ -155,7 +155,7 @@ class _ImportTaskState extends State<ImportTask> with TickerProviderStateMixin {
             _controller.forward();
           },
           material: (_, __) => MaterialElevatedButtonData(
-            icon: Icon(Icons.file_download_outlined),
+            icon: const Icon(Icons.file_download_outlined),
           ),
           child: Text(l10n.mainScreen_importTask_action_import),
         ),

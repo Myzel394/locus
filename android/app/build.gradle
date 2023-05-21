@@ -58,6 +58,7 @@ android {
         minSdkVersion 24
         targetSdkVersion rootProject.ext.targetSdkVersion
         compileSdkVersion rootProject.ext.compileSdkVersion
+        multiDexEnabled true
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
     }
@@ -74,6 +75,9 @@ android {
     buildTypes {
         release {
             signingConfig signingConfigs.release
+
+            minifyEnabled true
+            shrinkResources true
         }
     }
 }

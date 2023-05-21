@@ -54,8 +54,10 @@ class _NameFormState extends State<NameForm> {
                 return l10n.fields_errors_invalidCharacters;
               }
 
-              if (viewService.views.any((element) => element.name?.toLowerCase() == lowerCasedName)) {
-                return l10n.mainScreen_importTask_action_name_errors_sameNameAlreadyExists;
+              if (viewService.views.any(
+                  (element) => element.name?.toLowerCase() == lowerCasedName)) {
+                return l10n
+                    .mainScreen_importTask_action_name_errors_sameNameAlreadyExists;
               }
 
               return null;
@@ -63,7 +65,7 @@ class _NameFormState extends State<NameForm> {
             material: (_, __) => MaterialTextFormFieldData(
               decoration: InputDecoration(
                 labelText: l10n.mainScreen_importTask_action_name_label,
-                icon: Icon(Icons.text_fields_rounded),
+                icon: const Icon(Icons.text_fields_rounded),
               ),
             ),
             cupertino: (_, __) => CupertinoTextFormFieldData(

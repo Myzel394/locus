@@ -42,7 +42,7 @@ class _CreateTaskState extends State<CreateTask> with TickerProviderStateMixin {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         VisibilityDetector(
-          key: Key("create-task-lottie"),
+          key: const Key("create-task-lottie"),
           onVisibilityChanged: (info) {
             if (info.visibleFraction == 0) {
               _controller.reset();

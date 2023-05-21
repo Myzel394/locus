@@ -3,7 +3,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutter_platform_widgets/flutter_platform_widgets.dart' hide PlatformListTile;
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart'
+    hide PlatformListTile;
 import 'package:locus/services/task_service.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
@@ -36,9 +37,12 @@ class _TaskTileState extends State<TaskTile> {
     final l10n = AppLocalizations.of(context);
 
     return {
-      TaskLinkPublishProgress.encrypting: l10n.taskAction_generateLink_process_encrypting,
-      TaskLinkPublishProgress.publishing: l10n.taskAction_generateLink_process_publishing,
-      TaskLinkPublishProgress.creatingURI: l10n.taskAction_generateLink_process_creatingURI,
+      TaskLinkPublishProgress.encrypting:
+          l10n.taskAction_generateLink_process_encrypting,
+      TaskLinkPublishProgress.publishing:
+          l10n.taskAction_generateLink_process_publishing,
+      TaskLinkPublishProgress.creatingURI:
+          l10n.taskAction_generateLink_process_creatingURI,
     };
   }
 
@@ -81,7 +85,8 @@ class _TaskTileState extends State<TaskTile> {
                             context: context,
                             builder: (_) => PlatformAlertDialog(
                               title: Text(l10n.taskAction_started_title),
-                              content: Text(l10n.taskAction_started_runsUntil(nextEndDate)),
+                              content: Text(l10n
+                                  .taskAction_started_runsUntil(nextEndDate)),
                               actions: <Widget>[
                                 PlatformDialogActionButton(
                                   child: Text(l10n.closeNeutralAction),
@@ -94,7 +99,8 @@ class _TaskTileState extends State<TaskTile> {
                           );
                         } else {
                           await widget.task.stopExecutionImmediately();
-                          final nextStartDate = await widget.task.startScheduleTomorrow();
+                          final nextStartDate =
+                              await widget.task.startScheduleTomorrow();
 
                           if (!mounted) {
                             return;
@@ -108,7 +114,8 @@ class _TaskTileState extends State<TaskTile> {
                             context: context,
                             builder: (_) => PlatformAlertDialog(
                               title: Text(l10n.taskAction_stopped_title),
-                              content: Text(l10n.taskAction_stopped_startsAgain(nextStartDate)),
+                              content: Text(l10n.taskAction_stopped_startsAgain(
+                                  nextStartDate)),
                               actions: <Widget>[
                                 PlatformDialogActionButton(
                                   child: Text(l10n.closeNeutralAction),
@@ -140,8 +147,8 @@ class _TaskTileState extends State<TaskTile> {
         items: [
           PlatformPopupMenuItem<String>(
               label: PlatformListTile(
-                leading: Icon(Icons.link_rounded),
-                trailing: SizedBox.shrink(),
+                leading: const Icon(Icons.link_rounded),
+                trailing: const SizedBox.shrink(),
                 title: Text(l10n.taskAction_generateLink),
               ),
               onPressed: () async {
@@ -153,7 +160,8 @@ class _TaskTileState extends State<TaskTile> {
                       } catch (e) {}
                     }
 
-                    if (progress != TaskLinkPublishProgress.done && Platform.isAndroid) {
+                    if (progress != TaskLinkPublishProgress.done &&
+                        Platform.isAndroid) {
                       final scaffold = ScaffoldMessenger.of(context);
 
                       snackBar = scaffold.showSnackBar(

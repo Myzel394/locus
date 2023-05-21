@@ -59,7 +59,7 @@ class PlatformPopupMenuButton<T> extends StatelessWidget {
       },
       cupertino: (context, platform) => CupertinoButton(
         padding: cupertinoButtonPadding,
-        child: icon ?? child ?? Icon(CupertinoIcons.ellipsis_circle),
+        child: icon ?? child ?? const Icon(CupertinoIcons.ellipsis_circle),
         onPressed: () => _showActionSheet(context),
       ),
     );
@@ -103,7 +103,7 @@ class PlatformPopupMenuButton<T> extends StatelessWidget {
         },
       );
     }
-    return Divider();
+    return const Divider();
   }
 
   PopupMenuEntry<T> _toMaterialEntry(
@@ -114,7 +114,7 @@ class PlatformPopupMenuButton<T> extends StatelessWidget {
         child: entry.child,
       );
     }
-    return PopupMenuDivider();
+    return const PopupMenuDivider();
   }
 }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutter_platform_widgets/flutter_platform_widgets.dart' hide PlatformListTile;
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart'
+    hide PlatformListTile;
 import 'package:locus/services/view_service.dart';
 import 'package:openpgp/openpgp.dart';
 
@@ -128,7 +129,7 @@ class _ViewImportOverviewState extends State<ViewImportOverview> {
         ),
         if (_isLoading)
           const Padding(
-            padding: const EdgeInsets.all(MEDIUM_SPACE),
+            padding: EdgeInsets.all(MEDIUM_SPACE),
             child: Center(
               child: CircularProgressIndicator(),
             ),

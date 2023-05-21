@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutter_platform_widgets/flutter_platform_widgets.dart' hide PlatformListTile;
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart'
+    hide PlatformListTile;
 import 'package:locus/services/view_service.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/PlatformPopup.dart';
@@ -26,7 +27,7 @@ class ViewTile extends StatelessWidget {
       title: view.name == null
           ? Text(
               l10n.unnamedView,
-              style: TextStyle(fontFamily: "Cursive"),
+              style: const TextStyle(fontFamily: "Cursive"),
             )
           : Text(view.name!),
       trailing: PlatformPopup<String>(
@@ -42,7 +43,8 @@ class ViewTile extends StatelessWidget {
                   context: context,
                   barrierDismissible: true,
                   builder: (context) => PlatformAlertDialog(
-                    title: Text(l10n.viewAction_delete_confirm_title(view.name!)),
+                    title:
+                        Text(l10n.viewAction_delete_confirm_title(view.name!)),
                     content: Text(l10n.actionNotUndoable),
                     actions: createCancellableDialogActions(
                       context,

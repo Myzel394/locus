@@ -288,11 +288,11 @@ class _MainScreenState extends State<MainScreen> {
               currentIndex: activeTab,
               items: [
                 BottomNavigationBarItem(
-                  icon: Icon(CupertinoIcons.home),
+                  icon: const Icon(CupertinoIcons.home),
                   label: l10n.mainScreen_overview,
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(CupertinoIcons.location_fill),
+                  icon: const Icon(CupertinoIcons.location_fill),
                   label: l10n.mainScreen_createTask,
                 ),
               ],
@@ -328,7 +328,7 @@ class _MainScreenState extends State<MainScreen> {
                           );
                         }
 
-                        return SizedBox.shrink();
+                        return const SizedBox.shrink();
                       },
                     ),
                     const SizedBox(height: MEDIUM_SPACE),
@@ -369,7 +369,7 @@ class _MainScreenState extends State<MainScreen> {
                                           .slide(
                                             duration: 1.seconds,
                                             curve: Curves.easeOut,
-                                            begin: Offset(0, 0.2),
+                                            begin: const Offset(0, 0.2),
                                           )
                                           .fadeIn(
                                             delay: 100.ms,

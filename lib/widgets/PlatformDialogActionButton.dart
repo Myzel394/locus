@@ -33,22 +33,22 @@ class PlatformDialogActionButton extends StatelessWidget {
             child: ButtonTheme(
               buttonColor: Colors.red,
               child: TextButton(
-                child: child,
                 onPressed: onPressed,
+                child: child,
               ),
             ),
           );
         }
         return TextButton(
-          child: child,
           onPressed: onPressed,
+          child: child,
         );
       },
       cupertino: (context, platform) => CupertinoDialogAction(
-        child: child,
         onPressed: onPressed,
         isDestructiveAction: isDestructiveAction,
         isDefaultAction: isDefaultAction,
+        child: child,
       ),
     );
   }

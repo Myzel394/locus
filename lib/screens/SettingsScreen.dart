@@ -258,7 +258,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                         const SizedBox(height: LARGE_SPACE),
                         PlatformListTile(
-                          leading: Icon(Icons.code),
+                          leading: const Icon(Icons.code),
                           title: Text(l10n.support_options_develop),
                           subtitle:
                               Text(l10n.support_options_develop_description),
@@ -270,7 +270,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           },
                         ),
                         PlatformListTile(
-                          leading: Icon(Icons.translate_rounded),
+                          leading: const Icon(Icons.translate_rounded),
                           title: Text(l10n.support_options_translate),
                           subtitle:
                               Text(l10n.support_options_translate_description),

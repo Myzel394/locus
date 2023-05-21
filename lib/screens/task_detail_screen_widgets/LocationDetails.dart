@@ -2,7 +2,8 @@ import 'package:battery_plus/battery_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutter_platform_widgets/flutter_platform_widgets.dart' hide PlatformListTile;
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart'
+    hide PlatformListTile;
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/services/location_point_service.dart';
 import 'package:locus/utils/theme.dart';
@@ -33,10 +34,13 @@ class _LocationDetailsState extends State<LocationDetails> {
     final l10n = AppLocalizations.of(context);
 
     return {
-      BatteryState.charging: l10n.taskDetails_locationDetails_batteryState_charging,
-      BatteryState.discharging: l10n.taskDetails_locationDetails_batteryState_discharging,
+      BatteryState.charging:
+          l10n.taskDetails_locationDetails_batteryState_charging,
+      BatteryState.discharging:
+          l10n.taskDetails_locationDetails_batteryState_discharging,
       BatteryState.full: l10n.taskDetails_locationDetails_batteryState_full,
-      BatteryState.unknown: l10n.taskDetails_locationDetails_batteryState_unknown,
+      BatteryState.unknown:
+          l10n.taskDetails_locationDetails_batteryState_unknown,
       null: l10n.taskDetails_locationDetails_batteryState_unknown,
     };
   }
@@ -111,7 +115,7 @@ class _LocationDetailsState extends State<LocationDetails> {
                     material: (data) => data.scaffoldBackgroundColor,
                     cupertino: (data) => data.scaffoldBackgroundColor,
                   ),
-                  borderRadius: BorderRadius.all(
+                  borderRadius: const BorderRadius.all(
                     Radius.circular(MEDIUM_SPACE),
                   ),
                 ),
@@ -127,7 +131,7 @@ class _LocationDetailsState extends State<LocationDetails> {
                         l10n.taskDetails_locationDetails_createdAt_label,
                       ),
                       leading: Icon(context.platformIcons.time),
-                      trailing: SizedBox.shrink(),
+                      trailing: const SizedBox.shrink(),
                     ),
                     PlatformListTile(
                       title: Text(
@@ -135,9 +139,10 @@ class _LocationDetailsState extends State<LocationDetails> {
                           widget.location.accuracy.round(),
                         ),
                       ),
-                      subtitle: Text(l10n.taskDetails_locationDetails_accuracy_label),
-                      leading: Icon(Icons.location_on),
-                      trailing: SizedBox.shrink(),
+                      subtitle:
+                          Text(l10n.taskDetails_locationDetails_accuracy_label),
+                      leading: const Icon(Icons.location_on),
+                      trailing: const SizedBox.shrink(),
                     ),
                     PlatformListTile(
                       title: Text(
@@ -147,13 +152,14 @@ class _LocationDetailsState extends State<LocationDetails> {
                                 (widget.location.batteryLevel! * 100).floor(),
                               ),
                       ),
-                      subtitle: Text(l10n.taskDetails_locationDetails_battery_label),
+                      subtitle:
+                          Text(l10n.taskDetails_locationDetails_battery_label),
                       leading: Icon(
                         getIconForBatteryLevel(
                           widget.location.batteryLevel,
                         ),
                       ),
-                      trailing: SizedBox.shrink(),
+                      trailing: const SizedBox.shrink(),
                     ),
                     PlatformListTile(
                       title: Text(
@@ -162,8 +168,8 @@ class _LocationDetailsState extends State<LocationDetails> {
                       subtitle: Text(
                         l10n.taskDetails_locationDetails_batteryState_label,
                       ),
-                      leading: Icon(Icons.cable_rounded),
-                      trailing: SizedBox.shrink(),
+                      leading: const Icon(Icons.cable_rounded),
+                      trailing: const SizedBox.shrink(),
                     ),
                     PlatformListTile(
                       title: Text(
@@ -177,10 +183,11 @@ class _LocationDetailsState extends State<LocationDetails> {
                         l10n.taskDetails_locationDetails_speed_label,
                       ),
                       leading: PlatformWidget(
-                        material: (_, __) => Icon(Icons.speed),
-                        cupertino: (_, __) => Icon(CupertinoIcons.speedometer),
+                        material: (_, __) => const Icon(Icons.speed),
+                        cupertino: (_, __) =>
+                            const Icon(CupertinoIcons.speedometer),
                       ),
-                      trailing: SizedBox.shrink(),
+                      trailing: const SizedBox.shrink(),
                     ),
                     PlatformListTile(
                       title: Text(
@@ -190,17 +197,18 @@ class _LocationDetailsState extends State<LocationDetails> {
                                 widget.location.altitude!.toInt().abs(),
                               ),
                       ),
-                      subtitle: Text(l10n.taskDetails_locationDetails_altitude_label),
+                      subtitle:
+                          Text(l10n.taskDetails_locationDetails_altitude_label),
                       leading: PlatformWidget(
-                        material: (_, __) => Icon(Icons.height_rounded),
-                        cupertino: (_, __) => Icon(CupertinoIcons.alt),
+                        material: (_, __) => const Icon(Icons.height_rounded),
+                        cupertino: (_, __) => const Icon(CupertinoIcons.alt),
                       ),
-                      trailing: SizedBox.shrink(),
+                      trailing: const SizedBox.shrink(),
                     ),
                   ],
                 ),
               )
-            : SizedBox.shrink(),
+            : const SizedBox.shrink(),
       ],
     );
   }

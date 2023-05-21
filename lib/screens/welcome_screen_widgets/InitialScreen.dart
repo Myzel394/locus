@@ -35,8 +35,8 @@ class InitialScreen extends StatelessWidget {
                 width: 150,
                 height: 150,
               ).animate().scale(
-                    begin: Offset(0, 0),
-                    end: Offset(1, 1),
+                    begin: const Offset(0, 0),
+                    end: const Offset(1, 1),
                     duration: FADE_IN_DURATION,
                   ),
               const SizedBox(height: HUGE_SPACE),
@@ -47,7 +47,8 @@ class InitialScreen extends StatelessWidget {
                   .animate()
                   .then(delay: 200.ms)
                   .fadeIn(duration: FADE_IN_DURATION)
-                  .slide(begin: Offset(0, 0.5), duration: FADE_IN_DURATION),
+                  .slide(
+                      begin: const Offset(0, 0.5), duration: FADE_IN_DURATION),
               const SizedBox(height: SMALL_SPACE),
               Text(
                 l10n.welcomeScreen_description,
@@ -56,7 +57,8 @@ class InitialScreen extends StatelessWidget {
                   .animate()
                   .then(delay: 500.ms)
                   .fadeIn(duration: FADE_IN_DURATION)
-                  .slide(begin: Offset(0, 0.5), duration: FADE_IN_DURATION),
+                  .slide(
+                      begin: const Offset(0, 0.5), duration: FADE_IN_DURATION),
             ],
           ),
         ),
@@ -65,8 +67,8 @@ class InitialScreen extends StatelessWidget {
           onPressed: onContinue,
           child: Text(l10n.welcomeScreen_getStarted),
         ).animate().then(delay: 800.ms).slide(
-              begin: Offset(0, 1),
-              end: Offset(0, 0),
+              begin: const Offset(0, 1),
+              end: const Offset(0, 0),
               duration: FADE_IN_DURATION,
             ),
       ],
