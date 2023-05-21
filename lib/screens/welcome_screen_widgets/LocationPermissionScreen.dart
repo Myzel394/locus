@@ -45,8 +45,8 @@ class LocationPermissionScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
 
     return SimpleContinuePage(
-      title: l10n.welcomeScreen_permissions_title,
-      description: l10n.welcomeScreen_permissions_description,
+      title: l10n.welcomeScreen_locationPermission_title,
+      description: l10n.welcomeScreen_locationPermission_description,
       continueLabel: l10n.welcomeScreen_permissions_allow,
       header: Container(
         constraints: const BoxConstraints(
