@@ -8,7 +8,6 @@ import '../../utils/theme.dart';
 enum ImportSelectionType {
   url,
   file,
-  qr,
 }
 
 class ImportSelection extends StatefulWidget {
@@ -45,7 +44,8 @@ class _ImportSelectionState extends State<ImportSelection> {
         if (errorMessage != null) ...[
           Text(
             errorMessage!,
-            style: getBodyTextTextStyle(context).copyWith(color: getErrorColor(context)),
+            style: getBodyTextTextStyle(context)
+                .copyWith(color: getErrorColor(context)),
           ),
           const SizedBox(height: MEDIUM_SPACE),
         ],
@@ -73,16 +73,6 @@ class _ImportSelectionState extends State<ImportSelection> {
                 widget.onSelect(ImportSelectionType.file);
               },
               child: Text(l10n.mainScreen_importTask_action_importMethod_file),
-            ),
-            PlatformElevatedButton(
-              padding: const EdgeInsets.all(MEDIUM_SPACE),
-              material: (_, __) => MaterialElevatedButtonData(
-                icon: const Icon(Icons.qr_code_scanner_rounded),
-              ),
-              onPressed: () {
-                widget.onSelect(ImportSelectionType.qr);
-              },
-              child: Text(l10n.mainScreen_importTask_action_importMethod_qrCode),
             ),
           ],
         ),

@@ -178,7 +178,6 @@
   "mainScreen_importTask_action_importMethod_url_title": "Enter the URL of the task",
   "mainScreen_importTask_action_importMethod_file": "Import file",
   "mainScreen_importTask_action_importMethod_file_selectFile": "Select a ViewKey file to import",
-  "mainScreen_importTask_action_importMethod_qrCode": "Scan QR code",
   "mainScreen_importTask_action_import_isLoading": "Importing...",
   "mainScreen_importTask_action_name_title": "Enter a name for this view",
   "mainScreen_importTask_action_name_label": "Name",
