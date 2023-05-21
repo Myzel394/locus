@@ -5,6 +5,14 @@
   "resetLabel": "Reset",
   "cancelLabel": "Cancel",
   "addLabel": "Add",
+  "addNewValueLabel": "Add \"{value}\"",
+  "@addNewValueLabel": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
   "taskImportError": "An error occurred while importing the task",
   "locationsLoadingError": "An error occurred while loading locations",
   "locationFetchError": "There was an error fetching the locations. Please try again later.",

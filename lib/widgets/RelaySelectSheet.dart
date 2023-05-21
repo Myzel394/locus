@@ -1,7 +1,5 @@
 import 'dart:collection';
 
-import 'package:animated_list_plus/animated_list_plus.dart';
-import 'package:animated_list_plus/transitions.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -13,6 +11,12 @@ import 'package:locus/widgets/BottomSheetFilterBuilder.dart';
 import 'package:locus/widgets/ModalSheet.dart';
 
 import '../api/nostr-relays.dart';
+
+String removeProtocol(final String url) =>
+    url.toLowerCase().replaceAll(RegExp(r'^wss://'), '');
+
+String addProtocol(final String url) =>
+    url.toLowerCase().startsWith('wss://') ? url : 'wss://$url';
 
 class RelayController extends ChangeNotifier {
   late final List<String> _relays;
@@ -66,8 +70,11 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
   LoadStatus loadStatus = LoadStatus.loading;
   final _searchController = TextEditingController();
   late final DraggableScrollableController _sheetController;
+  String _newValue = '';
 
   Set<String> get checkedRelaysSet => Set.from(widget.controller.relays);
+
+  bool get isValueNew => _newValue.isNotEmpty;
 
   @override
   void initState() {
@@ -75,6 +82,49 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
     fetchAvailableRelays();
 
     widget.controller.addListener(rebuild);
+    _searchController.addListener(() {
+      final value = removeProtocol(_searchController.text.toLowerCase());
+
+      if (value.isEmpty) {
+        setState(() {
+          _newValue = '';
+        });
+        return;
+      }
+
+      final normalizedRelays = availableRelays.map(removeProtocol);
+
+      if (normalizedRelays.contains(value)) {
+        setState(() {
+          _newValue = "";
+        });
+        return;
+      }
+
+      final normalizedSelectedRelays =
+          widget.controller.relays.map(removeProtocol);
+
+      if (normalizedSelectedRelays.contains(value)) {
+        setState(() {
+          _newValue = "";
+        });
+        return;
+      }
+
+      final newValue = addProtocol(value);
+
+      if (Uri.tryParse(newValue) == null) {
+        setState(() {
+          _newValue = "";
+        });
+        return;
+      }
+
+      setState(() {
+        _newValue = newValue;
+      });
+    });
+
     _sheetController = DraggableScrollableController();
   }
 
@@ -108,6 +158,100 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
     }
   }
 
+  Widget buildRelaySelectSheet(final ScrollController draggableController) {
+    final l10n = AppLocalizations.of(context);
+
+    return BottomSheetFilterBuilder(
+      elements: availableRelays,
+      searchController: _searchController,
+      onSearchFocusChanged: (hasFocus) async {
+        if (hasFocus) {
+          _sheetController.jumpTo(1);
+        }
+      },
+      extractValue: (dynamic element) => element as String,
+      builder: (_, List<dynamic> foundRelays) {
+        final uncheckedFoundRelays = foundRelays
+            .where((element) => !checkedRelaysSet.contains(element))
+            .toList();
+        final allRelays = List<String>.from(
+            [...widget.controller.relays, ...uncheckedFoundRelays]);
+
+        final length = allRelays.length + (isValueNew ? 1 : 0);
+
+        return ListView.builder(
+          controller: draggableController,
+          itemCount: length,
+          itemBuilder: (context, rawIndex) {
+            if (isValueNew && rawIndex == 0) {
+              return PlatformWidget(
+                material: (context, _) => ListTile(
+                  title: Text(
+                    l10n.addNewValueLabel(_newValue),
+                  ),
+                  leading: const Icon(
+                    Icons.add,
+                  ),
+                  onTap: () {
+                    widget.controller.add(_searchController.value.text);
+                    _searchController.clear();
+                  },
+                ),
+                cupertino: (context, _) => CupertinoButton(
+                  child: Text(
+                    l10n.addNewValueLabel(_newValue),
+                  ),
+                  onPressed: () {
+                    widget.controller.add(_searchController.value.text);
+                    _searchController.clear();
+                  },
+                ),
+              );
+            }
+
+            final index = isValueNew ? rawIndex - 1 : rawIndex;
+            final relay = allRelays[index];
+
+            return PlatformWidget(
+              material: (context, _) => CheckboxListTile(
+                title: Text(
+                  relay.substring(6),
+                ),
+                value: widget.controller.relays.contains(relay),
+                onChanged: (newValue) {
+                  if (newValue == null) {
+                    return;
+                  }
+
+                  if (newValue) {
+                    widget.controller.add(relay);
+                  } else {
+                    widget.controller.remove(relay);
+                  }
+                },
+              ),
+              cupertino: (context, _) => CupertinoListTile(
+                title: Text(
+                  relay.substring(6),
+                ),
+                trailing: CupertinoSwitch(
+                  value: widget.controller.relays.contains(relay),
+                  onChanged: (newValue) {
+                    if (newValue) {
+                      widget.controller.add(relay);
+                    } else {
+                      widget.controller.remove(relay);
+                    }
+                  },
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -133,78 +277,7 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
               )
             else if (availableRelays.isNotEmpty)
               Expanded(
-                child: BottomSheetFilterBuilder(
-                  elements: availableRelays,
-                  searchController: _searchController,
-                  onSearchFocusChanged: (hasFocus) async {
-                    if (hasFocus) {
-                      _sheetController.jumpTo(1);
-                    }
-                  },
-                  extractValue: (dynamic element) => element as String,
-                  builder: (_, List<dynamic> foundRelays) {
-                    final uncheckedFoundRelays = foundRelays
-                        .where((element) => !checkedRelaysSet.contains(element))
-                        .toList();
-                    final allRelays = List<String>.from(
-                        [...widget.controller.relays, ...uncheckedFoundRelays]);
-
-                    return PlatformWidget(
-                      material: (context, _) => ListView.builder(
-                        controller: controller,
-                        itemCount: allRelays.length,
-                        itemBuilder: (context, index) {
-                          final relay = allRelays[index];
-
-                          return CheckboxListTile(
-                            title: Text(
-                              relay.substring(6),
-                            ),
-                            value: widget.controller.relays.contains(relay),
-                            onChanged: (newValue) {
-                              if (newValue == null) {
-                                return;
-                              }
-
-                              if (newValue) {
-                                widget.controller.add(relay);
-                              } else {
-                                widget.controller.remove(relay);
-                              }
-                            },
-                          );
-                        },
-                      ),
-                      cupertino: (context, _) => ImplicitlyAnimatedList<String>(
-                        items: allRelays,
-                        controller: controller,
-                        areItemsTheSame: (a, b) => a == b,
-                        itemBuilder: (context, animation, relay, index) {
-                          return SizeFadeTransition(
-                            animation: animation,
-                            sizeFraction: 0.7,
-                            curve: Curves.easeInOut,
-                            child: CupertinoListTile(
-                              title: Text(
-                                relay.substring(6),
-                              ),
-                              leading: CupertinoSwitch(
-                                value: widget.controller.relays.contains(relay),
-                                onChanged: (newValue) {
-                                  if (newValue) {
-                                    widget.controller.add(relay);
-                                  } else {
-                                    widget.controller.remove(relay);
-                                  }
-                                },
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    );
-                  },
-                ),
+                child: buildRelaySelectSheet(controller),
               ),
             const SizedBox(height: MEDIUM_SPACE),
             PlatformTextButton(
