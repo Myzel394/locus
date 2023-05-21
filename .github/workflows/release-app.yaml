@@ -38,6 +38,9 @@ jobs:
         with:
           channel: 'stable'
           flutter-version: '3.10.0'
+          
+      - name: Opt out of telemetry
+        run: flutter --disable-telemetry
 
       - name: Install dependencies 📦
         run: flutter pub get
