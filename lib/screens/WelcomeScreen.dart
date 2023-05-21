@@ -9,7 +9,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/init_quick_actions.dart';
 import 'package:locus/screens/welcome_screen_widgets/BatteryOptimizationsScreen.dart';
-import 'package:locus/screens/welcome_screen_widgets/LocationPermissionsScreen.dart';
+import 'package:locus/screens/welcome_screen_widgets/LocationPermissionScreen.dart';
 import 'package:locus/screens/welcome_screen_widgets/SimpleContinuePage.dart';
 import 'package:lottie/lottie.dart';
 
