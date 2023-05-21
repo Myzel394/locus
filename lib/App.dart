@@ -37,10 +37,12 @@ ColorScheme createColorScheme(
 
 class App extends StatelessWidget {
   final bool hasLocationAlwaysGranted;
+  final bool hasNotificationGranted;
   final bool isIgnoringBatteryOptimizations;
 
   const App({
     required this.hasLocationAlwaysGranted,
+    required this.hasNotificationGranted,
     required this.isIgnoringBatteryOptimizations,
     super.key,
   });
@@ -183,14 +185,16 @@ class App extends StatelessWidget {
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           onGenerateRoute: (settings) {
-            final screen =
-                hasLocationAlwaysGranted && isIgnoringBatteryOptimizations
-                    ? const MainScreen()
-                    : WelcomeScreen(
-                        hasLocationAlwaysGranted: hasLocationAlwaysGranted,
-                        isIgnoringBatteryOptimizations:
-                            isIgnoringBatteryOptimizations,
-                      );
+            final screen = hasLocationAlwaysGranted &&
+                    isIgnoringBatteryOptimizations &&
+                    hasNotificationGranted
+                ? const MainScreen()
+                : WelcomeScreen(
+                    hasLocationAlwaysGranted: hasLocationAlwaysGranted,
+                    hasNotificationGranted: hasNotificationGranted,
+                    isIgnoringBatteryOptimizations:
+                        isIgnoringBatteryOptimizations,
+                  );
 
             return MaterialWithModalsPageRoute(
               builder: (context) => screen,

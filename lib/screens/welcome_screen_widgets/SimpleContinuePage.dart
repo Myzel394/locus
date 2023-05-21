@@ -44,7 +44,8 @@ class SimpleContinuePage extends StatelessWidget {
                   .animate()
                   .then(delay: 200.ms)
                   .fadeIn(duration: FADE_IN_DURATION)
-                  .slide(begin: const Offset(0, 0.5), duration: FADE_IN_DURATION),
+                  .slide(
+                      begin: const Offset(0, 0.5), duration: FADE_IN_DURATION),
               header,
               Text(
                 description,
@@ -53,7 +54,8 @@ class SimpleContinuePage extends StatelessWidget {
                   .animate()
                   .then(delay: 500.ms)
                   .fadeIn(duration: FADE_IN_DURATION)
-                  .slide(begin: const Offset(0, 0.5), duration: FADE_IN_DURATION),
+                  .slide(
+                      begin: const Offset(0, 0.5), duration: FADE_IN_DURATION),
             ],
           ),
         ),

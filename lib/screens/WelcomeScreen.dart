@@ -10,6 +10,7 @@ import 'package:locus/constants/spacing.dart';
 import 'package:locus/init_quick_actions.dart';
 import 'package:locus/screens/welcome_screen_widgets/BatteryOptimizationsScreen.dart';
 import 'package:locus/screens/welcome_screen_widgets/LocationPermissionScreen.dart';
+import 'package:locus/screens/welcome_screen_widgets/NotificationPermissionScreen.dart';
 import 'package:locus/screens/welcome_screen_widgets/SimpleContinuePage.dart';
 import 'package:lottie/lottie.dart';
 
@@ -22,16 +23,19 @@ enum Page {
   welcome,
   explanation,
   locationPermission,
+  notificationPermission,
   batteryOptimizations,
   done,
 }
 
 class WelcomeScreen extends StatefulWidget {
   final bool hasLocationAlwaysGranted;
+  final bool hasNotificationGranted;
   final bool isIgnoringBatteryOptimizations;
 
   const WelcomeScreen({
     required this.hasLocationAlwaysGranted,
+    required this.hasNotificationGranted,
     required this.isIgnoringBatteryOptimizations,
     Key? key,
   }) : super(key: key);
@@ -133,7 +137,15 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 onContinue: () {
                   if (Platform.isAndroid) {
                     if (widget.hasLocationAlwaysGranted) {
-                      _nextScreen(Page.batteryOptimizations.index);
+                      if (widget.hasNotificationGranted) {
+                        if (widget.isIgnoringBatteryOptimizations) {
+                          _onDone();
+                        } else {
+                          _nextScreen(Page.batteryOptimizations.index);
+                        }
+                      } else {
+                        _nextScreen(Page.notificationPermission.index);
+                      }
                     } else {
                       _nextScreen(Page.locationPermission.index);
                     }
@@ -147,6 +159,23 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 },
               ),
               LocationPermissionScreen(
+                onGranted: () {
+                  if (Platform.isAndroid) {
+                    if (widget.hasNotificationGranted) {
+                      if (widget.isIgnoringBatteryOptimizations) {
+                        _onDone();
+                      } else {
+                        _nextScreen(Page.batteryOptimizations.index);
+                      }
+                    } else {
+                      _nextScreen(Page.notificationPermission.index);
+                    }
+                  } else {
+                    _onDone();
+                  }
+                },
+              ),
+              NotificationPermissionScreen(
                 onGranted: () {
                   if (Platform.isAndroid) {
                     if (widget.isIgnoringBatteryOptimizations) {
