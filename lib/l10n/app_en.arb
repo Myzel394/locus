@@ -171,7 +171,7 @@
   "mainScreen_tasksSection": "Tasks",
   "mainScreen_viewsSection": "Views",
   "mainScreen_importTask_title": "Import a Task",
-  "mainScreen_importTask_description": "Import a task from a link, a file or QR code you have received",
+  "mainScreen_importTask_description": "Import a task from a link or a file you have received",
   "mainScreen_importTask_action_import": "Import Task",
   "mainScreen_importTask_action_importMethod": "How would you like to import the task?",
   "mainScreen_importTask_action_importMethod_url": "Import URL",
