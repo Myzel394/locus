@@ -2,13 +2,13 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:basic_utils/basic_utils.dart' hide Mac;
 import 'package:collection/collection.dart';
 import 'package:cryptography/cryptography.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:nostr/nostr.dart';
-import 'package:openpgp/openpgp.dart';
 
 const storage = FlutterSecureStorage();
 const KEY = "view_service";
@@ -32,8 +32,8 @@ class ViewServiceLinkParameters {
 }
 
 class TaskView extends ChangeNotifier {
-  final String signPublicKey;
-  final String viewPrivateKey;
+  final ECPublicKey signPublicKey;
+  final RSAPrivateKey viewPrivateKey;
   final String nostrPublicKey;
   final List<String> relays;
   String? name;
@@ -58,8 +58,7 @@ class TaskView extends ChangeNotifier {
     final uri = Uri.parse(url);
     final fragment = uri.fragment;
 
-    final rawParameters =
-        const Utf8Decoder().convert(base64Url.decode(fragment));
+    final rawParameters = const Utf8Decoder().convert(base64Url.decode(fragment));
     final parameters = jsonDecode(rawParameters);
 
     return ViewServiceLinkParameters(
@@ -74,16 +73,15 @@ class TaskView extends ChangeNotifier {
 
   static TaskView fromJSON(final Map<String, dynamic> json) {
     return TaskView(
-      signPublicKey: json["signPublicKey"],
-      viewPrivateKey: json["viewPrivateKey"],
+      signPublicKey: CryptoUtils.ecPublicKeyFromPem(json["signPublicKey"]),
+      viewPrivateKey: CryptoUtils.rsaPrivateKeyFromPem(json["viewPrivateKey"]),
       nostrPublicKey: json["nostrPublicKey"],
       relays: List<String>.from(json["relays"]),
       name: json["name"],
     );
   }
 
-  static Future<TaskView> fetchFromNostr(
-      final ViewServiceLinkParameters parameters) async {
+  static Future<TaskView> fetchFromNostr(final ViewServiceLinkParameters parameters) async {
     final completer = Completer<TaskView>();
 
     final request = Request(generate64RandomHexChars(), [
@@ -107,8 +105,7 @@ class TaskView extends ChangeNotifier {
         case "EVENT":
           hasEventReceived = true;
           try {
-            final encryptedMessage =
-                List<int>.from(jsonDecode(event.message.content));
+            final encryptedMessage = List<int>.from(jsonDecode(event.message.content));
 
             final algorithm = AesCbc.with256bits(
               macAlgorithm: Hmac.sha256(),
@@ -119,8 +116,7 @@ class TaskView extends ChangeNotifier {
               mac: Mac(parameters.mac),
             );
             final secretKey = SecretKey(parameters.password);
-            final rawMessage =
-                await algorithm.decryptString(secretBox, secretKey: secretKey);
+            final rawMessage = await algorithm.decryptString(secretBox, secretKey: secretKey);
 
             final data = jsonDecode(rawMessage);
 
@@ -179,13 +175,6 @@ class TaskView extends ChangeNotifier {
   }) async {
     if (relays.isEmpty) {
       return "No relays are present in the task.";
-    }
-
-    try {
-      await OpenPGP.getPublicKeyMetadata(signPublicKey);
-      await OpenPGP.getPrivateKeyMetadata(viewPrivateKey);
-    } catch (error) {
-      return "Invalid keys provided.";
     }
 
     final sameTask = taskService.tasks.firstWhereOrNull((element) =>

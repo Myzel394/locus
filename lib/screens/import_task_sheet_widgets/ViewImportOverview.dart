@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart' hide PlatformListTile;
 import 'package:locus/services/view_service.dart';
-import 'package:openpgp/openpgp.dart';
 
 import '../../api/get-locations.dart';
 import '../../constants/spacing.dart';
@@ -75,12 +74,6 @@ class _ViewImportOverviewState extends State<ViewImportOverview> {
     );
   }
 
-  Future<String> getFingerprintFromKey(final String key) async {
-    final metadata = await OpenPGP.getPublicKeyMetadata(key);
-
-    return metadata.fingerprint;
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -108,27 +101,11 @@ class _ViewImportOverviewState extends State<ViewImportOverview> {
               leading: const Icon(Icons.key),
               trailing: const SizedBox.shrink(),
             ),
-            PlatformListTile(
-              title: FutureBuilder<String>(
-                  future: getFingerprintFromKey(widget.view.signPublicKey),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      return Text(snapshot.data!);
-                    } else {
-                      return const Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    }
-                  }),
-              subtitle: Text(l10n.signPublicKeyLabel),
-              leading: Icon(context.platformIcons.pen),
-              trailing: const SizedBox.shrink(),
-            )
           ],
         ),
         if (_isLoading)
           const Padding(
-            padding: const EdgeInsets.all(MEDIUM_SPACE),
+            padding: EdgeInsets.all(MEDIUM_SPACE),
             child: Center(
               child: CircularProgressIndicator(),
             ),

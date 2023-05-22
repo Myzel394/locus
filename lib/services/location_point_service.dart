@@ -1,9 +1,9 @@
 import 'dart:convert';
 
+import 'package:basic_utils/basic_utils.dart';
 import 'package:battery_plus/battery_plus.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:openpgp/openpgp.dart';
 import 'package:uuid/uuid.dart';
 
 const uuid = Uuid();
@@ -79,20 +79,22 @@ class LocationPointService {
   }
 
   Future<String> toEncryptedMessage({
-    required final String viewPublicKey,
-    required final String signPublicKey,
-    required final String signPrivateKey,
+    required final RSAPublicKey viewPublicKey,
+    required final ECPrivateKey signPrivateKey,
+    required final ECPublicKey signPublicKey,
   }) async {
     final rawMessage = jsonEncode(toJSON());
-    final signedMessage =
-        await OpenPGP.sign(rawMessage, signPublicKey, signPrivateKey, "");
+    final rawMessageBytes = Uint8List.fromList(utf8.encode(rawMessage));
+    final signedMessage = CryptoUtils.ecSign(signPrivateKey, rawMessageBytes);
+    final signedMessageBase64 = CryptoUtils.ecSignatureToBase64(signedMessage);
+
     final content = {
       "message": rawMessage,
-      "signature": signedMessage,
+      "signature": signedMessageBase64,
     };
     final rawContent = jsonEncode(content);
 
-    return OpenPGP.encrypt(rawContent, viewPublicKey);
+    return CryptoUtils.rsaEncrypt(rawContent, viewPublicKey);
   }
 
   static Future<LocationPointService> createUsingCurrentLocation([
@@ -151,21 +153,19 @@ class LocationPointService {
       );
 
   static Future<LocationPointService> fromEncrypted(
-    final String encryptedMessage,
-    final String viewPrivateKey,
-    final String signPublicKey,
+    final String cipherMessage,
+    final RSAPrivateKey viewPrivateKey,
+    final ECPublicKey signPublicKey,
   ) async {
-    final rawContent = await OpenPGP.decrypt(
-      encryptedMessage,
-      viewPrivateKey,
-      "",
-    );
+    final rawContent = CryptoUtils.rsaDecrypt(cipherMessage, viewPrivateKey);
+
     final content = jsonDecode(rawContent);
     final message = content["message"];
-    final signature = content["signature"];
+    final signatureBase64 = content["signature"];
+    final signature = CryptoUtils.ecSignatureFromBase64(signatureBase64);
+    final messageBytes = Uint8List.fromList(utf8.encode(message));
 
-    final isSignatureValid =
-        await OpenPGP.verify(signature, message, signPublicKey);
+    final isSignatureValid = CryptoUtils.ecVerify(signPublicKey, messageBytes, signature);
 
     if (!isSignatureValid) {
       throw Exception("Invalid signature");

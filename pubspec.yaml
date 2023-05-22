@@ -40,7 +40,6 @@ dependencies:
   cupertino_icons: ^1.0.5
   flutter_secure_storage: ^8.0.0
   intl: any
-  openpgp: ^3.5.4
   http: ^0.13.6
   nostr: ^1.3.4
   uuid: ^3.0.7
