@@ -28,9 +28,9 @@ class ShareLocationButton extends StatefulWidget {
 class _ShareLocationButtonState extends State<ShareLocationButton> {
   bool isLoading = false;
 
-  Future<File> _createTempViewKeyFile() {
+  Future<File> _createTempViewKeyFile() async {
     return createTempFile(
-      const Utf8Encoder().convert(widget.task.generateViewKeyContent()),
+      const Utf8Encoder().convert(await widget.task.generateViewKeyContent()),
       name: "viewkey.locus.json",
     );
   }

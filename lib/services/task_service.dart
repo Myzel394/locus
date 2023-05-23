@@ -1,30 +1,23 @@
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:math';
-import 'dart:typed_data';
 
 import 'package:cryptography/cryptography.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:locus/api/nostr-events.dart';
 import 'package:locus/constants/app.dart';
+import 'package:locus/utils/cryptography.dart';
 import 'package:nostr/nostr.dart';
-import 'package:openpgp/openpgp.dart';
 import 'package:uuid/uuid.dart';
 
+import '../api/get-locations.dart' as getLocationsAPI;
 import 'location_point_service.dart';
 import 'timers_service.dart';
 
 const storage = FlutterSecureStorage();
 const KEY = "tasks_settings";
 const SAME_TIME_THRESHOLD = Duration(minutes: 15);
-
-enum TaskCreationProgress {
-  startsSoon,
-  creatingViewKeys,
-  creatingSignKeys,
-  creatingTask,
-}
 
 enum TaskLinkPublishProgress {
   startsSoon,
@@ -39,40 +32,32 @@ const uuid = Uuid();
 class Task extends ChangeNotifier {
   final String id;
   final DateTime createdAt;
-  final String signPGPPrivateKey;
-  final String signPGPPublicKey;
-  final String viewPGPPrivateKey;
-  final String viewPGPPublicKey;
+
+  // Password for symmetric encryption of the locations
+  final SecretKey _encryptionPassword;
+
   final String nostrPrivateKey;
   final List<String> relays;
   final List<TaskRuntimeTimer> timers;
   String name;
   bool deleteAfterRun;
-  String? _nextRunWorkManagerID;
 
   Task({
     required this.id,
     required this.name,
-    required this.viewPGPPublicKey,
-    required this.signPGPPrivateKey,
-    required this.signPGPPublicKey,
     required this.createdAt,
+    required SecretKey encryptionPassword,
     required this.nostrPrivateKey,
-    required this.viewPGPPrivateKey,
     required this.relays,
     required this.timers,
     this.deleteAfterRun = false,
-    String? nextRunWorkManagerID,
-  }) : _nextRunWorkManagerID = nextRunWorkManagerID;
+  }) : _encryptionPassword = encryptionPassword;
 
-  static Task fromJSON(Map<String, dynamic> json) {
+  factory Task.fromJSON(Map<String, dynamic> json) {
     return Task(
       id: json["id"],
       name: json["name"],
-      viewPGPPrivateKey: json["viewPGPPrivateKey"],
-      viewPGPPublicKey: json["viewPGPPublicKey"],
-      signPGPPrivateKey: json["signPGPPrivateKey"],
-      signPGPPublicKey: json["signPGPPublicKey"],
+      encryptionPassword: SecretKey(List<int>.from(json["encryptionPassword"])),
       nostrPrivateKey: json["nostrPrivateKey"],
       createdAt: DateTime.parse(json["createdAt"]),
       relays: List<String>.from(json["relays"]),
@@ -87,7 +72,6 @@ class Task extends ChangeNotifier {
             throw Exception("Unknown timer type");
         }
       })),
-      nextRunWorkManagerID: json["nextRunWorkManagerID"],
     );
   }
 
@@ -97,54 +81,31 @@ class Task extends ChangeNotifier {
 
   String get nostrPublicKey => Keychain(nostrPrivateKey).public;
 
-  Map<String, dynamic> toJSON() {
+  Future<Map<String, dynamic>> toJSON() async {
     return {
       "id": id,
       "name": name,
-      "viewPGPPrivateKey": viewPGPPrivateKey,
-      "viewPGPPublicKey": viewPGPPublicKey,
-      "signPGPPrivateKey": signPGPPrivateKey,
-      "signPGPPublicKey": signPGPPublicKey,
+      "encryptionPassword": await _encryptionPassword.extractBytes(),
       "nostrPrivateKey": nostrPrivateKey,
       "createdAt": createdAt.toIso8601String(),
       "relays": relays,
       "timers": timers.map((timer) => timer.toJSON()).toList(),
       "deleteAfterRun": deleteAfterRun.toString(),
-      "nextRunWorkManagerID": _nextRunWorkManagerID,
     };
   }
 
   static Future<Task> create(
     final String name,
     final List<String> relays, {
-    Function(TaskCreationProgress)? onProgress,
     List<TaskRuntimeTimer> timers = const [],
     bool deleteAfterRun = false,
   }) async {
-    onProgress?.call(TaskCreationProgress.creatingViewKeys);
-    final viewKeyPair = await OpenPGP.generate(
-      options: (Options()
-        ..keyOptions = (KeyOptions()..rsaBits = 4096)
-        ..name = "Locus"
-        ..email = "user@locus.example"),
-    );
+    final secretKey = await generateSecretKey();
 
-    onProgress?.call(TaskCreationProgress.creatingSignKeys);
-    final signKeyPair = await OpenPGP.generate(
-      options: (Options()
-        ..keyOptions = (KeyOptions()..rsaBits = 4096)
-        ..name = "Locus"
-        ..email = "user@locus.example"),
-    );
-
-    onProgress?.call(TaskCreationProgress.creatingTask);
     return Task(
       id: uuid.v4(),
       name: name,
-      viewPGPPrivateKey: viewKeyPair.privateKey,
-      viewPGPPublicKey: viewKeyPair.publicKey,
-      signPGPPrivateKey: signKeyPair.privateKey,
-      signPGPPublicKey: signKeyPair.publicKey,
+      encryptionPassword: secretKey,
       nostrPrivateKey: Keychain.generate().private,
       relays: relays,
       createdAt: DateTime.now(),
@@ -190,8 +151,7 @@ class Task extends ChangeNotifier {
     };
   }
 
-  DateTime? nextStartDate({final DateTime? date}) =>
-      findNextStartDate(timers, startDate: date);
+  DateTime? nextStartDate({final DateTime? date}) => findNextStartDate(timers, startDate: date);
 
   DateTime? nextEndDate() => findNextEndDate(timers);
 
@@ -199,8 +159,7 @@ class Task extends ChangeNotifier {
 
   Future<bool> shouldRunNow() async {
     final executionStatus = await getExecutionStatus();
-    final shouldRunNowBasedOnTimers =
-        timers.any((timer) => timer.shouldRun(DateTime.now()));
+    final shouldRunNowBasedOnTimers = timers.any((timer) => timer.shouldRun(DateTime.now()));
 
     if (shouldRunNowBasedOnTimers) {
       return true;
@@ -213,8 +172,7 @@ class Task extends ChangeNotifier {
         return false;
       }
 
-      return (executionStatus["startedAt"] as DateTime)
-          .isBefore(earliestNextRun);
+      return (executionStatus["startedAt"] as DateTime).isBefore(earliestNextRun);
     }
 
     return false;
@@ -267,8 +225,7 @@ class Task extends ChangeNotifier {
   // Returns the next date the task will run OR `null` if the task is not scheduled to run.
   Future<DateTime?> startScheduleTomorrow() {
     final tomorrow = DateTime.now().add(const Duration(days: 1));
-    final nextDate =
-        DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 6, 0, 0);
+    final nextDate = DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 6, 0, 0);
 
     return startSchedule(startDate: nextDate);
   }
@@ -331,10 +288,9 @@ class Task extends ChangeNotifier {
     notifyListeners();
   }
 
-  String generateViewKeyContent() {
+  Future<String> generateViewKeyContent() async {
     return jsonEncode({
-      "signPublicKey": signPGPPublicKey,
-      "viewPrivateKey": viewPGPPrivateKey,
+      "encryptionPassword": await _encryptionPassword.extractBytes(),
       "nostrPublicKey": nostrPublicKey,
       "relays": relays,
     });
@@ -352,32 +308,22 @@ class Task extends ChangeNotifier {
   }) async {
     onProgress?.call(TaskLinkPublishProgress.startsSoon);
 
-    final message = generateViewKeyContent();
+    final message = await generateViewKeyContent();
 
     onProgress?.call(TaskLinkPublishProgress.encrypting);
 
-    final algorithm = AesCbc.with256bits(
-      macAlgorithm: Hmac.sha256(),
-    );
-    final secretKey = await algorithm.newSecretKey();
-
-    final encrypted = await algorithm.encrypt(
-      Uint8List.fromList(const Utf8Encoder().convert(message)),
-      secretKey: secretKey,
-    );
+    final passwordSecretKey = await generateSecretKey();
+    final password = await passwordSecretKey.extractBytes();
+    final cipherText = await encryptUsingAES(message, passwordSecretKey);
 
     onProgress?.call(TaskLinkPublishProgress.publishing);
-
-    final password = await secretKey.extractBytes();
 
     final relay = relays[Random().nextInt(relays.length)];
     final manager = NostrEventsManager(
       relays: [relay],
       privateKey: nostrPrivateKey,
     );
-    final nostrMessage = jsonEncode(encrypted.cipherText);
-    final publishedEvent =
-        await manager.publishMessage(nostrMessage, kind: 1001);
+    final publishedEvent = await manager.publishMessage(cipherText, kind: 1001);
 
     onProgress?.call(TaskLinkPublishProgress.creatingURI);
 
@@ -390,9 +336,6 @@ class Task extends ChangeNotifier {
       "i": publishedEvent.id,
       // Relay
       "r": relay,
-      // Initial vector
-      "v": encrypted.nonce,
-      "m": encrypted.mac.bytes,
     };
 
     final fragment = base64Url.encode(jsonEncode(parameters).codeUnits);
@@ -404,7 +347,7 @@ class Task extends ChangeNotifier {
     );
 
     onProgress?.call(TaskLinkPublishProgress.done);
-    secretKey.destroy();
+    passwordSecretKey.destroy();
 
     return uri.toString();
   }
@@ -413,17 +356,35 @@ class Task extends ChangeNotifier {
     final LocationPointService? location,
   ]) async {
     final eventManager = NostrEventsManager.fromTask(this);
+    final locationPoint = location ?? await LocationPointService.createUsingCurrentLocation();
 
-    final locationPoint =
-        location ?? await LocationPointService.createUsingCurrentLocation();
-
-    final message = await locationPoint.toEncryptedMessage(
-      signPrivateKey: signPGPPrivateKey,
-      signPublicKey: signPGPPublicKey,
-      viewPublicKey: viewPGPPublicKey,
-    );
+    final rawMessage = jsonEncode(locationPoint.toJSON());
+    final message = await encryptUsingAES(rawMessage, _encryptionPassword);
 
     await eventManager.publishMessage(message);
+  }
+
+  Future<void Function()> getLocations({
+    required void Function(LocationPointService) onLocationFetched,
+    required void Function() onEnd,
+    bool onlyLatestPosition = false,
+    DateTime? from,
+  }) =>
+      getLocationsAPI.getLocations(
+        encryptionPassword: _encryptionPassword,
+        nostrPublicKey: nostrPublicKey,
+        relays: relays,
+        onLocationFetched: onLocationFetched,
+        onEnd: onEnd,
+        from: from,
+        onlyLatestPosition: onlyLatestPosition,
+      );
+
+  @override
+  void dispose() {
+    _encryptionPassword.destroy();
+
+    super.dispose();
   }
 }
 
@@ -457,15 +418,14 @@ class TaskService extends ChangeNotifier {
   }
 
   Future<void> save() async {
-    final data = jsonEncode(
-      List<Map<String, dynamic>>.from(
-        _tasks.map(
-          (task) => task.toJSON(),
-        ),
+    // await all `toJson` functions
+    final data = await Future.wait<Map<String, dynamic>>(
+      _tasks.map(
+        (task) => task.toJSON(),
       ),
     );
 
-    await storage.write(key: KEY, value: data);
+    await storage.write(key: KEY, value: jsonEncode(data));
   }
 
   Task getByID(final String id) {
@@ -547,8 +507,7 @@ DateTime? findNextStartDate(final List<TaskRuntimeTimer> timers,
   return nextDates.first;
 }
 
-DateTime? findNextEndDate(final List<TaskRuntimeTimer> timers,
-    {final DateTime? startDate}) {
+DateTime? findNextEndDate(final List<TaskRuntimeTimer> timers, {final DateTime? startDate}) {
   final now = startDate ?? DateTime.now();
   final nextDates = List<DateTime>.from(
     timers.map((timer) => timer.nextEndDate(now)).where((date) => date != null),
@@ -558,8 +517,7 @@ DateTime? findNextEndDate(final List<TaskRuntimeTimer> timers,
 
   for (final date in nextDates.sublist(1)) {
     final nextStartDate = findNextStartDate(timers, startDate: date);
-    if (nextStartDate == null ||
-        nextStartDate.difference(date).inMinutes.abs() > 15) {
+    if (nextStartDate == null || nextStartDate.difference(date).inMinutes.abs() > 15) {
       // No next start date found or the difference is more than 15 minutes, so this is the last date
       break;
     }

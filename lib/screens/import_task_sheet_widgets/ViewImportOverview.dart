@@ -3,7 +3,6 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart'
     hide PlatformListTile;
 import 'package:locus/services/view_service.dart';
-import 'package:openpgp/openpgp.dart';
 
 import '../../api/get-locations.dart';
 import '../../constants/spacing.dart';
@@ -50,11 +49,7 @@ class _ViewImportOverviewState extends State<ViewImportOverview> {
   }
 
   addListener() async {
-    _unsubscribeGetLocations = await getLocations(
-      viewPrivateKey: widget.view.viewPrivateKey,
-      signPublicKey: widget.view.signPublicKey,
-      nostrPublicKey: widget.view.nostrPublicKey,
-      relays: widget.view.relays,
+    _unsubscribeGetLocations = await widget.view.getLocations(
       onlyLatestPosition: true,
       onLocationFetched: (final LocationPointService location) {
         if (!mounted) {
@@ -74,12 +69,6 @@ class _ViewImportOverviewState extends State<ViewImportOverview> {
         });
       },
     );
-  }
-
-  Future<String> getFingerprintFromKey(final String key) async {
-    final metadata = await OpenPGP.getPublicKeyMetadata(key);
-
-    return metadata.fingerprint;
   }
 
   @override
@@ -109,22 +98,6 @@ class _ViewImportOverviewState extends State<ViewImportOverview> {
               leading: const Icon(Icons.key),
               trailing: const SizedBox.shrink(),
             ),
-            PlatformListTile(
-              title: FutureBuilder<String>(
-                  future: getFingerprintFromKey(widget.view.signPublicKey),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      return Text(snapshot.data!);
-                    } else {
-                      return const Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    }
-                  }),
-              subtitle: Text(l10n.signPublicKeyLabel),
-              leading: Icon(context.platformIcons.pen),
-              trailing: const SizedBox.shrink(),
-            )
           ],
         ),
         if (_isLoading)

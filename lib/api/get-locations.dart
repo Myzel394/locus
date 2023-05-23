@@ -1,12 +1,13 @@
 import 'dart:io';
 
+import 'package:basic_utils/basic_utils.dart';
+import 'package:cryptography/cryptography.dart';
 import 'package:locus/services/location_point_service.dart';
 import 'package:nostr/nostr.dart';
 
 Future<void Function()> getLocations({
   required final String nostrPublicKey,
-  required final String viewPrivateKey,
-  required final String signPublicKey,
+  required final SecretKey encryptionPassword,
   required final List<String> relays,
   required void Function(LocationPointService) onLocationFetched,
   required void Function() onEnd,
@@ -40,8 +41,7 @@ Future<void Function()> getLocations({
 
         final locationProcess = LocationPointService.fromEncrypted(
           event.message.content,
-          viewPrivateKey,
-          signPublicKey,
+          encryptionPassword,
         );
 
         decryptionProcesses.add(locationProcess);

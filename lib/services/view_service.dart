@@ -7,44 +7,41 @@ import 'package:cryptography/cryptography.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:locus/services/task_service.dart';
+import 'package:locus/utils/cryptography.dart';
 import 'package:nostr/nostr.dart';
-import 'package:openpgp/openpgp.dart';
+
+import '../api/get-locations.dart' as getLocationsAPI;
+import 'location_point_service.dart';
 
 const storage = FlutterSecureStorage();
 const KEY = "view_service";
 
 class ViewServiceLinkParameters {
-  final List<int> password;
+  final SecretKey password;
   final String nostrPublicKey;
   final String nostrMessageID;
   final String relay;
-  final List<int> initialVector;
-  final List<int> mac;
 
   ViewServiceLinkParameters({
     required this.password,
     required this.nostrPublicKey,
     required this.nostrMessageID,
     required this.relay,
-    required this.initialVector,
-    required this.mac,
   });
 }
 
 class TaskView extends ChangeNotifier {
-  final String signPublicKey;
-  final String viewPrivateKey;
+  final SecretKey _encryptionPassword;
   final String nostrPublicKey;
   final List<String> relays;
   String? name;
 
   TaskView({
-    required this.signPublicKey,
-    required this.viewPrivateKey,
+    required final SecretKey encryptionPassword,
     required this.nostrPublicKey,
     required this.relays,
     this.name,
-  });
+  }) : _encryptionPassword = encryptionPassword;
 
   getUIName(final BuildContext context) {
     if (name == null) {
@@ -63,19 +60,16 @@ class TaskView extends ChangeNotifier {
     final parameters = jsonDecode(rawParameters);
 
     return ViewServiceLinkParameters(
-      password: List<int>.from(parameters['p']),
+      password: SecretKey(List<int>.from(parameters['p'])),
       nostrPublicKey: parameters['k'],
       nostrMessageID: parameters['i'],
       relay: parameters['r'],
-      initialVector: List<int>.from(parameters['v']),
-      mac: List<int>.from(parameters["m"]),
     );
   }
 
-  static TaskView fromJSON(final Map<String, dynamic> json) {
+  factory TaskView.fromJSON(final Map<String, dynamic> json) {
     return TaskView(
-      signPublicKey: json["signPublicKey"],
-      viewPrivateKey: json["viewPrivateKey"],
+      encryptionPassword: SecretKey(List<int>.from(json["encryptionPassword"])),
       nostrPublicKey: json["nostrPublicKey"],
       relays: List<String>.from(json["relays"]),
       name: json["name"],
@@ -83,7 +77,8 @@ class TaskView extends ChangeNotifier {
   }
 
   static Future<TaskView> fetchFromNostr(
-      final ViewServiceLinkParameters parameters) async {
+    final ViewServiceLinkParameters parameters,
+  ) async {
     final completer = Completer<TaskView>();
 
     final request = Request(generate64RandomHexChars(), [
@@ -107,20 +102,10 @@ class TaskView extends ChangeNotifier {
         case "EVENT":
           hasEventReceived = true;
           try {
-            final encryptedMessage =
-                List<int>.from(jsonDecode(event.message.content));
-
-            final algorithm = AesCbc.with256bits(
-              macAlgorithm: Hmac.sha256(),
+            final rawMessage = await decryptUsingAES(
+              event.message.content,
+              parameters.password,
             );
-            final secretBox = SecretBox(
-              encryptedMessage,
-              nonce: parameters.initialVector,
-              mac: Mac(parameters.mac),
-            );
-            final secretKey = SecretKey(parameters.password);
-            final rawMessage =
-                await algorithm.decryptString(secretBox, secretKey: secretKey);
 
             final data = jsonDecode(rawMessage);
 
@@ -129,12 +114,15 @@ class TaskView extends ChangeNotifier {
               return;
             }
 
-            completer.complete(TaskView(
-              signPublicKey: data['signPublicKey'],
-              viewPrivateKey: data['viewPrivateKey'],
-              nostrPublicKey: data['nostrPublicKey'],
-              relays: List<String>.from(data['relays']),
-            ));
+            completer.complete(
+              TaskView(
+                encryptionPassword: SecretKey(
+                  List<int>.from(data["encryptionPassword"]),
+                ),
+                nostrPublicKey: data['nostrPublicKey'],
+                relays: List<String>.from(data['relays']),
+              ),
+            );
           } catch (error) {
             completer.completeError(error);
           }
@@ -163,10 +151,9 @@ class TaskView extends ChangeNotifier {
     notifyListeners();
   }
 
-  Map<String, dynamic> toJSON() {
+  Future<Map<String, dynamic>> toJSON() async {
     return {
-      "signPublicKey": signPublicKey,
-      "viewPrivateKey": viewPrivateKey,
+      "encryptionPassword": await _encryptionPassword.extractBytes(),
       "nostrPublicKey": nostrPublicKey,
       "relays": relays,
       "name": name,
@@ -181,32 +168,44 @@ class TaskView extends ChangeNotifier {
       return "No relays are present in the task.";
     }
 
-    try {
-      await OpenPGP.getPublicKeyMetadata(signPublicKey);
-      await OpenPGP.getPrivateKeyMetadata(viewPrivateKey);
-    } catch (error) {
-      return "Invalid keys provided.";
-    }
-
-    final sameTask = taskService.tasks.firstWhereOrNull((element) =>
-        element.signPGPPublicKey == signPublicKey ||
-        element.nostrPublicKey == nostrPublicKey ||
-        element.viewPGPPrivateKey == viewPrivateKey);
+    final sameTask = taskService.tasks.firstWhereOrNull(
+        (element) => element.nostrPublicKey == nostrPublicKey);
 
     if (sameTask != null) {
       return "This is a task from you (name: ${sameTask.name}).";
     }
 
-    final sameView = viewService.views.firstWhereOrNull((element) =>
-        element.signPublicKey == signPublicKey ||
-        element.nostrPublicKey == nostrPublicKey ||
-        element.viewPrivateKey == viewPrivateKey);
+    final sameView = viewService.views.firstWhereOrNull(
+        (element) => element.nostrPublicKey == nostrPublicKey);
 
     if (sameView != null) {
       return "This is a view from you (name: ${sameView.name}).";
     }
 
     return null;
+  }
+
+  Future<void Function()> getLocations({
+    required void Function(LocationPointService) onLocationFetched,
+    required void Function() onEnd,
+    bool onlyLatestPosition = false,
+    DateTime? from,
+  }) =>
+      getLocationsAPI.getLocations(
+        encryptionPassword: _encryptionPassword,
+        nostrPublicKey: nostrPublicKey,
+        relays: relays,
+        onLocationFetched: onLocationFetched,
+        onEnd: onEnd,
+        from: from,
+        onlyLatestPosition: onlyLatestPosition,
+      );
+
+  @override
+  void dispose() {
+    _encryptionPassword.destroy();
+
+    super.dispose();
   }
 }
 
