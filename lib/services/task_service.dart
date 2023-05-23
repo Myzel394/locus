@@ -19,13 +19,6 @@ const storage = FlutterSecureStorage();
 const KEY = "tasks_settings";
 const SAME_TIME_THRESHOLD = Duration(minutes: 15);
 
-enum TaskCreationProgress {
-  startsSoon,
-  creatingViewKeys,
-  creatingSignKeys,
-  creatingTask,
-}
-
 enum TaskLinkPublishProgress {
   startsSoon,
   encrypting,
@@ -104,17 +97,11 @@ class Task extends ChangeNotifier {
   static Future<Task> create(
     final String name,
     final List<String> relays, {
-    Function(TaskCreationProgress)? onProgress,
     List<TaskRuntimeTimer> timers = const [],
     bool deleteAfterRun = false,
   }) async {
-    // TODO: Update enum
-    onProgress?.call(TaskCreationProgress.creatingViewKeys);
-    onProgress?.call(TaskCreationProgress.creatingSignKeys);
-
     final secretKey = await generateSecretKey();
 
-    onProgress?.call(TaskCreationProgress.creatingTask);
     return Task(
       id: uuid.v4(),
       name: name,
