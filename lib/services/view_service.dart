@@ -55,11 +55,12 @@ class TaskView extends ChangeNotifier {
     final uri = Uri.parse(url);
     final fragment = uri.fragment;
 
-    final rawParameters = const Utf8Decoder().convert(base64Url.decode(fragment));
+    final rawParameters =
+        const Utf8Decoder().convert(base64Url.decode(fragment));
     final parameters = jsonDecode(rawParameters);
 
     return ViewServiceLinkParameters(
-      password: SecretKey(parameters['p']),
+      password: SecretKey(List<int>.from(parameters['p'])),
       nostrPublicKey: parameters['k'],
       nostrMessageID: parameters['i'],
       relay: parameters['r'],
@@ -75,7 +76,8 @@ class TaskView extends ChangeNotifier {
     );
   }
 
-  static Future<TaskView> fetchFromNostr(final ViewServiceLinkParameters parameters) async {
+  static Future<TaskView> fetchFromNostr(
+      final ViewServiceLinkParameters parameters) async {
     final completer = Completer<TaskView>();
 
     final request = Request(generate64RandomHexChars(), [
@@ -99,7 +101,8 @@ class TaskView extends ChangeNotifier {
         case "EVENT":
           hasEventReceived = true;
           try {
-            final rawMessage = await decryptUsingAES(event.message.content, parameters.password);
+            final rawMessage = await decryptUsingAES(
+                event.message.content, parameters.password);
 
             final data = jsonDecode(rawMessage);
 
@@ -158,13 +161,15 @@ class TaskView extends ChangeNotifier {
       return "No relays are present in the task.";
     }
 
-    final sameTask = taskService.tasks.firstWhereOrNull((element) => element.nostrPublicKey == nostrPublicKey);
+    final sameTask = taskService.tasks.firstWhereOrNull(
+        (element) => element.nostrPublicKey == nostrPublicKey);
 
     if (sameTask != null) {
       return "This is a task from you (name: ${sameTask.name}).";
     }
 
-    final sameView = viewService.views.firstWhereOrNull((element) => element.nostrPublicKey == nostrPublicKey);
+    final sameView = viewService.views.firstWhereOrNull(
+        (element) => element.nostrPublicKey == nostrPublicKey);
 
     if (sameView != null) {
       return "This is a view from you (name: ${sameView.name}).";
