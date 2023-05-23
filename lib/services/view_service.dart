@@ -77,7 +77,8 @@ class TaskView extends ChangeNotifier {
   }
 
   static Future<TaskView> fetchFromNostr(
-      final ViewServiceLinkParameters parameters) async {
+    final ViewServiceLinkParameters parameters,
+  ) async {
     final completer = Completer<TaskView>();
 
     final request = Request(generate64RandomHexChars(), [
@@ -102,7 +103,9 @@ class TaskView extends ChangeNotifier {
           hasEventReceived = true;
           try {
             final rawMessage = await decryptUsingAES(
-                event.message.content, parameters.password);
+              event.message.content,
+              parameters.password,
+            );
 
             final data = jsonDecode(rawMessage);
 
@@ -112,7 +115,9 @@ class TaskView extends ChangeNotifier {
             }
 
             completer.complete(TaskView(
-              encryptionPassword: parameters.password,
+              encryptionPassword: SecretKey(
+                List<int>.from(data["encryptionPassword"]),
+              ),
               nostrPublicKey: data['nostrPublicKey'],
               relays: List<String>.from(data['relays']),
             ));

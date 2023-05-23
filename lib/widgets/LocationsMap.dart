@@ -1,6 +1,6 @@
+import 'dart:async';
 import 'dart:collection';
 import 'dart:io';
-import 'dart:async';
 
 import 'package:apple_maps_flutter/apple_maps_flutter.dart' as AppleMaps;
 import 'package:flutter/foundation.dart';
@@ -22,14 +22,13 @@ class LocationsMapController extends ChangeNotifier {
   // To inform our wrappers to update the map, we use a stream.
   // This emits event to which our wrappers listen to.
   final StreamController<Map<String, dynamic>> _eventEmitter =
-  StreamController.broadcast();
+      StreamController.broadcast();
 
   LocationsMapController({
     List<LocationPointService>? locations,
   }) : _locations = locations ?? [];
 
-  static DateTime normalizeDateTime(final DateTime dateTime) =>
-      DateTime(
+  static DateTime normalizeDateTime(final DateTime dateTime) => DateTime(
         dateTime.year,
         dateTime.month,
         dateTime.day,
@@ -74,7 +73,7 @@ class LocationsMapController extends ChangeNotifier {
   Map<DateTime, List<LocationPointService>> getLocationsPerHour() =>
       locations.fold(
         {},
-            (final Map<DateTime, List<LocationPointService>> value, element) {
+        (final Map<DateTime, List<LocationPointService>> value, element) {
           final date = normalizeDateTime(element.createdAt);
 
           if (value.containsKey(date)) {
@@ -98,10 +97,12 @@ class LocationsMapController extends ChangeNotifier {
 class LocationsMapAppleMaps extends StatefulWidget {
   final LocationsMapController controller;
   final double initialZoomLevel;
+  final bool initWithUserPosition;
 
   const LocationsMapAppleMaps({
     required this.controller,
     required this.initialZoomLevel,
+    required this.initWithUserPosition,
     Key? key,
   }) : super(key: key);
 
@@ -123,6 +124,11 @@ class _LocationsMapAppleMapsState extends State<LocationsMapAppleMaps> {
         widget.controller.eventListener.listen(eventEmitterListener);
 
     fetchInitialPosition();
+  }
+
+  @override
+  void didUpdateWidget(covariant LocationsMapAppleMaps oldWidget) {
+    super.didUpdateWidget(oldWidget);
   }
 
   @override
@@ -164,9 +170,26 @@ class _LocationsMapAppleMapsState extends State<LocationsMapAppleMaps> {
     setState(() {
       userPosition = locationData;
     });
+
+    updateCameraLocation();
   }
 
-  void rebuild() {
+  Future<void> updateCameraLocation() async {
+    final zoomLevel = await _controller!.getZoomLevel();
+
+    await _controller!.animateCamera(
+      AppleMaps.CameraUpdate.newCameraPosition(
+        AppleMaps.CameraPosition(
+          target: getInitialPosition(),
+          zoom: zoomLevel ?? 16,
+        ),
+      ),
+    );
+  }
+
+  void rebuild() async {
+    await updateCameraLocation();
+
     setState(() {});
   }
 
@@ -189,30 +212,30 @@ class _LocationsMapAppleMapsState extends State<LocationsMapAppleMaps> {
     ].where((element) => element.isNotEmpty).join("\n");
   }
 
-  AppleMaps.LatLng get initialPosition {
-    if (userPosition != null) {
+  AppleMaps.LatLng getInitialPosition() {
+    if (widget.initWithUserPosition ||
+        (!widget.initWithUserPosition && widget.controller.locations.isEmpty)) {
+      if (userPosition != null) {
+        return AppleMaps.LatLng(
+          userPosition!.latitude,
+          userPosition!.longitude,
+        );
+      }
+    } else if (widget.controller.locations.isNotEmpty) {
       return AppleMaps.LatLng(
-        userPosition!.latitude,
-        userPosition!.longitude,
+        widget.controller.locations.last.latitude,
+        widget.controller.locations.last.longitude,
       );
     }
 
-    if (widget.controller.locations.isEmpty) {
-      return const AppleMaps.LatLng(0, 0);
-    }
-
-    return AppleMaps.LatLng(
-      widget.controller.locations.last.latitude,
-      widget.controller.locations.last.longitude,
-    );
+    return const AppleMaps.LatLng(0, 0);
   }
 
   @override
   Widget build(BuildContext context) {
     return AppleMaps.AppleMap(
-      key: Key(initialPosition.toString()),
       initialCameraPosition: AppleMaps.CameraPosition(
-        target: initialPosition,
+        target: getInitialPosition(),
         zoom: widget.initialZoomLevel,
       ),
       onMapCreated: (controller) {
@@ -221,26 +244,24 @@ class _LocationsMapAppleMapsState extends State<LocationsMapAppleMaps> {
       myLocationEnabled: true,
       annotations: widget.controller.locations.isNotEmpty
           ? {
-        AppleMaps.Annotation(
-          annotationId: AppleMaps.AnnotationId(
-            "annotation_${widget.controller.locations.last.latitude}:${widget
-                .controller.locations.last.longitude}",
-          ),
-          position: AppleMaps.LatLng(
-            widget.controller.locations.last.latitude,
-            widget.controller.locations.last.longitude,
-          ),
-          infoWindow: AppleMaps.InfoWindow(
-            title: "Last location",
-            snippet: snippetText,
-          ),
-        ),
-      }
+              AppleMaps.Annotation(
+                annotationId: AppleMaps.AnnotationId(
+                  "annotation_${widget.controller.locations.last.latitude}:${widget.controller.locations.last.longitude}",
+                ),
+                position: AppleMaps.LatLng(
+                  widget.controller.locations.last.latitude,
+                  widget.controller.locations.last.longitude,
+                ),
+                infoWindow: AppleMaps.InfoWindow(
+                  title: "Last location",
+                  snippet: snippetText,
+                ),
+              ),
+            }
           : {},
       circles: widget.controller.locations
           .map(
-            (location) =>
-            AppleMaps.Circle(
+            (location) => AppleMaps.Circle(
               circleId: AppleMaps.CircleId(
                 "circle_${location.latitude}:${location.longitude}",
               ),
@@ -253,7 +274,7 @@ class _LocationsMapAppleMapsState extends State<LocationsMapAppleMaps> {
               strokeWidth: location.accuracy < 10 ? 1 : 3,
               radius: location.accuracy,
             ),
-      )
+          )
           .toSet(),
     );
   }
@@ -262,10 +283,12 @@ class _LocationsMapAppleMapsState extends State<LocationsMapAppleMaps> {
 class LocationsMapOSM extends StatefulWidget {
   final LocationsMapController controller;
   final double initialZoomLevel;
+  final bool initWithUserPosition;
 
   const LocationsMapOSM({
     required this.controller,
     required this.initialZoomLevel,
+    required this.initWithUserPosition,
     Key? key,
   }) : super(key: key);
 
@@ -277,12 +300,30 @@ class _LocationsMapOSMState extends State<LocationsMapOSM> {
   late final MapController _controller;
   late final StreamSubscription _controllerSubscription;
 
+  GeoPoint? getInitPosition() {
+    if (widget.initWithUserPosition && widget.controller.locations.isNotEmpty) {
+      // Return null as we set `initMapWithUserPosition`
+      return null;
+    }
+
+    if (widget.controller.locations.isNotEmpty) {
+      return GeoPoint(
+        latitude: widget.controller.locations.last.latitude,
+        longitude: widget.controller.locations.last.longitude,
+      );
+    }
+
+    return null;
+  }
+
   @override
   void initState() {
     super.initState();
 
     _controller = MapController(
-      initMapWithUserPosition: true,
+      initMapWithUserPosition:
+          widget.initWithUserPosition || widget.controller.locations.isEmpty,
+      initPosition: getInitPosition(),
     );
     widget.controller.addListener(rebuild);
     _controllerSubscription =
@@ -298,7 +339,7 @@ class _LocationsMapOSMState extends State<LocationsMapOSM> {
     super.dispose();
   }
 
-  void rebuild() {
+  void rebuild() async {
     drawCircles();
 
     setState(() {});
@@ -359,10 +400,12 @@ class _LocationsMapOSMState extends State<LocationsMapOSM> {
 class LocationsMap extends StatelessWidget {
   final LocationsMapController controller;
   final double initialZoomLevel;
+  final bool initWithUserPosition;
 
   const LocationsMap({
     required this.controller,
-    this.initialZoomLevel = 15,
+    this.initialZoomLevel = 16,
+    this.initWithUserPosition = false,
     Key? key,
   }) : super(key: key);
 
@@ -375,11 +418,13 @@ class LocationsMap extends StatelessWidget {
         return LocationsMapAppleMaps(
           controller: controller,
           initialZoomLevel: initialZoomLevel,
+          initWithUserPosition: initWithUserPosition,
         );
       case MapProvider.openStreetMap:
         return LocationsMapOSM(
           controller: controller,
           initialZoomLevel: initialZoomLevel,
+          initWithUserPosition: initWithUserPosition,
         );
     }
   }
