@@ -1,9 +1,7 @@
 import 'dart:convert';
 
-import 'package:basic_utils/basic_utils.dart';
 import 'package:battery_plus/battery_plus.dart';
 import 'package:cryptography/cryptography.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:uuid/uuid.dart';
@@ -109,9 +107,9 @@ class LocationPointService {
     return LocationPointService(
       id: uuid.v4(),
       createdAt: DateTime.now(),
-      latitude: kDebugMode ? 40.04110 : locationData.latitude,
-      longitude: kDebugMode ? -75.48693 : locationData.longitude,
-      altitude: kDebugMode ? 100 : locationData.altitude,
+      latitude: locationData.latitude,
+      longitude: locationData.longitude,
+      altitude: locationData.altitude,
       accuracy: locationData.accuracy,
       speed: locationData.speed,
       speedAccuracy: locationData.speedAccuracy,

@@ -833,10 +833,10 @@ packages:
     dependency: "direct main"
     description:
       name: quick_actions
-      sha256: d3de3100c5659ae559ca8b9e863d2739ef766edb71681d507b90a0f2ac81d330
+      sha256: bc90a8e0831ce199ab1739192f2041b67b75bfb06363b57550989cd7b1de4f18
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.3"
+    version: "1.0.4"
   quick_actions_android:
     dependency: transitive
     description:
@@ -905,10 +905,10 @@ packages:
     dependency: "direct main"
     description:
       name: shimmer
-      sha256: "1f1009b5845a1f88f1c5630212279540486f97409e9fc3f63883e71070d107bf"
+      sha256: "5f88c883a22e9f9f299e5ba0e4f7e6054857224976a5d9f839d4ebdc94a14ac9"
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.0"
+    version: "3.0.0"
   sky_engine:
     dependency: transitive
     description: flutter
