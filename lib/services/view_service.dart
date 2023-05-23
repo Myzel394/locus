@@ -114,13 +114,15 @@ class TaskView extends ChangeNotifier {
               return;
             }
 
-            completer.complete(TaskView(
-              encryptionPassword: SecretKey(
-                List<int>.from(data["encryptionPassword"]),
+            completer.complete(
+              TaskView(
+                encryptionPassword: SecretKey(
+                  List<int>.from(data["encryptionPassword"]),
+                ),
+                nostrPublicKey: data['nostrPublicKey'],
+                relays: List<String>.from(data['relays']),
               ),
-              nostrPublicKey: data['nostrPublicKey'],
-              relays: List<String>.from(data['relays']),
-            ));
+            );
           } catch (error) {
             completer.completeError(error);
           }
