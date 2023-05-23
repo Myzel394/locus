@@ -3,11 +3,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutter_platform_widgets/flutter_platform_widgets.dart' hide PlatformListTile;
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart'
+    hide PlatformListTile;
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/screens/create_task_screen_widgets/ExampleTasksRoulette.dart';
-import 'package:locus/screens/create_task_screen_widgets/SignKeyLottie.dart';
-import 'package:locus/screens/create_task_screen_widgets/ViewKeyLottie.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/RelaySelectSheet.dart';
@@ -43,8 +42,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
   bool anotherTaskAlreadyExists = false;
   bool showExamples = false;
   bool _scheduleNow = true;
-
-  TaskCreationProgress? _taskProgress;
+  bool _isError = false;
 
   @override
   void initState() {
@@ -53,7 +51,8 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
     _nameController.addListener(() {
       final taskService = context.read<TaskService>();
       final lowerCasedName = _nameController.text.toLowerCase();
-      final alreadyExists = taskService.tasks.any((element) => element.name.toLowerCase() == lowerCasedName);
+      final alreadyExists = taskService.tasks
+          .any((element) => element.name.toLowerCase() == lowerCasedName);
 
       setState(() {
         anotherTaskAlreadyExists = alreadyExists;
@@ -89,21 +88,16 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
   }
 
   Future<void> createTask(final BuildContext context) async {
-    setState(() {
-      _taskProgress = TaskCreationProgress.startsSoon;
-    });
-
     final taskService = context.read<TaskService>();
+
+    setState(() {
+      _isError = false;
+    });
 
     try {
       final task = await Task.create(
         _nameController.text,
         _relaysController.relays,
-        onProgress: (progress) {
-          setState(() {
-            _taskProgress = progress;
-          });
-        },
         timers: _timersController.timers,
       );
 
@@ -119,28 +113,14 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
         task.publishCurrentLocationNow();
       }
 
-      // Calling this explicitly so the text is cleared when leaving the screen
-      setState(() {
-        _taskProgress = null;
-      });
-
       if (mounted) {
         widget.onCreated();
       }
     } catch (error) {
       setState(() {
-        _taskProgress = null;
+        _isError = true;
       });
     }
-  }
-
-  Map<TaskCreationProgress, String> getCreationProgressTextMap() {
-    final l10n = AppLocalizations.of(context);
-
-    return {
-      TaskCreationProgress.creatingSignKeys: l10n.createTask_process_creatingSignKeys,
-      TaskCreationProgress.creatingViewKeys: l10n.createTask_process_creatingViewKeys,
-    };
   }
 
   @override
@@ -194,7 +174,6 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                               },
                               child: PlatformTextFormField(
                                 controller: _nameController,
-                                enabled: _taskProgress == null,
                                 textInputAction: TextInputAction.next,
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
@@ -211,12 +190,15 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                 autofillHints: const [AutofillHints.name],
                                 material: (_, __) => MaterialTextFormFieldData(
                                   decoration: InputDecoration(
-                                    labelText: l10n.createTask_fields_name_label,
+                                    labelText:
+                                        l10n.createTask_fields_name_label,
                                     prefixIcon: Icon(context.platformIcons.tag),
                                   ),
                                 ),
-                                cupertino: (_, __) => CupertinoTextFormFieldData(
-                                  placeholder: l10n.createTask_fields_name_label,
+                                cupertino: (_, __) =>
+                                    CupertinoTextFormFieldData(
+                                  placeholder:
+                                      l10n.createTask_fields_name_label,
                                   prefix: Icon(context.platformIcons.tag),
                                 ),
                               )
@@ -224,7 +206,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                   .slide(
                                     duration: IN_DURATION,
                                     curve: Curves.easeOut,
-                                    begin: Offset(0, 0.2),
+                                    begin: const Offset(0, 0.2),
                                   )
                                   .fadeIn(
                                     delay: IN_DELAY,
@@ -234,7 +216,6 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                             ),
                             if (showExamples)
                               ExampleTasksRoulette(
-                                disabled: _taskProgress != null,
                                 onSelected: (example) {
                                   FocusManager.instance.primaryFocus?.unfocus();
 
@@ -258,39 +239,42 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                               direction: Axis.horizontal,
                               children: <Widget>[
                                 PlatformElevatedButton(
-                                  material: (_, __) => MaterialElevatedButtonData(
+                                  material: (_, __) =>
+                                      MaterialElevatedButtonData(
                                     icon: PlatformWidget(
-                                      material: (_, __) => const Icon(Icons.dns_rounded),
-                                      cupertino: (_, __) => const Icon(CupertinoIcons.list_bullet),
+                                      material: (_, __) =>
+                                          const Icon(Icons.dns_rounded),
+                                      cupertino: (_, __) => const Icon(
+                                          CupertinoIcons.list_bullet),
                                     ),
                                   ),
-                                  cupertino: (_, __) => CupertinoElevatedButtonData(
+                                  cupertino: (_, __) =>
+                                      CupertinoElevatedButtonData(
                                     padding: getSmallButtonPadding(context),
                                   ),
-                                  onPressed: _taskProgress != null
-                                      ? null
-                                      : () {
-                                          showPlatformModalSheet(
-                                            context: context,
-                                            material: MaterialModalSheetData(
-                                              backgroundColor: Colors.transparent,
-                                              isScrollControlled: true,
-                                              isDismissible: true,
-                                            ),
-                                            builder: (_) => RelaySelectSheet(
-                                              controller: _relaysController,
-                                            ),
-                                          );
-                                        },
-                                  child:
-                                      Text(l10n.createTask_fields_relays_selectLabel(_relaysController.relays.length)),
+                                  onPressed: () {
+                                    showPlatformModalSheet(
+                                      context: context,
+                                      material: MaterialModalSheetData(
+                                        backgroundColor: Colors.transparent,
+                                        isScrollControlled: true,
+                                        isDismissible: true,
+                                      ),
+                                      builder: (_) => RelaySelectSheet(
+                                        controller: _relaysController,
+                                      ),
+                                    );
+                                  },
+                                  child: Text(
+                                      l10n.createTask_fields_relays_selectLabel(
+                                          _relaysController.relays.length)),
                                 )
                                     .animate()
                                     .then(delay: IN_DELAY * 4)
                                     .slide(
                                       duration: IN_DURATION,
                                       curve: Curves.easeOut,
-                                      begin: Offset(0.2, 0),
+                                      begin: const Offset(0.2, 0),
                                     )
                                     .fadeIn(
                                       delay: IN_DELAY,
@@ -298,29 +282,30 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                       curve: Curves.easeOut,
                                     ),
                                 PlatformElevatedButton(
-                                  material: (_, __) => MaterialElevatedButtonData(
+                                  material: (_, __) =>
+                                      MaterialElevatedButtonData(
                                     icon: const Icon(Icons.timer_rounded),
                                   ),
-                                  cupertino: (_, __) => CupertinoElevatedButtonData(
+                                  cupertino: (_, __) =>
+                                      CupertinoElevatedButtonData(
                                     padding: getSmallButtonPadding(context),
                                   ),
-                                  onPressed: _taskProgress != null
-                                      ? null
-                                      : () async {
-                                          await showPlatformModalSheet(
-                                            context: context,
-                                            material: MaterialModalSheetData(
-                                              backgroundColor: Colors.transparent,
-                                              isScrollControlled: true,
-                                              isDismissible: true,
-                                            ),
-                                            builder: (_) => TimerWidgetSheet(
-                                              controller: _timersController,
-                                            ),
-                                          );
-                                        },
+                                  onPressed: () async {
+                                    await showPlatformModalSheet(
+                                      context: context,
+                                      material: MaterialModalSheetData(
+                                        backgroundColor: Colors.transparent,
+                                        isScrollControlled: true,
+                                        isDismissible: true,
+                                      ),
+                                      builder: (_) => TimerWidgetSheet(
+                                        controller: _timersController,
+                                      ),
+                                    );
+                                  },
                                   child: Text(
-                                    l10n.createTask_fields_timers_selectLabel(_timersController.timers.length),
+                                    l10n.createTask_fields_timers_selectLabel(
+                                        _timersController.timers.length),
                                   ),
                                 )
                                     .animate()
@@ -328,7 +313,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                     .slide(
                                       duration: IN_DURATION,
                                       curve: Curves.easeOut,
-                                      begin: Offset(-0.2, 0),
+                                      begin: const Offset(-0.2, 0),
                                     )
                                     .fadeIn(
                                       delay: IN_DELAY,
@@ -339,16 +324,15 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                             ),
                             const SizedBox(height: MEDIUM_SPACE),
                             PlatformListTile(
-                              title: Text(l10n.mainScreen_createTask_scheduleNow),
+                              title:
+                                  Text(l10n.mainScreen_createTask_scheduleNow),
                               leading: PlatformSwitch(
                                 value: _scheduleNow,
-                                onChanged: _taskProgress != null
-                                    ? null
-                                    : (value) {
-                                        setState(() {
-                                          _scheduleNow = value;
-                                        });
-                                      },
+                                onChanged: (value) {
+                                  setState(() {
+                                    _scheduleNow = value;
+                                  });
+                                },
                               ),
                               trailing: PlatformIconButton(
                                 icon: Icon(context.platformIcons.help),
@@ -356,11 +340,14 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                   showPlatformDialog(
                                     context: context,
                                     builder: (context) => PlatformAlertDialog(
-                                      title: Text(l10n.mainScreen_createTask_scheduleNow_help_title),
-                                      content: Text(l10n.mainScreen_createTask_scheduleNow_help_description),
+                                      title: Text(l10n
+                                          .mainScreen_createTask_scheduleNow_help_title),
+                                      content: Text(l10n
+                                          .mainScreen_createTask_scheduleNow_help_description),
                                       actions: [
                                         PlatformDialogAction(
-                                          child: PlatformText(l10n.closeNeutralAction),
+                                          child: PlatformText(
+                                              l10n.closeNeutralAction),
                                           onPressed: () {
                                             Navigator.of(context).pop();
                                           },
@@ -376,7 +363,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                 .slide(
                                   duration: IN_DURATION,
                                   curve: Curves.easeOut,
-                                  begin: Offset(0, 0.2),
+                                  begin: const Offset(0, 0.2),
                                 )
                                 .fadeIn(
                                   delay: IN_DELAY,
@@ -398,41 +385,30 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                     ),
                     const SizedBox(height: MEDIUM_SPACE),
                   ],
-                  if (_taskProgress != null) ...[
-                    if (_taskProgress == TaskCreationProgress.creatingViewKeys)
-                      const Expanded(
-                        child: ViewKeyLottie(),
-                      ).animate().fadeIn(duration: 1.seconds),
-                    if (_taskProgress == TaskCreationProgress.creatingSignKeys)
-                      const Expanded(
-                        child: SignKeyLottie(),
-                      ).animate().fadeIn(duration: 1.seconds),
-                    const SizedBox(height: MEDIUM_SPACE),
+                  if (_isError) ...[
                     Text(
-                      getCreationProgressTextMap()[_taskProgress] ?? "",
-                      textAlign: TextAlign.center,
-                      style: getCaptionTextStyle(context),
+                      l10n.unknownError,
+                      style: getBodyTextTextStyle(context).copyWith(
+                        color: getErrorColor(context),
+                      ),
                     ),
-                    const SizedBox(height: MEDIUM_SPACE),
                   ],
                   PlatformElevatedButton(
                     padding: const EdgeInsets.all(MEDIUM_SPACE),
-                    onPressed: _taskProgress != null
-                        ? null
-                        : () {
-                            if (!_formKey.currentState!.validate()) {
-                              return;
-                            }
+                    onPressed: () {
+                      if (!_formKey.currentState!.validate()) {
+                        return;
+                      }
 
-                            if (_relaysController.relays.isEmpty) {
-                              setState(() {
-                                errorMessage = l10n.createTask_errors_emptyRelays;
-                              });
-                              return;
-                            }
+                      if (_relaysController.relays.isEmpty) {
+                        setState(() {
+                          errorMessage = l10n.createTask_errors_emptyRelays;
+                        });
+                        return;
+                      }
 
-                            createTask(context);
-                          },
+                      createTask(context);
+                    },
                     child: Text(
                       l10n.createTask_createLabel,
                       style: TextStyle(
@@ -445,7 +421,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                       .slide(
                         duration: 500.ms,
                         curve: Curves.easeOut,
-                        begin: Offset(0, 1.3),
+                        begin: const Offset(0, 1.3),
                       )
                       .fadeIn(
                         duration: 500.ms,
