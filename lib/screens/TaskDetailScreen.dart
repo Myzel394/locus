@@ -62,11 +62,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   }
 
   void addListener() async {
-    _unsubscribeGetLocations = await getLocations(
-      viewPrivateKey: widget.task.viewPGPPrivateKey,
-      signPublicKey: widget.task.signPGPPublicKey,
-      nostrPublicKey: widget.task.nostrPublicKey,
-      relays: widget.task.relays,
+    _unsubscribeGetLocations = await widget.task.getLocations(
       onLocationFetched: (final LocationPointService location) {
         if (!mounted) {
           return;
@@ -106,16 +102,13 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
           centerTitle: true,
         ),
         cupertino: (_, __) => CupertinoNavigationBarData(
-          backgroundColor:
-              CupertinoTheme.of(context).barBackgroundColor.withOpacity(.5),
+          backgroundColor: CupertinoTheme.of(context).barBackgroundColor.withOpacity(.5),
         ),
       ),
       body: _isError
           ? const LocationFetchError()
           : PageView(
-              physics: _isShowingDetails
-                  ? const AlwaysScrollableScrollPhysics()
-                  : const NeverScrollableScrollPhysics(),
+              physics: _isShowingDetails ? const AlwaysScrollableScrollPhysics() : const NeverScrollableScrollPhysics(),
               scrollDirection: Axis.vertical,
               controller: _pageController,
               children: <Widget>[

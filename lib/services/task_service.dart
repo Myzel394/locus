@@ -1,16 +1,16 @@
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:math';
-import 'dart:typed_data';
 
-import 'package:basic_utils/basic_utils.dart';
 import 'package:cryptography/cryptography.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:locus/api/nostr-events.dart';
 import 'package:locus/constants/app.dart';
+import 'package:locus/utils/cryptography.dart';
 import 'package:nostr/nostr.dart';
 import 'package:uuid/uuid.dart';
+import '../api/get-locations.dart' as getLocationsAPI;
 
 import 'location_point_service.dart';
 import 'timers_service.dart';
@@ -40,11 +40,8 @@ class Task extends ChangeNotifier {
   final String id;
   final DateTime createdAt;
 
-  // Encryption is currently only supported for RSA, so we'll use EC for signing and RSA for viewing
-  final ECPrivateKey signPGPPrivateKey;
-  final ECPublicKey signPGPPublicKey;
-  final RSAPrivateKey viewPGPPrivateKey;
-  final RSAPublicKey viewPGPPublicKey;
+  // Password for symmetric encryption of the locations
+  final SecretKey _encryptionPassword;
 
   final String nostrPrivateKey;
   final List<String> relays;
@@ -56,26 +53,21 @@ class Task extends ChangeNotifier {
   Task({
     required this.id,
     required this.name,
-    required this.viewPGPPublicKey,
-    required this.signPGPPrivateKey,
-    required this.signPGPPublicKey,
     required this.createdAt,
+    required SecretKey encryptionPassword,
     required this.nostrPrivateKey,
-    required this.viewPGPPrivateKey,
     required this.relays,
     required this.timers,
     this.deleteAfterRun = false,
     String? nextRunWorkManagerID,
-  }) : _nextRunWorkManagerID = nextRunWorkManagerID;
+  })  : _nextRunWorkManagerID = nextRunWorkManagerID,
+        _encryptionPassword = encryptionPassword;
 
-  static Task fromJSON(Map<String, dynamic> json) {
+  factory Task.fromJSON(Map<String, dynamic> json) {
     return Task(
       id: json["id"],
       name: json["name"],
-      viewPGPPrivateKey: CryptoUtils.rsaPrivateKeyFromPem(json["viewPGPPrivateKey"]),
-      viewPGPPublicKey: CryptoUtils.rsaPublicKeyFromPem(json["viewPGPPublicKey"]),
-      signPGPPrivateKey: CryptoUtils.ecPrivateKeyFromPem(json["signPGPPrivateKey"]),
-      signPGPPublicKey: CryptoUtils.ecPublicKeyFromPem(json["signPGPPublicKey"]),
+      encryptionPassword: SecretKey(List<int>.from(json["encryptionPassword"])),
       nostrPrivateKey: json["nostrPrivateKey"],
       createdAt: DateTime.parse(json["createdAt"]),
       relays: List<String>.from(json["relays"]),
@@ -100,14 +92,11 @@ class Task extends ChangeNotifier {
 
   String get nostrPublicKey => Keychain(nostrPrivateKey).public;
 
-  Map<String, dynamic> toJSON() {
+  Future<Map<String, dynamic>> toJSON() async {
     return {
       "id": id,
       "name": name,
-      "viewPGPPrivateKey": CryptoUtils.encodeRSAPrivateKeyToPem(viewPGPPrivateKey),
-      "viewPGPPublicKey": CryptoUtils.encodeRSAPublicKeyToPem(viewPGPPublicKey),
-      "signPGPPrivateKey": CryptoUtils.encodeEcPrivateKeyToPem(signPGPPrivateKey),
-      "signPGPPublicKey": CryptoUtils.encodeEcPublicKeyToPem(signPGPPublicKey),
+      "encryptionPassword": await _encryptionPassword.extractBytes(),
       "nostrPrivateKey": nostrPrivateKey,
       "createdAt": createdAt.toIso8601String(),
       "relays": relays,
@@ -124,20 +113,17 @@ class Task extends ChangeNotifier {
     List<TaskRuntimeTimer> timers = const [],
     bool deleteAfterRun = false,
   }) async {
+    // TODO: Update enum
     onProgress?.call(TaskCreationProgress.creatingViewKeys);
-    final viewKeyPair = CryptoUtils.generateRSAKeyPair() as AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey>;
-
     onProgress?.call(TaskCreationProgress.creatingSignKeys);
-    final signKeyPair = CryptoUtils.generateEcKeyPair() as AsymmetricKeyPair<ECPublicKey, ECPrivateKey>;
+
+    final secretKey = await generateSecretKey();
 
     onProgress?.call(TaskCreationProgress.creatingTask);
     return Task(
       id: uuid.v4(),
       name: name,
-      viewPGPPrivateKey: viewKeyPair.privateKey,
-      viewPGPPublicKey: viewKeyPair.publicKey,
-      signPGPPrivateKey: signKeyPair.privateKey,
-      signPGPPublicKey: signKeyPair.publicKey,
+      encryptionPassword: secretKey,
       nostrPrivateKey: Keychain.generate().private,
       relays: relays,
       createdAt: DateTime.now(),
@@ -320,10 +306,9 @@ class Task extends ChangeNotifier {
     notifyListeners();
   }
 
-  String generateViewKeyContent() {
+  Future<String> generateViewKeyContent() async {
     return jsonEncode({
-      "signPublicKey": signPGPPublicKey,
-      "viewPrivateKey": viewPGPPrivateKey,
+      "encryptionPassword": await _encryptionPassword.extractBytes(),
       "nostrPublicKey": nostrPublicKey,
       "relays": relays,
     });
@@ -341,31 +326,22 @@ class Task extends ChangeNotifier {
   }) async {
     onProgress?.call(TaskLinkPublishProgress.startsSoon);
 
-    final message = generateViewKeyContent();
+    final message = await generateViewKeyContent();
 
     onProgress?.call(TaskLinkPublishProgress.encrypting);
 
-    final algorithm = AesCbc.with256bits(
-      macAlgorithm: Hmac.sha256(),
-    );
-    final secretKey = await algorithm.newSecretKey();
-
-    final encrypted = await algorithm.encrypt(
-      Uint8List.fromList(const Utf8Encoder().convert(message)),
-      secretKey: secretKey,
-    );
+    final passwordSecretKey = await generateSecretKey();
+    final password = await passwordSecretKey.extractBytes();
+    final cipherText = await encryptUsingAES(message, passwordSecretKey);
 
     onProgress?.call(TaskLinkPublishProgress.publishing);
-
-    final password = await secretKey.extractBytes();
 
     final relay = relays[Random().nextInt(relays.length)];
     final manager = NostrEventsManager(
       relays: [relay],
       privateKey: nostrPrivateKey,
     );
-    final nostrMessage = jsonEncode(encrypted.cipherText);
-    final publishedEvent = await manager.publishMessage(nostrMessage, kind: 1001);
+    final publishedEvent = await manager.publishMessage(cipherText, kind: 1001);
 
     onProgress?.call(TaskLinkPublishProgress.creatingURI);
 
@@ -378,9 +354,6 @@ class Task extends ChangeNotifier {
       "i": publishedEvent.id,
       // Relay
       "r": relay,
-      // Initial vector
-      "v": encrypted.nonce,
-      "m": encrypted.mac.bytes,
     };
 
     final fragment = base64Url.encode(jsonEncode(parameters).codeUnits);
@@ -392,7 +365,7 @@ class Task extends ChangeNotifier {
     );
 
     onProgress?.call(TaskLinkPublishProgress.done);
-    secretKey.destroy();
+    passwordSecretKey.destroy();
 
     return uri.toString();
   }
@@ -401,16 +374,36 @@ class Task extends ChangeNotifier {
     final LocationPointService? location,
   ]) async {
     final eventManager = NostrEventsManager.fromTask(this);
-
     final locationPoint = location ?? await LocationPointService.createUsingCurrentLocation();
 
-    final message = await locationPoint.toEncryptedMessage(
-      signPrivateKey: signPGPPrivateKey,
-      signPublicKey: signPGPPublicKey,
-      viewPublicKey: viewPGPPublicKey,
-    );
+    final rawMessage = jsonEncode(locationPoint.toJSON());
+    final message = await encryptUsingAES(rawMessage, _encryptionPassword);
 
     await eventManager.publishMessage(message);
+  }
+
+  // TODO: Refactor into abstract
+  Future<void Function()> getLocations({
+    required void Function(LocationPointService) onLocationFetched,
+    required void Function() onEnd,
+    bool onlyLatestPosition = false,
+    DateTime? from,
+  }) =>
+      getLocationsAPI.getLocations(
+        encryptionPassword: _encryptionPassword,
+        nostrPublicKey: nostrPublicKey,
+        relays: relays,
+        onLocationFetched: onLocationFetched,
+        onEnd: onEnd,
+        from: from,
+        onlyLatestPosition: onlyLatestPosition,
+      );
+
+  @override
+  void dispose() {
+    _encryptionPassword.destroy();
+
+    super.dispose();
   }
 }
 
@@ -444,15 +437,14 @@ class TaskService extends ChangeNotifier {
   }
 
   Future<void> save() async {
-    final data = jsonEncode(
-      List<Map<String, dynamic>>.from(
-        _tasks.map(
-          (task) => task.toJSON(),
-        ),
+    // await all `toJson` functions
+    final data = await Future.wait<Map<String, dynamic>>(
+      _tasks.map(
+        (task) => task.toJSON(),
       ),
     );
 
-    await storage.write(key: KEY, value: data);
+    await storage.write(key: KEY, value: jsonEncode(data));
   }
 
   Task getByID(final String id) {

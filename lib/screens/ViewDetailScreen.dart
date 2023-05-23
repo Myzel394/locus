@@ -97,11 +97,7 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
   }
 
   addListener() async {
-    _unsubscribeGetLocations = await getLocations(
-      viewPrivateKey: widget.view.viewPrivateKey,
-      signPublicKey: widget.view.signPublicKey,
-      nostrPublicKey: widget.view.nostrPublicKey,
-      relays: widget.view.relays,
+    _unsubscribeGetLocations = await widget.view.getLocations(
       from: DateTime.now().subtract(1.days),
       onLocationFetched: (final LocationPointService location) {
         if (!mounted) {

@@ -48,11 +48,7 @@ class _ViewImportOverviewState extends State<ViewImportOverview> {
   }
 
   addListener() async {
-    _unsubscribeGetLocations = await getLocations(
-      viewPrivateKey: widget.view.viewPrivateKey,
-      signPublicKey: widget.view.signPublicKey,
-      nostrPublicKey: widget.view.nostrPublicKey,
-      relays: widget.view.relays,
+    _unsubscribeGetLocations = await widget.view.getLocations(
       onlyLatestPosition: true,
       onLocationFetched: (final LocationPointService location) {
         if (!mounted) {

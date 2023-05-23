@@ -2,9 +2,13 @@ import 'dart:convert';
 
 import 'package:basic_utils/basic_utils.dart';
 import 'package:battery_plus/battery_plus.dart';
+import 'package:cryptography/cryptography.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:uuid/uuid.dart';
+
+import '../utils/cryptography.dart';
 
 const uuid = Uuid();
 
@@ -78,25 +82,6 @@ class LocationPointService {
     };
   }
 
-  Future<String> toEncryptedMessage({
-    required final RSAPublicKey viewPublicKey,
-    required final ECPrivateKey signPrivateKey,
-    required final ECPublicKey signPublicKey,
-  }) async {
-    final rawMessage = jsonEncode(toJSON());
-    final rawMessageBytes = Uint8List.fromList(utf8.encode(rawMessage));
-    final signedMessage = CryptoUtils.ecSign(signPrivateKey, rawMessageBytes);
-    final signedMessageBase64 = CryptoUtils.ecSignatureToBase64(signedMessage);
-
-    final content = {
-      "message": rawMessage,
-      "signature": signedMessageBase64,
-    };
-    final rawContent = jsonEncode(content);
-
-    return CryptoUtils.rsaEncrypt(rawContent, viewPublicKey);
-  }
-
   static Future<LocationPointService> createUsingCurrentLocation([
     final Position? position,
   ]) async {
@@ -124,9 +109,9 @@ class LocationPointService {
     return LocationPointService(
       id: uuid.v4(),
       createdAt: DateTime.now(),
-      latitude: locationData.latitude,
-      longitude: locationData.longitude,
-      altitude: locationData.altitude,
+      latitude: kDebugMode ? 40.04110 : locationData.latitude,
+      longitude: kDebugMode ? -75.48693 : locationData.longitude,
+      altitude: kDebugMode ? 100 : locationData.altitude,
       accuracy: locationData.accuracy,
       speed: locationData.speed,
       speedAccuracy: locationData.speedAccuracy,
@@ -153,23 +138,13 @@ class LocationPointService {
       );
 
   static Future<LocationPointService> fromEncrypted(
-    final String cipherMessage,
-    final RSAPrivateKey viewPrivateKey,
-    final ECPublicKey signPublicKey,
+    final String cipherText,
+    final SecretKey encryptionPassword,
   ) async {
-    final rawContent = CryptoUtils.rsaDecrypt(cipherMessage, viewPrivateKey);
-
-    final content = jsonDecode(rawContent);
-    final message = content["message"];
-    final signatureBase64 = content["signature"];
-    final signature = CryptoUtils.ecSignatureFromBase64(signatureBase64);
-    final messageBytes = Uint8List.fromList(utf8.encode(message));
-
-    final isSignatureValid = CryptoUtils.ecVerify(signPublicKey, messageBytes, signature);
-
-    if (!isSignatureValid) {
-      throw Exception("Invalid signature");
-    }
+    final message = await decryptUsingAES(
+      cipherText,
+      encryptionPassword,
+    );
 
     return LocationPointService.fromJSON(jsonDecode(message));
   }

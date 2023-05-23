@@ -13,8 +13,7 @@ import "dart:typed_data";
 import "package:cryptography/cryptography.dart";
 
 final AES_ALGORITHM = AesCbc.with256bits(
-  // We need to pass a MAC algorithm, but we don't use it.
-  macAlgorithm: Hmac.sha256(),
+  macAlgorithm: MacAlgorithm.empty,
 );
 
 Future<String> encryptUsingAES(
@@ -38,7 +37,7 @@ Future<String> decryptUsingAES(
   final publicData = PublicStringData.fromPublicString(cipherText);
   final decrypted = await AES_ALGORITHM.decrypt(
     SecretBox(
-      publicData.cipherText,
+      List<int>.from(publicData.cipherText),
       mac: Mac.empty,
       nonce: publicData.nonce,
     ),
@@ -69,8 +68,8 @@ class PublicStringData {
     final parsed = jsonDecode(publicString);
 
     return PublicStringData(
-      nonce: parsed[0],
-      cipherText: parsed[1],
+      nonce: List<int>.from(parsed[0]),
+      cipherText: List<int>.from(parsed[1]),
     );
   }
 }
