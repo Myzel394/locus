@@ -16,7 +16,6 @@ import 'package:locus/widgets/SettingsDropdownTile.dart';
 import 'package:provider/provider.dart';
 import 'package:settings_ui/settings_ui.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:workmanager/workmanager.dart';
 
 import '../services/settings_service.dart';
 import '../utils/platform.dart';
@@ -219,7 +218,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               title: Text("Reset App"),
                               onPressed: (_) async {
                                 storage.deleteAll();
-                                await Workmanager().cancelAll();
 
                                 exit(0);
                               },

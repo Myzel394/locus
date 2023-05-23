@@ -10,8 +10,8 @@ import 'package:locus/constants/app.dart';
 import 'package:locus/utils/cryptography.dart';
 import 'package:nostr/nostr.dart';
 import 'package:uuid/uuid.dart';
-import '../api/get-locations.dart' as getLocationsAPI;
 
+import '../api/get-locations.dart' as getLocationsAPI;
 import 'location_point_service.dart';
 import 'timers_service.dart';
 
@@ -48,7 +48,6 @@ class Task extends ChangeNotifier {
   final List<TaskRuntimeTimer> timers;
   String name;
   bool deleteAfterRun;
-  String? _nextRunWorkManagerID;
 
   Task({
     required this.id,
@@ -59,9 +58,7 @@ class Task extends ChangeNotifier {
     required this.relays,
     required this.timers,
     this.deleteAfterRun = false,
-    String? nextRunWorkManagerID,
-  })  : _nextRunWorkManagerID = nextRunWorkManagerID,
-        _encryptionPassword = encryptionPassword;
+  }) : _encryptionPassword = encryptionPassword;
 
   factory Task.fromJSON(Map<String, dynamic> json) {
     return Task(
@@ -82,7 +79,6 @@ class Task extends ChangeNotifier {
             throw Exception("Unknown timer type");
         }
       })),
-      nextRunWorkManagerID: json["nextRunWorkManagerID"],
     );
   }
 
@@ -102,7 +98,6 @@ class Task extends ChangeNotifier {
       "relays": relays,
       "timers": timers.map((timer) => timer.toJSON()).toList(),
       "deleteAfterRun": deleteAfterRun.toString(),
-      "nextRunWorkManagerID": _nextRunWorkManagerID,
     };
   }
 
@@ -169,7 +164,8 @@ class Task extends ChangeNotifier {
     };
   }
 
-  DateTime? nextStartDate({final DateTime? date}) => findNextStartDate(timers, startDate: date);
+  DateTime? nextStartDate({final DateTime? date}) =>
+      findNextStartDate(timers, startDate: date);
 
   DateTime? nextEndDate() => findNextEndDate(timers);
 
@@ -177,7 +173,8 @@ class Task extends ChangeNotifier {
 
   Future<bool> shouldRunNow() async {
     final executionStatus = await getExecutionStatus();
-    final shouldRunNowBasedOnTimers = timers.any((timer) => timer.shouldRun(DateTime.now()));
+    final shouldRunNowBasedOnTimers =
+        timers.any((timer) => timer.shouldRun(DateTime.now()));
 
     if (shouldRunNowBasedOnTimers) {
       return true;
@@ -190,7 +187,8 @@ class Task extends ChangeNotifier {
         return false;
       }
 
-      return (executionStatus["startedAt"] as DateTime).isBefore(earliestNextRun);
+      return (executionStatus["startedAt"] as DateTime)
+          .isBefore(earliestNextRun);
     }
 
     return false;
@@ -243,7 +241,8 @@ class Task extends ChangeNotifier {
   // Returns the next date the task will run OR `null` if the task is not scheduled to run.
   Future<DateTime?> startScheduleTomorrow() {
     final tomorrow = DateTime.now().add(const Duration(days: 1));
-    final nextDate = DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 6, 0, 0);
+    final nextDate =
+        DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 6, 0, 0);
 
     return startSchedule(startDate: nextDate);
   }
@@ -374,7 +373,8 @@ class Task extends ChangeNotifier {
     final LocationPointService? location,
   ]) async {
     final eventManager = NostrEventsManager.fromTask(this);
-    final locationPoint = location ?? await LocationPointService.createUsingCurrentLocation();
+    final locationPoint =
+        location ?? await LocationPointService.createUsingCurrentLocation();
 
     final rawMessage = jsonEncode(locationPoint.toJSON());
     final message = await encryptUsingAES(rawMessage, _encryptionPassword);
@@ -526,7 +526,8 @@ DateTime? findNextStartDate(final List<TaskRuntimeTimer> timers,
   return nextDates.first;
 }
 
-DateTime? findNextEndDate(final List<TaskRuntimeTimer> timers, {final DateTime? startDate}) {
+DateTime? findNextEndDate(final List<TaskRuntimeTimer> timers,
+    {final DateTime? startDate}) {
   final now = startDate ?? DateTime.now();
   final nextDates = List<DateTime>.from(
     timers.map((timer) => timer.nextEndDate(now)).where((date) => date != null),
@@ -536,7 +537,8 @@ DateTime? findNextEndDate(final List<TaskRuntimeTimer> timers, {final DateTime? 
 
   for (final date in nextDates.sublist(1)) {
     final nextStartDate = findNextStartDate(timers, startDate: date);
-    if (nextStartDate == null || nextStartDate.difference(date).inMinutes.abs() > 15) {
+    if (nextStartDate == null ||
+        nextStartDate.difference(date).inMinutes.abs() > 15) {
       // No next start date found or the difference is more than 15 minutes, so this is the last date
       break;
     }
