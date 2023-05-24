@@ -10,7 +10,7 @@ assignees: ''
 ## OS
 <!-- Tick on which OS this issue happens -->
 * [ ] Android
-* [ ]
+* [ ] iOS
 
 ## Android specific
 If you ticked `Android`, please specify on which Android flavor this issue happens
