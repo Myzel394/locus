@@ -1,6 +1,4 @@
-import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:animations/animations.dart';
 import 'package:background_fetch/background_fetch.dart';
@@ -24,7 +22,6 @@ import 'package:locus/widgets/ChipCaption.dart';
 import 'package:locus/widgets/Paper.dart';
 import 'package:locus/widgets/PlatformPopup.dart';
 import 'package:provider/provider.dart';
-import 'package:basic_utils/basic_utils.dart';
 
 import '../constants/values.dart';
 import '../services/location_point_service.dart';
@@ -47,34 +44,11 @@ class _MainScreenState extends State<MainScreen> {
   final listViewKey = GlobalKey();
   late final TaskService taskService;
   final _hintTypeFuture = getHintTypeForMainScreen();
-  bool shouldUseScreenHeight = false;
-  bool listViewShouldFillUp = false;
-  double listViewHeight = 0;
   int activeTab = 0;
   bool showHint = true;
   Stream<Position>? _positionStream;
 
   double get windowHeight => MediaQuery.of(context).size.height - kToolbarHeight;
-
-  // If the ListView covers more than 75% of the screen, then actions get a whole screen of space.
-  // Otherwise fill up the remaining space.
-  bool getShouldUseScreenHeight(final BuildContext context) {
-    // Initial app screen, no tasks have been created yet. Use the full screen.
-    if (listViewKey.currentContext == null) {
-      return true;
-    }
-
-    final listViewHeight = listViewKey.currentContext?.size?.height ?? 0;
-    return listViewHeight >= windowHeight * 0.5;
-  }
-
-  // Checks if the ListView should fill up the remaining space. This means that the listView is smaller than the
-  // remaining height.
-  bool getListViewShouldFillUp(final BuildContext context) {
-    final listViewHeight = listViewKey.currentContext?.size?.height ?? 0;
-
-    return listViewHeight < windowHeight;
-  }
 
   void initBackground() async {
     BackgroundFetch.start();
@@ -171,15 +145,6 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void updateView() async {
-    final taskService = context.read<TaskService>();
-    final height = listViewKey.currentContext?.size?.height ?? 0;
-
-    setState(() {
-      shouldUseScreenHeight = getShouldUseScreenHeight(context);
-      listViewShouldFillUp = getListViewShouldFillUp(context);
-      listViewHeight = height;
-    });
-
     final runningTasks = await taskService.getRunningTasks().toList();
 
     if (runningTasks.isNotEmpty) {
