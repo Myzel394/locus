@@ -30,8 +30,12 @@ enum ImportScreen {
 class ImportTaskSheet extends StatefulWidget {
   final ImportScreen? initialScreen;
 
+  // If set, `initialScreen` will be ignored and the URL will be imported
+  final String? initialURL;
+
   const ImportTaskSheet({
     this.initialScreen = ImportScreen.ask,
+    this.initialURL,
     Key? key,
   }) : super(key: key);
 
@@ -39,7 +43,8 @@ class ImportTaskSheet extends StatefulWidget {
   State<ImportTaskSheet> createState() => _ImportTaskSheetState();
 }
 
-class _ImportTaskSheetState extends State<ImportTaskSheet> with TickerProviderStateMixin {
+class _ImportTaskSheetState extends State<ImportTaskSheet>
+    with TickerProviderStateMixin {
   final _nameController = TextEditingController();
   final _urlController = TextEditingController();
   ImportScreen _screen = ImportScreen.ask;
@@ -86,6 +91,9 @@ class _ImportTaskSheetState extends State<ImportTaskSheet> with TickerProviderSt
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (widget.initialScreen == ImportScreen.importFile) {
           _importFile();
+        } else if (widget.initialURL != null) {
+          _urlController.text = widget.initialURL!;
+          _importURL();
         } else {
           setState(() {
             _screen = widget.initialScreen!;
@@ -120,7 +128,8 @@ class _ImportTaskSheetState extends State<ImportTaskSheet> with TickerProviderSt
       result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ["json"],
-        dialogTitle: l10n.mainScreen_importTask_action_importMethod_file_selectFile,
+        dialogTitle:
+            l10n.mainScreen_importTask_action_importMethod_file_selectFile,
         withData: true,
       );
     } catch (_) {
@@ -269,7 +278,8 @@ class _ImportTaskSheetState extends State<ImportTaskSheet> with TickerProviderSt
                       else if (errorMessage != null)
                         Text(
                           errorMessage!,
-                          style: getBodyTextTextStyle(context).copyWith(color: getErrorColor(context)),
+                          style: getBodyTextTextStyle(context)
+                              .copyWith(color: getErrorColor(context)),
                         ),
                     ],
                   )
@@ -295,7 +305,8 @@ class _ImportTaskSheetState extends State<ImportTaskSheet> with TickerProviderSt
                 else if (_screen == ImportScreen.error)
                   Column(
                     children: <Widget>[
-                      Icon(context.platformIcons.error, size: 64, color: getErrorColor(context)),
+                      Icon(context.platformIcons.error,
+                          size: 64, color: getErrorColor(context)),
                       const SizedBox(height: MEDIUM_SPACE),
                       Text(
                         l10n.taskImportError,
@@ -304,7 +315,8 @@ class _ImportTaskSheetState extends State<ImportTaskSheet> with TickerProviderSt
                       const SizedBox(height: SMALL_SPACE),
                       Text(
                         errorMessage!,
-                        style: getBodyTextTextStyle(context).copyWith(color: getErrorColor(context)),
+                        style: getBodyTextTextStyle(context)
+                            .copyWith(color: getErrorColor(context)),
                       ),
                       const SizedBox(height: LARGE_SPACE),
                       PlatformElevatedButton(
