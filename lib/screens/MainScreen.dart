@@ -22,6 +22,8 @@ import 'package:locus/widgets/ChipCaption.dart';
 import 'package:locus/widgets/Paper.dart';
 import 'package:locus/widgets/PlatformPopup.dart';
 import 'package:provider/provider.dart';
+import 'package:uni_links/uni_links.dart';
+import 'package:flutter/services.dart' show PlatformException;
 
 import '../constants/values.dart';
 import '../services/location_point_service.dart';
@@ -118,12 +120,26 @@ class _MainScreenState extends State<MainScreen> {
     _positionStream = null;
   }
 
+  Future<void> initUniLinks() async {
+    try {
+      final initialLink = await getInitialLink();
+      // Parse the link and warn the user, if it is not correct,
+      // but keep in mind it could be `null`.
+
+      print(initialLink);
+    } on PlatformException {
+      // Handle exception by warning the user their action did not succeed
+      // return?
+    }
+  }
+
   @override
   void initState() {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       initQuickActions(context);
+      initUniLinks();
     });
 
     final taskService = context.read<TaskService>();
