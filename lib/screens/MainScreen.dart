@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:animations/animations.dart';
 import 'package:background_fetch/background_fetch.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show PlatformException;
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
@@ -23,12 +25,12 @@ import 'package:locus/widgets/Paper.dart';
 import 'package:locus/widgets/PlatformPopup.dart';
 import 'package:provider/provider.dart';
 import 'package:uni_links/uni_links.dart';
-import 'package:flutter/services.dart' show PlatformException;
 
 import '../constants/values.dart';
 import '../services/location_point_service.dart';
 import '../utils/platform.dart';
 import 'CreateTaskScreen.dart';
+import 'ImportTaskSheet.dart';
 import 'main_screen_widgets/CreateTask.dart';
 
 const FAB_DIMENSION = 56.0;
@@ -49,8 +51,13 @@ class _MainScreenState extends State<MainScreen> {
   int activeTab = 0;
   bool showHint = true;
   Stream<Position>? _positionStream;
+  StreamSubscription<String?>? _uniLinksStream;
 
-  double get windowHeight => MediaQuery.of(context).size.height - kToolbarHeight;
+  double get windowHeight =>
+      MediaQuery
+          .of(context)
+          .size
+          .height - kToolbarHeight;
 
   void initBackground() async {
     BackgroundFetch.start();
@@ -105,7 +112,8 @@ class _MainScreenState extends State<MainScreen> {
         return;
       }
 
-      final locationData = await LocationPointService.createUsingCurrentLocation(position);
+      final locationData =
+      await LocationPointService.createUsingCurrentLocation(position);
 
       for (final task in runningTasks) {
         await task.publishCurrentLocationNow(
@@ -120,16 +128,52 @@ class _MainScreenState extends State<MainScreen> {
     _positionStream = null;
   }
 
-  Future<void> initUniLinks() async {
-    try {
-      final initialLink = await getInitialLink();
-      // Parse the link and warn the user, if it is not correct,
-      // but keep in mind it could be `null`.
+  Future<void> _importUniLink(final String url) async {
+    await showPlatformModalSheet(
+      context: context,
+      material: MaterialModalSheetData(
+        backgroundColor: Colors.transparent,
+        isScrollControlled: true,
+        isDismissible: true,
+      ),
+      builder: (context) =>
+          ImportTaskSheet(initialURL: url),
+    );
+  }
 
-      print(initialLink);
-    } on PlatformException {
-      // Handle exception by warning the user their action did not succeed
-      // return?
+  Future<void> initUniLinks() async {
+    final l10n = AppLocalizations.of(context);
+
+    _uniLinksStream = linkStream.listen((final String? link) {
+      if (link != null) {
+        _importUniLink(link);
+      }
+    });
+
+    try {
+      // Only fired when the app was in background
+      final initialLink = await getInitialLink();
+
+      if (initialLink != null) {
+        await _importUniLink(initialLink);
+      }
+    } on PlatformException catch (error) {
+      showPlatformDialog(
+        context: context,
+        builder: (_) =>
+            PlatformAlertDialog(
+              title: Text(l10n.uniLinksOpenError),
+              content: Text(error.message ?? l10n.unknownError),
+              actions: [
+                PlatformDialogAction(
+                  child: Text(l10n.closeNeutralAction),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            ),
+      );
     }
   }
 
@@ -154,6 +198,8 @@ class _MainScreenState extends State<MainScreen> {
   void dispose() {
     final taskService = context.read<TaskService>();
     taskService.removeListener(updateView);
+
+    _uniLinksStream?.cancel();
 
     _removeLiveLocationUpdate();
 
@@ -198,7 +244,8 @@ class _MainScreenState extends State<MainScreen> {
     final viewService = context.watch<ViewService>();
     final settings = context.watch<SettingsService>();
 
-    final showEmptyScreen = taskService.tasks.isEmpty && viewService.views.isEmpty;
+    final showEmptyScreen =
+        taskService.tasks.isEmpty && viewService.views.isEmpty;
 
     if (showEmptyScreen) {
       return PlatformScaffold(
@@ -227,226 +274,255 @@ class _MainScreenState extends State<MainScreen> {
     }
 
     return PlatformScaffold(
-      material: (_, __) => MaterialScaffoldData(
-        floatingActionButton: OpenContainer(
-          transitionDuration: const Duration(milliseconds: 500),
-          transitionType: ContainerTransitionType.fade,
-          openBuilder: (_, action) => CreateTaskScreen(
-            onCreated: () {
-              Navigator.pop(context);
-            },
-          ),
-          closedBuilder: (context, action) => SizedBox(
-            height: FAB_DIMENSION,
-            width: FAB_DIMENSION,
-            child: Center(
-              child: Icon(
-                Icons.add,
-                color: Theme.of(context).colorScheme.onPrimary,
+      material: (_, __) =>
+          MaterialScaffoldData(
+            floatingActionButton: OpenContainer(
+              transitionDuration: const Duration(milliseconds: 500),
+              transitionType: ContainerTransitionType.fade,
+              openBuilder: (_, action) =>
+                  CreateTaskScreen(
+                    onCreated: () {
+                      Navigator.pop(context);
+                    },
+                  ),
+              closedBuilder: (context, action) =>
+                  SizedBox(
+                    height: FAB_DIMENSION,
+                    width: FAB_DIMENSION,
+                    child: Center(
+                      child: Icon(
+                        Icons.add,
+                        color: Theme
+                            .of(context)
+                            .colorScheme
+                            .onPrimary,
+                      ),
+                    ),
+                  ),
+              closedElevation: 6.0,
+              closedShape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(
+                  Radius.circular(FAB_DIMENSION / 2),
+                ),
               ),
-            ),
+              openColor: Theme
+                  .of(context)
+                  .scaffoldBackgroundColor,
+              closedColor: Theme
+                  .of(context)
+                  .colorScheme
+                  .primary,
+            )
+                .animate()
+                .scale(
+                duration: 500.ms, delay: 1.seconds, curve: Curves.bounceOut),
           ),
-          closedElevation: 6.0,
-          closedShape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(
-              Radius.circular(FAB_DIMENSION / 2),
-            ),
-          ),
-          openColor: Theme.of(context).scaffoldBackgroundColor,
-          closedColor: Theme.of(context).colorScheme.primary,
-        ).animate().scale(duration: 500.ms, delay: 1.seconds, curve: Curves.bounceOut),
-      ),
       // Settings bottomNavBar via cupertino data class does not work
       bottomNavBar: isCupertino(context)
           ? PlatformNavBar(
-              itemChanged: (index) {
-                setState(() {
-                  activeTab = index;
-                });
-              },
-              currentIndex: activeTab,
-              items: [
-                BottomNavigationBarItem(
-                  icon: const Icon(CupertinoIcons.home),
-                  label: l10n.mainScreen_overview,
-                ),
-                BottomNavigationBarItem(
-                  icon: const Icon(CupertinoIcons.location_fill),
-                  label: l10n.mainScreen_createTask,
-                ),
-              ],
-            )
+        itemChanged: (index) {
+          setState(() {
+            activeTab = index;
+          });
+        },
+        currentIndex: activeTab,
+        items: [
+          BottomNavigationBarItem(
+            icon: const Icon(CupertinoIcons.home),
+            label: l10n.mainScreen_overview,
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(CupertinoIcons.location_fill),
+            label: l10n.mainScreen_createTask,
+          ),
+        ],
+      )
           : null,
       appBar: activeTab == 0 ? getAppBar() : null,
       body: activeTab == 0
           ? SafeArea(
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.max,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              FutureBuilder<HintType?>(
+                future: _hintTypeFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.hasData &&
+                      settings.getShowHints() &&
+                      showHint) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: LARGE_SPACE,
+                        horizontal: MEDIUM_SPACE,
+                      ),
+                      child: AppHint(
+                        hintType: snapshot.data!,
+                        onDismiss: () {
+                          setState(() {
+                            showHint = false;
+                          });
+                        },
+                      ),
+                    );
+                  }
+
+                  return const SizedBox.shrink();
+                },
+              ),
+              const SizedBox(height: MEDIUM_SPACE),
+              SizedBox(
+                height: windowHeight - kToolbarHeight,
+                child: Wrap(
+                  runSpacing: LARGE_SPACE,
+                  crossAxisAlignment: WrapCrossAlignment.start,
                   children: <Widget>[
-                    FutureBuilder<HintType?>(
-                      future: _hintTypeFuture,
-                      builder: (context, snapshot) {
-                        if (snapshot.hasData && settings.getShowHints() && showHint) {
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(
-                              vertical: LARGE_SPACE,
-                              horizontal: MEDIUM_SPACE,
-                            ),
-                            child: AppHint(
-                              hintType: snapshot.data!,
-                              onDismiss: () {
-                                setState(() {
-                                  showHint = false;
-                                });
-                              },
-                            ),
-                          );
-                        }
-
-                        return const SizedBox.shrink();
-                      },
-                    ),
-                    const SizedBox(height: MEDIUM_SPACE),
-                    SizedBox(
-                      height: windowHeight - kToolbarHeight,
-                      child: Wrap(
-                        runSpacing: LARGE_SPACE,
-                        crossAxisAlignment: WrapCrossAlignment.start,
-                        children: <Widget>[
-                          if (taskService.tasks.isNotEmpty)
-                            PlatformWidget(
-                              material: (context, __) => Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: MEDIUM_SPACE),
-                                    child: ChipCaption(
-                                      l10n.mainScreen_tasksSection,
-                                      icon: Icons.task_rounded,
-                                    ),
-                                  ).animate().fadeIn(duration: 1.seconds),
-                                  ListView.builder(
-                                    shrinkWrap: true,
-                                    padding: const EdgeInsets.only(top: MEDIUM_SPACE),
-                                    physics: const NeverScrollableScrollPhysics(),
-                                    itemCount: taskService.tasks.length,
-                                    itemBuilder: (context, index) {
-                                      final task = taskService.tasks[index];
-
-                                      return TaskTile(
-                                        task: task,
-                                      )
-                                          .animate()
-                                          .then(delay: 100.ms * index)
-                                          .slide(
-                                            duration: 1.seconds,
-                                            curve: Curves.easeOut,
-                                            begin: const Offset(0, 0.2),
-                                          )
-                                          .fadeIn(
-                                            delay: 100.ms,
-                                            duration: 1.seconds,
-                                            curve: Curves.easeOut,
-                                          );
-                                    },
+                    if (taskService.tasks.isNotEmpty)
+                      PlatformWidget(
+                        material: (context, __) =>
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: MEDIUM_SPACE),
+                                  child: ChipCaption(
+                                    l10n.mainScreen_tasksSection,
+                                    icon: Icons.task_rounded,
                                   ),
-                                ],
-                              ),
-                              cupertino: (context, __) => CupertinoListSection(
-                                header: Text(
-                                  l10n.mainScreen_tasksSection,
-                                ),
-                                children: taskService.tasks
-                                    .map(
-                                      (task) => TaskTile(
-                                        task: task,
-                                      ),
-                                    )
-                                    .toList(),
-                              ),
-                            ),
-                          if (viewService.views.isNotEmpty)
-                            PlatformWidget(
-                              material: (context, __) => Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: MEDIUM_SPACE),
-                                    child: ChipCaption(
-                                      l10n.mainScreen_viewsSection,
-                                      icon: context.platformIcons.eyeSolid,
-                                    ),
-                                  ).animate().fadeIn(duration: 1.seconds),
-                                  ListView.builder(
-                                    shrinkWrap: true,
-                                    padding: const EdgeInsets.only(top: MEDIUM_SPACE),
-                                    physics: const NeverScrollableScrollPhysics(),
-                                    itemCount: viewService.views.length,
-                                    itemBuilder: (context, index) => ViewTile(
-                                      view: viewService.views[index],
+                                ).animate().fadeIn(duration: 1.seconds),
+                                ListView.builder(
+                                  shrinkWrap: true,
+                                  padding: const EdgeInsets.only(
+                                      top: MEDIUM_SPACE),
+                                  physics:
+                                  const NeverScrollableScrollPhysics(),
+                                  itemCount: taskService.tasks.length,
+                                  itemBuilder: (context, index) {
+                                    final task = taskService.tasks[index];
+
+                                    return TaskTile(
+                                      task: task,
                                     )
                                         .animate()
                                         .then(delay: 100.ms * index)
                                         .slide(
-                                          duration: 1.seconds,
-                                          curve: Curves.easeOut,
-                                          begin: const Offset(0, 0.2),
-                                        )
-                                        .fadeIn(
-                                          delay: 100.ms,
-                                          duration: 1.seconds,
-                                          curve: Curves.easeOut,
-                                        ),
-                                  ),
-                                ],
-                              ),
-                              cupertino: (context, __) => CupertinoListSection(
-                                header: Text(l10n.mainScreen_viewsSection),
-                                children: viewService.views
-                                    .map(
-                                      (view) => ViewTile(
-                                        view: view,
-                                      ),
+                                      duration: 1.seconds,
+                                      curve: Curves.easeOut,
+                                      begin: const Offset(0, 0.2),
                                     )
-                                    .toList(),
-                              ),
+                                        .fadeIn(
+                                      delay: 100.ms,
+                                      duration: 1.seconds,
+                                      curve: Curves.easeOut,
+                                    );
+                                  },
+                                ),
+                              ],
                             ),
-                        ],
+                        cupertino: (context, __) =>
+                            CupertinoListSection(
+                              header: Text(
+                                l10n.mainScreen_tasksSection,
+                              ),
+                              children: taskService.tasks
+                                  .map(
+                                    (task) =>
+                                    TaskTile(
+                                      task: task,
+                                    ),
+                              )
+                                  .toList(),
+                            ),
                       ),
-                    ),
-                    SizedBox(
-                      height: windowHeight,
-                      child: const Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: MEDIUM_SPACE,
-                          vertical: HUGE_SPACE,
-                        ),
-                        child: Center(
-                          child: Paper(
-                            child: ImportTask(),
-                          ),
-                        ),
+                    if (viewService.views.isNotEmpty)
+                      PlatformWidget(
+                        material: (context, __) =>
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: MEDIUM_SPACE),
+                                  child: ChipCaption(
+                                    l10n.mainScreen_viewsSection,
+                                    icon: context.platformIcons.eyeSolid,
+                                  ),
+                                ).animate().fadeIn(duration: 1.seconds),
+                                ListView.builder(
+                                  shrinkWrap: true,
+                                  padding: const EdgeInsets.only(
+                                      top: MEDIUM_SPACE),
+                                  physics:
+                                  const NeverScrollableScrollPhysics(),
+                                  itemCount: viewService.views.length,
+                                  itemBuilder: (context, index) =>
+                                      ViewTile(
+                                        view: viewService.views[index],
+                                      )
+                                          .animate()
+                                          .then(delay: 100.ms * index)
+                                          .slide(
+                                        duration: 1.seconds,
+                                        curve: Curves.easeOut,
+                                        begin: const Offset(0, 0.2),
+                                      )
+                                          .fadeIn(
+                                        delay: 100.ms,
+                                        duration: 1.seconds,
+                                        curve: Curves.easeOut,
+                                      ),
+                                ),
+                              ],
+                            ),
+                        cupertino: (context, __) =>
+                            CupertinoListSection(
+                              header: Text(l10n.mainScreen_viewsSection),
+                              children: viewService.views
+                                  .map(
+                                    (view) =>
+                                    ViewTile(
+                                      view: view,
+                                    ),
+                              )
+                                  .toList(),
+                            ),
                       ),
-                    ),
                   ],
                 ),
               ),
-            )
+              SizedBox(
+                height: windowHeight,
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: MEDIUM_SPACE,
+                    vertical: HUGE_SPACE,
+                  ),
+                  child: Center(
+                    child: Paper(
+                      child: ImportTask(),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      )
           : activeTab == 1
-              ? CreateTaskScreen(
-                  onCreated: () {
-                    if (isCupertino(context)) {
-                      setState(() {
-                        activeTab = 0;
-                      });
-                    } else {
-                      Navigator.pop(context);
-                    }
-                  },
-                )
-              : null,
+          ? CreateTaskScreen(
+        onCreated: () {
+          if (isCupertino(context)) {
+            setState(() {
+              activeTab = 0;
+            });
+          } else {
+            Navigator.pop(context);
+          }
+        },
+      )
+          : null,
     );
   }
 }

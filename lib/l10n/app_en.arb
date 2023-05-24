@@ -24,6 +24,7 @@
   "deleteLabel": "Delete",
   "dismissLabel": "Dismiss",
   "editRelays": "Edit Relays",
+  "uniLinksOpenError": "Link could not be opened",
   "actionNotUndoable": "This action cannot be undone!",
   "linkCopiedToClipboard": "Link copied to clipboard!",
   "nostrRelaysLabel": "Nostr Relays",
