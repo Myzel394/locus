@@ -32,6 +32,7 @@ void main() async {
         : Future.value(true),
     SettingsService.restore(),
     hasGrantedNotificationPermission(),
+    Hive.initFlutter(),
   ]);
   final bool hasLocationAlwaysGranted = futures[0];
   final TaskService taskService = futures[1];
