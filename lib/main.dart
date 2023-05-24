@@ -4,6 +4,7 @@ import 'package:disable_battery_optimization/disable_battery_optimization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:locus/App.dart';
 import 'package:locus/services/manager_service.dart';
 import 'package:locus/services/settings_service.dart';
@@ -23,6 +24,9 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
 
+  await Hive.initFlutter();
+  await Hive.openBox("logs");
+
   final futures = await Future.wait<dynamic>([
     Permission.locationAlways.isGranted,
     TaskService.restore(),
@@ -32,7 +36,6 @@ void main() async {
         : Future.value(true),
     SettingsService.restore(),
     hasGrantedNotificationPermission(),
-    Hive.initFlutter(),
   ]);
   final bool hasLocationAlwaysGranted = futures[0];
   final TaskService taskService = futures[1];
