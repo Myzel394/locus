@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:locus/App.dart';
+import 'package:locus/constants/hive_keys.dart';
 import 'package:locus/services/manager_service.dart';
 import 'package:locus/services/settings_service.dart';
 import 'package:locus/services/task_service.dart';
@@ -25,7 +26,7 @@ void main() async {
   ]);
 
   await Hive.initFlutter();
-  await Hive.openBox("logs");
+  await Hive.openBox(HIVE_KEY_LOGS);
 
   final futures = await Future.wait<dynamic>([
     Permission.locationAlways.isGranted,
