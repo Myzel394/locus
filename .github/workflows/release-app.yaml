@@ -38,7 +38,7 @@ jobs:
         with:
           channel: 'stable'
           flutter-version: '3.10.0'
-          
+
       - name: Opt out of telemetry
         run: flutter --disable-telemetry
 
@@ -48,12 +48,15 @@ jobs:
       - name: Generate Localizations 🌐
         run: flutter gen-l10n
 
+      - name: Generate adapters for Hive 📦
+        run: dart run build_runner build
+
       - name: Build Android App (Multiple APKs) 📱
         run: flutter build apk --split-per-abi
 
       - name: Build Android App (fat APK) 📱
         run: flutter build apk
-        
+
       - name: Rename files
         run: |
           cd build/app/outputs/flutter-apk &&
