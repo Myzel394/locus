@@ -1,1 +1,1 @@
-const APP_URL_DOMAIN = "locus.app";
+const APP_URL_DOMAIN = "locus.cfd";
