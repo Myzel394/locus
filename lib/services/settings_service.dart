@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:hive/hive.dart';
 
 import '../utils/platform.dart';
 
@@ -21,6 +22,7 @@ class SettingsService extends ChangeNotifier {
   bool automaticallyLookupAddresses;
   bool showHints;
   List<String> _relays;
+  final List<int> hivePassword;
 
   // null = system default
   Color? primaryColor;
@@ -33,6 +35,7 @@ class SettingsService extends ChangeNotifier {
     required this.primaryColor,
     required this.mapProvider,
     required this.showHints,
+    required this.hivePassword,
     List<String>? relays,
   }) : _relays = relays ?? [];
 
@@ -43,6 +46,7 @@ class SettingsService extends ChangeNotifier {
       mapProvider:
           isPlatformApple() ? MapProvider.apple : MapProvider.openStreetMap,
       showHints: true,
+      hivePassword: Hive.generateSecureKey(),
     );
   }
 
@@ -54,6 +58,7 @@ class SettingsService extends ChangeNotifier {
       mapProvider: MapProvider.values[data['mapProvider']],
       relays: List<String>.from(data['relays'] ?? []),
       showHints: data['showHints'],
+      hivePassword: List<int>.from(data['hivePassword']),
     );
   }
 

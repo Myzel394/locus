@@ -25,9 +25,6 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
 
-  await Hive.initFlutter();
-  await Hive.openBox(HIVE_KEY_LOGS);
-
   final futures = await Future.wait<dynamic>([
     Permission.locationAlways.isGranted,
     TaskService.restore(),
@@ -44,6 +41,12 @@ void main() async {
   final bool isIgnoringBatteryOptimizations = futures[3];
   final SettingsService settingsService = futures[4];
   final bool hasNotificationGranted = futures[5];
+
+  await Hive.initFlutter();
+  await Hive.openBox(
+    HIVE_KEY_LOGS,
+    encryptionCipher: HiveAesCipher(settingsService.hivePassword),
+  );
 
   runApp(
     MultiProvider(
