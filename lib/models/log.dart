@@ -29,7 +29,7 @@ enum LogInitiator {
 }
 
 @HiveType(typeId: 3)
-class Log {
+class Log extends HiveObject {
   @HiveField(0)
   final String id;
 
@@ -46,7 +46,7 @@ class Log {
   // Arbitrary payload that can be used for specific LogTypes
   final String payload;
 
-  const Log({
+  Log({
     required this.id,
     required this.createdAt,
     required this.type,

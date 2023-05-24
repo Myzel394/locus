@@ -26,6 +26,8 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
 
+  Hive.registerAdapter(LogTypeAdapter());
+  Hive.registerAdapter(LogInitiatorAdapter());
   Hive.registerAdapter(LogAdapter());
 
   final futures = await Future.wait<dynamic>([
