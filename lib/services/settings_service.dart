@@ -72,8 +72,9 @@ class SettingsService extends ChangeNotifier {
 
     final defaultValues = createDefault().toJSON();
     final data = Map<String, dynamic>.from(jsonDecode(rawData));
+    // Merge data with default values, replace null values with default values
     final mergedData = HashMap<String, dynamic>.from(defaultValues)
-      ..addAll(data);
+      ..addAll(data..removeWhere((key, value) => value == null));
 
     return fromJSON(mergedData);
   }
@@ -85,6 +86,7 @@ class SettingsService extends ChangeNotifier {
       'mapProvider': mapProvider.index,
       "relays": _relays,
       "showHints": showHints,
+      "hivePassword": hivePassword,
     };
   }
 

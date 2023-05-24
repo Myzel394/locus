@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:locus/App.dart';
-import 'package:locus/constants/hive_keys.dart';
 import 'package:locus/services/manager_service.dart';
 import 'package:locus/services/settings_service.dart';
 import 'package:locus/services/task_service.dart';
@@ -14,6 +13,8 @@ import 'package:locus/services/view_service.dart';
 import 'package:locus/utils/permission.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
+
+import 'models/log.dart';
 
 const storage = FlutterSecureStorage();
 
@@ -24,6 +25,8 @@ void main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
+
+  Hive.registerAdapter(LogAdapter());
 
   final futures = await Future.wait<dynamic>([
     Permission.locationAlways.isGranted,
@@ -43,10 +46,6 @@ void main() async {
   final bool hasNotificationGranted = futures[5];
 
   await Hive.initFlutter();
-  await Hive.openBox(
-    HIVE_KEY_LOGS,
-    encryptionCipher: HiveAesCipher(settingsService.hivePassword),
-  );
 
   runApp(
     MultiProvider(

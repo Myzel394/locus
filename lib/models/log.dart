@@ -1,10 +1,12 @@
 import 'package:hive/hive.dart';
 import 'package:uuid/uuid.dart';
 
+part 'log.g.dart';
+
 const LOG_HIVE_BOX = "v1_hive_logs";
 const uuid = Uuid();
 
-@HiveType(typeId: 0)
+@HiveType(typeId: 1)
 enum LogType {
   @HiveField(0)
   taskCreated,
@@ -18,7 +20,7 @@ enum LogType {
   updatedLocation,
 }
 
-@HiveType(typeId: 1)
+@HiveType(typeId: 2)
 enum LogInitiator {
   @HiveField(0)
   user,
@@ -26,7 +28,7 @@ enum LogInitiator {
   system,
 }
 
-@HiveType(typeId: 0)
+@HiveType(typeId: 3)
 class Log {
   @HiveField(0)
   final String id;
