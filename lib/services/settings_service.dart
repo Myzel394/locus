@@ -122,7 +122,14 @@ class SettingsService extends ChangeNotifier {
     otherProviders.shuffle();
     final providers = getGeocoderProvider() == GeocoderProvider.system
         ? [GeocoderProvider.system, ...otherProviders]
-        : otherProviders;
+        // If the user does not want to use the system provider,
+        // we will not use it, even if it is the only one
+        // available (for better privacy)
+        : [
+            getGeocoderProvider(),
+            ...otherProviders
+                .where((element) => element != getGeocoderProvider())
+          ];
 
     for (final provider in providers) {
       try {
