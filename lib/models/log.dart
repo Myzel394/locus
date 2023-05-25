@@ -2,49 +2,32 @@ import 'dart:convert';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:hive/hive.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:uuid/uuid.dart';
 
-part 'log.g.dart';
-
 const uuid = Uuid();
 
-@HiveType(typeId: 1)
 enum LogType {
-  @HiveField(0)
   taskCreated,
-  @HiveField(1)
   taskDeleted,
-  @HiveField(2)
   taskStatusChanged,
-  @HiveField(3)
   updatedLocation,
 }
 
-@HiveType(typeId: 2)
 enum LogInitiator {
-  @HiveField(0)
   user,
-  @HiveField(1)
   system,
 }
 
-@HiveType(typeId: 3)
-class Log extends HiveObject {
-  @HiveField(0)
+class Log {
   final String id;
 
-  @HiveField(1)
   final DateTime createdAt;
 
-  @HiveField(2)
   final LogType type;
 
-  @HiveField(3)
   final LogInitiator initiator;
 
-  @HiveField(4)
   // Arbitrary payload that can be used for specific LogTypes
   final String payload;
 
@@ -185,6 +168,22 @@ class Log extends HiveObject {
     }
     return UpdateLocationData.fromJSON(jsonDecode(payload));
   }
+
+  factory Log.fromJSON(Map<String, dynamic> json) => Log(
+        id: json["i"],
+        createdAt: DateTime.parse(json["c"]),
+        type: LogType.values[json["t"]],
+        initiator: LogInitiator.values[json["o"]],
+        payload: json["p"],
+      );
+
+  Map<String, dynamic> toJSON() => {
+        "i": id,
+        "c": createdAt.toIso8601String(),
+        "t": type.index,
+        "o": initiator.index,
+        "p": payload,
+      };
 }
 
 class UpdatedTaskData {

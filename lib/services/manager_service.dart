@@ -1,15 +1,15 @@
 import 'package:background_fetch/background_fetch.dart';
 import 'package:locus/services/location_point_service.dart';
-import 'package:locus/services/settings_service.dart';
 import 'package:locus/services/task_service.dart';
 
 import '../models/log.dart';
+import 'log_service.dart';
 
 Future<void> updateLocation() async {
   final taskService = await TaskService.restore();
-  final settings = await SettingsService.restore();
+  final logService = await LogService.restore();
 
-  await taskService.checkup(settings);
+  await taskService.checkup(logService);
   final runningTasks = await taskService.getRunningTasks().toList();
 
   if (runningTasks.isEmpty) {
@@ -22,7 +22,7 @@ Future<void> updateLocation() async {
     await task.publishCurrentLocationNow(locationData.copyWithDifferentId());
   }
 
-  await settings.addNewLog(
+  await logService.addLog(
     Log.updateLocation(
       initiator: LogInitiator.system,
       latitude: locationData.latitude,

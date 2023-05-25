@@ -8,7 +8,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:locus/api/nostr-events.dart';
 import 'package:locus/constants/app.dart';
 import 'package:locus/models/log.dart';
-import 'package:locus/services/settings_service.dart';
+import 'package:locus/services/log_service.dart';
 import 'package:locus/utils/cryptography.dart';
 import 'package:nostr/nostr.dart';
 import 'package:uuid/uuid.dart';
@@ -463,14 +463,14 @@ class TaskService extends ChangeNotifier {
 
   // Does a general check up state of the task.
   // Checks if the task should be running / should be deleted etc.
-  Future<void> checkup(final SettingsService settings) async {
+  Future<void> checkup(final LogService logService) async {
     for (final task in tasks) {
       if (!task.isInfinite() && task.nextEndDate() == null) {
         // Delete task
         remove(task);
         await save();
 
-        await settings.addNewLog(
+        await logService.addLog(
           Log.deleteTask(
             initiator: LogInitiator.system,
             taskName: task.name,
@@ -479,7 +479,7 @@ class TaskService extends ChangeNotifier {
       } else if (!(await task.shouldRunNow())) {
         await task.stopExecutionImmediately();
 
-        await settings.addNewLog(
+        await logService.addLog(
           Log.taskStatusChanged(
             initiator: LogInitiator.system,
             taskId: task.id,

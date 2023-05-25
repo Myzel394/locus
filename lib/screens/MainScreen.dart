@@ -29,6 +29,7 @@ import 'package:uni_links/uni_links.dart';
 import '../constants/values.dart';
 import '../models/log.dart';
 import '../services/location_point_service.dart';
+import '../services/log_service.dart';
 import '../utils/platform.dart';
 import 'CreateTaskScreen.dart';
 import 'ImportTaskSheet.dart';
@@ -106,6 +107,7 @@ class _MainScreenState extends State<MainScreen> {
     _positionStream!.listen((position) async {
       final taskService = context.read<TaskService>();
       final settings = context.read<SettingsService>();
+      final logService = context.read<LogService>();
       final runningTasks = await taskService.getRunningTasks().toList();
 
       if (runningTasks.isEmpty) {
@@ -121,7 +123,7 @@ class _MainScreenState extends State<MainScreen> {
         );
       }
 
-      await settings.addNewLog(
+      await logService.addLog(
         Log.updateLocation(
           initiator: LogInitiator.system,
           latitude: locationData.latitude,
@@ -199,11 +201,12 @@ class _MainScreenState extends State<MainScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final taskService = context.read<TaskService>();
       final settings = context.read<SettingsService>();
+      final logService = context.read<LogService>();
 
       initQuickActions(context);
       initUniLinks();
 
-      taskService.checkup(settings);
+      taskService.checkup(logService);
     });
 
     final taskService = context.read<TaskService>();

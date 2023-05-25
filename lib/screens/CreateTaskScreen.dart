@@ -15,6 +15,7 @@ import 'package:locus/widgets/TimerWidgetSheet.dart';
 import 'package:provider/provider.dart';
 
 import '../models/log.dart';
+import '../services/log_service.dart';
 import '../services/settings_service.dart';
 import '../widgets/PlatformListTile.dart';
 import '../widgets/WarningText.dart';
@@ -91,6 +92,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
   Future<void> createTask() async {
     final taskService = context.read<TaskService>();
     final settings = context.read<SettingsService>();
+    final logService = context.read<LogService>();
 
     setState(() {
       _isError = false;
@@ -110,7 +112,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
       taskService.add(task);
       await taskService.save();
 
-      await settings.addNewLog(
+      await logService.addLog(
         Log.createTask(
           initiator: LogInitiator.user,
           taskId: task.id,

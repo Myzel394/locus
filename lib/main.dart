@@ -4,8 +4,8 @@ import 'package:disable_battery_optimization/disable_battery_optimization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:locus/App.dart';
+import 'package:locus/services/log_service.dart';
 import 'package:locus/services/manager_service.dart';
 import 'package:locus/services/settings_service.dart';
 import 'package:locus/services/task_service.dart';
@@ -13,8 +13,6 @@ import 'package:locus/services/view_service.dart';
 import 'package:locus/utils/permission.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
-
-import 'models/log.dart';
 
 const storage = FlutterSecureStorage();
 
@@ -26,10 +24,6 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
 
-  Hive.registerAdapter(LogTypeAdapter());
-  Hive.registerAdapter(LogInitiatorAdapter());
-  Hive.registerAdapter(LogAdapter());
-
   final futures = await Future.wait<dynamic>([
     Permission.locationAlways.isGranted,
     TaskService.restore(),
@@ -39,6 +33,7 @@ void main() async {
         : Future.value(true),
     SettingsService.restore(),
     hasGrantedNotificationPermission(),
+    LogService.restore(),
   ]);
   final bool hasLocationAlwaysGranted = futures[0];
   final TaskService taskService = futures[1];
@@ -46,10 +41,7 @@ void main() async {
   final bool isIgnoringBatteryOptimizations = futures[3];
   final SettingsService settingsService = futures[4];
   final bool hasNotificationGranted = futures[5];
-
-  await Hive.initFlutter();
-
-  await settingsService.openLogBox();
+  final LogService logService = futures[6];
 
   runApp(
     MultiProvider(
@@ -57,6 +49,7 @@ void main() async {
         ChangeNotifierProvider<TaskService>(create: (_) => taskService),
         ChangeNotifierProvider<ViewService>(create: (_) => viewService),
         ChangeNotifierProvider<SettingsService>(create: (_) => settingsService),
+        ChangeNotifierProvider<LogService>(create: (_) => logService),
       ],
       child: App(
         hasLocationAlwaysGranted: hasLocationAlwaysGranted,

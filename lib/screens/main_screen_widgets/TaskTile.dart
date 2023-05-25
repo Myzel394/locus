@@ -11,7 +11,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../models/log.dart';
 import '../../services/location_point_service.dart';
-import '../../services/settings_service.dart';
+import '../../services/log_service.dart';
 import '../../widgets/PlatformDialogActionButton.dart';
 import '../../widgets/PlatformListTile.dart';
 import '../../widgets/PlatformPopup.dart';
@@ -69,12 +69,12 @@ class _TaskTileState extends State<TaskTile> {
                         isLoading = true;
                       });
 
-                      final settings = context.read<SettingsService>();
+                      final logService = context.read<LogService>();
 
                       try {
                         if (value) {
                           await widget.task.startExecutionImmediately();
-                          await settings.addNewLog(
+                          await logService.addLog(
                             Log.taskStatusChanged(
                               initiator: LogInitiator.user,
                               taskId: widget.task.id,
@@ -114,7 +114,7 @@ class _TaskTileState extends State<TaskTile> {
                           );
                         } else {
                           await widget.task.stopExecutionImmediately();
-                          await settings.addNewLog(
+                          await logService.addLog(
                             Log.taskStatusChanged(
                               initiator: LogInitiator.user,
                               taskId: widget.task.id,

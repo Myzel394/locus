@@ -5,10 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:hive/hive.dart';
 
-import '../constants/hive_keys.dart';
-import '../models/log.dart';
 import '../utils/platform.dart';
 
 const STORAGE_KEY = "_app_settings";
@@ -24,7 +21,6 @@ class SettingsService extends ChangeNotifier {
   bool automaticallyLookupAddresses;
   bool showHints;
   List<String> _relays;
-  final List<int> hivePassword;
 
   // null = system default
   Color? primaryColor;
@@ -37,7 +33,6 @@ class SettingsService extends ChangeNotifier {
     required this.primaryColor,
     required this.mapProvider,
     required this.showHints,
-    required this.hivePassword,
     List<String>? relays,
   }) : _relays = relays ?? [];
 
@@ -48,7 +43,6 @@ class SettingsService extends ChangeNotifier {
       mapProvider:
           isPlatformApple() ? MapProvider.apple : MapProvider.openStreetMap,
       showHints: true,
-      hivePassword: Hive.generateSecureKey(),
     );
   }
 
@@ -60,7 +54,6 @@ class SettingsService extends ChangeNotifier {
       mapProvider: MapProvider.values[data['mapProvider']],
       relays: List<String>.from(data['relays'] ?? []),
       showHints: data['showHints'],
-      hivePassword: List<int>.from(data['hivePassword']),
     );
   }
 
@@ -90,7 +83,6 @@ class SettingsService extends ChangeNotifier {
       'mapProvider': mapProvider.index,
       "relays": _relays,
       "showHints": showHints,
-      "hivePassword": hivePassword,
     };
   }
 
@@ -98,20 +90,6 @@ class SettingsService extends ChangeNotifier {
         key: STORAGE_KEY,
         value: jsonEncode(toJSON()),
       );
-
-  Future<void> openLogBox() async {
-    await Hive.openBox<Log>(
-      HIVE_KEY_LOGS,
-      encryptionCipher: HiveAesCipher(hivePassword),
-    );
-  }
-
-  Future<void> addNewLog(final Log log) async {
-    final box = Hive.box<Log>(HIVE_KEY_LOGS);
-    await box.add(log);
-
-    await log.save();
-  }
 
   bool getAutomaticallyLookupAddresses() {
     return automaticallyLookupAddresses;

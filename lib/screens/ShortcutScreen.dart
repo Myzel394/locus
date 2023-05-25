@@ -12,6 +12,7 @@ import 'package:provider/provider.dart';
 
 import '../models/log.dart';
 import '../services/location_point_service.dart';
+import '../services/log_service.dart';
 import '../services/settings_service.dart';
 import '../utils/theme.dart';
 
@@ -46,7 +47,8 @@ class _ShortcutScreenState extends State<ShortcutScreen> {
       final l10n = AppLocalizations.of(context);
       final taskService = context.read<TaskService>();
       final settings = context.read<SettingsService>();
-      await taskService.checkup(settings);
+      final logService = context.read<LogService>();
+      await taskService.checkup(logService);
 
       switch (widget.type) {
         case ShortcutType.createOneHour:
@@ -62,7 +64,7 @@ class _ShortcutScreenState extends State<ShortcutScreen> {
           taskService.add(task);
           await taskService.save();
 
-          await settings.addNewLog(
+          await logService.addLog(
             Log.createTask(
               initiator: LogInitiator.user,
               taskId: task.id,
@@ -76,7 +78,7 @@ class _ShortcutScreenState extends State<ShortcutScreen> {
               await LocationPointService.createUsingCurrentLocation();
           await task.publishCurrentLocationNow(locationData);
 
-          await settings.addNewLog(
+          await logService.addLog(
             Log.updateLocation(
               initiator: LogInitiator.user,
               latitude: locationData.latitude,
@@ -104,7 +106,7 @@ class _ShortcutScreenState extends State<ShortcutScreen> {
             ),
           );
 
-          await settings.addNewLog(
+          await logService.addLog(
             Log.updateLocation(
               initiator: LogInitiator.user,
               latitude: locationData.latitude,

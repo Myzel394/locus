@@ -7,7 +7,7 @@ import 'package:locus/models/log.dart';
 import 'package:locus/screens/LocationPointsDetailsScreen.dart';
 import 'package:locus/screens/task_detail_screen_widgets/ShareLocationButton.dart';
 import 'package:locus/services/location_point_service.dart';
-import 'package:locus/services/settings_service.dart';
+import 'package:locus/services/log_service.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/AddressFetcher.dart';
@@ -276,14 +276,14 @@ class _DetailsState extends State<Details> {
                                     icon: const Icon(Icons.stop_rounded),
                                   ),
                                   onPressed: () async {
-                                    final settings =
-                                        context.read<SettingsService>();
+                                    final logService =
+                                        context.read<LogService>();
                                     await widget.task
                                         .stopExecutionImmediately();
 
                                     taskService.update(widget.task);
 
-                                    await settings.addNewLog(
+                                    await logService.addLog(
                                       Log.taskStatusChanged(
                                         initiator: LogInitiator.system,
                                         taskId: widget.task.id,
@@ -300,14 +300,14 @@ class _DetailsState extends State<Details> {
                                     icon: const Icon(Icons.play_arrow_rounded),
                                   ),
                                   onPressed: () async {
-                                    final settings =
-                                        context.read<SettingsService>();
+                                    final logService =
+                                        context.read<LogService>();
                                     await widget.task
                                         .startExecutionImmediately();
 
                                     taskService.update(widget.task);
 
-                                    await settings.addNewLog(
+                                    await logService.addLog(
                                       Log.taskStatusChanged(
                                         initiator: LogInitiator.system,
                                         taskId: widget.task.id,
@@ -488,7 +488,7 @@ class _DetailsState extends State<Details> {
                     color: Theme.of(context).errorColor,
                   ),
                   onPressed: () async {
-                    final settings = context.read<SettingsService>();
+                    final logService = context.read<LogService>();
 
                     final confirmed = await showPlatformDialog(
                       context: context,
@@ -520,7 +520,7 @@ class _DetailsState extends State<Details> {
                       taskService.remove(widget.task);
                       await taskService.save();
 
-                      await settings.addNewLog(
+                      await logService.addLog(
                         Log.deleteTask(
                           initiator: LogInitiator.user,
                           taskName: widget.task.name,
