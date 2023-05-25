@@ -74,6 +74,7 @@ class Log extends HiveObject {
     required LogInitiator initiator,
     required String taskId,
     required String taskName,
+    required TaskCreationContext creationContext,
   }) =>
       Log.create(
         type: LogType.taskCreated,
@@ -82,6 +83,7 @@ class Log extends HiveObject {
           CreateTaskData(
             id: taskId,
             name: taskName,
+            creationContext: creationContext,
           ).toJSON(),
         ),
       );
@@ -221,24 +223,21 @@ class UpdateLocationData {
         accuracy: json["c"],
         tasks: List<UpdatedTaskData>.from(
           List<Map<String, String>>.from(json["t"]).map(
-                (task) =>
-                UpdatedTaskData(
-                  id: task["i"]!,
-                  name: task["n"]!,
-                ),
+            (task) => UpdatedTaskData(
+              id: task["i"]!,
+              name: task["n"]!,
+            ),
           ),
         ),
       );
 
-  Map<String, dynamic> toJSON() =>
-      {
+  Map<String, dynamic> toJSON() => {
         "o": latitude,
         "a": longitude,
         "c": accuracy,
         "t": List<Map<String, String>>.from(
           tasks.map(
-                (task) =>
-            {
+            (task) => {
               "i": task.id,
               "n": task.name,
             },
@@ -247,25 +246,32 @@ class UpdateLocationData {
       };
 }
 
+enum TaskCreationContext {
+  inApp,
+  quickAction,
+}
+
 class CreateTaskData {
   final String id;
   final String name;
+  final TaskCreationContext creationContext;
 
   const CreateTaskData({
     required this.id,
     required this.name,
+    required this.creationContext,
   });
 
-  factory CreateTaskData.fromJSON(Map<String, dynamic> json) =>
-      CreateTaskData(
+  factory CreateTaskData.fromJSON(Map<String, dynamic> json) => CreateTaskData(
         id: json["i"],
         name: json["n"],
+        creationContext: TaskCreationContext.values[json["c"]],
       );
 
-  Map<String, dynamic> toJSON() =>
-      {
+  Map<String, dynamic> toJSON() => {
         "i": id,
         "n": name,
+        "c": creationContext.index,
       };
 
   Task getTask(final TaskService taskService) => taskService.getByID(id);
@@ -278,13 +284,11 @@ class DeleteTaskData {
     required this.name,
   });
 
-  factory DeleteTaskData.fromJSON(Map<String, dynamic> json) =>
-      DeleteTaskData(
+  factory DeleteTaskData.fromJSON(Map<String, dynamic> json) => DeleteTaskData(
         name: json["n"],
       );
 
-  Map<String, dynamic> toJSON() =>
-      {
+  Map<String, dynamic> toJSON() => {
         "n": name,
       };
 }
@@ -298,14 +302,12 @@ class StartTaskData {
     required this.name,
   });
 
-  factory StartTaskData.fromJSON(Map<String, dynamic> json) =>
-      StartTaskData(
+  factory StartTaskData.fromJSON(Map<String, dynamic> json) => StartTaskData(
         id: json["i"],
         name: json["n"],
       );
 
-  Map<String, dynamic> toJSON() =>
-      {
+  Map<String, dynamic> toJSON() => {
         "i": id,
         "n": name,
       };
@@ -322,14 +324,12 @@ class StopTaskData {
     required this.name,
   });
 
-  factory StopTaskData.fromJSON(Map<String, dynamic> json) =>
-      StopTaskData(
+  factory StopTaskData.fromJSON(Map<String, dynamic> json) => StopTaskData(
         id: json["i"],
         name: json["n"],
       );
 
-  Map<String, dynamic> toJSON() =>
-      {
+  Map<String, dynamic> toJSON() => {
         "i": id,
         "n": name,
       };

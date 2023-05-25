@@ -2,6 +2,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+import 'package:hive/hive.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/init_quick_actions.dart';
 import 'package:locus/services/task_service.dart';
@@ -10,6 +11,8 @@ import 'package:locus/utils/platform.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 
+import '../constants/hive_keys.dart';
+import '../models/log.dart';
 import '../services/location_point_service.dart';
 import '../services/settings_service.dart';
 import '../utils/theme.dart';
@@ -64,10 +67,25 @@ class _ShortcutScreenState extends State<ShortcutScreen> {
           taskService.add(task);
           await taskService.save();
 
+          final box = await Hive.openBox<Log>(
+            HIVE_KEY_LOGS,
+            encryptionCipher: HiveAesCipher(settings.hivePassword),
+          );
+
+          await box.add(
+            Log.createTask(
+              initiator: LogInitiator.user,
+              taskId: task.id,
+              taskName: task.name,
+              creationContext: TaskCreationContext.quickAction,
+            ),
+          );
+
           break;
         case ShortcutType.shareNow:
           final tasks = await taskService.getRunningTasks().toList();
-          final locationData = await LocationPointService.createUsingCurrentLocation();
+          final locationData =
+              await LocationPointService.createUsingCurrentLocation();
           await Future.wait(
             tasks.map(
               (task) => task.publishCurrentLocationNow(

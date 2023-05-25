@@ -127,6 +127,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
           initiator: LogInitiator.user,
           taskId: task.id,
           taskName: task.name,
+          creationContext: TaskCreationContext.inApp,
         ),
       );
 
