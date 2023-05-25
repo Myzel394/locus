@@ -485,7 +485,7 @@ class TaskService extends ChangeNotifier {
 
         await box.add(
           Log.taskStatusChanged(
-            initiator: LogInitiator.user,
+            initiator: LogInitiator.system,
             taskId: task.id,
             taskName: task.name,
             active: false,
