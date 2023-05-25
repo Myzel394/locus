@@ -139,6 +139,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         description: Text(l10n
                             .settingsScreen_setting_lookupAddresses_description),
                       ),
+                      SettingsDropdownTile(
+                        title: Text(
+                          l10n.settingsScreen_settings_geocoderProvider_label,
+                        ),
+                        values: GeocoderProvider.values,
+                        textMapping: {
+                          GeocoderProvider.system: l10n
+                              .settingsScreen_settings_geocoderProvider_system,
+                          GeocoderProvider.geocodeMapsCo: l10n
+                              .settingsScreen_settings_geocoderProvider_geocodeMapsCo,
+                          GeocoderProvider.nominatim: l10n
+                              .settingsScreen_settings_geocoderProvider_nominatim,
+                        },
+                        value: settings.geocoderProvider,
+                        onUpdate: (newValue) {
+                          settings.setGeocoderProvider(newValue);
+                          settings.save();
+                        },
+                      ),
                       isPlatformApple()
                           ? SettingsDropdownTile(
                               title: Text(

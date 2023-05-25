@@ -332,6 +332,11 @@
       }
     }
   },
+  "settingsScreen_settings_geocoderProvider_label": "Lookup Provider",
+  "settingsScreen_settings_geocoderProvider_description": "Which provider to used to look up addresses for locations.",
+  "settingsScreen_settings_geocoderProvider_system": "System",
+  "settingsScreen_settings_geocoderProvider_geocodeMapsCo": "geocode.maps.co",
+  "settingsScreen_settings_geocoderProvider_nominatim": "Nominatim (OpenStreetMap)",
   "support_title": "Support Locus",
   "support_description": "Locus is a free open source project. This means that I don't make any money from it. If you like the app and want to support me, you can do so by multiple ways. Thank you very much! :)",
   "support_options_develop": "Help developing Locus",
