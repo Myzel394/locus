@@ -52,6 +52,13 @@ class _DetailsState extends State<Details> {
     super.dispose();
   }
 
+  Future<void> _createLog(final Log log) async {
+    final settings = context.read<SettingsService>();
+    final logBox = await settings.getHiveLogBox();
+
+    await logBox.add(log);
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -280,6 +287,15 @@ class _DetailsState extends State<Details> {
                                         .stopExecutionImmediately();
 
                                     taskService.update(widget.task);
+
+                                    await _createLog(
+                                      Log.taskStatusChanged(
+                                        initiator: LogInitiator.system,
+                                        taskId: widget.task.id,
+                                        taskName: widget.task.name,
+                                        active: false,
+                                      ),
+                                    );
                                   },
                                 )
                               else
@@ -293,6 +309,15 @@ class _DetailsState extends State<Details> {
                                         .startExecutionImmediately();
 
                                     taskService.update(widget.task);
+
+                                    await _createLog(
+                                      Log.taskStatusChanged(
+                                        initiator: LogInitiator.system,
+                                        taskId: widget.task.id,
+                                        taskName: widget.task.name,
+                                        active: true,
+                                      ),
+                                    );
                                   },
                                 ),
                               const SizedBox(width: MEDIUM_SPACE),
@@ -466,8 +491,6 @@ class _DetailsState extends State<Details> {
                     color: Theme.of(context).errorColor,
                   ),
                   onPressed: () async {
-                    final settings = context.read<SettingsService>();
-
                     final confirmed = await showPlatformDialog(
                       context: context,
                       builder: (context) => PlatformAlertDialog(
@@ -498,8 +521,7 @@ class _DetailsState extends State<Details> {
                       taskService.remove(widget.task);
                       await taskService.save();
 
-                      final box = await settings.getHiveLogBox();
-                      await box.add(
+                      await _createLog(
                         Log.deleteTask(
                           initiator: LogInitiator.user,
                           taskName: widget.task.name,
