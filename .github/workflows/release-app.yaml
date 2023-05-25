@@ -38,7 +38,7 @@ jobs:
         with:
           channel: 'stable'
           flutter-version: '3.10.0'
-          
+
       - name: Opt out of telemetry
         run: flutter --disable-telemetry
 
@@ -48,19 +48,42 @@ jobs:
       - name: Generate Localizations 🌐
         run: flutter gen-l10n
 
-      - name: Build Android App (Multiple APKs) 📱
-        run: flutter build apk --split-per-abi
+      - name: Build Android App (Multiple APKs) - GMS variant 📱
+        run: flutter build apk --split-per-abi --flavor=gms --dart-define=app.flavor=gms
 
-      - name: Build Android App (fat APK) 📱
-        run: flutter build apk
-        
+      - name: Build Android App (fat APK) - GMS variant 📱
+        run: flutter build apk --flavor=gms --dart-define=app.flavor=gms
+
       - name: Rename files
         run: |
           cd build/app/outputs/flutter-apk &&
-          mv app-release.apk locus.apk &&
-          mv app-arm64-v8a-release.apk locus-arm64-v8a-release.apk &&
-          mv app-armeabi-v7a-release.apk locus-armeabi-v7a-release.apk &&
-          mv app-x86_64-release.apk locus-x86_64-release.apk
+          mv app-release.apk locus-universal-gms.apk &&
+          mv app-arm64-v8a-release.apk locus-arm64-gms.apk &&
+          mv app-armeabi-v7a-release.apk locus-armeabi-gms.apk &&
+          mv app-x86_64-release.apk locus-x86-gms.apk
+
+      - name: Update pubspec.yaml for FLOSS variant 📝
+        run: sed -i -e 's/^#f//' pubspec.yaml
+
+      - name: Install dependencies 📦
+        run: flutter pub get
+
+      - name: Generate Localizations 🌐
+        run: flutter gen-l10n
+
+      - name: Build Android App (Multiple APKs) - FLOSS variant 📱
+        run: flutter build apk --split-per-abi --flavor=floss --dart-define=app.flavor=floss
+
+      - name: Build Android App (fat APK) - FLOSS variant 📱
+        run: flutter build apk --flavor=floss --dart-define=app.flavor=floss
+
+      - name: Rename files 📝
+        run: |
+          cd build/app/outputs/flutter-apk &&
+          mv app-release.apk locus-universal-floss.apk &&
+          mv app-arm64-v8a-release.apk locus-arm64-floss.apk &&
+          mv app-armeabi-v7a-release.apk locus-armeabi-floss.apk &&
+          mv app-x86_64-release.apk locus-x86-floss.apk
 
       - name: Release Apps 🚀
         uses: softprops/action-gh-release@v1
