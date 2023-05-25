@@ -6,7 +6,6 @@ import 'package:uuid/uuid.dart';
 
 part 'log.g.dart';
 
-const LOG_HIVE_BOX = "v1_hive_logs";
 const uuid = Uuid();
 
 @HiveType(typeId: 1)
@@ -95,7 +94,7 @@ class Log extends HiveObject {
 
   factory Log.deleteTask({
     required LogInitiator initiator,
-    // No reference to the id, since its deleted
+    // No reference to the id, since it's deleted
     required String taskName,
   }) =>
       Log.create(

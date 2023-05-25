@@ -90,7 +90,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
     setState(() {});
   }
 
-  Future<void> createTask(final BuildContext context) async {
+  Future<void> createTask() async {
     final taskService = context.read<TaskService>();
 
     setState(() {
@@ -421,7 +421,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                         return;
                       }
 
-                      createTask(context);
+                      createTask();
                     },
                     child: Text(
                       l10n.createTask_createLabel,
