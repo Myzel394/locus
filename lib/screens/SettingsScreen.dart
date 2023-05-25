@@ -33,7 +33,6 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   final _relayController = RelayController();
-  bool _enableHighlight = true;
 
   @override
   void initState() {
@@ -45,12 +44,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _relayController.addListener(() {
       settings.setRelays(_relayController.relays);
       settings.save();
-    });
-
-    WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((_) {
-      setState(() {
-        _enableHighlight = false;
-      });
     });
   }
 
