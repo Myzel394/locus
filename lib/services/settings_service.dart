@@ -78,7 +78,9 @@ class SettingsService extends ChangeNotifier {
     final mergedData = HashMap<String, dynamic>.from(defaultValues)
       ..addAll(data..removeWhere((key, value) => value == null));
 
-    return fromJSON(mergedData);
+    final settings = fromJSON(mergedData);
+
+    return settings;
   }
 
   Map<String, dynamic> toJSON() {
@@ -97,10 +99,19 @@ class SettingsService extends ChangeNotifier {
         value: jsonEncode(toJSON()),
       );
 
-  Future<Box<Log>> getHiveLogBox() async => Hive.openBox<Log>(
-        HIVE_KEY_LOGS,
-        encryptionCipher: HiveAesCipher(hivePassword),
-      );
+  Future<void> openLogBox() async {
+    await Hive.openBox<Log>(
+      HIVE_KEY_LOGS,
+      encryptionCipher: HiveAesCipher(hivePassword),
+    );
+  }
+
+  Future<void> addNewLog(final Log log) async {
+    final box = Hive.box<Log>(HIVE_KEY_LOGS);
+    await box.add(log);
+
+    await log.save();
+  }
 
   bool getAutomaticallyLookupAddresses() {
     return automaticallyLookupAddresses;

@@ -49,6 +49,8 @@ void main() async {
 
   await Hive.initFlutter();
 
+  await settingsService.openLogBox();
+
   runApp(
     MultiProvider(
       providers: [

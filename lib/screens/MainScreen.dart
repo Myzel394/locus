@@ -121,9 +121,7 @@ class _MainScreenState extends State<MainScreen> {
         );
       }
 
-      final logBox = await settings.getHiveLogBox();
-
-      logBox.add(
+      await settings.addNewLog(
         Log.updateLocation(
           initiator: LogInitiator.system,
           latitude: locationData.latitude,
@@ -205,8 +203,7 @@ class _MainScreenState extends State<MainScreen> {
       initQuickActions(context);
       initUniLinks();
 
-      final logBox = await settings.getHiveLogBox();
-      taskService.checkup(logBox);
+      taskService.checkup(settings);
     });
 
     final taskService = context.read<TaskService>();

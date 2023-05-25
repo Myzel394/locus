@@ -49,20 +49,6 @@ class _TaskTileState extends State<TaskTile> {
     };
   }
 
-  Future<void> _createLog(final Task task, final bool started) async {
-    final settings = context.read<SettingsService>();
-    final box = await settings.getHiveLogBox();
-
-    await box.add(
-      Log.taskStatusChanged(
-        initiator: LogInitiator.user,
-        taskId: task.id,
-        taskName: task.name,
-        active: started,
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -84,27 +70,23 @@ class _TaskTileState extends State<TaskTile> {
                       });
 
                       final settings = context.read<SettingsService>();
-                      final logBox = await settings.getHiveLogBox();
 
                       try {
                         if (value) {
                           await widget.task.startExecutionImmediately();
-                          await _createLog(widget.task, true);
+                          await settings.addNewLog(
+                            Log.taskStatusChanged(
+                              initiator: LogInitiator.user,
+                              taskId: widget.task.id,
+                              taskName: widget.task.name,
+                              active: true,
+                            ),
+                          );
                           final nextEndDate = widget.task.nextEndDate();
                           final locationData = await LocationPointService
                               .createUsingCurrentLocation();
 
                           widget.task.publishCurrentLocationNow(locationData);
-
-                          await logBox.add(
-                            Log.updateLocation(
-                              initiator: LogInitiator.user,
-                              latitude: locationData.latitude,
-                              longitude: locationData.longitude,
-                              accuracy: locationData.accuracy,
-                              tasks: [widget.task] as List<UpdatedTaskData>,
-                            ),
-                          );
 
                           if (!mounted) {
                             return;
@@ -132,10 +114,16 @@ class _TaskTileState extends State<TaskTile> {
                           );
                         } else {
                           await widget.task.stopExecutionImmediately();
+                          await settings.addNewLog(
+                            Log.taskStatusChanged(
+                              initiator: LogInitiator.user,
+                              taskId: widget.task.id,
+                              taskName: widget.task.name,
+                              active: false,
+                            ),
+                          );
                           final nextStartDate =
                               await widget.task.startScheduleTomorrow();
-
-                          await _createLog(widget.task, false);
 
                           if (!mounted) {
                             return;

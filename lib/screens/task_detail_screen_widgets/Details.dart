@@ -52,13 +52,6 @@ class _DetailsState extends State<Details> {
     super.dispose();
   }
 
-  Future<void> _createLog(final Log log) async {
-    final settings = context.read<SettingsService>();
-    final logBox = await settings.getHiveLogBox();
-
-    await logBox.add(log);
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -283,12 +276,14 @@ class _DetailsState extends State<Details> {
                                     icon: const Icon(Icons.stop_rounded),
                                   ),
                                   onPressed: () async {
+                                    final settings =
+                                        context.read<SettingsService>();
                                     await widget.task
                                         .stopExecutionImmediately();
 
                                     taskService.update(widget.task);
 
-                                    await _createLog(
+                                    await settings.addNewLog(
                                       Log.taskStatusChanged(
                                         initiator: LogInitiator.system,
                                         taskId: widget.task.id,
@@ -305,12 +300,14 @@ class _DetailsState extends State<Details> {
                                     icon: const Icon(Icons.play_arrow_rounded),
                                   ),
                                   onPressed: () async {
+                                    final settings =
+                                        context.read<SettingsService>();
                                     await widget.task
                                         .startExecutionImmediately();
 
                                     taskService.update(widget.task);
 
-                                    await _createLog(
+                                    await settings.addNewLog(
                                       Log.taskStatusChanged(
                                         initiator: LogInitiator.system,
                                         taskId: widget.task.id,
@@ -491,6 +488,8 @@ class _DetailsState extends State<Details> {
                     color: Theme.of(context).errorColor,
                   ),
                   onPressed: () async {
+                    final settings = context.read<SettingsService>();
+
                     final confirmed = await showPlatformDialog(
                       context: context,
                       builder: (context) => PlatformAlertDialog(
@@ -521,7 +520,7 @@ class _DetailsState extends State<Details> {
                       taskService.remove(widget.task);
                       await taskService.save();
 
-                      await _createLog(
+                      await settings.addNewLog(
                         Log.deleteTask(
                           initiator: LogInitiator.user,
                           taskName: widget.task.name,

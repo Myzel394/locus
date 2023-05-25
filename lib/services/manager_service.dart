@@ -8,9 +8,8 @@ import '../models/log.dart';
 Future<void> updateLocation() async {
   final taskService = await TaskService.restore();
   final settings = await SettingsService.restore();
-  final logBox = await settings.getHiveLogBox();
 
-  await taskService.checkup(logBox);
+  await taskService.checkup(settings);
   final runningTasks = await taskService.getRunningTasks().toList();
 
   if (runningTasks.isEmpty) {
@@ -23,7 +22,7 @@ Future<void> updateLocation() async {
     await task.publishCurrentLocationNow(locationData.copyWithDifferentId());
   }
 
-  await logBox.add(
+  await settings.addNewLog(
     Log.updateLocation(
       initiator: LogInitiator.system,
       latitude: locationData.latitude,

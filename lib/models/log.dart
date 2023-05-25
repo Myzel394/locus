@@ -216,7 +216,7 @@ class UpdateLocationData {
         longitude: json["o"],
         accuracy: json["c"],
         tasks: List<UpdatedTaskData>.from(
-          List<Map<String, String>>.from(json["t"]).map(
+          List<Map<String, dynamic>>.from(json["t"]).map(
             (task) => UpdatedTaskData(
               id: task["i"]!,
               name: task["n"]!,

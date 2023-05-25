@@ -46,8 +46,7 @@ class _ShortcutScreenState extends State<ShortcutScreen> {
       final l10n = AppLocalizations.of(context);
       final taskService = context.read<TaskService>();
       final settings = context.read<SettingsService>();
-      final logBox = await settings.getHiveLogBox();
-      await taskService.checkup(logBox);
+      await taskService.checkup(settings);
 
       switch (widget.type) {
         case ShortcutType.createOneHour:
@@ -63,9 +62,7 @@ class _ShortcutScreenState extends State<ShortcutScreen> {
           taskService.add(task);
           await taskService.save();
 
-          final box = await settings.getHiveLogBox();
-
-          await box.add(
+          await settings.addNewLog(
             Log.createTask(
               initiator: LogInitiator.user,
               taskId: task.id,
@@ -75,11 +72,11 @@ class _ShortcutScreenState extends State<ShortcutScreen> {
           );
 
           await task.startSchedule(startNowIfNextRunIsUnknown: true);
-          final locationData = await LocationPointService
-              .createUsingCurrentLocation();
+          final locationData =
+              await LocationPointService.createUsingCurrentLocation();
           await task.publishCurrentLocationNow(locationData);
 
-          logBox.add(
+          await settings.addNewLog(
             Log.updateLocation(
               initiator: LogInitiator.user,
               latitude: locationData.latitude,
@@ -98,17 +95,16 @@ class _ShortcutScreenState extends State<ShortcutScreen> {
           }
 
           final locationData =
-          await LocationPointService.createUsingCurrentLocation();
+              await LocationPointService.createUsingCurrentLocation();
           await Future.wait(
             tasks.map(
-                  (task) =>
-                  task.publishCurrentLocationNow(
-                    locationData.copyWithDifferentId(),
-                  ),
+              (task) => task.publishCurrentLocationNow(
+                locationData.copyWithDifferentId(),
+              ),
             ),
           );
 
-          await logBox.add(
+          await settings.addNewLog(
             Log.updateLocation(
               initiator: LogInitiator.user,
               latitude: locationData.latitude,
@@ -116,11 +112,10 @@ class _ShortcutScreenState extends State<ShortcutScreen> {
               accuracy: locationData.accuracy,
               tasks: List<UpdatedTaskData>.from(
                 tasks.map(
-                      (task) =>
-                      UpdatedTaskData(
-                        id: task.id,
-                        name: task.name,
-                      ),
+                  (task) => UpdatedTaskData(
+                    id: task.id,
+                    name: task.name,
+                  ),
                 ),
               ),
             ),

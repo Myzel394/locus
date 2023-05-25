@@ -15,7 +15,6 @@ import 'package:locus/widgets/TimerWidgetSheet.dart';
 import 'package:provider/provider.dart';
 
 import '../models/log.dart';
-import '../services/location_point_service.dart';
 import '../services/settings_service.dart';
 import '../widgets/PlatformListTile.dart';
 import '../widgets/WarningText.dart';
@@ -111,9 +110,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
       taskService.add(task);
       await taskService.save();
 
-      final box = await settings.getHiveLogBox();
-
-      await box.add(
+      await settings.addNewLog(
         Log.createTask(
           initiator: LogInitiator.user,
           taskId: task.id,
@@ -124,19 +121,6 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
 
       if (_scheduleNow) {
         await task.startSchedule(startNowIfNextRunIsUnknown: true);
-        final locationData =
-            await LocationPointService.createUsingCurrentLocation();
-        task.publishCurrentLocationNow(locationData);
-
-        await box.add(
-          Log.updateLocation(
-            initiator: LogInitiator.system,
-            latitude: locationData.latitude,
-            longitude: locationData.longitude,
-            accuracy: locationData.accuracy,
-            tasks: [task] as List<UpdatedTaskData>,
-          ),
-        );
       }
 
       if (mounted) {
