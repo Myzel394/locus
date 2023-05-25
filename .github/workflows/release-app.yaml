@@ -49,10 +49,10 @@ jobs:
         run: flutter gen-l10n
 
       - name: Build Android App (Multiple APKs) - GMS variant 📱
-        run: flutter build apk --split-per-abi --flavor=gms --dart-define=app.flavor=gms
+        run: flutter build apk --split-per-abi --dart-define=app.flavor=gms
 
       - name: Build Android App (fat APK) - GMS variant 📱
-        run: flutter build apk --flavor=gms --dart-define=app.flavor=gms
+        run: flutter build apk --dart-define=app.flavor=gms
 
       - name: Rename files
         run: |
