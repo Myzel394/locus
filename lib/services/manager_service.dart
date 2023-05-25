@@ -3,6 +3,8 @@ import 'package:locus/services/location_point_service.dart';
 import 'package:locus/services/settings_service.dart';
 import 'package:locus/services/task_service.dart';
 
+import '../models/log.dart';
+
 Future<void> updateLocation() async {
   final taskService = await TaskService.restore();
   final settings = await SettingsService.restore();
@@ -20,6 +22,23 @@ Future<void> updateLocation() async {
   for (final task in runningTasks) {
     await task.publishCurrentLocationNow(locationData.copyWithDifferentId());
   }
+
+  await logBox.add(
+    Log.updateLocation(
+      initiator: LogInitiator.system,
+      latitude: locationData.latitude,
+      longitude: locationData.longitude,
+      accuracy: locationData.accuracy,
+      tasks: List<UpdatedTaskData>.from(
+        runningTasks.map(
+          (task) => UpdatedTaskData(
+            id: task.id,
+            name: task.name,
+          ),
+        ),
+      ),
+    ),
+  );
 }
 
 @pragma('vm:entry-point')

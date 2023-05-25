@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../models/log.dart';
+import '../../services/location_point_service.dart';
 import '../../services/settings_service.dart';
 import '../../widgets/PlatformDialogActionButton.dart';
 import '../../widgets/PlatformListTile.dart';
@@ -82,12 +83,27 @@ class _TaskTileState extends State<TaskTile> {
                         isLoading = true;
                       });
 
+                      final settings = context.read<SettingsService>();
+                      final logBox = await settings.getHiveLogBox();
+
                       try {
                         if (value) {
                           await widget.task.startExecutionImmediately();
                           final nextEndDate = widget.task.nextEndDate();
+                          final locationData = await LocationPointService
+                              .createUsingCurrentLocation();
 
-                          widget.task.publishCurrentLocationNow();
+                          widget.task.publishCurrentLocationNow(locationData);
+
+                          await logBox.add(
+                            Log.updateLocation(
+                              initiator: LogInitiator.user,
+                              latitude: locationData.latitude,
+                              longitude: locationData.longitude,
+                              accuracy: locationData.accuracy,
+                              tasks: [widget.task] as List<UpdatedTaskData>,
+                            ),
+                          );
 
                           if (!mounted) {
                             return;

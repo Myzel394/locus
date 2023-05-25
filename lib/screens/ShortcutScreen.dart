@@ -60,9 +60,6 @@ class _ShortcutScreenState extends State<ShortcutScreen> {
             deleteAfterRun: true,
           );
 
-          await task.startSchedule(startNowIfNextRunIsUnknown: true);
-          await task.publishCurrentLocationNow();
-
           taskService.add(task);
           await taskService.save();
 
@@ -77,18 +74,58 @@ class _ShortcutScreenState extends State<ShortcutScreen> {
             ),
           );
 
+          await task.startSchedule(startNowIfNextRunIsUnknown: true);
+          final locationData = await LocationPointService
+              .createUsingCurrentLocation();
+          await task.publishCurrentLocationNow(locationData);
+
+          logBox.add(
+            Log.updateLocation(
+              initiator: LogInitiator.user,
+              latitude: locationData.latitude,
+              longitude: locationData.longitude,
+              accuracy: locationData.accuracy,
+              tasks: [task] as List<UpdatedTaskData>,
+            ),
+          );
+
           break;
         case ShortcutType.shareNow:
           final tasks = await taskService.getRunningTasks().toList();
+
+          if (tasks.isEmpty) {
+            return;
+          }
+
           final locationData =
-              await LocationPointService.createUsingCurrentLocation();
+          await LocationPointService.createUsingCurrentLocation();
           await Future.wait(
             tasks.map(
-              (task) => task.publishCurrentLocationNow(
-                locationData.copyWithDifferentId(),
+                  (task) =>
+                  task.publishCurrentLocationNow(
+                    locationData.copyWithDifferentId(),
+                  ),
+            ),
+          );
+
+          await logBox.add(
+            Log.updateLocation(
+              initiator: LogInitiator.user,
+              latitude: locationData.latitude,
+              longitude: locationData.longitude,
+              accuracy: locationData.accuracy,
+              tasks: List<UpdatedTaskData>.from(
+                tasks.map(
+                      (task) =>
+                      UpdatedTaskData(
+                        id: task.id,
+                        name: task.name,
+                      ),
+                ),
               ),
             ),
           );
+
           break;
         case ShortcutType.stopAllTasks:
           final tasks = await taskService.getRunningTasks().toList();

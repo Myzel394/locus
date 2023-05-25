@@ -141,8 +141,6 @@ class Log extends HiveObject {
 
   factory Log.updateLocation({
     required LogInitiator initiator,
-    required String taskId,
-    required String taskName,
     required double latitude,
     required double longitude,
     required double accuracy,
