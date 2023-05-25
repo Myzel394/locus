@@ -89,6 +89,7 @@ class _TaskTileState extends State<TaskTile> {
                       try {
                         if (value) {
                           await widget.task.startExecutionImmediately();
+                          await _createLog(widget.task, true);
                           final nextEndDate = widget.task.nextEndDate();
                           final locationData = await LocationPointService
                               .createUsingCurrentLocation();
@@ -134,6 +135,8 @@ class _TaskTileState extends State<TaskTile> {
                           final nextStartDate =
                               await widget.task.startScheduleTomorrow();
 
+                          await _createLog(widget.task, false);
+
                           if (!mounted) {
                             return;
                           }
@@ -161,8 +164,6 @@ class _TaskTileState extends State<TaskTile> {
                         }
 
                         taskService.update(widget.task);
-
-                        await _createLog(widget.task, value);
                       } catch (_) {
                       } finally {
                         setState(() {
