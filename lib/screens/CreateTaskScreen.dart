@@ -5,6 +5,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart'
     hide PlatformListTile;
+import 'package:hive/hive.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/screens/create_task_screen_widgets/ExampleTasksRoulette.dart';
 import 'package:locus/services/task_service.dart';
@@ -14,6 +15,8 @@ import 'package:locus/widgets/TimerWidget.dart';
 import 'package:locus/widgets/TimerWidgetSheet.dart';
 import 'package:provider/provider.dart';
 
+import '../constants/hive_keys.dart';
+import '../models/log.dart';
 import '../services/settings_service.dart';
 import '../widgets/PlatformListTile.dart';
 import '../widgets/WarningText.dart';
@@ -89,6 +92,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
 
   Future<void> createTask(final BuildContext context) async {
     final taskService = context.read<TaskService>();
+    final settings = context.read<SettingsService>();
 
     setState(() {
       _isError = false;
@@ -112,6 +116,19 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
         await task.startSchedule(startNowIfNextRunIsUnknown: true);
         task.publishCurrentLocationNow();
       }
+
+      final box = await Hive.openBox<Log>(
+        HIVE_KEY_LOGS,
+        encryptionCipher: HiveAesCipher(settings.hivePassword),
+      );
+
+      await box.add(
+        Log.createTask(
+          initiator: LogInitiator.user,
+          taskId: task.id,
+          taskName: task.name,
+        ),
+      );
 
       if (mounted) {
         widget.onCreated();
