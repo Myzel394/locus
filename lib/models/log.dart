@@ -16,10 +16,8 @@ enum LogType {
   @HiveField(1)
   taskDeleted,
   @HiveField(2)
-  taskStarted,
+  taskStatusChanged,
   @HiveField(3)
-  taskStopped,
-  @HiveField(4)
   updatedLocation,
 }
 
@@ -117,50 +115,29 @@ class Log extends HiveObject {
     return DeleteTaskData.fromJSON(jsonDecode(payload));
   }
 
-  factory Log.startTask({
+  factory Log.taskStatusChanged({
     required LogInitiator initiator,
     required String taskId,
     required String taskName,
+    required bool started,
   }) =>
       Log.create(
-        type: LogType.taskStarted,
+        type: LogType.taskStatusChanged,
         initiator: initiator,
         payload: jsonEncode(
-          StartTaskData(
+          TaskStatusChangeData(
             id: taskId,
             name: taskName,
+            started: started,
           ).toJSON(),
         ),
       );
 
-  StartTaskData get startTaskData {
-    if (type != LogType.taskStarted) {
-      throw Exception("Log is not of type taskStarted");
+  TaskStatusChangeData get taskStatusChangeData {
+    if (type != LogType.taskStatusChanged) {
+      throw Exception("Log is not of type taskStatusChanged");
     }
-    return StartTaskData.fromJSON(jsonDecode(payload));
-  }
-
-  factory Log.stopTask({
-    required LogInitiator initiator,
-    required String taskId,
-    required String taskName,
-  }) =>
-      Log.create(
-        type: LogType.taskStopped,
-        initiator: initiator,
-        payload: jsonEncode(
-          StopTaskData(
-            id: taskId,
-            name: taskName,
-          ).toJSON(),
-        ),
-      );
-
-  StopTaskData get stopTaskData {
-    if (type != LogType.taskStopped) {
-      throw Exception("Log is not of type taskStopped");
-    }
-    return StopTaskData.fromJSON(jsonDecode(payload));
+    return TaskStatusChangeData.fromJSON(jsonDecode(payload));
   }
 
   factory Log.updateLocation({
@@ -293,23 +270,28 @@ class DeleteTaskData {
       };
 }
 
-class StartTaskData {
+class TaskStatusChangeData {
   final String id;
   final String name;
+  final bool started;
 
-  const StartTaskData({
+  const TaskStatusChangeData({
     required this.id,
     required this.name,
+    required this.started,
   });
 
-  factory StartTaskData.fromJSON(Map<String, dynamic> json) => StartTaskData(
+  factory TaskStatusChangeData.fromJSON(Map<String, dynamic> json) =>
+      TaskStatusChangeData(
         id: json["i"],
         name: json["n"],
+        started: json["s"],
       );
 
   Map<String, dynamic> toJSON() => {
         "i": id,
         "n": name,
+        "s": started,
       };
 
   Task getTask(final TaskService taskService) => taskService.getByID(id);
