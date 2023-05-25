@@ -34,7 +34,7 @@ jobs:
         run: flutter gen-l10n
 
       - name: Build Android App - GMS variant 📱
-        run: flutter build apk --dart-define=app.flavor=gms
+        run: flutter build apk --dart-define=app.flavor=gms --debug
 
       - name: Rename files
         run: |
@@ -51,7 +51,7 @@ jobs:
         run: flutter gen-l10n
 
       - name: Build Android App (fat APK) - FLOSS variant 📱
-        run: flutter build apk --dart-define=app.flavor=floss
+        run: flutter build apk --dart-define=app.flavor=floss --debug
 
       - name: Rename files 📝
         run: |
