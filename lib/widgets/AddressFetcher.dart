@@ -2,8 +2,6 @@ import 'package:flutter/widgets.dart';
 import 'package:locus/services/settings_service.dart';
 import 'package:provider/provider.dart';
 
-import '../api/get-address.dart';
-
 class AddressFetcher extends StatefulWidget {
   final double latitude;
   final double longitude;
@@ -39,13 +37,15 @@ class _AddressFetcherState extends State<AddressFetcher> {
   }
 
   Future<void> loadAddress() async {
+    final settings = context.read<SettingsService>();
+
     setState(() {
       isLoading = true;
     });
 
     try {
       final address =
-          await getAddressGeocodeMapsCo(widget.latitude, widget.longitude);
+          await settings.getAddress(widget.latitude, widget.longitude);
 
       if (!mounted) {
         return;
