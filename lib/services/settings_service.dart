@@ -7,6 +7,8 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hive/hive.dart';
 
+import '../constants/hive_keys.dart';
+import '../models/log.dart';
 import '../utils/platform.dart';
 
 const STORAGE_KEY = "_app_settings";
@@ -93,6 +95,11 @@ class SettingsService extends ChangeNotifier {
   Future<void> save() => storage.write(
         key: STORAGE_KEY,
         value: jsonEncode(toJSON()),
+      );
+
+  Future<Box<Log>> getHiveLogBox() async => Hive.openBox<Log>(
+        HIVE_KEY_LOGS,
+        encryptionCipher: HiveAesCipher(hivePassword),
       );
 
   bool getAutomaticallyLookupAddresses() {

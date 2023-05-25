@@ -5,13 +5,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart'
     hide PlatformListTile;
-import 'package:hive/hive.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 
-import '../../constants/hive_keys.dart';
 import '../../models/log.dart';
+import '../../services/settings_service.dart';
 import '../../widgets/PlatformDialogActionButton.dart';
 import '../../widgets/PlatformListTile.dart';
 import '../../widgets/PlatformPopup.dart';
@@ -50,7 +49,8 @@ class _TaskTileState extends State<TaskTile> {
   }
 
   Future<void> _createLog(final Task task, final bool started) async {
-    final box = await Hive.openBox<Log>(HIVE_KEY_LOGS);
+    final settings = context.read<SettingsService>();
+    final box = await settings.getHiveLogBox();
 
     await box.add(
       Log.taskStatusChanged(

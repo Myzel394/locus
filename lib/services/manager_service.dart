@@ -6,8 +6,9 @@ import 'package:locus/services/task_service.dart';
 Future<void> updateLocation() async {
   final taskService = await TaskService.restore();
   final settings = await SettingsService.restore();
+  final logBox = await settings.getHiveLogBox();
 
-  await taskService.checkup(settings);
+  await taskService.checkup(logBox);
   final runningTasks = await taskService.getRunningTasks().toList();
 
   if (runningTasks.isEmpty) {

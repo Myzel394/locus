@@ -2,7 +2,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
-import 'package:hive/hive.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/init_quick_actions.dart';
 import 'package:locus/services/task_service.dart';
@@ -11,7 +10,6 @@ import 'package:locus/utils/platform.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 
-import '../constants/hive_keys.dart';
 import '../models/log.dart';
 import '../services/location_point_service.dart';
 import '../services/settings_service.dart';
@@ -48,7 +46,8 @@ class _ShortcutScreenState extends State<ShortcutScreen> {
       final l10n = AppLocalizations.of(context);
       final taskService = context.read<TaskService>();
       final settings = context.read<SettingsService>();
-      await taskService.checkup(settings);
+      final logBox = await settings.getHiveLogBox();
+      await taskService.checkup(logBox);
 
       switch (widget.type) {
         case ShortcutType.createOneHour:
@@ -67,7 +66,7 @@ class _ShortcutScreenState extends State<ShortcutScreen> {
           taskService.add(task);
           await taskService.save();
 
-          final box = await Hive.openBox<Log>(HIVE_KEY_LOGS);
+          final box = await settings.getHiveLogBox();
 
           await box.add(
             Log.createTask(

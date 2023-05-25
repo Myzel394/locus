@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart'
     hide PlatformListTile;
-import 'package:hive/hive.dart';
-import 'package:locus/constants/hive_keys.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/models/log.dart';
 import 'package:locus/screens/LocationPointsDetailsScreen.dart';
@@ -500,7 +498,7 @@ class _DetailsState extends State<Details> {
                       taskService.remove(widget.task);
                       await taskService.save();
 
-                      final box = await Hive.openBox<Log>(HIVE_KEY_LOGS);
+                      final box = await settings.getHiveLogBox();
                       await box.add(
                         Log.deleteTask(
                           initiator: LogInitiator.user,
