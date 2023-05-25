@@ -92,7 +92,6 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
 
   Future<void> createTask(final BuildContext context) async {
     final taskService = context.read<TaskService>();
-    final settings = context.read<SettingsService>();
 
     setState(() {
       _isError = false;
@@ -117,10 +116,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
         task.publishCurrentLocationNow();
       }
 
-      final box = await Hive.openBox<Log>(
-        HIVE_KEY_LOGS,
-        encryptionCipher: HiveAesCipher(settings.hivePassword),
-      );
+      final box = await Hive.openBox<Log>(HIVE_KEY_LOGS);
 
       await box.add(
         Log.createTask(

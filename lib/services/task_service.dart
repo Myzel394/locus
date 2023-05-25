@@ -5,13 +5,17 @@ import 'dart:math';
 import 'package:cryptography/cryptography.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:hive/hive.dart';
 import 'package:locus/api/nostr-events.dart';
 import 'package:locus/constants/app.dart';
+import 'package:locus/models/log.dart';
+import 'package:locus/services/settings_service.dart';
 import 'package:locus/utils/cryptography.dart';
 import 'package:nostr/nostr.dart';
 import 'package:uuid/uuid.dart';
 
 import '../api/get-locations.dart' as getLocationsAPI;
+import '../constants/hive_keys.dart';
 import 'location_point_service.dart';
 import 'timers_service.dart';
 
@@ -151,7 +155,8 @@ class Task extends ChangeNotifier {
     };
   }
 
-  DateTime? nextStartDate({final DateTime? date}) => findNextStartDate(timers, startDate: date);
+  DateTime? nextStartDate({final DateTime? date}) =>
+      findNextStartDate(timers, startDate: date);
 
   DateTime? nextEndDate() => findNextEndDate(timers);
 
@@ -159,7 +164,8 @@ class Task extends ChangeNotifier {
 
   Future<bool> shouldRunNow() async {
     final executionStatus = await getExecutionStatus();
-    final shouldRunNowBasedOnTimers = timers.any((timer) => timer.shouldRun(DateTime.now()));
+    final shouldRunNowBasedOnTimers =
+        timers.any((timer) => timer.shouldRun(DateTime.now()));
 
     if (shouldRunNowBasedOnTimers) {
       return true;
@@ -172,7 +178,8 @@ class Task extends ChangeNotifier {
         return false;
       }
 
-      return (executionStatus["startedAt"] as DateTime).isBefore(earliestNextRun);
+      return (executionStatus["startedAt"] as DateTime)
+          .isBefore(earliestNextRun);
     }
 
     return false;
@@ -225,7 +232,8 @@ class Task extends ChangeNotifier {
   // Returns the next date the task will run OR `null` if the task is not scheduled to run.
   Future<DateTime?> startScheduleTomorrow() {
     final tomorrow = DateTime.now().add(const Duration(days: 1));
-    final nextDate = DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 6, 0, 0);
+    final nextDate =
+        DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 6, 0, 0);
 
     return startSchedule(startDate: nextDate);
   }
@@ -356,7 +364,8 @@ class Task extends ChangeNotifier {
     final LocationPointService? location,
   ]) async {
     final eventManager = NostrEventsManager.fromTask(this);
-    final locationPoint = location ?? await LocationPointService.createUsingCurrentLocation();
+    final locationPoint =
+        location ?? await LocationPointService.createUsingCurrentLocation();
 
     final rawMessage = jsonEncode(locationPoint.toJSON());
     final message = await encryptUsingAES(rawMessage, _encryptionPassword);
@@ -456,14 +465,32 @@ class TaskService extends ChangeNotifier {
 
   // Does a general check up state of the task.
   // Checks if the task should be running / should be deleted etc.
-  Future<void> checkup() async {
+  Future<void> checkup([final SettingsService? settings]) async {
+    final box = await Hive.openBox<Log>(HIVE_KEY_LOGS);
+
     for (final task in tasks) {
       if (!task.isInfinite() && task.nextEndDate() == null) {
         // Delete task
         remove(task);
         await save();
+
+        await box.add(
+          Log.deleteTask(
+            initiator: LogInitiator.system,
+            taskName: task.name,
+          ),
+        );
       } else if (!(await task.shouldRunNow())) {
         await task.stopExecutionImmediately();
+
+        await box.add(
+          Log.taskStatusChanged(
+            initiator: LogInitiator.user,
+            taskId: task.id,
+            taskName: task.name,
+            active: false,
+          ),
+        );
       }
     }
   }
@@ -507,7 +534,8 @@ DateTime? findNextStartDate(final List<TaskRuntimeTimer> timers,
   return nextDates.first;
 }
 
-DateTime? findNextEndDate(final List<TaskRuntimeTimer> timers, {final DateTime? startDate}) {
+DateTime? findNextEndDate(final List<TaskRuntimeTimer> timers,
+    {final DateTime? startDate}) {
   final now = startDate ?? DateTime.now();
   final nextDates = List<DateTime>.from(
     timers.map((timer) => timer.nextEndDate(now)).where((date) => date != null),
@@ -517,7 +545,8 @@ DateTime? findNextEndDate(final List<TaskRuntimeTimer> timers, {final DateTime? 
 
   for (final date in nextDates.sublist(1)) {
     final nextStartDate = findNextStartDate(timers, startDate: date);
-    if (nextStartDate == null || nextStartDate.difference(date).inMinutes.abs() > 15) {
+    if (nextStartDate == null ||
+        nextStartDate.difference(date).inMinutes.abs() > 15) {
       // No next start date found or the difference is more than 15 minutes, so this is the last date
       break;
     }

@@ -119,7 +119,7 @@ class Log extends HiveObject {
     required LogInitiator initiator,
     required String taskId,
     required String taskName,
-    required bool started,
+    required bool active,
   }) =>
       Log.create(
         type: LogType.taskStatusChanged,
@@ -128,7 +128,7 @@ class Log extends HiveObject {
           TaskStatusChangeData(
             id: taskId,
             name: taskName,
-            started: started,
+            active: active,
           ).toJSON(),
         ),
       );
@@ -273,25 +273,25 @@ class DeleteTaskData {
 class TaskStatusChangeData {
   final String id;
   final String name;
-  final bool started;
+  final bool active;
 
   const TaskStatusChangeData({
     required this.id,
     required this.name,
-    required this.started,
+    required this.active,
   });
 
   factory TaskStatusChangeData.fromJSON(Map<String, dynamic> json) =>
       TaskStatusChangeData(
         id: json["i"],
         name: json["n"],
-        started: json["s"],
+        active: json["s"],
       );
 
   Map<String, dynamic> toJSON() => {
         "i": id,
         "n": name,
-        "s": started,
+        "s": active,
       };
 
   Task getTask(final TaskService taskService) => taskService.getByID(id);

@@ -1,11 +1,13 @@
 import 'package:background_fetch/background_fetch.dart';
 import 'package:locus/services/location_point_service.dart';
+import 'package:locus/services/settings_service.dart';
 import 'package:locus/services/task_service.dart';
 
 Future<void> updateLocation() async {
   final taskService = await TaskService.restore();
+  final settings = await SettingsService.restore();
 
-  await taskService.checkup();
+  await taskService.checkup(settings);
   final runningTasks = await taskService.getRunningTasks().toList();
 
   if (runningTasks.isEmpty) {
@@ -49,14 +51,14 @@ void configureBackgroundFetch() {
       startOnBoot: true,
       stopOnTerminate: false,
     ),
-        (taskId) async {
+    (taskId) async {
       // We only use one taskId to update the location for all tasks,
       // so we don't need to check the taskId.
       await updateLocation();
 
       BackgroundFetch.finish(taskId);
     },
-        (taskId) {
+    (taskId) {
       // Timeout, we need to finish immediately.
       BackgroundFetch.finish(taskId);
     },

@@ -48,7 +48,7 @@ class _ShortcutScreenState extends State<ShortcutScreen> {
       final l10n = AppLocalizations.of(context);
       final taskService = context.read<TaskService>();
       final settings = context.read<SettingsService>();
-      await taskService.checkup();
+      await taskService.checkup(settings);
 
       switch (widget.type) {
         case ShortcutType.createOneHour:
@@ -67,10 +67,7 @@ class _ShortcutScreenState extends State<ShortcutScreen> {
           taskService.add(task);
           await taskService.save();
 
-          final box = await Hive.openBox<Log>(
-            HIVE_KEY_LOGS,
-            encryptionCipher: HiveAesCipher(settings.hivePassword),
-          );
+          final box = await Hive.openBox<Log>(HIVE_KEY_LOGS);
 
           await box.add(
             Log.createTask(

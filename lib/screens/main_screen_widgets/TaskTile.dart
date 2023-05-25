@@ -12,7 +12,6 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../constants/hive_keys.dart';
 import '../../models/log.dart';
-import '../../services/settings_service.dart';
 import '../../widgets/PlatformDialogActionButton.dart';
 import '../../widgets/PlatformListTile.dart';
 import '../../widgets/PlatformPopup.dart';
@@ -42,28 +41,23 @@ class _TaskTileState extends State<TaskTile> {
 
     return {
       TaskLinkPublishProgress.encrypting:
-      l10n.taskAction_generateLink_process_encrypting,
+          l10n.taskAction_generateLink_process_encrypting,
       TaskLinkPublishProgress.publishing:
-      l10n.taskAction_generateLink_process_publishing,
+          l10n.taskAction_generateLink_process_publishing,
       TaskLinkPublishProgress.creatingURI:
-      l10n.taskAction_generateLink_process_creatingURI,
+          l10n.taskAction_generateLink_process_creatingURI,
     };
   }
 
   Future<void> _createLog(final Task task, final bool started) async {
-    final settings = context.watch<SettingsService>();
-
-    final box = await Hive.openBox<Log>(
-      HIVE_KEY_LOGS,
-      encryptionCipher: HiveAesCipher(settings.hivePassword),
-    );
+    final box = await Hive.openBox<Log>(HIVE_KEY_LOGS);
 
     await box.add(
       Log.taskStatusChanged(
         initiator: LogInitiator.user,
         taskId: task.id,
         taskName: task.name,
-        started: started,
+        active: started,
       ),
     );
   }
@@ -84,83 +78,82 @@ class _TaskTileState extends State<TaskTile> {
               onChanged: widget.disabled || isLoading
                   ? null
                   : (value) async {
-                setState(() {
-                  isLoading = true;
-                });
+                      setState(() {
+                        isLoading = true;
+                      });
 
-                try {
-                  if (value) {
-                    await widget.task.startExecutionImmediately();
-                    final nextEndDate = widget.task.nextEndDate();
+                      try {
+                        if (value) {
+                          await widget.task.startExecutionImmediately();
+                          final nextEndDate = widget.task.nextEndDate();
 
-                    widget.task.publishCurrentLocationNow();
+                          widget.task.publishCurrentLocationNow();
 
-                    if (!mounted) {
-                      return;
-                    }
+                          if (!mounted) {
+                            return;
+                          }
 
-                    if (nextEndDate == null) {
-                      return;
-                    }
+                          if (nextEndDate == null) {
+                            return;
+                          }
 
-                    showPlatformDialog(
-                      context: context,
-                      builder: (_) =>
-                          PlatformAlertDialog(
-                            title: Text(l10n.taskAction_started_title),
-                            content: Text(l10n
-                                .taskAction_started_runsUntil(nextEndDate)),
-                            actions: <Widget>[
-                              PlatformDialogActionButton(
-                                child: Text(l10n.closeNeutralAction),
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                              )
-                            ],
-                          ),
-                    );
-                  } else {
-                    await widget.task.stopExecutionImmediately();
-                    final nextStartDate =
-                    await widget.task.startScheduleTomorrow();
+                          showPlatformDialog(
+                            context: context,
+                            builder: (_) => PlatformAlertDialog(
+                              title: Text(l10n.taskAction_started_title),
+                              content: Text(l10n
+                                  .taskAction_started_runsUntil(nextEndDate)),
+                              actions: <Widget>[
+                                PlatformDialogActionButton(
+                                  child: Text(l10n.closeNeutralAction),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                )
+                              ],
+                            ),
+                          );
+                        } else {
+                          await widget.task.stopExecutionImmediately();
+                          final nextStartDate =
+                              await widget.task.startScheduleTomorrow();
 
-                    if (!mounted) {
-                      return;
-                    }
+                          if (!mounted) {
+                            return;
+                          }
 
-                    if (nextStartDate == null) {
-                      return;
-                    }
+                          if (nextStartDate == null) {
+                            return;
+                          }
 
-                    showPlatformDialog(
-                      context: context,
-                      builder: (_) =>
-                          PlatformAlertDialog(
-                            title: Text(l10n.taskAction_stopped_title),
-                            content: Text(l10n.taskAction_stopped_startsAgain(
-                                nextStartDate)),
-                            actions: <Widget>[
-                              PlatformDialogActionButton(
-                                child: Text(l10n.closeNeutralAction),
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                              )
-                            ],
-                          ),
-                    );
-                  }
+                          showPlatformDialog(
+                            context: context,
+                            builder: (_) => PlatformAlertDialog(
+                              title: Text(l10n.taskAction_stopped_title),
+                              content: Text(l10n.taskAction_stopped_startsAgain(
+                                  nextStartDate)),
+                              actions: <Widget>[
+                                PlatformDialogActionButton(
+                                  child: Text(l10n.closeNeutralAction),
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                )
+                              ],
+                            ),
+                          );
+                        }
 
-                  taskService.update(widget.task);
+                        taskService.update(widget.task);
 
-                  await _createLog(widget.task, value);
-                } catch (_) {} finally {
-                  setState(() {
-                    isLoading = false;
-                  });
-                }
-              },
+                        await _createLog(widget.task, value);
+                      } catch (_) {
+                      } finally {
+                        setState(() {
+                          isLoading = false;
+                        });
+                      }
+                    },
             );
           }
 
@@ -227,10 +220,9 @@ class _TaskTileState extends State<TaskTile> {
       onTap: () {
         Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (context) =>
-                TaskDetailScreen(
-                  task: widget.task,
-                ),
+            builder: (context) => TaskDetailScreen(
+              task: widget.task,
+            ),
           ),
         );
       },
