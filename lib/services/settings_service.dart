@@ -66,12 +66,15 @@ class SettingsService extends ChangeNotifier {
       mapProvider:
           isPlatformApple() ? MapProvider.apple : MapProvider.openStreetMap,
       showHints: true,
-      geocoderProvider:
-          isPlatformApple() || (Platform.isAndroid && GmsCheck().isGmsAvailable)
-              ? GeocoderProvider.system
-              : selectRandomProvider(),
+      geocoderProvider: isSystemGeocoderAvailable()
+          ? GeocoderProvider.system
+          : selectRandomProvider(),
     );
   }
+
+  static bool isSystemGeocoderAvailable() =>
+      // Apple does not seem to work
+      (Platform.isAndroid && GmsCheck().isGmsAvailable);
 
   static SettingsService fromJSON(final Map<String, dynamic> data) {
     return SettingsService(
@@ -116,20 +119,18 @@ class SettingsService extends ChangeNotifier {
     final double latitude,
     final double longitude,
   ) async {
-    final otherProviders = GeocoderProvider.values
-        .where((element) => element != GeocoderProvider.system)
-        .toList();
-    otherProviders.shuffle();
-    final providers = getGeocoderProvider() == GeocoderProvider.system
-        ? [GeocoderProvider.system, ...otherProviders]
-        // If the user does not want to use the system provider,
-        // we will not use it, even if it is the only one
-        // available (for better privacy)
-        : [
-            getGeocoderProvider(),
-            ...otherProviders
-                .where((element) => element != getGeocoderProvider())
-          ];
+    final providers = [
+      getGeocoderProvider(),
+      ...GeocoderProvider.values
+          .where((element) => element != getGeocoderProvider())
+    ];
+    // If the user does not want to use the system provider,
+    // we will not use it, even if it is the only one
+    // available (for better privacy)
+    if (!isSystemGeocoderAvailable() ||
+        getGeocoderProvider() != GeocoderProvider.system) {
+      providers.remove(GeocoderProvider.system);
+    }
 
     for (final provider in providers) {
       try {

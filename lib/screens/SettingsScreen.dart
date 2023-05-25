@@ -143,7 +143,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         title: Text(
                           l10n.settingsScreen_settings_geocoderProvider_label,
                         ),
-                        values: GeocoderProvider.values,
+                        values: SettingsService.isSystemGeocoderAvailable()
+                            ? GeocoderProvider.values
+                            : GeocoderProvider.values
+                                .where((element) =>
+                                    element != GeocoderProvider.system)
+                                .toList(),
                         textMapping: {
                           GeocoderProvider.system: l10n
                               .settingsScreen_settings_geocoderProvider_system,
