@@ -60,7 +60,7 @@ class _LogsScreenState extends State<LogsScreen> {
                 // Reverse
                 final Log log = box.getAt(box.length - index - 1)!;
                 return PlatformListTile(
-                  title: Text(typeLocalizationMap[log.type]!),
+                  title: Text(log.getTitle(context)),
                   subtitle: Row(
                     children: <Widget>[
                       Text(typeLocalizationMap[log.type]!),

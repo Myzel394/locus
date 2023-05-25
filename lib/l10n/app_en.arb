@@ -396,5 +396,39 @@
   "logs_values_taskCreated": "Task created",
   "logs_values_taskDeleted": "Task deleted",
   "logs_values_taskStatusChanged": "Task status changed",
-  "logs_values_updatedLocation": "Location updated"
+  "logs_values_updatedLocation": "Location updated",
+  "log_title_taskCreated": "<{name}> created",
+  "@log_title_taskCreated": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "log_title_taskDeleted": "<{name}> deleted",
+  "@log_title_taskDeleted": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "log_title_taskStatusChanged": "{active, select, true{{name} started} false{{name} stopped} other{Unknown error occurred}}",
+  "@log_title_taskStatusChanged": {
+    "placeholders": {
+      "active": {
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "log_title_updatedLocation": "Location updated for {count, plural, =1{one task} other{{count} tasks}}",
+  "@log_title_updatedLocation": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  }
 }

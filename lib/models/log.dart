@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:flutter/widgets.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:hive/hive.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:uuid/uuid.dart';
@@ -53,6 +55,24 @@ class Log extends HiveObject {
     required this.initiator,
     required this.payload,
   });
+
+  String getTitle(final BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
+    switch (type) {
+      case LogType.taskCreated:
+        return l10n.log_title_taskCreated(createTaskData.name);
+      case LogType.taskDeleted:
+        return l10n.log_title_taskDeleted(deleteTaskData.name);
+      case LogType.taskStatusChanged:
+        return l10n.log_title_taskStatusChanged(
+          taskStatusChangeData.active.toString(),
+          taskStatusChangeData.name,
+        );
+      case LogType.updatedLocation:
+        return l10n.log_title_updatedLocation(updateLocationData.tasks.length);
+    }
+  }
 
   factory Log.create({
     required LogType type,
