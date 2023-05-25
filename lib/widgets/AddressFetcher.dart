@@ -11,11 +11,12 @@ class AddressFetcher extends StatefulWidget {
   final Widget Function(String address) builder;
   final Widget Function(bool isLoading) rawLocationBuilder;
 
-  const AddressFetcher({required this.latitude,
-    required this.longitude,
-    required this.builder,
-    required this.rawLocationBuilder,
-    Key? key})
+  const AddressFetcher(
+      {required this.latitude,
+      required this.longitude,
+      required this.builder,
+      required this.rawLocationBuilder,
+      Key? key})
       : super(key: key);
 
   @override
@@ -43,7 +44,8 @@ class _AddressFetcherState extends State<AddressFetcher> {
     });
 
     try {
-      final address = await getAddress(widget.latitude, widget.longitude);
+      final address =
+          await getAddressGeocodeMapsCo(widget.latitude, widget.longitude);
 
       if (!mounted) {
         return;
@@ -52,7 +54,8 @@ class _AddressFetcherState extends State<AddressFetcher> {
       setState(() {
         this.address = address;
       });
-    } catch (_) {} finally {
+    } catch (_) {
+    } finally {
       setState(() {
         isLoading = false;
       });

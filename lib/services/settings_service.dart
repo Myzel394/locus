@@ -1,11 +1,15 @@
 import 'dart:collection';
 import 'dart:convert';
+import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:gms_check/gms_check.dart';
 
+import '../api/get-address.dart';
 import '../utils/platform.dart';
 
 const STORAGE_KEY = "_app_settings";
@@ -17,10 +21,28 @@ enum MapProvider {
   apple,
 }
 
+enum GeocoderProvider {
+  system,
+  geocodeMapsCo,
+  nominatim,
+}
+
+// Selects a random provider from the list of available providers, not including
+// the system provider.
+GeocoderProvider selectRandomProvider() {
+  final providers = GeocoderProvider.values
+      .where((element) => element != GeocoderProvider.system)
+      .toList();
+
+  return providers[Random().nextInt(providers.length)];
+}
+
 class SettingsService extends ChangeNotifier {
   bool automaticallyLookupAddresses;
   bool showHints;
   List<String> _relays;
+
+  GeocoderProvider geocoderProvider;
 
   // null = system default
   Color? primaryColor;
@@ -33,6 +55,7 @@ class SettingsService extends ChangeNotifier {
     required this.primaryColor,
     required this.mapProvider,
     required this.showHints,
+    required this.geocoderProvider,
     List<String>? relays,
   }) : _relays = relays ?? [];
 
@@ -43,6 +66,10 @@ class SettingsService extends ChangeNotifier {
       mapProvider:
           isPlatformApple() ? MapProvider.apple : MapProvider.openStreetMap,
       showHints: true,
+      geocoderProvider:
+          isPlatformApple() || (Platform.isAndroid && GmsCheck().isGmsAvailable)
+              ? GeocoderProvider.system
+              : selectRandomProvider(),
     );
   }
 
@@ -54,6 +81,7 @@ class SettingsService extends ChangeNotifier {
       mapProvider: MapProvider.values[data['mapProvider']],
       relays: List<String>.from(data['relays'] ?? []),
       showHints: data['showHints'],
+      geocoderProvider: GeocoderProvider.values[data['geocoderProvider']],
     );
   }
 
@@ -80,7 +108,38 @@ class SettingsService extends ChangeNotifier {
       'mapProvider': mapProvider.index,
       "relays": _relays,
       "showHints": showHints,
+      "geocoderProvider": geocoderProvider.index,
     };
+  }
+
+  Future<String> getAddress(
+    final double latitude,
+    final double longitude,
+  ) async {
+    final otherProviders = GeocoderProvider.values
+        .where((element) => element != GeocoderProvider.system)
+        .toList();
+    otherProviders.shuffle();
+    final providers = getGeocoderProvider() == GeocoderProvider.system
+        ? [GeocoderProvider.system, ...otherProviders]
+        : otherProviders;
+
+    for (final provider in providers) {
+      try {
+        switch (provider) {
+          case GeocoderProvider.system:
+            return await getAddressSystem(latitude, longitude);
+          case GeocoderProvider.geocodeMapsCo:
+            return await getAddressGeocodeMapsCo(latitude, longitude);
+          case GeocoderProvider.nominatim:
+            return await getAddressNominatim(latitude, longitude);
+        }
+      } catch (e) {
+        print("Failed to get address from $provider: $e");
+      }
+    }
+
+    throw Exception("Failed to get address from any provider");
   }
 
   Future<void> save() => storage.write(
@@ -141,6 +200,14 @@ class SettingsService extends ChangeNotifier {
 
   void setShowHints(final bool value) {
     showHints = value;
+    notifyListeners();
+  }
+
+  GeocoderProvider getGeocoderProvider() => geocoderProvider;
+
+  void setGeocoderProvider(final GeocoderProvider value) {
+    geocoderProvider = value;
+
     notifyListeners();
   }
 }
