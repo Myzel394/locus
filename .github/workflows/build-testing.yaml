@@ -1,0 +1,69 @@
+name: Build and push Flutter App
+
+on:
+  pull_request:
+
+jobs:
+  build-app:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Java ☕
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'adopt'
+          java-version: "15.x"
+          cache: 'gradle'
+
+      - name: Setup Flutter 📱
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          flutter-version: '3.10.0'
+
+      - name: Opt out of telemetry
+        run: flutter --disable-telemetry
+
+      - name: Install dependencies 📦
+        run: flutter pub get
+
+      - name: Generate Localizations 🌐
+        run: flutter gen-l10n
+
+      - name: Build Android App - GMS variant 📱
+        run: flutter build apk --flavor=gms --dart-define=app.flavor=gms
+
+      - name: Rename files
+        run: |
+          cd build/app/outputs/flutter-apk &&
+          mv app-release.apk locus-universal-gms.apk
+
+      - name: Update pubspec.yaml for FLOSS variant 📝
+        run: sed -i -e 's/^#f//' pubspec.yaml
+
+      - name: Install dependencies 📦
+        run: flutter pub get
+
+      - name: Generate Localizations 🌐
+        run: flutter gen-l10n
+
+      - name: Build Android App (fat APK) - FLOSS variant 📱
+        run: flutter build apk --flavor=floss --dart-define=app.flavor=floss
+
+      - name: Rename files 📝
+        run: |
+          cd build/app/outputs/flutter-apk &&
+          mv app-release.apk locus-universal-floss.app
+
+      - uses: actions/upload-artifact@v1
+        with:
+          name: release-apk
+          path: build/app/outputs/apk/release/locus-universal-gms.apk
+
+      - uses: actions/upload-artifact@v1
+        with:
+          name: release-apk
+          path: build/app/outputs/apk/release/locus-universal-floss.apk
