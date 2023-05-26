@@ -61,9 +61,9 @@ jobs:
       - uses: actions/upload-artifact@v1
         with:
           name: release-apk
-          path: build/app/outputs/apk/release/locus-universal-gms.apk
+          path: build/app/outputs/flutter-apk/locus-universal-gms.apk
 
       - uses: actions/upload-artifact@v1
         with:
           name: release-apk
-          path: build/app/outputs/apk/release/locus-universal-floss.apk
+          path: build/app/outputs/flutter-apk/locus-universal-floss.apk
