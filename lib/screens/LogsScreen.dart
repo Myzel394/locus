@@ -96,6 +96,19 @@ class _LogsScreenState extends State<LogsScreen> {
                               barrierColor: Colors.black.withOpacity(.3),
                               opaque: false,
                               barrierDismissible: true,
+                              reverseTransitionDuration: const Duration(
+                                milliseconds: 100,
+                              ),
+                              transitionDuration: const Duration(
+                                milliseconds: 500,
+                              ),
+                              maintainState: true,
+                              transitionsBuilder: (_, animation, __, child) {
+                                return FadeTransition(
+                                  opacity: animation,
+                                  child: child,
+                                );
+                              },
                             ),
                           );
                         },
