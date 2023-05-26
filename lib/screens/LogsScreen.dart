@@ -70,7 +70,7 @@ class _LogsScreenState extends State<LogsScreen> {
                 itemBuilder: (context, final int index) {
                   // Reverse
                   final Log log =
-                      logService.logs[logService.logs.length - index - 1];
+                  logService.logs[logService.logs.length - index - 1];
                   return Stack(
                     children: <Widget>[
                       Positioned(
@@ -86,7 +86,7 @@ class _LogsScreenState extends State<LogsScreen> {
                           ),
                         ),
                       ),
-                      PlatformListTile(
+                      GestureDetector(
                         onTap: () {
                           Navigator.of(context).push(
                             PageRouteBuilder(
@@ -112,51 +112,56 @@ class _LogsScreenState extends State<LogsScreen> {
                             ),
                           );
                         },
-                        leading: Hero(
-                          tag: "${log.id}:icon",
-                          child: LogIcon(log: log),
-                        ),
-                        title: Hero(
-                          tag: "${log.id}:title",
-                          child: MaybeMaterial(
-                            color: Colors.transparent,
-                            child: Text(
-                              log.getTitle(context),
+
+                        child: PlatformListTile(
+                          leading: Hero(
+                            tag: "${log.id}:icon",
+                            child: LogIcon(log: log),
+                          ),
+                          title: Hero(
+                            tag: "${log.id}:title",
+                            child: MaybeMaterial(
+                              color: Colors.transparent,
+                              child: Text(
+                                log.getTitle(context),
+                              ),
                             ),
                           ),
-                        ),
-                        subtitle: Row(
-                          children: <Widget>[
-                            Hero(
-                              tag: "${log.id}:type",
-                              child: MaybeMaterial(
-                                color: Colors.transparent,
-                                child: LogTypeInfo(log: log),
-                              ),
-                            ),
-                            const SizedBox(width: SMALL_SPACE),
-                            Hero(
-                              tag: "${log.id}:createdAt",
-                              child: MaybeMaterial(
-                                color: Colors.transparent,
-                                child: LogCreatedInfo(log: log),
-                              ),
-                            ),
-                          ],
-                        ),
-                        trailing: log.initiator == LogInitiator.system
-                            ? Hero(
-                                tag: "${log.id}:initiator",
-                                child: PlatformWidget(
-                                  material: (_, __) => const Icon(
-                                    Icons.laptop,
-                                  ),
-                                  cupertino: (_, __) => const Icon(
-                                    CupertinoIcons.bolt,
-                                  ),
+                          subtitle: Row(
+                            children: <Widget>[
+                              Hero(
+                                tag: "${log.id}:type",
+                                child: MaybeMaterial(
+                                  color: Colors.transparent,
+                                  child: LogTypeInfo(log: log),
                                 ),
-                              )
-                            : null,
+                              ),
+                              const SizedBox(width: SMALL_SPACE),
+                              Hero(
+                                tag: "${log.id}:createdAt",
+                                child: MaybeMaterial(
+                                  color: Colors.transparent,
+                                  child: LogCreatedInfo(log: log),
+                                ),
+                              ),
+                            ],
+                          ),
+                          trailing: log.initiator == LogInitiator.system
+                              ? Hero(
+                            tag: "${log.id}:initiator",
+                            child: PlatformWidget(
+                              material: (_, __) =>
+                              const Icon(
+                                Icons.laptop,
+                              ),
+                              cupertino: (_, __) =>
+                              const Icon(
+                                CupertinoIcons.bolt,
+                              ),
+                            ),
+                          )
+                              : null,
+                        ),
                       ),
                     ],
                   );
