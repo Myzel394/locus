@@ -106,7 +106,6 @@ class _MainScreenState extends State<MainScreen> {
 
     _positionStream!.listen((position) async {
       final taskService = context.read<TaskService>();
-      final settings = context.read<SettingsService>();
       final logService = context.read<LogService>();
       final runningTasks = await taskService.getRunningTasks().toList();
 
