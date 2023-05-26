@@ -27,10 +27,13 @@ import 'package:provider/provider.dart';
 import 'package:uni_links/uni_links.dart';
 
 import '../constants/values.dart';
+import '../models/log.dart';
 import '../services/location_point_service.dart';
+import '../services/log_service.dart';
 import '../utils/platform.dart';
 import 'CreateTaskScreen.dart';
 import 'ImportTaskSheet.dart';
+import 'LogsScreen.dart';
 import 'main_screen_widgets/CreateTask.dart';
 
 const FAB_DIMENSION = 56.0;
@@ -53,8 +56,7 @@ class _MainScreenState extends State<MainScreen> {
   Stream<Position>? _positionStream;
   StreamSubscription<String?>? _uniLinksStream;
 
-  double get windowHeight =>
-      MediaQuery.of(context).size.height - kToolbarHeight;
+  double get windowHeight => MediaQuery.of(context).size.height - kToolbarHeight;
 
   void initBackground() async {
     BackgroundFetch.start();
@@ -103,20 +105,37 @@ class _MainScreenState extends State<MainScreen> {
 
     _positionStream!.listen((position) async {
       final taskService = context.read<TaskService>();
+      final logService = context.read<LogService>();
       final runningTasks = await taskService.getRunningTasks().toList();
 
       if (runningTasks.isEmpty) {
         return;
       }
 
-      final locationData =
-          await LocationPointService.createUsingCurrentLocation(position);
+      final locationData = await LocationPointService.createUsingCurrentLocation(position);
 
       for (final task in runningTasks) {
         await task.publishCurrentLocationNow(
           locationData.copyWithDifferentId(),
         );
       }
+
+      await logService.addLog(
+        Log.updateLocation(
+          initiator: LogInitiator.system,
+          latitude: locationData.latitude,
+          longitude: locationData.longitude,
+          accuracy: locationData.accuracy,
+          tasks: List<UpdatedTaskData>.from(
+            runningTasks.map(
+              (task) => UpdatedTaskData(
+                id: task.id,
+                name: task.name,
+              ),
+            ),
+          ),
+        ),
+      );
     });
   }
 
@@ -176,15 +195,19 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final taskService = context.read<TaskService>();
+      final logService = context.read<LogService>();
+
       initQuickActions(context);
       initUniLinks();
+
+      taskService.checkup(logService);
     });
 
     final taskService = context.read<TaskService>();
 
     taskService.addListener(updateView);
-    taskService.checkup();
 
     initBackground();
   }
@@ -202,6 +225,8 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void updateView() async {
+    final taskService = context.read<TaskService>();
+
     final runningTasks = await taskService.getRunningTasks().toList();
 
     if (runningTasks.isNotEmpty) {
@@ -239,8 +264,7 @@ class _MainScreenState extends State<MainScreen> {
     final viewService = context.watch<ViewService>();
     final settings = context.watch<SettingsService>();
 
-    final showEmptyScreen =
-        taskService.tasks.isEmpty && viewService.views.isEmpty;
+    final showEmptyScreen = taskService.tasks.isEmpty && viewService.views.isEmpty;
 
     if (showEmptyScreen) {
       return PlatformScaffold(
@@ -296,31 +320,45 @@ class _MainScreenState extends State<MainScreen> {
           ),
           openColor: Theme.of(context).scaffoldBackgroundColor,
           closedColor: Theme.of(context).colorScheme.primary,
-        )
-            .animate()
-            .scale(duration: 500.ms, delay: 1.seconds, curve: Curves.bounceOut),
+        ).animate().scale(duration: 500.ms, delay: 1.seconds, curve: Curves.bounceOut),
       ),
       // Settings bottomNavBar via cupertino data class does not work
-      bottomNavBar: isCupertino(context)
-          ? PlatformNavBar(
+      bottomNavBar: PlatformNavBar(
+        material: (_, __) => MaterialNavBarData(
+            backgroundColor: Theme.of(context).dialogBackgroundColor, elevation: 0, padding: const EdgeInsets.all(0)),
               itemChanged: (index) {
                 setState(() {
                   activeTab = index;
                 });
               },
               currentIndex: activeTab,
-              items: [
+              items: isCupertino(context)
+            ? [
                 BottomNavigationBarItem(
                   icon: const Icon(CupertinoIcons.home),
                   label: l10n.mainScreen_overview,
                 ),
                 BottomNavigationBarItem(
+                  icon: const Icon(CupertinoIcons.list_bullet),
+                  label: l10n.mainScreen_logs,
+                ),
+                BottomNavigationBarItem(
                   icon: const Icon(CupertinoIcons.location_fill),
                   label: l10n.mainScreen_createTask,
                 ),
+              ]
+            : [
+                BottomNavigationBarItem(
+                  icon: const Icon(Icons.home),
+                  label: l10n.mainScreen_overview,
+                  backgroundColor: Theme.of(context).dialogBackgroundColor,
+                ),
+                BottomNavigationBarItem(
+                  icon: const Icon(Icons.history),
+                  label: l10n.mainScreen_logs,
+                ),
               ],
-            )
-          : null,
+      ),
       appBar: activeTab == 0 ? getAppBar() : null,
       body: activeTab == 0
           ? SafeArea(
@@ -332,9 +370,7 @@ class _MainScreenState extends State<MainScreen> {
                     FutureBuilder<HintType?>(
                       future: _hintTypeFuture,
                       builder: (context, snapshot) {
-                        if (snapshot.hasData &&
-                            settings.getShowHints() &&
-                            showHint) {
+                        if (snapshot.hasData && settings.getShowHints() && showHint) {
                           return Padding(
                             padding: const EdgeInsets.symmetric(
                               vertical: LARGE_SPACE,
@@ -367,8 +403,7 @@ class _MainScreenState extends State<MainScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: <Widget>[
                                   Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: MEDIUM_SPACE),
+                                    padding: const EdgeInsets.symmetric(horizontal: MEDIUM_SPACE),
                                     child: ChipCaption(
                                       l10n.mainScreen_tasksSection,
                                       icon: Icons.task_rounded,
@@ -376,10 +411,8 @@ class _MainScreenState extends State<MainScreen> {
                                   ).animate().fadeIn(duration: 1.seconds),
                                   ListView.builder(
                                     shrinkWrap: true,
-                                    padding: const EdgeInsets.only(
-                                        top: MEDIUM_SPACE),
-                                    physics:
-                                        const NeverScrollableScrollPhysics(),
+                                    padding: const EdgeInsets.only(top: MEDIUM_SPACE),
+                                    physics: const NeverScrollableScrollPhysics(),
                                     itemCount: taskService.tasks.length,
                                     itemBuilder: (context, index) {
                                       final task = taskService.tasks[index];
@@ -422,8 +455,7 @@ class _MainScreenState extends State<MainScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: <Widget>[
                                   Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: MEDIUM_SPACE),
+                                    padding: const EdgeInsets.symmetric(horizontal: MEDIUM_SPACE),
                                     child: ChipCaption(
                                       l10n.mainScreen_viewsSection,
                                       icon: context.platformIcons.eyeSolid,
@@ -431,10 +463,8 @@ class _MainScreenState extends State<MainScreen> {
                                   ).animate().fadeIn(duration: 1.seconds),
                                   ListView.builder(
                                     shrinkWrap: true,
-                                    padding: const EdgeInsets.only(
-                                        top: MEDIUM_SPACE),
-                                    physics:
-                                        const NeverScrollableScrollPhysics(),
+                                    padding: const EdgeInsets.only(top: MEDIUM_SPACE),
+                                    physics: const NeverScrollableScrollPhysics(),
                                     itemCount: viewService.views.length,
                                     itemBuilder: (context, index) => ViewTile(
                                       view: viewService.views[index],
@@ -487,18 +517,20 @@ class _MainScreenState extends State<MainScreen> {
               ),
             )
           : activeTab == 1
-              ? CreateTaskScreen(
-                  onCreated: () {
-                    if (isCupertino(context)) {
-                      setState(() {
-                        activeTab = 0;
-                      });
-                    } else {
-                      Navigator.pop(context);
-                    }
-                  },
-                )
-              : null,
+              ? LogsScreen()
+              : activeTab == 2
+                  ? CreateTaskScreen(
+                      onCreated: () {
+                        if (isCupertino(context)) {
+                          setState(() {
+                            activeTab = 0;
+                          });
+                        } else {
+                          Navigator.pop(context);
+                        }
+                      },
+                    )
+                  : null,
     );
   }
 }

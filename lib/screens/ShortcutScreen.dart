@@ -10,7 +10,9 @@ import 'package:locus/utils/platform.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 
+import '../models/log.dart';
 import '../services/location_point_service.dart';
+import '../services/log_service.dart';
 import '../services/settings_service.dart';
 import '../utils/theme.dart';
 
@@ -45,7 +47,8 @@ class _ShortcutScreenState extends State<ShortcutScreen> {
       final l10n = AppLocalizations.of(context);
       final taskService = context.read<TaskService>();
       final settings = context.read<SettingsService>();
-      await taskService.checkup();
+      final logService = context.read<LogService>();
+      await taskService.checkup(logService);
 
       switch (widget.type) {
         case ShortcutType.createOneHour:
@@ -58,16 +61,43 @@ class _ShortcutScreenState extends State<ShortcutScreen> {
             deleteAfterRun: true,
           );
 
-          await task.startSchedule(startNowIfNextRunIsUnknown: true);
-          await task.publishCurrentLocationNow();
-
           taskService.add(task);
           await taskService.save();
+
+          await logService.addLog(
+            Log.createTask(
+              initiator: LogInitiator.user,
+              taskId: task.id,
+              taskName: task.name,
+              creationContext: TaskCreationContext.quickAction,
+            ),
+          );
+
+          await task.startSchedule(startNowIfNextRunIsUnknown: true);
+          final locationData =
+              await LocationPointService.createUsingCurrentLocation();
+          await task.publishCurrentLocationNow(locationData);
+
+          await logService.addLog(
+            Log.updateLocation(
+              initiator: LogInitiator.user,
+              latitude: locationData.latitude,
+              longitude: locationData.longitude,
+              accuracy: locationData.accuracy,
+              tasks: [task] as List<UpdatedTaskData>,
+            ),
+          );
 
           break;
         case ShortcutType.shareNow:
           final tasks = await taskService.getRunningTasks().toList();
-          final locationData = await LocationPointService.createUsingCurrentLocation();
+
+          if (tasks.isEmpty) {
+            return;
+          }
+
+          final locationData =
+              await LocationPointService.createUsingCurrentLocation();
           await Future.wait(
             tasks.map(
               (task) => task.publishCurrentLocationNow(
@@ -75,6 +105,24 @@ class _ShortcutScreenState extends State<ShortcutScreen> {
               ),
             ),
           );
+
+          await logService.addLog(
+            Log.updateLocation(
+              initiator: LogInitiator.user,
+              latitude: locationData.latitude,
+              longitude: locationData.longitude,
+              accuracy: locationData.accuracy,
+              tasks: List<UpdatedTaskData>.from(
+                tasks.map(
+                  (task) => UpdatedTaskData(
+                    id: task.id,
+                    name: task.name,
+                  ),
+                ),
+              ),
+            ),
+          );
+
           break;
         case ShortcutType.stopAllTasks:
           final tasks = await taskService.getRunningTasks().toList();

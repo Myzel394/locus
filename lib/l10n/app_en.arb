@@ -167,6 +167,7 @@
   "welcomeScreen_usesWrongAppFlavor_description_isNotAvailable": "Locus is available in two variants. You are using the \"GMS\" variant. This variant contains Google Play Services. You, however, do not have Google Play Services installed. Unfortunately, the \"GMS\" variant does not work without Google Play Services. Please install the FLOSS variant of Locus.",
   "mainScreen_overview": "Overview",
   "mainScreen_createTask": "Create Task",
+  "mainScreen_logs": "Logs",
   "mainScreen_createTask_scheduleNow": "Start schedule immediately",
   "mainScreen_createTask_scheduleNow_help_title": "Scheduling",
   "mainScreen_createTask_scheduleNow_help_description": "The task will be scheduled after you create it. This does not necessarily mean that it will start directly. It will start at the next expected time based on your timers. If you disable this, you will have to schedule the task manually.",
@@ -390,5 +391,57 @@
   "weekdaySelection_selectTitle": "Select Date and Time",
   "weekdaySelection_error_startTimeBeforeEndTime": "Start time must be before end time",
   "backgroundLocationFetch_title": "Updating location in real-time",
-  "backgroundLocationFetch_text": "Close the app to stop updating your location in real-time. Locus will still update your location in the background, but with less battery usage."
+  "backgroundLocationFetch_text": "Close the app to stop updating your location in real-time. Locus will still update your location in the background, but with less battery usage.",
+  "logs_createdAt": "{date}",
+  "@logs_createdAt": {
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "MMMM d, HH:mm",
+        "isCustomDateFormat": "true"
+      }
+    }
+  },
+  "logs_values_taskCreated": "Task created",
+  "logs_values_taskDeleted": "Task deleted",
+  "logs_values_taskStatusChanged": "Task status changed",
+  "logs_values_updatedLocation": "Location updated",
+  "log_title_taskCreated": "<{name}> created",
+  "@log_title_taskCreated": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "log_title_taskDeleted": "<{name}> deleted",
+  "@log_title_taskDeleted": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "log_title_taskStatusChanged": "{active, select, true{{name} started} false{{name} stopped} other{Unknown error occurred}}",
+  "@log_title_taskStatusChanged": {
+    "placeholders": {
+      "active": {
+      },
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "log_title_updatedLocation": "Location updated for {count, plural, =1{one task} other{{count} tasks}}",
+  "@log_title_updatedLocation": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "logs_system_initiator_description": "This log was created by the system",
+  "logs_task_creationContext_description": "{context, select, inApp{Task created inside the App} quickAction{Task created via Quick Action} other{Unknown error occurred}}",
+  "logs_title": "Locus automatically creates logs",
+  "logs_description": "Logs are kept for 7 days and are automatically deleted afterwards."
 }

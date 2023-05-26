@@ -93,6 +93,7 @@ dependencies:
 #f      ref: floss
 #f      path: geolocator_android
 
+
 flutter_launcher_icons:
   android: true
   image_path: "assets/launcher-icon-android.png"
@@ -114,6 +115,8 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^2.0.0
   flutter_launcher_icons: any
+  hive_generator: any
+  build_runner: any
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
