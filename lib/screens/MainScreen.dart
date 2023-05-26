@@ -56,8 +56,7 @@ class _MainScreenState extends State<MainScreen> {
   Stream<Position>? _positionStream;
   StreamSubscription<String?>? _uniLinksStream;
 
-  double get windowHeight =>
-      MediaQuery.of(context).size.height - kToolbarHeight;
+  double get windowHeight => MediaQuery.of(context).size.height - kToolbarHeight;
 
   void initBackground() async {
     BackgroundFetch.start();
@@ -113,8 +112,7 @@ class _MainScreenState extends State<MainScreen> {
         return;
       }
 
-      final locationData =
-          await LocationPointService.createUsingCurrentLocation(position);
+      final locationData = await LocationPointService.createUsingCurrentLocation(position);
 
       for (final task in runningTasks) {
         await task.publishCurrentLocationNow(
@@ -199,7 +197,6 @@ class _MainScreenState extends State<MainScreen> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final taskService = context.read<TaskService>();
-      final settings = context.read<SettingsService>();
       final logService = context.read<LogService>();
 
       initQuickActions(context);
@@ -267,8 +264,7 @@ class _MainScreenState extends State<MainScreen> {
     final viewService = context.watch<ViewService>();
     final settings = context.watch<SettingsService>();
 
-    final showEmptyScreen =
-        taskService.tasks.isEmpty && viewService.views.isEmpty;
+    final showEmptyScreen = taskService.tasks.isEmpty && viewService.views.isEmpty;
 
     if (showEmptyScreen) {
       return PlatformScaffold(
@@ -324,12 +320,12 @@ class _MainScreenState extends State<MainScreen> {
           ),
           openColor: Theme.of(context).scaffoldBackgroundColor,
           closedColor: Theme.of(context).colorScheme.primary,
-        )
-            .animate()
-            .scale(duration: 500.ms, delay: 1.seconds, curve: Curves.bounceOut),
+        ).animate().scale(duration: 500.ms, delay: 1.seconds, curve: Curves.bounceOut),
       ),
       // Settings bottomNavBar via cupertino data class does not work
       bottomNavBar: PlatformNavBar(
+        material: (_, __) => MaterialNavBarData(
+            backgroundColor: Theme.of(context).dialogBackgroundColor, elevation: 0, padding: const EdgeInsets.all(0)),
         itemChanged: (index) {
           setState(() {
             activeTab = index;
@@ -355,6 +351,7 @@ class _MainScreenState extends State<MainScreen> {
                 BottomNavigationBarItem(
                   icon: const Icon(Icons.home),
                   label: l10n.mainScreen_overview,
+                  backgroundColor: Theme.of(context).dialogBackgroundColor,
                 ),
                 BottomNavigationBarItem(
                   icon: const Icon(Icons.history),
@@ -373,9 +370,7 @@ class _MainScreenState extends State<MainScreen> {
                     FutureBuilder<HintType?>(
                       future: _hintTypeFuture,
                       builder: (context, snapshot) {
-                        if (snapshot.hasData &&
-                            settings.getShowHints() &&
-                            showHint) {
+                        if (snapshot.hasData && settings.getShowHints() && showHint) {
                           return Padding(
                             padding: const EdgeInsets.symmetric(
                               vertical: LARGE_SPACE,
@@ -408,8 +403,7 @@ class _MainScreenState extends State<MainScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: <Widget>[
                                   Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: MEDIUM_SPACE),
+                                    padding: const EdgeInsets.symmetric(horizontal: MEDIUM_SPACE),
                                     child: ChipCaption(
                                       l10n.mainScreen_tasksSection,
                                       icon: Icons.task_rounded,
@@ -417,10 +411,8 @@ class _MainScreenState extends State<MainScreen> {
                                   ).animate().fadeIn(duration: 1.seconds),
                                   ListView.builder(
                                     shrinkWrap: true,
-                                    padding: const EdgeInsets.only(
-                                        top: MEDIUM_SPACE),
-                                    physics:
-                                        const NeverScrollableScrollPhysics(),
+                                    padding: const EdgeInsets.only(top: MEDIUM_SPACE),
+                                    physics: const NeverScrollableScrollPhysics(),
                                     itemCount: taskService.tasks.length,
                                     itemBuilder: (context, index) {
                                       final task = taskService.tasks[index];
@@ -463,8 +455,7 @@ class _MainScreenState extends State<MainScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: <Widget>[
                                   Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: MEDIUM_SPACE),
+                                    padding: const EdgeInsets.symmetric(horizontal: MEDIUM_SPACE),
                                     child: ChipCaption(
                                       l10n.mainScreen_viewsSection,
                                       icon: context.platformIcons.eyeSolid,
@@ -472,10 +463,8 @@ class _MainScreenState extends State<MainScreen> {
                                   ).animate().fadeIn(duration: 1.seconds),
                                   ListView.builder(
                                     shrinkWrap: true,
-                                    padding: const EdgeInsets.only(
-                                        top: MEDIUM_SPACE),
-                                    physics:
-                                        const NeverScrollableScrollPhysics(),
+                                    padding: const EdgeInsets.only(top: MEDIUM_SPACE),
+                                    physics: const NeverScrollableScrollPhysics(),
                                     itemCount: viewService.views.length,
                                     itemBuilder: (context, index) => ViewTile(
                                       view: viewService.views[index],
