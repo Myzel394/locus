@@ -33,7 +33,6 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   final _relayController = RelayController();
-  bool _enableHighlight = true;
 
   @override
   void initState() {
@@ -45,12 +44,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _relayController.addListener(() {
       settings.setRelays(_relayController.relays);
       settings.save();
-    });
-
-    WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((_) {
-      setState(() {
-        _enableHighlight = false;
-      });
     });
   }
 
@@ -138,6 +131,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             l10n.settingsScreen_setting_lookupAddresses_label),
                         description: Text(l10n
                             .settingsScreen_setting_lookupAddresses_description),
+                      ),
+                      SettingsDropdownTile(
+                        title: Text(
+                          l10n.settingsScreen_settings_geocoderProvider_label,
+                        ),
+                        values: SettingsService.isSystemGeocoderAvailable()
+                            ? GeocoderProvider.values
+                            : GeocoderProvider.values
+                                .where((element) =>
+                                    element != GeocoderProvider.system)
+                                .toList(),
+                        textMapping: {
+                          GeocoderProvider.system: l10n
+                              .settingsScreen_settings_geocoderProvider_system,
+                          GeocoderProvider.geocodeMapsCo: l10n
+                              .settingsScreen_settings_geocoderProvider_geocodeMapsCo,
+                          GeocoderProvider.nominatim: l10n
+                              .settingsScreen_settings_geocoderProvider_nominatim,
+                        },
+                        value: settings.geocoderProvider,
+                        onUpdate: (newValue) {
+                          settings.setGeocoderProvider(newValue);
+                          settings.save();
+                        },
                       ),
                       isPlatformApple()
                           ? SettingsDropdownTile(

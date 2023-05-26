@@ -326,13 +326,13 @@ class _MainScreenState extends State<MainScreen> {
       bottomNavBar: PlatformNavBar(
         material: (_, __) => MaterialNavBarData(
             backgroundColor: Theme.of(context).dialogBackgroundColor, elevation: 0, padding: const EdgeInsets.all(0)),
-        itemChanged: (index) {
-          setState(() {
-            activeTab = index;
-          });
-        },
-        currentIndex: activeTab,
-        items: isCupertino(context)
+              itemChanged: (index) {
+                setState(() {
+                  activeTab = index;
+                });
+              },
+              currentIndex: activeTab,
+              items: isCupertino(context)
             ? [
                 BottomNavigationBarItem(
                   icon: const Icon(CupertinoIcons.home),
