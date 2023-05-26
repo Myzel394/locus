@@ -430,5 +430,6 @@
         "type": "int"
       }
     }
-  }
+  },
+  "logs_system_initiator_description": "This log was created by the system"
 }

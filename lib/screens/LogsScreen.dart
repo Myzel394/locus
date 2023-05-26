@@ -2,8 +2,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+import 'package:locus/constants/spacing.dart';
 import 'package:locus/screens/LogDetailScreen.dart';
 import 'package:locus/screens/log_detail_screen_widgets/LogCreatedAtInfo.dart';
+import 'package:locus/screens/log_detail_screen_widgets/LogTypeInfo.dart';
 import 'package:provider/provider.dart';
 
 import '../models/log.dart';
@@ -55,11 +57,9 @@ class _LogsScreenState extends State<LogsScreen> {
                       PageRouteBuilder(
                         pageBuilder: (_, __, ___) => LogDetailScreen(log: log),
                         fullscreenDialog: true,
-                        maintainState: true,
-                        allowSnapshotting: true,
-                        barrierDismissible: true,
                         barrierColor: Colors.black.withOpacity(.3),
                         opaque: false,
+                        barrierDismissible: true,
                       ),
                     );
                   },
@@ -76,20 +76,35 @@ class _LogsScreenState extends State<LogsScreen> {
                       ),
                     ),
                   ),
-                  subtitle: Hero(
-                    tag: "${log.id}:info",
-                    child: Material(
-                      color: Colors.transparent,
-                      child: LogCreatedInfo(log: log),
-                    ),
+                  subtitle: Row(
+                    children: <Widget>[
+                      Hero(
+                        tag: "${log.id}:type",
+                        child: Material(
+                          color: Colors.transparent,
+                          child: LogTypeInfo(log: log),
+                        ),
+                      ),
+                      const SizedBox(width: SMALL_SPACE),
+                      Hero(
+                        tag: "${log.id}:createdAt",
+                        child: Material(
+                          color: Colors.transparent,
+                          child: LogCreatedInfo(log: log),
+                        ),
+                      ),
+                    ],
                   ),
                   trailing: log.initiator == LogInitiator.system
-                      ? PlatformWidget(
-                          material: (_, __) => const Icon(
-                            Icons.laptop,
-                          ),
-                          cupertino: (_, __) => const Icon(
-                            CupertinoIcons.bolt,
+                      ? Hero(
+                          tag: "${log.id}:initiator",
+                          child: PlatformWidget(
+                            material: (_, __) => const Icon(
+                              Icons.laptop,
+                            ),
+                            cupertino: (_, __) => const Icon(
+                              CupertinoIcons.bolt,
+                            ),
                           ),
                         )
                       : null,
