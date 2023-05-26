@@ -56,7 +56,7 @@ jobs:
       - name: Rename files 📝
         run: |
           cd build/app/outputs/flutter-apk &&
-          mv app-debug.apk locus-universal-floss.app
+          mv app-debug.apk locus-universal-floss.apk
 
       - uses: actions/upload-artifact@v1
         with:
