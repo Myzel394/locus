@@ -53,6 +53,9 @@ class _PlatformSelectState<T> extends State<PlatformSelect<T>> {
                 top: false,
                 child: CupertinoPicker(
                   itemExtent: 32.0,
+                  scrollController: FixedExtentScrollController(
+                    initialItem: _selectedIndex,
+                  ),
                   onSelectedItemChanged: (index) {
                     setState(() {
                       _selectedIndex = index;
