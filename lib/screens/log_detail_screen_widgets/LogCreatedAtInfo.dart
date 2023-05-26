@@ -30,27 +30,27 @@ class LogCreatedInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final Map<LogType, String> typeLocalizationMap =
-        getTypeLocalizationMap(context);
+    final Map<LogType, String> typeLocalizationMap = getTypeLocalizationMap(context);
 
-    return Material(
-      color: Colors.transparent,
-      child: Row(
-        children: <Widget>[
-          Text(typeLocalizationMap[log.type]!),
-          const SizedBox(width: SMALL_SPACE),
-          PlatformWidget(
-            material: (_, __) => const Icon(Icons.access_time_filled_rounded),
-            cupertino: (_, __) => Icon(
-              CupertinoIcons.time,
-              size: _kSubtitleFontSize,
-              color: CupertinoColors.secondaryLabel.resolveFrom(context),
-            ),
+    return Row(
+      children: <Widget>[
+        Text(typeLocalizationMap[log.type]!),
+        const SizedBox(width: SMALL_SPACE),
+        PlatformWidget(
+          material: (_, __) => Icon(
+            Icons.access_time_filled_rounded,
+            size: Theme.of(context).textTheme.bodySmall!.fontSize,
+            color: Theme.of(context).textTheme.bodySmall!.color,
           ),
-          const SizedBox(width: 2.0),
-          Text(l10n.logs_createdAt(log.createdAt)),
-        ],
-      ),
+          cupertino: (_, __) => Icon(
+            CupertinoIcons.time,
+            size: _kSubtitleFontSize,
+            color: CupertinoColors.secondaryLabel.resolveFrom(context),
+          ),
+        ),
+        const SizedBox(width: TINY_SPACE),
+        Text(l10n.logs_createdAt(log.createdAt)),
+      ],
     );
   }
 }

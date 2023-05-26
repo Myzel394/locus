@@ -8,6 +8,8 @@ import 'package:provider/provider.dart';
 
 import '../models/log.dart';
 import '../services/log_service.dart';
+import '../widgets/Paper.dart';
+import 'log_detail_screen_widgets/LogIcon.dart';
 
 class LogsScreen extends StatefulWidget {
   const LogsScreen({Key? key}) : super(key: key);
@@ -26,36 +28,73 @@ class _LogsScreenState extends State<LogsScreen> {
       body: SafeArea(
         child: ListView.builder(
           itemCount: logService.logs.length,
-          shrinkWrap: true,
           itemBuilder: (context, final int index) {
             // Reverse
             final Log log = logService.logs[logService.logs.length - index - 1];
-            return PlatformListTile(
-              onTap: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                  builder: (context) => LogDetailScreen(log: log),
-                ));
-              },
-              title: Hero(
-                tag: "title",
-                child: Material(
-                  color: Colors.transparent,
-                  child: Text(
-                    log.getTitle(context),
+            return Stack(
+              children: <Widget>[
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  top: 0,
+                  bottom: 0,
+                  child: Hero(
+                    tag: "${log.id}:paper",
+                    child: Material(
+                      color: Colors.transparent,
+                      child: Paper(
+                        roundness: 0,
+                        child: Container(),
+                      ),
+                    ),
                   ),
                 ),
-              ),
-              subtitle: LogCreatedInfo(log: log),
-              trailing: log.initiator == LogInitiator.system
-                  ? PlatformWidget(
-                      material: (_, __) => const Icon(
-                        Icons.laptop,
+                PlatformListTile(
+                  onTap: () {
+                    Navigator.of(context).push(
+                      PageRouteBuilder(
+                        pageBuilder: (_, __, ___) => LogDetailScreen(log: log),
+                        fullscreenDialog: true,
+                        maintainState: true,
+                        allowSnapshotting: true,
+                        barrierDismissible: true,
+                        barrierColor: Colors.black.withOpacity(.3),
+                        opaque: false,
                       ),
-                      cupertino: (_, __) => const Icon(
-                        CupertinoIcons.bolt,
+                    );
+                  },
+                  leading: Hero(
+                    tag: "${log.id}:icon",
+                    child: LogIcon(log: log),
+                  ),
+                  title: Hero(
+                    tag: "${log.id}:title",
+                    child: Material(
+                      color: Colors.transparent,
+                      child: Text(
+                        log.getTitle(context),
                       ),
-                    )
-                  : null,
+                    ),
+                  ),
+                  subtitle: Hero(
+                    tag: "${log.id}:info",
+                    child: Material(
+                      color: Colors.transparent,
+                      child: LogCreatedInfo(log: log),
+                    ),
+                  ),
+                  trailing: log.initiator == LogInitiator.system
+                      ? PlatformWidget(
+                          material: (_, __) => const Icon(
+                            Icons.laptop,
+                          ),
+                          cupertino: (_, __) => const Icon(
+                            CupertinoIcons.bolt,
+                          ),
+                        )
+                      : null,
+                ),
+              ],
             );
           },
         ),
