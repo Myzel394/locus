@@ -39,7 +39,7 @@ jobs:
       - name: Rename files
         run: |
           cd build/app/outputs/flutter-apk &&
-          mv app-release.apk locus-universal-gms.apk
+          mv app-debug.apk locus-universal-gms.apk
 
       - name: Update pubspec.yaml for FLOSS variant 📝
         run: sed -i -e 's/^#f//' pubspec.yaml
@@ -56,7 +56,7 @@ jobs:
       - name: Rename files 📝
         run: |
           cd build/app/outputs/flutter-apk &&
-          mv app-release.apk locus-universal-floss.app
+          mv app-debug.apk locus-universal-floss.app
 
       - uses: actions/upload-artifact@v1
         with:
