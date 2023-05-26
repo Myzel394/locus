@@ -11,6 +11,7 @@ import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/Paper.dart';
 
 import '../constants/themes.dart';
+import '../widgets/MaybeMaterial.dart';
 import 'log_detail_screen_widgets/LogCreatedAtInfo.dart';
 
 final FADE_IN_DURATION = 900.ms;
@@ -24,21 +25,9 @@ class LogDetailScreen extends StatelessWidget {
     Key? key,
   }) : super(key: key);
 
-  Map<LogType, String> getTypeLocalizationMap(context) {
-    final l10n = AppLocalizations.of(context);
-
-    return {
-      LogType.taskCreated: l10n.logs_values_taskCreated,
-      LogType.taskDeleted: l10n.logs_values_taskDeleted,
-      LogType.taskStatusChanged: l10n.logs_values_taskStatusChanged,
-      LogType.updatedLocation: l10n.logs_values_updatedLocation,
-    };
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final Map<LogType, String> typeLocalizationMap = getTypeLocalizationMap(context);
 
     return PlatformScaffold(
       backgroundColor: Colors.transparent,
@@ -73,11 +62,8 @@ class LogDetailScreen extends StatelessWidget {
                             bottom: 0,
                             child: Hero(
                               tag: "${log.id}:paper",
-                              child: Material(
-                                color: Colors.transparent,
-                                child: Paper(
-                                  child: Container(),
-                                ),
+                              child: Paper(
+                                child: Container(),
                               ),
                             ),
                           ),
@@ -92,7 +78,7 @@ class LogDetailScreen extends StatelessWidget {
                                 ),
                                 Hero(
                                   tag: "${log.id}:title",
-                                  child: Material(
+                                  child: MaybeMaterial(
                                     color: Colors.transparent,
                                     child: Text(
                                       log.getTitle(context),
@@ -103,7 +89,7 @@ class LogDetailScreen extends StatelessWidget {
                                 const SizedBox(height: MEDIUM_SPACE),
                                 Hero(
                                   tag: "${log.id}:type",
-                                  child: Material(
+                                  child: MaybeMaterial(
                                     color: Colors.transparent,
                                     child: LogTypeInfo(log: log),
                                   ),
@@ -111,7 +97,7 @@ class LogDetailScreen extends StatelessWidget {
                                 const SizedBox(height: SMALL_SPACE),
                                 Hero(
                                   tag: "${log.id}:createdAt",
-                                  child: Material(
+                                  child: MaybeMaterial(
                                     color: Colors.transparent,
                                     child: LogCreatedInfo(log: log),
                                   ),
@@ -123,23 +109,34 @@ class LogDetailScreen extends StatelessWidget {
                                       PlatformWidget(
                                         material: (_, __) => Icon(
                                           Icons.edit,
-                                          size: Theme.of(context).textTheme.bodySmall!.fontSize,
-                                          color: Theme.of(context).textTheme.bodySmall!.color,
+                                          size: Theme.of(context)
+                                              .textTheme
+                                              .bodySmall!
+                                              .fontSize,
+                                          color: Theme.of(context)
+                                              .textTheme
+                                              .bodySmall!
+                                              .color,
                                         ),
                                         cupertino: (_, __) => Icon(
                                           CupertinoIcons.pencil,
                                           size: CUPERTINO_SUBTITLE_FONT_SIZE,
-                                          color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                                          color: CupertinoColors.secondaryLabel
+                                              .resolveFrom(context),
                                         ),
                                       ),
                                       const SizedBox(width: TINY_SPACE),
                                       Text(
                                         l10n.logs_task_creationContext_description(
-                                          log.createTaskData.creationContext.name,
+                                          log.createTaskData.creationContext
+                                              .name,
                                         ),
                                       ),
                                     ],
-                                  ).animate().fadeIn(duration: FADE_IN_DURATION, delay: DELAY_DURATION),
+                                  ).animate().fadeIn(
+                                        duration: FADE_IN_DURATION,
+                                        delay: DELAY_DURATION,
+                                      ),
                                 ],
                                 if (log.initiator == LogInitiator.system) ...[
                                   const SizedBox(height: SMALL_SPACE),
@@ -150,20 +147,32 @@ class LogDetailScreen extends StatelessWidget {
                                         child: PlatformWidget(
                                           material: (_, __) => Icon(
                                             Icons.laptop,
-                                            size: Theme.of(context).textTheme.bodySmall!.fontSize,
-                                            color: Theme.of(context).textTheme.bodySmall!.color,
+                                            size: Theme.of(context)
+                                                .textTheme
+                                                .bodySmall!
+                                                .fontSize,
+                                            color: Theme.of(context)
+                                                .textTheme
+                                                .bodySmall!
+                                                .color,
                                           ),
                                           cupertino: (_, __) => Icon(
                                             CupertinoIcons.bolt,
                                             size: CUPERTINO_SUBTITLE_FONT_SIZE,
-                                            color: CupertinoColors.secondaryLabel.resolveFrom(context),
+                                            color: CupertinoColors
+                                                .secondaryLabel
+                                                .resolveFrom(context),
                                           ),
                                         ),
                                       ),
                                       const SizedBox(width: TINY_SPACE),
-                                      Text(l10n.logs_system_initiator_description)
+                                      Text(l10n
+                                              .logs_system_initiator_description)
                                           .animate()
-                                          .fadeIn(duration: FADE_IN_DURATION, delay: DELAY_DURATION),
+                                          .fadeIn(
+                                            duration: FADE_IN_DURATION,
+                                            delay: DELAY_DURATION,
+                                          ),
                                     ],
                                   ),
                                 ],
@@ -172,7 +181,10 @@ class LogDetailScreen extends StatelessWidget {
                                   onPressed: () {
                                     Navigator.of(context).pop();
                                   },
-                                ).animate().fadeIn(duration: FADE_IN_DURATION, delay: DELAY_DURATION),
+                                ).animate().fadeIn(
+                                      duration: FADE_IN_DURATION,
+                                      delay: DELAY_DURATION,
+                                    ),
                               ],
                             ),
                           ),

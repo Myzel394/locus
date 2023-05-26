@@ -7,6 +7,7 @@ import 'package:locus/screens/LogDetailScreen.dart';
 import 'package:locus/screens/log_detail_screen_widgets/LogCreatedAtInfo.dart';
 import 'package:locus/screens/log_detail_screen_widgets/LogTypeInfo.dart';
 import 'package:locus/utils/theme.dart';
+import 'package:locus/widgets/MaybeMaterial.dart';
 import 'package:provider/provider.dart';
 
 import '../models/log.dart';
@@ -33,7 +34,10 @@ class _LogsScreenState extends State<LogsScreen> {
           child: Column(
             children: <Widget>[
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: MEDIUM_SPACE, vertical: LARGE_SPACE),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: MEDIUM_SPACE,
+                  vertical: LARGE_SPACE,
+                ),
                 child: Paper(
                   child: Padding(
                     padding: const EdgeInsets.all(MEDIUM_SPACE),
@@ -65,7 +69,8 @@ class _LogsScreenState extends State<LogsScreen> {
                 physics: const NeverScrollableScrollPhysics(),
                 itemBuilder: (context, final int index) {
                   // Reverse
-                  final Log log = logService.logs[logService.logs.length - index - 1];
+                  final Log log =
+                      logService.logs[logService.logs.length - index - 1];
                   return Stack(
                     children: <Widget>[
                       Positioned(
@@ -75,12 +80,9 @@ class _LogsScreenState extends State<LogsScreen> {
                         bottom: 0,
                         child: Hero(
                           tag: "${log.id}:paper",
-                          child: Material(
-                            color: Colors.transparent,
-                            child: Paper(
-                              roundness: 0,
-                              child: Container(),
-                            ),
+                          child: Paper(
+                            roundness: 0,
+                            child: Container(),
                           ),
                         ),
                       ),
@@ -88,7 +90,8 @@ class _LogsScreenState extends State<LogsScreen> {
                         onTap: () {
                           Navigator.of(context).push(
                             PageRouteBuilder(
-                              pageBuilder: (_, __, ___) => LogDetailScreen(log: log),
+                              pageBuilder: (_, __, ___) =>
+                                  LogDetailScreen(log: log),
                               fullscreenDialog: true,
                               barrierColor: Colors.black.withOpacity(.3),
                               opaque: false,
@@ -102,7 +105,7 @@ class _LogsScreenState extends State<LogsScreen> {
                         ),
                         title: Hero(
                           tag: "${log.id}:title",
-                          child: Material(
+                          child: MaybeMaterial(
                             color: Colors.transparent,
                             child: Text(
                               log.getTitle(context),
@@ -113,7 +116,7 @@ class _LogsScreenState extends State<LogsScreen> {
                           children: <Widget>[
                             Hero(
                               tag: "${log.id}:type",
-                              child: Material(
+                              child: MaybeMaterial(
                                 color: Colors.transparent,
                                 child: LogTypeInfo(log: log),
                               ),
@@ -121,7 +124,7 @@ class _LogsScreenState extends State<LogsScreen> {
                             const SizedBox(width: SMALL_SPACE),
                             Hero(
                               tag: "${log.id}:createdAt",
-                              child: Material(
+                              child: MaybeMaterial(
                                 color: Colors.transparent,
                                 child: LogCreatedInfo(log: log),
                               ),
