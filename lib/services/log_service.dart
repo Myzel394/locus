@@ -5,6 +5,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../models/log.dart';
 
+const LOGS_LIFETIME = Duration(days: 7);
 const storage = FlutterSecureStorage();
 const KEY = "_app_logs";
 
@@ -60,5 +61,16 @@ class LogService extends ChangeNotifier {
   void clear() {
     _logs.clear();
     notifyListeners();
+  }
+
+  Future<void> deleteOldLogs() async {
+    final terminationDate = DateTime.now().subtract(LOGS_LIFETIME);
+    final oldLogs = _logs.where((log) => log.createdAt.isBefore(terminationDate));
+
+    for (final log in oldLogs) {
+      _logs.remove(log);
+    }
+
+    await save();
   }
 }

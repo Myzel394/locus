@@ -28,9 +28,7 @@ void main() async {
     Permission.locationAlways.isGranted,
     TaskService.restore(),
     ViewService.restore(),
-    Platform.isAndroid
-        ? DisableBatteryOptimization.isBatteryOptimizationDisabled
-        : Future.value(true),
+    Platform.isAndroid ? DisableBatteryOptimization.isBatteryOptimizationDisabled : Future.value(true),
     SettingsService.restore(),
     hasGrantedNotificationPermission(),
     LogService.restore(),
@@ -42,6 +40,8 @@ void main() async {
   final SettingsService settingsService = futures[4];
   final bool hasNotificationGranted = futures[5];
   final LogService logService = futures[6];
+
+  await logService.deleteOldLogs();
 
   runApp(
     MultiProvider(
