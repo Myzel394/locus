@@ -432,5 +432,7 @@
     }
   },
   "logs_system_initiator_description": "This log was created by the system",
-  "logs_task_creationContext_description": "{context, select, inApp{Task created inside the App} quickAction{Task created via Quick Action} other{Unknown error occurred}}"
+  "logs_task_creationContext_description": "{context, select, inApp{Task created inside the App} quickAction{Task created via Quick Action} other{Unknown error occurred}}",
+  "logs_title": "Locus automatically creates logs",
+  "logs_description": "Logs are kept for 7 days and are automatically deleted afterwards."
 }
