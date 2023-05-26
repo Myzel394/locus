@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:gms_check/gms_check.dart';
 import 'package:locus/App.dart';
+import 'package:locus/services/app_update_service.dart';
 import 'package:locus/services/log_service.dart';
 import 'package:locus/services/manager_service.dart';
 import 'package:locus/services/settings_service.dart';
@@ -35,6 +36,7 @@ void main() async {
     SettingsService.restore(),
     hasGrantedNotificationPermission(),
     LogService.restore(),
+    AppUpdateService.restore(),
     GmsCheck().checkGmsAvailability(),
   ]);
   final bool hasLocationAlwaysGranted = futures[0];
@@ -44,8 +46,11 @@ void main() async {
   final SettingsService settingsService = futures[4];
   final bool hasNotificationGranted = futures[5];
   final LogService logService = futures[6];
+  final AppUpdateService appUpdateService = futures[7];
 
   await logService.deleteOldLogs();
+
+  appUpdateService.checkForUpdates(force: true);
 
   runApp(
     MultiProvider(
@@ -54,6 +59,8 @@ void main() async {
         ChangeNotifierProvider<ViewService>(create: (_) => viewService),
         ChangeNotifierProvider<SettingsService>(create: (_) => settingsService),
         ChangeNotifierProvider<LogService>(create: (_) => logService),
+        ChangeNotifierProvider<AppUpdateService>(
+            create: (_) => appUpdateService),
       ],
       child: App(
         hasLocationAlwaysGranted: hasLocationAlwaysGranted,
