@@ -34,12 +34,12 @@ jobs:
         run: flutter gen-l10n
 
       - name: Build Android App - GMS variant 📱
-        run: flutter build apk --dart-define=app.flavor=gms
+        run: flutter build apk --dart-define=app.flavor=gms --debug
 
       - name: Rename files
         run: |
           cd build/app/outputs/flutter-apk &&
-          mv app-release.apk locus-universal-gms.apk
+          mv app-debug.apk locus-universal-gms.apk
 
       - name: Update pubspec.yaml for FLOSS variant 📝
         run: sed -i -e 's/^#f//' pubspec.yaml
@@ -51,12 +51,12 @@ jobs:
         run: flutter gen-l10n
 
       - name: Build Android App (fat APK) - FLOSS variant 📱
-        run: flutter build apk --dart-define=app.flavor=floss
+        run: flutter build apk --dart-define=app.flavor=floss --debug
 
       - name: Rename files 📝
         run: |
           cd build/app/outputs/flutter-apk &&
-          mv app-release.apk locus-universal-floss.app
+          mv app-debug.apk locus-universal-floss.app
 
       - uses: actions/upload-artifact@v1
         with:
