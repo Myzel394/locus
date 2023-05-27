@@ -36,6 +36,16 @@ locked to a service. No authentication required.
 
 # Download
 
+**iOS currently does not have a release. You will need to build and install the app yourself.**
+
+Locus comes in two variants for Android:
+
+* GMS: This variant uses Google Play Services to get your location. If you have Google Play Services
+  installed, you need to use this variant.
+* FLOSS: This variant is completely libre and does not use any proprietary software. If you have NO
+  Google Play Services installed, you need to use this variant.
+
+[<img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png" alt="Get it on IzzyOnDroid" height="80">](https://apt.izzysoft.de/fdroid/index/apk/app.myzel394.locus)
 [<img src="readme_content/github-badge.png" alt="Get it on GitHub" height="80">](https://github.com/Myzel394/locus/releases)
 
 # Supporting Locus
