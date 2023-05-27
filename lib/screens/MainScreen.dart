@@ -36,6 +36,7 @@ import 'CreateTaskScreen.dart';
 import 'ImportTaskSheet.dart';
 import 'LogsScreen.dart';
 import 'main_screen_widgets/CreateTask.dart';
+import 'main_screen_widgets/UpdateAvailableBanner.dart';
 
 const FAB_DIMENSION = 56.0;
 
@@ -57,8 +58,7 @@ class _MainScreenState extends State<MainScreen> {
   Stream<Position>? _positionStream;
   StreamSubscription<String?>? _uniLinksStream;
 
-  double get windowHeight =>
-      MediaQuery.of(context).size.height - kToolbarHeight;
+  double get windowHeight => MediaQuery.of(context).size.height - kToolbarHeight;
 
   void initBackground() async {
     BackgroundFetch.start();
@@ -114,8 +114,7 @@ class _MainScreenState extends State<MainScreen> {
         return;
       }
 
-      final locationData =
-          await LocationPointService.createUsingCurrentLocation(position);
+      final locationData = await LocationPointService.createUsingCurrentLocation(position);
 
       for (final task in runningTasks) {
         await task.publishCurrentLocationNow(
@@ -199,6 +198,7 @@ class _MainScreenState extends State<MainScreen> {
     super.initState();
 
     final taskService = context.read<TaskService>();
+    final appUpdateService = context.read<AppUpdateService>();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final taskService = context.read<TaskService>();
@@ -211,6 +211,7 @@ class _MainScreenState extends State<MainScreen> {
     });
 
     taskService.addListener(updateView);
+    appUpdateService.addListener(updateView);
 
     initBackground();
   }
@@ -218,7 +219,9 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void dispose() {
     final taskService = context.read<TaskService>();
+    final appUpdateService = context.read<AppUpdateService>();
     taskService.removeListener(updateView);
+    appUpdateService.removeListener(updateView);
 
     _uniLinksStream?.cancel();
 
@@ -241,7 +244,6 @@ class _MainScreenState extends State<MainScreen> {
 
   PlatformAppBar getAppBar() {
     final l10n = AppLocalizations.of(context);
-    final appUpdateService = context.watch<AppUpdateService>();
 
     return PlatformAppBar(
       title: Text(l10n.appName),
@@ -267,9 +269,9 @@ class _MainScreenState extends State<MainScreen> {
     final taskService = context.watch<TaskService>();
     final viewService = context.watch<ViewService>();
     final settings = context.watch<SettingsService>();
+    final appUpdateService = context.watch<AppUpdateService>();
 
-    final showEmptyScreen =
-        taskService.tasks.isEmpty && viewService.views.isEmpty;
+    final showEmptyScreen = taskService.tasks.isEmpty && viewService.views.isEmpty;
 
     if (showEmptyScreen) {
       return PlatformScaffold(
@@ -325,16 +327,12 @@ class _MainScreenState extends State<MainScreen> {
           ),
           openColor: Theme.of(context).scaffoldBackgroundColor,
           closedColor: Theme.of(context).colorScheme.primary,
-        )
-            .animate()
-            .scale(duration: 500.ms, delay: 1.seconds, curve: Curves.bounceOut),
+        ).animate().scale(duration: 500.ms, delay: 1.seconds, curve: Curves.bounceOut),
       ),
       // Settings bottomNavBar via cupertino data class does not work
       bottomNavBar: PlatformNavBar(
         material: (_, __) => MaterialNavBarData(
-            backgroundColor: Theme.of(context).dialogBackgroundColor,
-            elevation: 0,
-            padding: const EdgeInsets.all(0)),
+            backgroundColor: Theme.of(context).dialogBackgroundColor, elevation: 0, padding: const EdgeInsets.all(0)),
         itemChanged: (index) {
           setState(() {
             activeTab = index;
@@ -376,12 +374,11 @@ class _MainScreenState extends State<MainScreen> {
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
+                    appUpdateService.shouldShowBanner() ? const UpdateAvailableBanner() : const SizedBox.shrink(),
                     FutureBuilder<HintType?>(
                       future: _hintTypeFuture,
                       builder: (context, snapshot) {
-                        if (snapshot.hasData &&
-                            settings.getShowHints() &&
-                            showHint) {
+                        if (snapshot.hasData && settings.getShowHints() && showHint) {
                           return Padding(
                             padding: const EdgeInsets.symmetric(
                               vertical: LARGE_SPACE,
@@ -414,8 +411,7 @@ class _MainScreenState extends State<MainScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: <Widget>[
                                   Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: MEDIUM_SPACE),
+                                    padding: const EdgeInsets.symmetric(horizontal: MEDIUM_SPACE),
                                     child: ChipCaption(
                                       l10n.mainScreen_tasksSection,
                                       icon: Icons.task_rounded,
@@ -423,10 +419,8 @@ class _MainScreenState extends State<MainScreen> {
                                   ).animate().fadeIn(duration: 1.seconds),
                                   ListView.builder(
                                     shrinkWrap: true,
-                                    padding: const EdgeInsets.only(
-                                        top: MEDIUM_SPACE),
-                                    physics:
-                                        const NeverScrollableScrollPhysics(),
+                                    padding: const EdgeInsets.only(top: MEDIUM_SPACE),
+                                    physics: const NeverScrollableScrollPhysics(),
                                     itemCount: taskService.tasks.length,
                                     itemBuilder: (context, index) {
                                       final task = taskService.tasks[index];
@@ -469,8 +463,7 @@ class _MainScreenState extends State<MainScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: <Widget>[
                                   Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: MEDIUM_SPACE),
+                                    padding: const EdgeInsets.symmetric(horizontal: MEDIUM_SPACE),
                                     child: ChipCaption(
                                       l10n.mainScreen_viewsSection,
                                       icon: context.platformIcons.eyeSolid,
@@ -478,10 +471,8 @@ class _MainScreenState extends State<MainScreen> {
                                   ).animate().fadeIn(duration: 1.seconds),
                                   ListView.builder(
                                     shrinkWrap: true,
-                                    padding: const EdgeInsets.only(
-                                        top: MEDIUM_SPACE),
-                                    physics:
-                                        const NeverScrollableScrollPhysics(),
+                                    padding: const EdgeInsets.only(top: MEDIUM_SPACE),
+                                    physics: const NeverScrollableScrollPhysics(),
                                     itemCount: viewService.views.length,
                                     itemBuilder: (context, index) => ViewTile(
                                       view: viewService.views[index],

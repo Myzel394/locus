@@ -33,6 +33,8 @@
   "detailsTimersLabel": "Timers",
   "searchLabel": "Search",
   "closeApp": "Close Locus",
+  "updateAvailable_android": "A new version of Locus is available! Click to download the newest APK.",
+  "doNotShowAgainLabel": "Do not show again",
   "fields_errors_isEmpty": "This field is required",
   "fields_errors_invalidCharacters": "This field contains invalid characters",
   "fields_errors_notNumber": "This field must be a number",

@@ -58,7 +58,7 @@ class AppUpdateService extends ChangeNotifier {
   }
 
   Future<void> checkForUpdates({final bool force = false}) async {
-    if (_outDateDate == null && !force) {
+    if (_outDateDate != null && !force) {
       return;
     }
 
@@ -109,5 +109,12 @@ class AppUpdateService extends ChangeNotifier {
     final diff = now.difference(_outDateDate!);
 
     return diff.inDays >= 30;
+  }
+
+  Future<void> doNotShowBannerAgain() async {
+    _hideBanner = true;
+
+    notifyListeners();
+    await save();
   }
 }
