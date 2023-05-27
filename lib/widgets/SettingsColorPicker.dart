@@ -3,8 +3,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutter_platform_widgets/flutter_platform_widgets.dart'
-    hide PlatformListTile;
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart' hide PlatformListTile;
+import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/SwapElementAnimation.dart';
 import 'package:settings_ui/settings_ui.dart';
 
@@ -51,7 +51,7 @@ class _ColorDialogPickerState extends State<ColorDialogPicker> {
 }
 
 class SettingsColorPickerWidgetRaw extends StatefulWidget {
-  final Widget title;
+  final String title;
   final Color? value;
   final void Function(Color? value) onUpdate;
 
@@ -59,23 +59,21 @@ class SettingsColorPickerWidgetRaw extends StatefulWidget {
   final Widget? leading;
   final Widget? description;
 
-  const SettingsColorPickerWidgetRaw(
-      {required this.title,
-      required this.value,
-      required this.onUpdate,
-      required this.enabled,
-      this.leading,
-      this.description,
-      Key? key})
-      : super(key: key);
+  const SettingsColorPickerWidgetRaw({
+    required this.title,
+    required this.value,
+    required this.onUpdate,
+    required this.enabled,
+    this.leading,
+    this.description,
+    Key? key,
+  }) : super(key: key);
 
   @override
-  State<SettingsColorPickerWidgetRaw> createState() =>
-      _SettingsColorPickerWidgetRawState();
+  State<SettingsColorPickerWidgetRaw> createState() => _SettingsColorPickerWidgetRawState();
 }
 
-class _SettingsColorPickerWidgetRawState
-    extends State<SettingsColorPickerWidgetRaw> with TickerProviderStateMixin {
+class _SettingsColorPickerWidgetRawState extends State<SettingsColorPickerWidgetRaw> with TickerProviderStateMixin {
   late final AnimationController controller;
   Animation<Offset>? animation;
   Color? oldColor;
@@ -170,7 +168,23 @@ class _SettingsColorPickerWidgetRawState
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                widget.title,
+                Expanded(
+                  child: Center(
+                    child: widget.leading ?? Container(),
+                  ),
+                ),
+                Expanded(
+                  flex: 6,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: SMALL_SPACE),
+                    child: Text(
+                      widget.title,
+                      style: getSubTitleTextStyle(context).copyWith(
+                        fontSize: 18,
+                      ),
+                    ),
+                  ),
+                ),
                 swapElement,
               ],
             ),
@@ -183,8 +197,7 @@ class _SettingsColorPickerWidgetRawState
                 crossAxisAlignment: WrapCrossAlignment.center,
                 children: <Widget>[
                       PlatformTextButton(
-                        child: Text(l10n
-                            .settingsScreen_setting_primaryColor_systemDefault),
+                        child: Text(l10n.settingsScreen_setting_primaryColor_systemDefault),
                         onPressed: () {
                           widget.onUpdate(null);
                         },
@@ -227,7 +240,7 @@ class _SettingsColorPickerWidgetRawState
 }
 
 class SettingsColorPicker extends AbstractSettingsTile {
-  final Widget title;
+  final String title;
   final Color? value;
   final void Function(Color? value) onUpdate;
 
