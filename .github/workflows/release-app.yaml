@@ -75,7 +75,7 @@ jobs:
         run: flutter gen-l10n
 
       - name: Build Android App (Multiple APKs) - FLOSS variant 📱
-        run: flutter build apk --split-per-abi --flavor=floss --dart-define=app.flavor=floss
+        run: flutter build apk --split-per-abi --dart-define=app.flavor=floss
 
       - name: Build Android App (fat APK) - FLOSS variant 📱
         run: flutter build apk --flavor=floss --dart-define=app.flavor=floss
