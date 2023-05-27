@@ -14,6 +14,8 @@ import 'package:locus/widgets/TimerWidget.dart';
 import 'package:locus/widgets/TimerWidgetSheet.dart';
 import 'package:provider/provider.dart';
 
+import '../models/log.dart';
+import '../services/log_service.dart';
 import '../services/settings_service.dart';
 import '../widgets/PlatformListTile.dart';
 import '../widgets/WarningText.dart';
@@ -87,8 +89,10 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
     setState(() {});
   }
 
-  Future<void> createTask(final BuildContext context) async {
+  Future<void> createTask() async {
     final taskService = context.read<TaskService>();
+    final settings = context.read<SettingsService>();
+    final logService = context.read<LogService>();
 
     setState(() {
       _isError = false;
@@ -108,9 +112,17 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
       taskService.add(task);
       await taskService.save();
 
+      await logService.addLog(
+        Log.createTask(
+          initiator: LogInitiator.user,
+          taskId: task.id,
+          taskName: task.name,
+          creationContext: TaskCreationContext.inApp,
+        ),
+      );
+
       if (_scheduleNow) {
         await task.startSchedule(startNowIfNextRunIsUnknown: true);
-        task.publishCurrentLocationNow();
       }
 
       if (mounted) {
@@ -407,7 +419,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                         return;
                       }
 
-                      createTask(context);
+                      createTask();
                     },
                     child: Text(
                       l10n.createTask_createLabel,

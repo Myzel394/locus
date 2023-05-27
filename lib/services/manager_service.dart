@@ -2,10 +2,14 @@ import 'package:background_fetch/background_fetch.dart';
 import 'package:locus/services/location_point_service.dart';
 import 'package:locus/services/task_service.dart';
 
+import '../models/log.dart';
+import 'log_service.dart';
+
 Future<void> updateLocation() async {
   final taskService = await TaskService.restore();
+  final logService = await LogService.restore();
 
-  await taskService.checkup();
+  await taskService.checkup(logService);
   final runningTasks = await taskService.getRunningTasks().toList();
 
   if (runningTasks.isEmpty) {
@@ -17,6 +21,23 @@ Future<void> updateLocation() async {
   for (final task in runningTasks) {
     await task.publishCurrentLocationNow(locationData.copyWithDifferentId());
   }
+
+  await logService.addLog(
+    Log.updateLocation(
+      initiator: LogInitiator.system,
+      latitude: locationData.latitude,
+      longitude: locationData.longitude,
+      accuracy: locationData.accuracy,
+      tasks: List<UpdatedTaskData>.from(
+        runningTasks.map(
+          (task) => UpdatedTaskData(
+            id: task.id,
+            name: task.name,
+          ),
+        ),
+      ),
+    ),
+  );
 }
 
 @pragma('vm:entry-point')
@@ -49,14 +70,14 @@ void configureBackgroundFetch() {
       startOnBoot: true,
       stopOnTerminate: false,
     ),
-        (taskId) async {
+    (taskId) async {
       // We only use one taskId to update the location for all tasks,
       // so we don't need to check the taskId.
       await updateLocation();
 
       BackgroundFetch.finish(taskId);
     },
-        (taskId) {
+    (taskId) {
       // Timeout, we need to finish immediately.
       BackgroundFetch.finish(taskId);
     },

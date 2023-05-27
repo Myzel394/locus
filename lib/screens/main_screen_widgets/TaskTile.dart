@@ -9,6 +9,9 @@ import 'package:locus/services/task_service.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../models/log.dart';
+import '../../services/location_point_service.dart';
+import '../../services/log_service.dart';
 import '../../widgets/PlatformDialogActionButton.dart';
 import '../../widgets/PlatformListTile.dart';
 import '../../widgets/PlatformPopup.dart';
@@ -66,12 +69,24 @@ class _TaskTileState extends State<TaskTile> {
                         isLoading = true;
                       });
 
+                      final logService = context.read<LogService>();
+
                       try {
                         if (value) {
                           await widget.task.startExecutionImmediately();
+                          await logService.addLog(
+                            Log.taskStatusChanged(
+                              initiator: LogInitiator.user,
+                              taskId: widget.task.id,
+                              taskName: widget.task.name,
+                              active: true,
+                            ),
+                          );
                           final nextEndDate = widget.task.nextEndDate();
+                          final locationData = await LocationPointService
+                              .createUsingCurrentLocation();
 
-                          widget.task.publishCurrentLocationNow();
+                          widget.task.publishCurrentLocationNow(locationData);
 
                           if (!mounted) {
                             return;
@@ -99,6 +114,14 @@ class _TaskTileState extends State<TaskTile> {
                           );
                         } else {
                           await widget.task.stopExecutionImmediately();
+                          await logService.addLog(
+                            Log.taskStatusChanged(
+                              initiator: LogInitiator.user,
+                              taskId: widget.task.id,
+                              taskName: widget.task.name,
+                              active: false,
+                            ),
+                          );
                           final nextStartDate =
                               await widget.task.startScheduleTomorrow();
 

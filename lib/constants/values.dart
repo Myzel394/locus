@@ -1,6 +1,7 @@
 const REPOSITORY_URL = "https://github.com/Myzel394/locus";
 const TRANSLATION_HELP_URL = "https://github.com/Myzel394/locus";
 const DONATION_URL = "https://github.com/Myzel394/locus";
+const APK_RELEASES_URL = "https://github.com/Myzel394/locus/releases";
 
 const BACKGROUND_LOCATION_UPDATES_MINIMUM_DISTANCE_FILTER = 25;
 
