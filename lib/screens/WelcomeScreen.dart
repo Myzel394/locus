@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -10,10 +11,12 @@ import 'package:gms_check/gms_check.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/init_quick_actions.dart';
 import 'package:locus/screens/welcome_screen_widgets/BatteryOptimizationsScreen.dart';
+import 'package:locus/screens/welcome_screen_widgets/ImportSheet.dart';
 import 'package:locus/screens/welcome_screen_widgets/LocationPermissionScreen.dart';
 import 'package:locus/screens/welcome_screen_widgets/NotificationPermissionScreen.dart';
 import 'package:locus/screens/welcome_screen_widgets/SimpleContinuePage.dart';
 import 'package:locus/utils/gms_check.dart';
+import 'package:locus/widgets/ModalSheet.dart';
 import 'package:lottie/lottie.dart';
 
 import '../utils/theme.dart';
@@ -72,16 +75,16 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   }
 
   void _nextScreen(final int page) {
-    _controller.animateToPage(page,
-        duration: 500.ms, curve: Curves.easeOutExpo);
+    _controller.animateToPage(page, duration: 500.ms, curve: Curves.easeOutExpo);
   }
 
   void _onDone() {
-    Navigator.pushReplacement(
+    Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(
         builder: (context) => const MainScreen(),
       ),
+      (route) => false,
     );
   }
 
@@ -103,6 +106,33 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 title: l10n.welcomeScreen_title,
                 description: l10n.welcomeScreen_description,
                 continueLabel: l10n.welcomeScreen_getStarted,
+                secondaryButton: PlatformTextButton(
+                  padding: EdgeInsets.zero,
+                  material: (_, __) => MaterialTextButtonData(
+                    icon: const Icon(Icons.download),
+                    // Small button
+                    style: TextButton.styleFrom(
+                      textStyle: const TextStyle(fontSize: 12),
+                    ),
+                  ),
+                  onPressed: () async {
+                    final d = await showPlatformModalSheet(
+                      context: context,
+                      builder: (context) => ImportSheet(
+                        onImport: (final taskService, final viewService, final settings) async {
+                          await Future.wait([
+                            taskService.save(),
+                            viewService.save(),
+                            settings.save(),
+                          ]);
+
+                          _onDone();
+                        },
+                      ),
+                    );
+                  },
+                  child: Text(l10n.welcomeScreen_importLabel),
+                ),
                 header: SvgPicture.asset(
                   "assets/logo.svg",
                   width: 150,
@@ -137,8 +167,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       // Background
                       ValueDelegate.color(
                         const ["unlock Konturen", "Kreis", "Fläche 1"],
-                        value:
-                            getIsDarkMode(context) ? shades[900] : shades[200],
+                        value: getIsDarkMode(context) ? shades[900] : shades[200],
                       ),
                     ],
                   ),
@@ -201,10 +230,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
               SimpleContinuePage(
                 title: l10n.welcomeScreen_usesWrongAppFlavor_title,
                 description: GmsCheck().isGmsAvailable
-                    ? l10n
-                        .welcomeScreen_usesWrongAppFlavor_description_isAvailable
-                    : l10n
-                        .welcomeScreen_usesWrongAppFlavor_description_isNotAvailable,
+                    ? l10n.welcomeScreen_usesWrongAppFlavor_description_isAvailable
+                    : l10n.welcomeScreen_usesWrongAppFlavor_description_isNotAvailable,
                 continueLabel: l10n.closeApp,
                 onContinue: () {
                   exit(0);
