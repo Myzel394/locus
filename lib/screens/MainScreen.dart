@@ -10,22 +10,14 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:locus/constants/spacing.dart';
 import 'package:locus/init_quick_actions.dart';
-import 'package:locus/screens/main_screen_widgets/ImportTask.dart';
-import 'package:locus/screens/main_screen_widgets/TaskTile.dart';
-import 'package:locus/screens/main_screen_widgets/ViewTile.dart';
-import 'package:locus/services/settings_service.dart';
+import 'package:locus/screens/main_screen_widgets/screens/EmptyScreen.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:locus/utils/navigation.dart';
-import 'package:locus/widgets/AppHint.dart';
-import 'package:locus/widgets/ChipCaption.dart';
-import 'package:locus/widgets/Paper.dart';
 import 'package:locus/widgets/PlatformPopup.dart';
 import 'package:provider/provider.dart';
 import 'package:uni_links/uni_links.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 
 import '../constants/values.dart';
 import '../models/log.dart';
@@ -36,8 +28,7 @@ import '../utils/platform.dart';
 import 'CreateTaskScreen.dart';
 import 'ImportTaskSheet.dart';
 import 'LogsScreen.dart';
-import 'main_screen_widgets/CreateTask.dart';
-import 'main_screen_widgets/UpdateAvailableBanner.dart';
+import 'main_screen_widgets/screens/OverviewScreen.dart';
 
 const FAB_DIMENSION = 56.0;
 
@@ -53,13 +44,9 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   final listViewKey = GlobalKey();
   late final TaskService taskService;
-  final _hintTypeFuture = getHintTypeForMainScreen();
   int activeTab = 0;
-  bool showHint = true;
   Stream<Position>? _positionStream;
   StreamSubscription<String?>? _uniLinksStream;
-
-  double get windowHeight => MediaQuery.of(context).size.height - kToolbarHeight;
 
   void initBackground() async {
     BackgroundFetch.start();
@@ -314,66 +301,47 @@ class _MainScreenState extends State<MainScreen> {
     final l10n = AppLocalizations.of(context);
     final taskService = context.watch<TaskService>();
     final viewService = context.watch<ViewService>();
-    final settings = context.watch<SettingsService>();
-    final appUpdateService = context.watch<AppUpdateService>();
 
     final showEmptyScreen = taskService.tasks.isEmpty && viewService.views.isEmpty;
 
     if (showEmptyScreen) {
       return PlatformScaffold(
         appBar: getAppBar(),
-        body: SafeArea(
-          child: SingleChildScrollView(
-            child: Column(
-              children: <Widget>[
-                SizedBox(
-                  height: windowHeight,
-                  child: const Center(
-                    child: CreateTask(),
-                  ),
-                ),
-                SizedBox(
-                  height: windowHeight,
-                  child: const Center(
-                    child: ImportTask(),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+        body: const EmptyScreen(),
       );
     }
 
     return PlatformScaffold(
       material: (_, __) => MaterialScaffoldData(
-        floatingActionButton: OpenContainer(
-          transitionDuration: const Duration(milliseconds: 500),
-          transitionType: ContainerTransitionType.fade,
-          openBuilder: (_, action) => CreateTaskScreen(
-            onCreated: () {
-              Navigator.pop(context);
-            },
-          ),
-          closedBuilder: (context, action) => SizedBox(
-            height: FAB_DIMENSION,
-            width: FAB_DIMENSION,
-            child: Center(
-              child: Icon(
-                Icons.add,
-                color: Theme.of(context).colorScheme.onPrimary,
-              ),
-            ),
-          ),
-          closedElevation: 6.0,
-          closedShape: const RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(
-              Radius.circular(FAB_DIMENSION / 2),
-            ),
-          ),
-          openColor: Theme.of(context).scaffoldBackgroundColor,
-          closedColor: Theme.of(context).colorScheme.primary,
-        ).animate().scale(duration: 500.ms, delay: 1.seconds, curve: Curves.bounceOut),
+        floatingActionButton: activeTab == 0
+            ? OpenContainer(
+                transitionDuration: const Duration(milliseconds: 500),
+                transitionType: ContainerTransitionType.fade,
+                openBuilder: (_, action) => CreateTaskScreen(
+                  onCreated: () {
+                    Navigator.pop(context);
+                  },
+                ),
+                closedBuilder: (context, action) => SizedBox(
+                  height: FAB_DIMENSION,
+                  width: FAB_DIMENSION,
+                  child: Center(
+                    child: Icon(
+                      Icons.add,
+                      color: Theme.of(context).colorScheme.onPrimary,
+                    ),
+                  ),
+                ),
+                closedElevation: 6.0,
+                closedShape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(FAB_DIMENSION / 2),
+                  ),
+                ),
+                openColor: Theme.of(context).scaffoldBackgroundColor,
+                closedColor: Theme.of(context).colorScheme.primary,
+              ).animate().scale(duration: 500.ms, delay: 1.seconds, curve: Curves.bounceOut)
+            : null,
       ),
       // Settings bottomNavBar via cupertino data class does not work
       bottomNavBar: PlatformNavBar(
@@ -413,178 +381,26 @@ class _MainScreenState extends State<MainScreen> {
               ],
       ),
       appBar: activeTab == 0 ? getAppBar() : null,
-      body: activeTab == 0
-          ? SafeArea(
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.max,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    appUpdateService.shouldShowBanner() ? const UpdateAvailableBanner() : const SizedBox.shrink(),
-                    FutureBuilder<HintType?>(
-                      future: _hintTypeFuture,
-                      builder: (context, snapshot) {
-                        if (snapshot.hasData && settings.getShowHints() && showHint) {
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(
-                              vertical: LARGE_SPACE,
-                              horizontal: MEDIUM_SPACE,
-                            ),
-                            child: AppHint(
-                              hintType: snapshot.data!,
-                              onDismiss: () {
-                                setState(() {
-                                  showHint = false;
-                                });
-                              },
-                            ),
-                          );
-                        }
-
-                        return const SizedBox.shrink();
-                      },
-                    ),
-                    const SizedBox(height: MEDIUM_SPACE),
-                    SizedBox(
-                      height: windowHeight - kToolbarHeight,
-                      child: Wrap(
-                        runSpacing: LARGE_SPACE,
-                        crossAxisAlignment: WrapCrossAlignment.start,
-                        children: <Widget>[
-                          if (taskService.tasks.isNotEmpty)
-                            PlatformWidget(
-                              material: (context, __) => Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: MEDIUM_SPACE),
-                                    child: ChipCaption(
-                                      l10n.mainScreen_tasksSection,
-                                      icon: Icons.task_rounded,
-                                    ),
-                                  ).animate().fadeIn(duration: 1.seconds),
-                                  ListView.builder(
-                                    shrinkWrap: true,
-                                    padding: const EdgeInsets.only(top: MEDIUM_SPACE),
-                                    physics: const NeverScrollableScrollPhysics(),
-                                    itemCount: taskService.tasks.length,
-                                    itemBuilder: (context, index) {
-                                      final task = taskService.tasks[index];
-
-                                      return TaskTile(
-                                        task: task,
-                                      )
-                                          .animate()
-                                          .then(delay: 100.ms * index)
-                                          .slide(
-                                            duration: 1.seconds,
-                                            curve: Curves.easeOut,
-                                            begin: const Offset(0, 0.2),
-                                          )
-                                          .fadeIn(
-                                            delay: 100.ms,
-                                            duration: 1.seconds,
-                                            curve: Curves.easeOut,
-                                          );
-                                    },
-                                  ),
-                                ],
-                              ),
-                              cupertino: (context, __) => CupertinoListSection(
-                                header: Text(
-                                  l10n.mainScreen_tasksSection,
-                                ),
-                                children: taskService.tasks
-                                    .map(
-                                      (task) => TaskTile(
-                                        task: task,
-                                      ),
-                                    )
-                                    .toList(),
-                              ),
-                            ),
-                          if (viewService.views.isNotEmpty)
-                            PlatformWidget(
-                              material: (context, __) => Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: <Widget>[
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: MEDIUM_SPACE),
-                                    child: ChipCaption(
-                                      l10n.mainScreen_viewsSection,
-                                      icon: context.platformIcons.eyeSolid,
-                                    ),
-                                  ).animate().fadeIn(duration: 1.seconds),
-                                  ListView.builder(
-                                    shrinkWrap: true,
-                                    padding: const EdgeInsets.only(top: MEDIUM_SPACE),
-                                    physics: const NeverScrollableScrollPhysics(),
-                                    itemCount: viewService.views.length,
-                                    itemBuilder: (context, index) => ViewTile(
-                                      view: viewService.views[index],
-                                    )
-                                        .animate()
-                                        .then(delay: 100.ms * index)
-                                        .slide(
-                                          duration: 1.seconds,
-                                          curve: Curves.easeOut,
-                                          begin: const Offset(0, 0.2),
-                                        )
-                                        .fadeIn(
-                                          delay: 100.ms,
-                                          duration: 1.seconds,
-                                          curve: Curves.easeOut,
-                                        ),
-                                  ),
-                                ],
-                              ),
-                              cupertino: (context, __) => CupertinoListSection(
-                                header: Text(l10n.mainScreen_viewsSection),
-                                children: viewService.views
-                                    .map(
-                                      (view) => ViewTile(
-                                        view: view,
-                                      ),
-                                    )
-                                    .toList(),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(
-                      height: windowHeight,
-                      child: const Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: MEDIUM_SPACE,
-                          vertical: HUGE_SPACE,
-                        ),
-                        child: Center(
-                          child: Paper(
-                            child: ImportTask(),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            )
-          : activeTab == 1
-              ? LogsScreen()
-              : activeTab == 2
-                  ? CreateTaskScreen(
-                      onCreated: () {
-                        if (isCupertino(context)) {
-                          setState(() {
-                            activeTab = 0;
-                          });
-                        } else {
-                          Navigator.pop(context);
-                        }
-                      },
-                    )
-                  : null,
+      body: (() {
+        switch (activeTab) {
+          case 0:
+            return const OverviewScreen();
+          case 1:
+            return const LogsScreen();
+          case 2:
+            return CreateTaskScreen(
+              onCreated: () {
+                if (isCupertino(context)) {
+                  setState(() {
+                    activeTab = 0;
+                  });
+                } else {
+                  Navigator.pop(context);
+                }
+              },
+            );
+        }
+      })(),
     );
   }
 }
