@@ -11,14 +11,20 @@ const storage = FlutterSecureStorage();
 const KEY = "_app_update_service";
 
 class AppUpdateService extends ChangeNotifier {
+  // Since when the app is outdated
   DateTime? _outDateDate;
   bool _isUpdateAvailable;
+  bool _hideBanner;
+  bool _hideDialogue;
 
   AppUpdateService({
     DateTime? outDateDate,
-    bool isUpdateAvailable = false,
+    bool hideBanner = false,
+    bool hideDialogue = false,
   })  : _outDateDate = outDateDate,
-        _isUpdateAvailable = isUpdateAvailable;
+        _hideBanner = hideBanner,
+        _hideDialogue = hideDialogue,
+        _isUpdateAvailable = false;
 
   static Future<AppUpdateService> restore() async {
     final data = await storage.read(key: KEY);
@@ -30,12 +36,18 @@ class AppUpdateService extends ChangeNotifier {
     return AppUpdateService.fromJSON(jsonDecode(data) as Map<String, dynamic>);
   }
 
-  static AppUpdateService fromJSON(final Map<String, dynamic> data) =>
-      AppUpdateService(
-        outDateDate: data['outDateDate'] == null
-            ? null
-            : DateTime.parse(data['outDateDate'] as String),
+  static AppUpdateService fromJSON(final Map<String, dynamic> data) => AppUpdateService(
+        outDateDate: data['outDateDate'] == null ? null : DateTime.parse(data['outDateDate'] as String),
+        hideBanner: data['hideBanner'] as bool,
+        hideDialogue: data['hideDialogue'] as bool,
       );
+
+  void _reset() {
+    _outDateDate = null;
+    _isUpdateAvailable = false;
+    _hideBanner = false;
+    _hideDialogue = false;
+  }
 
   bool get isUpdateAvailable => _isUpdateAvailable;
 
@@ -58,7 +70,7 @@ class AppUpdateService extends ChangeNotifier {
     if (_isUpdateAvailable) {
       _outDateDate ??= DateTime.now();
     } else {
-      _outDateDate = null;
+      _reset();
     }
 
     notifyListeners();
@@ -68,10 +80,34 @@ class AppUpdateService extends ChangeNotifier {
 
   Map<String, dynamic> toJSON() => {
         "outDateDate": _outDateDate?.toIso8601String(),
+        "hideBanner": _hideBanner,
+        "hideDialogue": _hideDialogue,
       };
 
   Future<void> save() => storage.write(
         key: KEY,
         value: jsonEncode(toJSON()),
       );
+
+  bool shouldShowBanner() {
+    if (_outDateDate == null || _hideBanner) {
+      return false;
+    }
+
+    final now = DateTime.now();
+    final diff = now.difference(_outDateDate!);
+
+    return diff.inDays >= 5 && diff.inDays <= 30;
+  }
+
+  bool shouldShowDialogue() {
+    if (_outDateDate == null || _hideDialogue) {
+      return false;
+    }
+
+    final now = DateTime.now();
+    final diff = now.difference(_outDateDate!);
+
+    return diff.inDays >= 30;
+  }
 }
