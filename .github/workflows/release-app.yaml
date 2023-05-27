@@ -61,6 +61,13 @@ jobs:
           mv app-arm64-v8a-release.apk locus-arm64-gms.apk &&
           mv app-armeabi-v7a-release.apk locus-armeabi-gms.apk &&
           mv app-x86_64-release.apk locus-x86-gms.apk
+      
+      - name: Upload APKs 🚀
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        with:
+          files: 'build/app/outputs/flutter-apk/*.apk'
           
       - name: Clean Flutter
         run: flutter clean
@@ -88,7 +95,7 @@ jobs:
           mv app-armeabi-v7a-release.apk locus-armeabi-floss.apk &&
           mv app-x86_64-release.apk locus-x86-floss.apk
 
-      - name: Release Apps 🚀
+      - name: Upload APKs 🚀
         uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
