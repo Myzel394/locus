@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
@@ -5,21 +6,29 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart' hide PlatformListTile;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/constants/values.dart';
 import 'package:locus/screens/settings_screen_widgets/MentionTile.dart';
+import 'package:locus/services/task_service.dart';
+import 'package:locus/utils/import_export_handler.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/Paper.dart';
 import 'package:locus/widgets/SettingsColorPicker.dart';
 import 'package:locus/widgets/SettingsDropdownTile.dart';
 import 'package:provider/provider.dart';
 import 'package:settings_ui/settings_ui.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../services/settings_service.dart';
+import '../services/view_service.dart';
+import '../utils/file.dart';
 import '../utils/platform.dart';
 import '../widgets/PlatformListTile.dart';
 import '../widgets/RelaySelectSheet.dart';
+
+const storage = FlutterSecureStorage();
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({
@@ -213,11 +222,74 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         leading: Icon(context.platformIcons.info),
                       ),
                       SettingsTile.navigation(
-                        title: Text(l10n.settingsScreen_settings_importExport_label),
+                        title: Text(l10n.settingsScreen_settings_importExport_exportFile),
                         leading: PlatformWidget(
-                          material: (_, __) => const Icon(Icons.import_export),
-                          cupertino: (_, __) => const Icon(CupertinoIcons.arrow_up_arrow_down_circle),
+                          material: (_, __) => const Icon(Icons.file_open),
+                          cupertino: (_, __) => const Icon(CupertinoIcons.doc),
                         ),
+                        trailing: PlatformWidget(
+                          material: (_, __) => const Icon(Icons.arrow_forward),
+                          cupertino: (_, __) => const Icon(CupertinoIcons.forward),
+                        ),
+                        onPressed: (_) async {
+                          final taskService = context.read<TaskService>();
+                          final viewService = context.read<ViewService>();
+                          final settings = context.read<SettingsService>();
+
+                          final shouldSave = await showPlatformDialog(
+                            context: context,
+                            builder: (context) => PlatformAlertDialog(
+                              title: Text(l10n.settingsScreen_settings_importExport_exportFile),
+                              content: Text(l10n.settingsScreen_settings_importExport_exportFile_description),
+                              actions: createCancellableDialogActions(
+                                context,
+                                [
+                                  PlatformDialogAction(
+                                    material: (_, __) => MaterialDialogActionData(
+                                      icon: const Icon(Icons.save),
+                                    ),
+                                    onPressed: () {
+                                      Navigator.pop(context, true);
+                                    },
+                                    child: Text(l10n.settingsScreen_settings_importExport_exportFile_save),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+
+                          if (shouldSave) {
+                            final rawData = jsonEncode(
+                              await exportToJSON(taskService, viewService, settings),
+                            );
+
+                            final file = XFile(
+                              (await createTempFile(
+                                const Utf8Encoder().convert(rawData),
+                                name: "export.locus.json",
+                              ))
+                                  .path,
+                            );
+
+                            await Share.shareXFiles(
+                              [file],
+                              text: "Locus view key",
+                              subject: l10n.shareLocation_actions_shareFile_text,
+                            );
+                          }
+                        },
+                      ),
+                      SettingsTile.navigation(
+                        title: Text(l10n.settingsScreen_settings_importExport_transfer),
+                        leading: PlatformWidget(
+                          material: (_, __) => const Icon(Icons.phonelink_setup_rounded),
+                          cupertino: (_, __) => const Icon(CupertinoIcons.device_phone_portrait),
+                        ),
+                        trailing: PlatformWidget(
+                          material: (_, __) => const Icon(Icons.arrow_forward),
+                          cupertino: (_, __) => const Icon(CupertinoIcons.forward),
+                        ),
+                        onPressed: (_) {},
                       )
                     ],
                   ),
