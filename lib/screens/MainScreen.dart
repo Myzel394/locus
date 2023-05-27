@@ -25,6 +25,7 @@ import 'package:locus/widgets/Paper.dart';
 import 'package:locus/widgets/PlatformPopup.dart';
 import 'package:provider/provider.dart';
 import 'package:uni_links/uni_links.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 import '../constants/values.dart';
 import '../models/log.dart';
@@ -230,9 +231,52 @@ class _MainScreenState extends State<MainScreen> {
     super.dispose();
   }
 
+  void _showUpdateDialogIfRequired() async {
+    final l10n = AppLocalizations.of(context);
+    final appUpdateService = context.read<AppUpdateService>();
+
+    if (appUpdateService.shouldShowDialogue() && !appUpdateService.hasShownDialogue && mounted) {
+      await showPlatformDialog(
+        context: context,
+        barrierDismissible: false,
+        material: MaterialDialogData(
+          barrierColor: Colors.black,
+        ),
+        builder: (context) => PlatformAlertDialog(
+          title: Text(l10n.updateAvailable_android_title),
+          content: Text(l10n.updateAvailable_android_description),
+          actions: [
+            PlatformDialogAction(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              material: (context, _) => MaterialDialogActionData(icon: const Icon(Icons.watch_later_rounded)),
+              child: Text(l10n.updateAvailable_android_remindLater),
+            ),
+            PlatformDialogAction(
+              onPressed: () {
+                appUpdateService.doNotShowDialogueAgain();
+
+                Navigator.of(context).pop();
+              },
+              material: (context, _) => MaterialDialogActionData(icon: const Icon(Icons.block)),
+              child: Text(l10n.updateAvailable_android_ignore),
+            ),
+            PlatformDialogAction(
+              onPressed: appUpdateService.openStoreForUpdate,
+              material: (context, _) => MaterialDialogActionData(icon: const Icon(Icons.download)),
+              child: Text(l10n.updateAvailable_android_download),
+            ),
+          ],
+        ),
+      );
+
+      appUpdateService.setHasShownDialogue();
+    }
+  }
+
   void updateView() async {
     final taskService = context.read<TaskService>();
-
     final runningTasks = await taskService.getRunningTasks().toList();
 
     if (runningTasks.isNotEmpty) {
@@ -240,6 +284,8 @@ class _MainScreenState extends State<MainScreen> {
     } else {
       _removeLiveLocationUpdate();
     }
+
+    _showUpdateDialogIfRequired();
   }
 
   PlatformAppBar getAppBar() {

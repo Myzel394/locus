@@ -2,7 +2,9 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:locus/constants/values.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 import 'package:version/version.dart';
 
 import '../api/get-newest-version.dart';
@@ -16,6 +18,7 @@ class AppUpdateService extends ChangeNotifier {
   bool _isUpdateAvailable;
   bool _hideBanner;
   bool _hideDialogue;
+  bool hasShownDialogue = false;
 
   AppUpdateService({
     DateTime? outDateDate,
@@ -117,4 +120,20 @@ class AppUpdateService extends ChangeNotifier {
     notifyListeners();
     await save();
   }
+
+  Future<void> doNotShowDialogueAgain() async {
+    _hideDialogue = true;
+
+    notifyListeners();
+    await save();
+  }
+
+  void setHasShownDialogue() {
+    hasShownDialogue = true;
+  }
+
+  void openStoreForUpdate() => launchUrlString(
+        APK_RELEASES_URL,
+        mode: LaunchMode.externalApplication,
+      );
 }

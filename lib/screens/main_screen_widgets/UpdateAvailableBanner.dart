@@ -22,12 +22,7 @@ class UpdateAvailableBanner extends StatelessWidget {
 
     if (Platform.isAndroid) {
       return InkWell(
-        onTap: () {
-          launchUrlString(
-            APK_RELEASES_URL,
-            mode: LaunchMode.externalApplication,
-          );
-        },
+        onTap: appUpdateService.openStoreForUpdate,
         child: ColoredBox(
           color: platformThemeData(
             context,
