@@ -1,13 +1,11 @@
 import 'dart:collection';
 import 'dart:convert';
-import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:gms_check/gms_check.dart';
 
 import '../api/get-address.dart';
 import '../utils/platform.dart';
@@ -72,9 +70,7 @@ class SettingsService extends ChangeNotifier {
     );
   }
 
-  static bool isSystemGeocoderAvailable() =>
-      // Apple does not seem to work
-      (Platform.isAndroid && GmsCheck().isGmsAvailable);
+  static bool isSystemGeocoderAvailable() => false;
 
   static SettingsService fromJSON(final Map<String, dynamic> data) {
     return SettingsService(

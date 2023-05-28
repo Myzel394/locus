@@ -4,7 +4,6 @@ import 'package:disable_battery_optimization/disable_battery_optimization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:gms_check/gms_check.dart';
 import 'package:locus/App.dart';
 import 'package:locus/services/app_update_service.dart';
 import 'package:locus/services/log_service.dart';
@@ -37,7 +36,6 @@ void main() async {
     hasGrantedNotificationPermission(),
     LogService.restore(),
     AppUpdateService.restore(),
-    GmsCheck().checkGmsAvailability(),
   ]);
   final bool hasLocationAlwaysGranted = futures[0];
   final TaskService taskService = futures[1];

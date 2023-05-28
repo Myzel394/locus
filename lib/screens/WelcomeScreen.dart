@@ -6,7 +6,6 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:gms_check/gms_check.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/init_quick_actions.dart';
 import 'package:locus/screens/welcome_screen_widgets/BatteryOptimizationsScreen.dart';
@@ -198,23 +197,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 },
               ),
               BatteryOptimizationsScreen(onDone: _onDone),
-              SimpleContinuePage(
-                title: l10n.welcomeScreen_usesWrongAppFlavor_title,
-                description: GmsCheck().isGmsAvailable
-                    ? l10n
-                        .welcomeScreen_usesWrongAppFlavor_description_isAvailable
-                    : l10n
-                        .welcomeScreen_usesWrongAppFlavor_description_isNotAvailable,
-                continueLabel: l10n.closeApp,
-                onContinue: () {
-                  exit(0);
-                },
-                header: Icon(
-                  Icons.warning,
-                  color: getErrorColor(context),
-                  size: 120,
-                ),
-              )
             ],
           ),
         ),
