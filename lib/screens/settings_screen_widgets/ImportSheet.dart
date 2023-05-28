@@ -69,7 +69,7 @@ class _ImportSheetState extends State<ImportSheet> {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Text(
-            l10n.welcomeScreen_importLabel,
+            l10n.settingsScreen_settings_importExport_importLabel,
             style: getTitle2TextStyle(context),
           ),
           const SizedBox(height: MEDIUM_SPACE),
@@ -88,13 +88,13 @@ class _ImportSheetState extends State<ImportSheet> {
             children: <Widget>[
               PlatformListTile(
                 leading: const Icon(Icons.file_download),
-                title: Text(l10n.welcomeScreen_import_file),
+                title: Text(l10n.settingsScreen_import_file),
                 onTap: () async {
                   try {
                     final result = await FilePicker.platform.pickFiles(
                       type: FileType.custom,
                       allowedExtensions: ["json"],
-                      dialogTitle: l10n.welcomeScreen_import_pickerTitle,
+                      dialogTitle: l10n.settingsScreen_import_pickerTitle,
                       withData: true,
                     );
 
@@ -117,7 +117,7 @@ class _ImportSheetState extends State<ImportSheet> {
                   material: (_, __) => const Icon(Icons.phonelink_setup_rounded),
                   cupertino: (_, __) => const Icon(CupertinoIcons.device_phone_portrait),
                 ),
-                title: Text(l10n.welcomeScreen_import_transfer),
+                title: Text(l10n.settingsScreen_import_transfer),
                 onTap: () {
                   Navigator.push(
                     context,

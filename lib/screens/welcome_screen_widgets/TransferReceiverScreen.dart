@@ -109,7 +109,7 @@ class _TransferReceiverScreenState extends State<TransferReceiverScreen> with Bl
 
     return PlatformScaffold(
       appBar: PlatformAppBar(
-        title: Text(l10n.welcomeScreen_import_transfer),
+        title: Text(l10n.settingsScreen_import_transfer),
       ),
       body: SafeArea(
         child: Padding(
@@ -194,7 +194,7 @@ class _TransferReceiverScreenState extends State<TransferReceiverScreen> with Bl
                   const SizedBox(height: MEDIUM_SPACE),
                   PlatformElevatedButton(
                     onPressed: acceptConnection,
-                    child: Text("Connect"),
+                    child: Text(l10n.settingsScreen_settings_importExport_transfer_connectionActionLabel),
                   ),
                 ],
               );

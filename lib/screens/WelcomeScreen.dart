@@ -11,7 +11,7 @@ import 'package:gms_check/gms_check.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/init_quick_actions.dart';
 import 'package:locus/screens/welcome_screen_widgets/BatteryOptimizationsScreen.dart';
-import 'package:locus/screens/welcome_screen_widgets/ImportSheet.dart';
+import 'package:locus/screens/settings_screen_widgets/ImportSheet.dart';
 import 'package:locus/screens/welcome_screen_widgets/LocationPermissionScreen.dart';
 import 'package:locus/screens/welcome_screen_widgets/NotificationPermissionScreen.dart';
 import 'package:locus/screens/welcome_screen_widgets/SimpleContinuePage.dart';
@@ -106,33 +106,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 title: l10n.welcomeScreen_title,
                 description: l10n.welcomeScreen_description,
                 continueLabel: l10n.welcomeScreen_getStarted,
-                secondaryButton: PlatformTextButton(
-                  padding: EdgeInsets.zero,
-                  material: (_, __) => MaterialTextButtonData(
-                    icon: const Icon(Icons.download),
-                    // Small button
-                    style: TextButton.styleFrom(
-                      textStyle: const TextStyle(fontSize: 12),
-                    ),
-                  ),
-                  onPressed: () async {
-                    final d = await showPlatformModalSheet(
-                      context: context,
-                      builder: (context) => ImportSheet(
-                        onImport: (final taskService, final viewService, final settings) async {
-                          await Future.wait([
-                            taskService.save(),
-                            viewService.save(),
-                            settings.save(),
-                          ]);
-
-                          _onDone();
-                        },
-                      ),
-                    );
-                  },
-                  child: Text(l10n.welcomeScreen_importLabel),
-                ),
                 header: SvgPicture.asset(
                   "assets/logo.svg",
                   width: 150,

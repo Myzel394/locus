@@ -9,6 +9,7 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart' hide Pla
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/constants/values.dart';
+import 'package:locus/screens/settings_screen_widgets/ImportSheet.dart';
 import 'package:locus/screens/settings_screen_widgets/MentionTile.dart';
 import 'package:locus/screens/settings_screen_widgets/TransferSenderScreen.dart';
 import 'package:locus/services/task_service.dart';
@@ -298,8 +299,39 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             ),
                           );
                         },
-                      )
-                    ],
+                      ),
+                      Platform.isAndroid
+                          ? SettingsTile.navigation(
+                              title: Text(l10n.settingsScreen_settings_importExport_importLabel),
+                              leading: PlatformWidget(
+                                material: (_, __) => const Icon(Icons.file_download),
+                                cupertino: (_, __) => const Icon(CupertinoIcons.tray_arrow_down_fill),
+                              ),
+                              onPressed: (_) async {
+                                final shouldPopContext = await showPlatformModalSheet(
+                                  context: context,
+                                  builder: (context) => ImportSheet(
+                                    onImport: (final taskService, final viewService, final settings) async {
+                                      await Future.wait([
+                                        taskService.save(),
+                                        viewService.save(),
+                                        settings.save(),
+                                      ]);
+
+                                      if (context.mounted) {
+                                        Navigator.pop(context, true);
+                                      }
+                                    },
+                                  ),
+                                );
+
+                                if (shouldPopContext && mounted) {
+                                  Navigator.pop(context);
+                                }
+                              },
+                            )
+                          : null,
+                    ].where((element) => element != null).cast<SettingsTile>().toList(),
                   ),
                   kDebugMode
                       ? SettingsSection(
