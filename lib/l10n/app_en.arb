@@ -363,6 +363,17 @@
   "settingsScreen_import_file": "Import file",
   "settingsScreen_import_pickerTitle": "Select the export.locus.json file to import your data",
   "settingsScreen_import_transfer": "Transfer from old device",
+  "settingsScreen_version": "Version {version} ({flavor, select, gms{GMS} floss{FLOSS} other{Unknown}})",
+  "@settingsScreen_version": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "flavor": {
+        "type": "String"
+      }
+    }
+  },
   "support_title": "Support Locus",
   "support_description": "Locus is a free open source project. This means that I don't make any money from it. If you like the app and want to support me, you can do so by multiple ways. Thank you very much! :)",
   "support_options_develop": "Help developing Locus",
