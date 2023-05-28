@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart' hide PlatformListTile;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:locus/screens/welcome_screen_widgets/TransferReceiverScreen.dart';
 import 'package:locus/services/settings_service.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/services/view_service.dart';
@@ -117,6 +118,14 @@ class _ImportSheetState extends State<ImportSheet> {
                   cupertino: (_, __) => const Icon(CupertinoIcons.device_phone_portrait),
                 ),
                 title: Text(l10n.welcomeScreen_import_transfer),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => TransferReceiverScreen(onContentReceived: parseRawData),
+                    ),
+                  );
+                },
               ),
             ],
           ),

@@ -10,6 +10,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/constants/values.dart';
 import 'package:locus/screens/settings_screen_widgets/MentionTile.dart';
+import 'package:locus/screens/settings_screen_widgets/TransferSenderScreen.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/utils/import_export_handler.dart';
 import 'package:locus/utils/theme.dart';
@@ -289,7 +290,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           material: (_, __) => const Icon(Icons.arrow_forward),
                           cupertino: (_, __) => const Icon(CupertinoIcons.forward),
                         ),
-                        onPressed: (_) {},
+                        onPressed: (_) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => TransferSenderScreen(),
+                            ),
+                          );
+                        },
                       )
                     ],
                   ),
