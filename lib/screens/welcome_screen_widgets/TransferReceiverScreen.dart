@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
+import 'package:locus/utils/bluetooth.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/PINView.dart';
 import 'package:lottie/lottie.dart';
@@ -31,12 +32,13 @@ class _TransferReceiverScreenState extends State<TransferReceiverScreen> {
   String? connectionID;
   int? connectionPIN;
   double? progress;
+  bool hasGrantedPermissions = false;
 
   @override
   void initState() {
     super.initState();
 
-    startAdvertising();
+    checkPermissions();
   }
 
   @override
@@ -45,6 +47,18 @@ class _TransferReceiverScreenState extends State<TransferReceiverScreen> {
     Nearby().stopAllEndpoints();
 
     super.dispose();
+  }
+
+  checkPermissions() async {
+    final hasGranted = await checkIfHasBluetoothPermission();
+
+    if (hasGranted) {
+      setState(() {
+        hasGrantedPermissions = true;
+      });
+
+      startAdvertising();
+    }
   }
 
   startAdvertising() async {
@@ -110,6 +124,22 @@ class _TransferReceiverScreenState extends State<TransferReceiverScreen> {
           padding: const EdgeInsets.all(MEDIUM_SPACE),
           child: Center(
             child: (() {
+              if (!hasGrantedPermissions) {
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    const Icon(Icons.bluetooth_audio_rounded, size: 60),
+                    const SizedBox(height: MEDIUM_SPACE),
+                    Text(l10n.grantBluetoothPermission),
+                    const SizedBox(height: MEDIUM_SPACE),
+                    PlatformElevatedButton(
+                      onPressed: checkPermissions,
+                      child: Text(l10n.grantPermission),
+                    ),
+                  ],
+                );
+              }
               if (progress != null) {
                 return Column(
                   mainAxisAlignment: MainAxisAlignment.center,

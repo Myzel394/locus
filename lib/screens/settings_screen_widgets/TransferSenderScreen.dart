@@ -10,6 +10,7 @@ import 'package:locus/constants/spacing.dart';
 import 'package:locus/constants/values.dart';
 import 'package:locus/services/settings_service.dart';
 import 'package:locus/services/task_service.dart';
+import 'package:locus/utils/bluetooth.dart';
 import 'package:locus/utils/import_export_handler.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/PINView.dart';
@@ -33,12 +34,13 @@ class _TransferSenderScreenState extends State<TransferSenderScreen> {
   String? connectionID;
   bool connectionEstablished = false;
   bool isSending = false;
+  bool hasGrantedPermissions = false;
 
   @override
   void initState() {
     super.initState();
 
-    startDiscovery();
+    checkPermissions();
   }
 
   @override
@@ -49,12 +51,20 @@ class _TransferSenderScreenState extends State<TransferSenderScreen> {
     super.dispose();
   }
 
+  checkPermissions() async {
+    final hasGranted = await checkIfHasBluetoothPermission();
+
+    if (hasGranted) {
+      setState(() {
+        hasGrantedPermissions = true;
+      });
+
+      startDiscovery();
+    }
+  }
+
   startDiscovery() async {
     final serviceID = await getBluetoothServiceID();
-
-    Nearby().askBluetoothPermission();
-    await Permission.bluetoothAdvertise.request();
-    await Permission.nearbyWifiDevices.request();
 
     await Nearby().startDiscovery(
       PACKAGE_NAME,
@@ -141,6 +151,23 @@ class _TransferSenderScreenState extends State<TransferSenderScreen> {
           padding: const EdgeInsets.all(MEDIUM_SPACE),
           child: Center(
             child: (() {
+              if (!hasGrantedPermissions) {
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    const Icon(Icons.bluetooth_audio_rounded, size: 60),
+                    const SizedBox(height: MEDIUM_SPACE),
+                    Text(l10n.grantBluetoothPermission),
+                    const SizedBox(height: MEDIUM_SPACE),
+                    PlatformElevatedButton(
+                      onPressed: checkPermissions,
+                      child: Text(l10n.grantPermission),
+                    ),
+                  ],
+                );
+              }
+
               if (connectionEstablished) {
                 return Column(
                   mainAxisAlignment: MainAxisAlignment.center,

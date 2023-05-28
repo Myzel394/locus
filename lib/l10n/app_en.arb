@@ -33,6 +33,8 @@
   "detailsTimersLabel": "Timers",
   "searchLabel": "Search",
   "closeApp": "Close Locus",
+  "grantBluetoothPermission": "Please activate Bluetooth and grant the permission to scan for nearby devices",
+  "grantPermission": "Grant permission",
   "updateAvailable_android": "A new version of Locus is available! Click to download the newest APK.",
   "updateAvailable_android_title": "Please update Locus",
   "updateAvailable_android_description": "A new version of Locus is available! Please keep Locus up to date to ensure that it works properly and you are not missing out any new features or bug fixes. Tap to download the newest APK.",
