@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/app.dart';
 import 'package:locus/constants/spacing.dart';
@@ -138,6 +139,9 @@ class _TransferSenderScreenState extends State<TransferSenderScreen> with Blueto
     final l10n = AppLocalizations.of(context);
 
     return PlatformScaffold(
+      appBar: PlatformAppBar(
+        title: Text(l10n.settingsScreen_settings_importExport_transfer),
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(MEDIUM_SPACE),
@@ -181,11 +185,13 @@ class _TransferSenderScreenState extends State<TransferSenderScreen> with Blueto
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  Lottie.asset(
-                    "assets/lotties/radar.json",
-                    frameRate: FrameRate.max,
-                    repeat: true,
-                  ),
+                  Container(
+                    child: Lottie.asset(
+                      "assets/lotties/radar.json",
+                      frameRate: FrameRate.max,
+                      repeat: true,
+                    ),
+                  ).animate().fadeIn(duration: 800.ms),
                   Text(l10n.transferScreen_send_awaiting_label),
                   const SizedBox(height: LARGE_SPACE),
                   Text(
