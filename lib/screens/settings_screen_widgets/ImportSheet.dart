@@ -1,11 +1,12 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter_platform_widgets/flutter_platform_widgets.dart' hide PlatformListTile;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart'
+    hide PlatformListTile;
 import 'package:locus/screens/welcome_screen_widgets/TransferReceiverScreen.dart';
 import 'package:locus/services/settings_service.dart';
 import 'package:locus/services/task_service.dart';
@@ -102,7 +103,8 @@ class _ImportSheetState extends State<ImportSheet> {
                       return;
                     }
 
-                    final content = String.fromCharCodes(List<int>.from(result.files[0].bytes!));
+                    final content = String.fromCharCodes(
+                        List<int>.from(result.files[0].bytes!));
 
                     parseRawData(content);
                   } catch (_) {
@@ -112,21 +114,26 @@ class _ImportSheetState extends State<ImportSheet> {
                   }
                 },
               ),
-              PlatformListTile(
-                leading: PlatformWidget(
-                  material: (_, __) => const Icon(Icons.phonelink_setup_rounded),
-                  cupertino: (_, __) => const Icon(CupertinoIcons.device_phone_portrait),
-                ),
-                title: Text(l10n.settingsScreen_import_transfer),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => TransferReceiverScreen(onContentReceived: parseRawData),
-                    ),
-                  );
-                },
-              ),
+              Platform.isAndroid
+                  ? PlatformListTile(
+                      leading: PlatformWidget(
+                        material: (_, __) =>
+                            const Icon(Icons.phonelink_setup_rounded),
+                        cupertino: (_, __) =>
+                            const Icon(CupertinoIcons.device_phone_portrait),
+                      ),
+                      title: Text(l10n.settingsScreen_import_transfer),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => TransferReceiverScreen(
+                                onContentReceived: parseRawData),
+                          ),
+                        );
+                      },
+                    )
+                  : const SizedBox.shrink(),
             ],
           ),
         ],
