@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -71,16 +72,16 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   }
 
   void _nextScreen(final int page) {
-    _controller.animateToPage(page,
-        duration: 500.ms, curve: Curves.easeOutExpo);
+    _controller.animateToPage(page, duration: 500.ms, curve: Curves.easeOutExpo);
   }
 
   void _onDone() {
-    Navigator.pushReplacement(
+    Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(
         builder: (context) => const MainScreen(),
       ),
+      (route) => false,
     );
   }
 
@@ -136,8 +137,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       // Background
                       ValueDelegate.color(
                         const ["unlock Konturen", "Kreis", "Fläche 1"],
-                        value:
-                            getIsDarkMode(context) ? shades[900] : shades[200],
+                        value: getIsDarkMode(context) ? shades[900] : shades[200],
                       ),
                     ],
                   ),

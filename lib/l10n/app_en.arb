@@ -33,6 +33,8 @@
   "detailsTimersLabel": "Timers",
   "searchLabel": "Search",
   "closeApp": "Close Locus",
+  "grantBluetoothPermission": "Please activate Bluetooth and grant the permission to scan for nearby devices",
+  "grantPermission": "Grant permission",
   "updateAvailable_android": "A new version of Locus is available! Click to download the newest APK.",
   "updateAvailable_android_title": "Please update Locus",
   "updateAvailable_android_description": "A new version of Locus is available! Please keep Locus up to date to ensure that it works properly and you are not missing out any new features or bug fixes. Tap to download the newest APK.",
@@ -172,6 +174,13 @@
   "welcomeScreen_usesWrongAppFlavor_title": "You are using the wrong app variant",
   "welcomeScreen_usesWrongAppFlavor_description_isAvailable": "Locus is available in two variants. You are using the FLOSS variant. This variant contains only free and open-source software. It does not contain any propietary code, such as Google Play Services. You, however, have Google Play Services installed. Unfortunately, the FLOSS variant does not work with Google Play Services. Please install the \"GMS\" variant of Locus.",
   "welcomeScreen_usesWrongAppFlavor_description_isNotAvailable": "Locus is available in two variants. You are using the \"GMS\" variant. This variant contains Google Play Services. You, however, do not have Google Play Services installed. Unfortunately, the \"GMS\" variant does not work without Google Play Services. Please install the FLOSS variant of Locus.",
+  "transferScreen_receive_awaiting_label": "Make sure you have Bluetooth enabled. Waiting for transfer, open Locus on your old device and go to settings, then tap \"Transfer Locus to a new Phone\"",
+  "transferScreen_send_awaiting_label": "Make sure you have Bluetooth enabled. Searching for nearby devices...",
+  "transferScreen_send_pin_description": "This is your PIN:",
+  "transferScreen_send_connected_label": "Perfect! You are connected to your new device. Press \"Transfer\" to start the transfer.",
+  "transferScreen_send_startTransfer": "Transfer",
+  "transferScreen_receive_connect_description": "Received a transfer request. This is the PIN. Make sure the PIN matches the one on your old device. If it does, tap \"Connect\".",
+  "transferScreen_receive_connected_label": "Please start the transfer on your old device now.",
   "mainScreen_overview": "Overview",
   "mainScreen_createTask": "Create Task",
   "mainScreen_logs": "Logs",
@@ -345,6 +354,26 @@
   "settingsScreen_settings_geocoderProvider_system": "System",
   "settingsScreen_settings_geocoderProvider_geocodeMapsCo": "geocode.maps.co",
   "settingsScreen_settings_geocoderProvider_nominatim": "Nominatim (OpenStreetMap)",
+  "settingsScreen_settings_importExport_exportFile": "Export Locus data",
+  "settingsScreen_settings_importExport_exportFile_description": "Export all your Locus data to a file. This includes all your tasks and settings. You can use this file to import your data on another device.",
+  "settingsScreen_settings_importExport_exportFile_save": "Save Export",
+  "settingsScreen_settings_importExport_transfer": "Transfer Locus to a new phone",
+  "settingsScreen_settings_importExport_transfer_connectionActionLabel": "Connect",
+  "settingsScreen_settings_importExport_importLabel": "Import Locus data",
+  "settingsScreen_import_file": "Import file",
+  "settingsScreen_import_pickerTitle": "Select the export.locus.json file to import your data",
+  "settingsScreen_import_transfer": "Transfer from old device",
+  "settingsScreen_version": "Version {version} ({flavor, select, gms{GMS} floss{FLOSS} other{Unknown}})",
+  "@settingsScreen_version": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      },
+      "flavor": {
+        "type": "String"
+      }
+    }
+  },
   "support_title": "Support Locus",
   "support_description": "Locus is a free open source project. This means that I don't make any money from it. If you like the app and want to support me, you can do so by multiple ways. Thank you very much! :)",
   "support_options_develop": "Help developing Locus",

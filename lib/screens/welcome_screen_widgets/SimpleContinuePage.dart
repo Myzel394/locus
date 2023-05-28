@@ -14,6 +14,7 @@ class SimpleContinuePage extends StatelessWidget {
   final void Function() onContinue;
   final Widget header;
   final bool initialAnimations;
+  final Widget? secondaryButton;
 
   const SimpleContinuePage({
     required this.title,
@@ -21,6 +22,7 @@ class SimpleContinuePage extends StatelessWidget {
     required this.continueLabel,
     required this.onContinue,
     required this.header,
+    this.secondaryButton,
     this.initialAnimations = false,
     Key? key,
   }) : super(key: key);
@@ -44,8 +46,7 @@ class SimpleContinuePage extends StatelessWidget {
                   .animate()
                   .then(delay: 200.ms)
                   .fadeIn(duration: FADE_IN_DURATION)
-                  .slide(
-                      begin: const Offset(0, 0.5), duration: FADE_IN_DURATION),
+                  .slide(begin: const Offset(0, 0.5), duration: FADE_IN_DURATION),
               header,
               Text(
                 description,
@@ -54,20 +55,30 @@ class SimpleContinuePage extends StatelessWidget {
                   .animate()
                   .then(delay: 500.ms)
                   .fadeIn(duration: FADE_IN_DURATION)
-                  .slide(
-                      begin: const Offset(0, 0.5), duration: FADE_IN_DURATION),
+                  .slide(begin: const Offset(0, 0.5), duration: FADE_IN_DURATION),
             ],
           ),
         ),
-        PlatformElevatedButton(
-          padding: const EdgeInsets.all(MEDIUM_SPACE),
-          onPressed: onContinue,
-          child: Text(continueLabel),
-        ).animate().then(delay: 800.ms).slide(
-              begin: const Offset(0, 1),
-              end: const Offset(0, 0),
-              duration: FADE_IN_DURATION,
-            ),
+        Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            if (secondaryButton != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: MEDIUM_SPACE),
+                child: secondaryButton,
+              ),
+            PlatformElevatedButton(
+              padding: const EdgeInsets.all(MEDIUM_SPACE),
+              onPressed: onContinue,
+              child: Text(continueLabel),
+            ).animate().then(delay: 800.ms).slide(
+                  begin: const Offset(0, 1),
+                  end: const Offset(0, 0),
+                  duration: FADE_IN_DURATION,
+                ),
+          ],
+        ),
       ],
     );
   }

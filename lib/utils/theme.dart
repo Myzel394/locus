@@ -8,7 +8,7 @@ import 'package:provider/provider.dart';
 
 TextStyle getBodyTextTextStyle(final BuildContext context) => platformThemeData(
       context,
-      material: (data) => data.textTheme.bodyText1!,
+      material: (data) => data.textTheme.bodyLarge!,
       cupertino: (data) => data.textTheme.textStyle,
     );
 
@@ -20,12 +20,11 @@ Color getErrorColor(final BuildContext context) => platformThemeData(
 
 Color getBodyTextColor(final BuildContext context) => platformThemeData(
       context,
-      material: (data) => data.textTheme.bodyText1!.color!,
+      material: (data) => data.textTheme.bodyLarge!.color!,
       cupertino: (data) => data.textTheme.textStyle.color!,
     );
 
-bool getIsDarkMode(final BuildContext context) =>
-    MediaQuery.of(context).platformBrightness == Brightness.dark;
+bool getIsDarkMode(final BuildContext context) => MediaQuery.of(context).platformBrightness == Brightness.dark;
 
 Color getButtonBackgroundColor(final BuildContext context) => platformThemeData(
       context,
@@ -59,35 +58,33 @@ TextStyle getTitle2TextStyle(final BuildContext context) => platformThemeData(
 
 TextStyle getSubTitleTextStyle(final BuildContext context) => platformThemeData(
       context,
-      material: (data) => data.textTheme.subtitle1!,
+      material: (data) => data.textTheme.titleMedium!,
       cupertino: (data) => data.textTheme.navTitleTextStyle,
     );
 
 TextStyle getCaptionTextStyle(final BuildContext context) => platformThemeData(
       context,
-      material: (data) => data.textTheme.caption!,
+      material: (data) => data.textTheme.bodySmall!,
       cupertino: (data) => data.textTheme.tabLabelTextStyle,
     );
 
 Color getSheetColor(final BuildContext context) => platformThemeData(
       context,
       material: (data) => getIsDarkMode(context)
-          ? HSLColor.fromColor(data.scaffoldBackgroundColor.withAlpha(255))
-              .withLightness(.18)
-              .toColor()
+          ? HSLColor.fromColor(data.scaffoldBackgroundColor.withAlpha(255)).withLightness(.18).toColor()
           : data.scaffoldBackgroundColor,
       cupertino: (data) => data.barBackgroundColor,
     );
 
 double getIconSizeForBodyText(final BuildContext context) => platformThemeData(
       context,
-      material: (data) => data.textTheme.bodyText1!.fontSize ?? 16,
+      material: (data) => data.textTheme.bodyLarge!.fontSize ?? 16,
       cupertino: (data) => data.textTheme.textStyle.fontSize ?? 16,
     );
 
 double getActionButtonSize(final BuildContext context) => platformThemeData(
       context,
-      material: (data) => data.textTheme.headline6!.fontSize ?? 16,
+      material: (data) => data.textTheme.titleLarge!.fontSize ?? 16,
       cupertino: (data) => data.textTheme.actionTextStyle.fontSize ?? 16,
     );
 
@@ -100,9 +97,7 @@ Map<int, Color> getPrimaryColorShades(final BuildContext context) {
       9,
       (index) => MapEntry(
         (index + 1) * 100,
-        HSLColor.fromColor(primaryColor)
-            .withLightness(1 - (index / 10))
-            .toColor(),
+        HSLColor.fromColor(primaryColor).withLightness(1 - (index / 10)).toColor(),
       ),
     ),
   );
@@ -113,8 +108,7 @@ Map<int, Color> getPrimaryColorShades(final BuildContext context) {
   };
 }
 
-EdgeInsets getSmallButtonPadding(final BuildContext context) =>
-    platformThemeData(
+EdgeInsets getSmallButtonPadding(final BuildContext context) => platformThemeData(
       context,
       material: (data) => const EdgeInsets.symmetric(
         horizontal: MEDIUM_SPACE,
