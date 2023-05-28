@@ -29,18 +29,17 @@ class TransferSenderScreen extends StatefulWidget {
   State<TransferSenderScreen> createState() => _TransferSenderScreenState();
 }
 
-class _TransferSenderScreenState extends State<TransferSenderScreen> {
+class _TransferSenderScreenState extends State<TransferSenderScreen> with BluetoothPermissionMixin {
   final pin = Random().nextInt(90000) + 10000;
   String? connectionID;
   bool connectionEstablished = false;
   bool isSending = false;
-  bool hasGrantedPermissions = false;
 
   @override
   void initState() {
     super.initState();
 
-    checkPermissions();
+    checkBluetoothPermission();
   }
 
   @override
@@ -51,16 +50,9 @@ class _TransferSenderScreenState extends State<TransferSenderScreen> {
     super.dispose();
   }
 
-  checkPermissions() async {
-    final hasGranted = await checkIfHasBluetoothPermission();
-
-    if (hasGranted) {
-      setState(() {
-        hasGrantedPermissions = true;
-      });
-
-      startDiscovery();
-    }
+  @override
+  void onBluetoothPermissionGranted() {
+    startDiscovery();
   }
 
   startDiscovery() async {
@@ -151,7 +143,7 @@ class _TransferSenderScreenState extends State<TransferSenderScreen> {
           padding: const EdgeInsets.all(MEDIUM_SPACE),
           child: Center(
             child: (() {
-              if (!hasGrantedPermissions) {
+              if (!hasGrantedBluetoothPermission) {
                 return Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -161,7 +153,7 @@ class _TransferSenderScreenState extends State<TransferSenderScreen> {
                     Text(l10n.grantBluetoothPermission),
                     const SizedBox(height: MEDIUM_SPACE),
                     PlatformElevatedButton(
-                      onPressed: checkPermissions,
+                      onPressed: checkBluetoothPermission,
                       child: Text(l10n.grantPermission),
                     ),
                   ],
