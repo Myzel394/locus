@@ -44,6 +44,9 @@ jobs:
       - name: Update pubspec.yaml for FLOSS variant 📝
         run: sed -i -e 's/^#f//' pubspec.yaml
 
+      - name: Update android/app/build.gradle for FLOSS variant 📝
+        run: sed -i -e 's/^\/\/f //' android/app/build.gradle
+
       - name: Install dependencies 📦
         run: flutter pub get
 

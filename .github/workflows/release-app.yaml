@@ -61,19 +61,22 @@ jobs:
           mv app-arm64-v8a-release.apk locus-arm64-gms.apk &&
           mv app-armeabi-v7a-release.apk locus-armeabi-gms.apk &&
           mv app-x86_64-release.apk locus-x86-gms.apk
-      
+
       - name: Upload APKs 🚀
         uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
           files: 'build/app/outputs/flutter-apk/*.apk'
-          
+
       - name: Clean Flutter
         run: flutter clean
 
       - name: Update pubspec.yaml for FLOSS variant 📝
         run: sed -i -e 's/^#f//' pubspec.yaml
+
+      - name: Update android/app/build.gradle for FLOSS variant 📝
+        run: sed -i -e 's/^\/\/f //' android/app/build.gradle
 
       - name: Install dependencies 📦
         run: flutter pub get
