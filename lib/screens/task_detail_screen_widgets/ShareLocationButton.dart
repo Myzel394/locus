@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
+import 'package:locus/screens/task_detail_screen_widgets/SendViewByBluetooth.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/widgets/SingularElementDialog.dart';
 import 'package:qr_flutter/qr_flutter.dart';
@@ -58,6 +59,14 @@ class _ShareLocationButtonState extends State<ShareLocationButton> {
             ),
             onPressed: () => Navigator.of(context).pop("share"),
           ),
+          if (Platform.isAndroid)
+            PlatformDialogAction(
+              material: (_, __) => MaterialDialogActionData(
+                icon: const Icon(Icons.bluetooth_audio_rounded),
+              ),
+              onPressed: () => Navigator.of(context).pop("bluetooth"),
+              child: Text(l10n.shareLocation_actions_shareBluetooth),
+            ),
           PlatformDialogAction(
             child: Text(l10n.shareLocation_actions_shareLink),
             cupertino: (_, __) => CupertinoDialogActionData(
@@ -101,9 +110,7 @@ class _ShareLocationButtonState extends State<ShareLocationButton> {
                           style: getTitle2TextStyle(context),
                           textAlign: TextAlign.center,
                         ),
-                        isMaterial(context)
-                            ? const SizedBox(height: LARGE_SPACE)
-                            : null,
+                        isMaterial(context) ? const SizedBox(height: LARGE_SPACE) : null,
                         QrImageView(
                           data: url,
                           errorCorrectionLevel: QrErrorCorrectLevel.H,
@@ -130,6 +137,23 @@ class _ShareLocationButtonState extends State<ShareLocationButton> {
             url,
             subject: l10n.shareLocation_actions_shareLink_text,
           );
+          break;
+        case "bluetooth":
+          final data = await widget.task.generateViewKeyContent();
+
+          if (mounted) {
+            await showPlatformModalSheet(
+              context: context,
+              material: MaterialModalSheetData(
+                isScrollControlled: true,
+                isDismissible: true,
+              ),
+              builder: (_) => SendViewByBluetooth(
+                data: data,
+              ),
+            );
+          }
+          break;
       }
     } catch (_) {
     } finally {

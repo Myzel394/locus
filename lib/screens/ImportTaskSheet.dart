@@ -16,7 +16,7 @@ import 'package:provider/provider.dart';
 
 import '../services/task_service.dart';
 import '../widgets/ModalSheet.dart';
-import 'import_task_sheet_widgets/BluetoothReceive.dart';
+import 'import_task_sheet_widgets/ReceiveViewByBluetooth.dart';
 
 enum ImportScreen {
   ask,
@@ -112,10 +112,39 @@ class _ImportTaskSheetState extends State<ImportTaskSheet> with TickerProviderSt
     super.dispose();
   }
 
-  void _importFile() async {
+  void parseViewData(final TaskView taskView) async {
     final l10n = AppLocalizations.of(context);
     final taskService = context.read<TaskService>();
     final viewService = context.read<ViewService>();
+
+    try {
+      final errorMessage = await taskView.validate(
+        taskService: taskService,
+        viewService: viewService,
+      );
+
+      if (errorMessage != null) {
+        setState(() {
+          this.errorMessage = errorMessage;
+        });
+
+        return;
+      } else {
+        setState(() {
+          _taskView = taskView;
+          _screen = ImportScreen.present;
+        });
+      }
+    } catch (_) {
+      setState(() {
+        errorMessage = l10n.unknownError;
+        _screen = ImportScreen.error;
+      });
+    }
+  }
+
+  void _importFile() async {
+    final l10n = AppLocalizations.of(context);
 
     FilePickerResult? result;
 
@@ -143,31 +172,9 @@ class _ImportTaskSheetState extends State<ImportTaskSheet> with TickerProviderSt
         reset();
       } else {
         final rawData = const Utf8Decoder().convert(result.files[0].bytes!);
-        final data = jsonDecode(rawData);
+        final taskView = TaskView.fromJSON(jsonDecode(rawData));
 
-        final taskView = TaskView(
-          relays: List<String>.from(data["relays"]),
-          nostrPublicKey: data["nostrPublicKey"],
-          encryptionPassword: data["encryptionPassword"],
-        );
-
-        final errorMessage = await taskView.validate(
-          taskService: taskService,
-          viewService: viewService,
-        );
-
-        if (errorMessage != null) {
-          setState(() {
-            this.errorMessage = errorMessage;
-          });
-
-          return;
-        } else {
-          setState(() {
-            _taskView = taskView;
-            _screen = ImportScreen.present;
-          });
-        }
+        parseViewData(taskView);
       }
     } catch (_) {
     } finally {
@@ -180,8 +187,6 @@ class _ImportTaskSheetState extends State<ImportTaskSheet> with TickerProviderSt
   Future<void> _importURL() async {
     final url = _urlController.text;
     final l10n = AppLocalizations.of(context);
-    final taskService = context.read<TaskService>();
-    final viewService = context.read<ViewService>();
 
     try {
       setState(() {
@@ -191,22 +196,8 @@ class _ImportTaskSheetState extends State<ImportTaskSheet> with TickerProviderSt
 
       final parameters = TaskView.parseLink(url);
       final taskView = await TaskView.fetchFromNostr(parameters);
-      final errorMessage = await taskView.validate(
-        taskService: taskService,
-        viewService: viewService,
-      );
 
-      if (errorMessage == null) {
-        setState(() {
-          _taskView = taskView;
-          _screen = ImportScreen.present;
-        });
-      } else {
-        setState(() {
-          this.errorMessage = errorMessage;
-          _screen = ImportScreen.error;
-        });
-      }
+      parseViewData(taskView);
     } catch (_) {
       setState(() {
         errorMessage = l10n.unknownError;
@@ -288,7 +279,9 @@ class _ImportTaskSheetState extends State<ImportTaskSheet> with TickerProviderSt
                     ],
                   )
                 else if (_screen == ImportScreen.bluetoothReceive)
-                  BluetoothReceive()
+                  ReceiveViewByBluetooth(
+                    onImport: parseViewData,
+                  )
                 else if (_screen == ImportScreen.present)
                   ViewImportOverview(
                     view: _taskView!,
