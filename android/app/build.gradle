@@ -93,5 +93,5 @@ dependencies {
 
 // Remove this for FLOSS version
 //f configurations.all {
-//f    exclude group: 'com.google.android.gms'
+//f    exclude group: 'com.google.android.gms', module: 'play-services-base'
 //f }
