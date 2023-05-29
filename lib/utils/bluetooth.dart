@@ -38,7 +38,17 @@ abstract class BluetoothPermissionMixin {
     setState(() {
       hasGrantedBluetoothPermission = hasGranted;
     });
+
+    if (hasGranted) {
+      onBluetoothPermissionGranted();
+    }
   }
 
-  void onBluetoothPermissionGranted() {}
+  void closeBluetooth() {
+    Nearby().stopAllEndpoints();
+    Nearby().stopAdvertising();
+    Nearby().stopDiscovery();
+  }
+
+  void onBluetoothPermissionGranted();
 }

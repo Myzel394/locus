@@ -14,6 +14,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../constants/app.dart';
 import '../../constants/values.dart';
 import '../../utils/import_export_handler.dart';
+import '../../widgets/BluetoothPermissionRequiredScreen.dart';
 
 class TransferReceiverScreen extends StatefulWidget {
   final void Function(String rawData) onContentReceived;
@@ -117,21 +118,9 @@ class _TransferReceiverScreenState extends State<TransferReceiverScreen> with Bl
           child: Center(
             child: (() {
               if (!hasGrantedBluetoothPermission) {
-                return Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    const Icon(Icons.bluetooth_audio_rounded, size: 60),
-                    const SizedBox(height: MEDIUM_SPACE),
-                    Text(l10n.grantBluetoothPermission),
-                    const SizedBox(height: MEDIUM_SPACE),
-                    PlatformElevatedButton(
-                      onPressed: checkBluetoothPermission,
-                      child: Text(l10n.grantPermission),
-                    ),
-                  ],
-                );
+                return BluetoothPermissionRequiredScreen(onRequest: checkBluetoothPermission);
               }
+
               if (progress != null) {
                 return Column(
                   mainAxisAlignment: MainAxisAlignment.center,

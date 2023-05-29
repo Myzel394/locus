@@ -16,12 +16,14 @@ import 'package:provider/provider.dart';
 
 import '../services/task_service.dart';
 import '../widgets/ModalSheet.dart';
+import 'import_task_sheet_widgets/ReceiveViewByBluetooth.dart';
 
 enum ImportScreen {
   ask,
   importFile,
   askURL,
   askName,
+  bluetoothReceive,
   present,
   error,
   done,
@@ -43,8 +45,7 @@ class ImportTaskSheet extends StatefulWidget {
   State<ImportTaskSheet> createState() => _ImportTaskSheetState();
 }
 
-class _ImportTaskSheetState extends State<ImportTaskSheet>
-    with TickerProviderStateMixin {
+class _ImportTaskSheetState extends State<ImportTaskSheet> with TickerProviderStateMixin {
   final _nameController = TextEditingController();
   final _urlController = TextEditingController();
   ImportScreen _screen = ImportScreen.ask;
@@ -111,10 +112,39 @@ class _ImportTaskSheetState extends State<ImportTaskSheet>
     super.dispose();
   }
 
-  void _importFile() async {
+  void parseViewData(final TaskView taskView) async {
     final l10n = AppLocalizations.of(context);
     final taskService = context.read<TaskService>();
     final viewService = context.read<ViewService>();
+
+    try {
+      final errorMessage = await taskView.validate(
+        taskService: taskService,
+        viewService: viewService,
+      );
+
+      if (errorMessage != null) {
+        setState(() {
+          this.errorMessage = errorMessage;
+        });
+
+        return;
+      } else {
+        setState(() {
+          _taskView = taskView;
+          _screen = ImportScreen.present;
+        });
+      }
+    } catch (_) {
+      setState(() {
+        errorMessage = l10n.unknownError;
+        _screen = ImportScreen.error;
+      });
+    }
+  }
+
+  void _importFile() async {
+    final l10n = AppLocalizations.of(context);
 
     FilePickerResult? result;
 
@@ -128,8 +158,7 @@ class _ImportTaskSheetState extends State<ImportTaskSheet>
       result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ["json"],
-        dialogTitle:
-            l10n.mainScreen_importTask_action_importMethod_file_selectFile,
+        dialogTitle: l10n.mainScreen_importTask_action_importMethod_file_selectFile,
         withData: true,
       );
     } catch (_) {
@@ -143,31 +172,9 @@ class _ImportTaskSheetState extends State<ImportTaskSheet>
         reset();
       } else {
         final rawData = const Utf8Decoder().convert(result.files[0].bytes!);
-        final data = jsonDecode(rawData);
+        final taskView = TaskView.fromJSON(jsonDecode(rawData));
 
-        final taskView = TaskView(
-          relays: List<String>.from(data["relays"]),
-          nostrPublicKey: data["nostrPublicKey"],
-          encryptionPassword: data["encryptionPassword"],
-        );
-
-        final errorMessage = await taskView.validate(
-          taskService: taskService,
-          viewService: viewService,
-        );
-
-        if (errorMessage != null) {
-          setState(() {
-            this.errorMessage = errorMessage;
-          });
-
-          return;
-        } else {
-          setState(() {
-            _taskView = taskView;
-            _screen = ImportScreen.present;
-          });
-        }
+        parseViewData(taskView);
       }
     } catch (_) {
     } finally {
@@ -180,8 +187,6 @@ class _ImportTaskSheetState extends State<ImportTaskSheet>
   Future<void> _importURL() async {
     final url = _urlController.text;
     final l10n = AppLocalizations.of(context);
-    final taskService = context.read<TaskService>();
-    final viewService = context.read<ViewService>();
 
     try {
       setState(() {
@@ -191,22 +196,8 @@ class _ImportTaskSheetState extends State<ImportTaskSheet>
 
       final parameters = TaskView.parseLink(url);
       final taskView = await TaskView.fetchFromNostr(parameters);
-      final errorMessage = await taskView.validate(
-        taskService: taskService,
-        viewService: viewService,
-      );
 
-      if (errorMessage == null) {
-        setState(() {
-          _taskView = taskView;
-          _screen = ImportScreen.present;
-        });
-      } else {
-        setState(() {
-          this.errorMessage = errorMessage;
-          _screen = ImportScreen.error;
-        });
-      }
+      parseViewData(taskView);
     } catch (_) {
       setState(() {
         errorMessage = l10n.unknownError;
@@ -247,6 +238,11 @@ class _ImportTaskSheetState extends State<ImportTaskSheet>
                             _screen = ImportScreen.askURL;
                           });
                           break;
+                        case ImportSelectionType.bluetooth:
+                          setState(() {
+                            _screen = ImportScreen.bluetoothReceive;
+                          });
+                          break;
                       }
                     },
                   )
@@ -278,10 +274,13 @@ class _ImportTaskSheetState extends State<ImportTaskSheet>
                       else if (errorMessage != null)
                         Text(
                           errorMessage!,
-                          style: getBodyTextTextStyle(context)
-                              .copyWith(color: getErrorColor(context)),
+                          style: getBodyTextTextStyle(context).copyWith(color: getErrorColor(context)),
                         ),
                     ],
+                  )
+                else if (_screen == ImportScreen.bluetoothReceive)
+                  ReceiveViewByBluetooth(
+                    onImport: parseViewData,
                   )
                 else if (_screen == ImportScreen.present)
                   ViewImportOverview(
@@ -305,8 +304,7 @@ class _ImportTaskSheetState extends State<ImportTaskSheet>
                 else if (_screen == ImportScreen.error)
                   Column(
                     children: <Widget>[
-                      Icon(context.platformIcons.error,
-                          size: 64, color: getErrorColor(context)),
+                      Icon(context.platformIcons.error, size: 64, color: getErrorColor(context)),
                       const SizedBox(height: MEDIUM_SPACE),
                       Text(
                         l10n.taskImportError,
@@ -315,8 +313,7 @@ class _ImportTaskSheetState extends State<ImportTaskSheet>
                       const SizedBox(height: SMALL_SPACE),
                       Text(
                         errorMessage!,
-                        style: getBodyTextTextStyle(context)
-                            .copyWith(color: getErrorColor(context)),
+                        style: getBodyTextTextStyle(context).copyWith(color: getErrorColor(context)),
                       ),
                       const SizedBox(height: LARGE_SPACE),
                       PlatformElevatedButton(
