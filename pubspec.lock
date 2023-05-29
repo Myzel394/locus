@@ -661,14 +661,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.2"
-  gms_check:
-    dependency: "direct main"
-    description:
-      name: gms_check
-      sha256: "696780955f9432dd75f32dbd65994f45765ff6abe9aa34d6e2d2d6ced70671a7"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.1"
   google_polyline_algorithm:
     dependency: transitive
     description:
