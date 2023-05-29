@@ -14,10 +14,10 @@ import 'package:locus/services/task_service.dart';
 import 'package:locus/utils/bluetooth.dart';
 import 'package:locus/utils/import_export_handler.dart';
 import 'package:locus/utils/theme.dart';
+import 'package:locus/widgets/BluetoothPermissionRequiredScreen.dart';
 import 'package:locus/widgets/PINView.dart';
 import 'package:lottie/lottie.dart';
 import 'package:nearby_connections/nearby_connections.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 
@@ -148,20 +148,7 @@ class _TransferSenderScreenState extends State<TransferSenderScreen> with Blueto
           child: Center(
             child: (() {
               if (!hasGrantedBluetoothPermission) {
-                return Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    const Icon(Icons.bluetooth_audio_rounded, size: 60),
-                    const SizedBox(height: MEDIUM_SPACE),
-                    Text(l10n.grantBluetoothPermission),
-                    const SizedBox(height: MEDIUM_SPACE),
-                    PlatformElevatedButton(
-                      onPressed: checkBluetoothPermission,
-                      child: Text(l10n.grantPermission),
-                    ),
-                  ],
-                );
+                return BluetoothPermissionRequiredScreen(onRequest: checkBluetoothPermission);
               }
 
               if (connectionEstablished) {

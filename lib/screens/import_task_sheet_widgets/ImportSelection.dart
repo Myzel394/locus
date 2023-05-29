@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
@@ -8,6 +10,7 @@ import '../../utils/theme.dart';
 enum ImportSelectionType {
   url,
   file,
+  bluetooth,
 }
 
 class ImportSelection extends StatefulWidget {
@@ -44,8 +47,7 @@ class _ImportSelectionState extends State<ImportSelection> {
         if (errorMessage != null) ...[
           Text(
             errorMessage!,
-            style: getBodyTextTextStyle(context)
-                .copyWith(color: getErrorColor(context)),
+            style: getBodyTextTextStyle(context).copyWith(color: getErrorColor(context)),
           ),
           const SizedBox(height: MEDIUM_SPACE),
         ],
@@ -74,6 +76,17 @@ class _ImportSelectionState extends State<ImportSelection> {
               },
               child: Text(l10n.mainScreen_importTask_action_importMethod_file),
             ),
+            if (Platform.isAndroid)
+              PlatformElevatedButton(
+                padding: const EdgeInsets.all(MEDIUM_SPACE),
+                material: (_, __) => MaterialElevatedButtonData(
+                  icon: const Icon(Icons.bluetooth_audio_rounded),
+                ),
+                onPressed: () async {
+                  widget.onSelect(ImportSelectionType.bluetooth);
+                },
+                child: Text(l10n.mainScreen_importTask_action_importMethod_bluetooth),
+              )
           ],
         ),
       ],

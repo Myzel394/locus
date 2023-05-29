@@ -345,6 +345,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.6.5"
+  english_words:
+    dependency: "direct main"
+    description:
+      name: english_words
+      sha256: "6a7ef6473a97bd8571b6b641d006a6e58a7c67e65fb6f3d6d1151cb46b0e983c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "4.0.0"
   fake_async:
     dependency: transitive
     description:
@@ -661,14 +669,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.2"
-  gms_check:
-    dependency: "direct main"
-    description:
-      name: gms_check
-      sha256: "696780955f9432dd75f32dbd65994f45765ff6abe9aa34d6e2d2d6ced70671a7"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.1"
   google_polyline_algorithm:
     dependency: transitive
     description:
