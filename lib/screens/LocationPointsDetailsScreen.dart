@@ -23,19 +23,18 @@ class LocationPointsDetailsScreen extends StatelessWidget {
 
     final locationElements = locations.isEmpty
         ? Text(
-      l10n.taskDetails_noLocations,
-      style: getBodyTextTextStyle(context),
-    )
+            l10n.taskDetails_noLocations,
+            style: getBodyTextTextStyle(context),
+          )
         : ListView.builder(
-      shrinkWrap: isPreview,
-      physics: isPreview ? const NeverScrollableScrollPhysics() : null,
-      itemCount: locations.length,
-      itemBuilder: (_, index) =>
-          LocationDetails(
-            location: locations[locations.length - index - 1],
-            isPreview: isPreview,
-          ),
-    );
+            shrinkWrap: isPreview,
+            physics: isPreview ? const NeverScrollableScrollPhysics() : null,
+            itemCount: locations.length,
+            itemBuilder: (_, index) => LocationDetails(
+              location: locations[locations.length - index - 1],
+              isPreview: isPreview,
+            ),
+          );
     final content = Hero(
       tag: "container",
       child: Material(
@@ -44,8 +43,8 @@ class LocationPointsDetailsScreen extends StatelessWidget {
           roundness: isPreview ? null : 0,
           constraints: isPreview
               ? const BoxConstraints(
-            maxHeight: 300,
-          )
+                  maxHeight: 300,
+                )
               : null,
           child: locationElements,
         ),
@@ -58,9 +57,7 @@ class LocationPointsDetailsScreen extends StatelessWidget {
 
     return PlatformScaffold(
       appBar: PlatformAppBar(
-        title: Text(
-          "Location Points",
-        ),
+        title: Text(l10n.locationPointsScreen_title),
       ),
       body: SafeArea(
         child: content,
