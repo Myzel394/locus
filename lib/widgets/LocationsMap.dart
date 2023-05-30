@@ -268,7 +268,9 @@ class _LocationsMapState extends State<LocationsMap> {
           options: MapOptions(
             center: getInitialPosition(),
             zoom: widget.initialZoomLevel,
+            maxZoom: 18,
           ),
+          mapController: flutterMapController,
           children: [
             TileLayer(
               urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
