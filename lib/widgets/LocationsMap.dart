@@ -5,11 +5,13 @@ import 'dart:io';
 import 'package:apple_maps_flutter/apple_maps_flutter.dart' as AppleMaps;
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 // Provided by the flutter_map package
 import 'package:latlong2/latlong.dart';
 import 'package:locus/services/settings_service.dart';
+import 'package:locus/widgets/Paper.dart';
 import 'package:provider/provider.dart';
 
 import '../services/location_point_service.dart';
@@ -215,8 +217,8 @@ class _LocationsMapState extends State<LocationsMap> {
     );
 
     moveToPosition(LatLng(
-      locationData!.latitude,
-      locationData!.longitude,
+      locationData.latitude,
+      locationData.longitude,
     ));
   }
 
@@ -278,8 +280,9 @@ class _LocationsMapState extends State<LocationsMap> {
           ),
           children: [
             TileLayer(
-              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-              userAgentPackageName: 'com.example.app',
+              urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+              subdomains: const ['a', 'b', 'c'],
+              userAgentPackageName: "app.myzel394.locus",
             ),
             CircleLayer(
               circles: widget.controller.locations
@@ -298,6 +301,29 @@ class _LocationsMapState extends State<LocationsMap> {
                   )
                   .toList(),
             ),
+            if (widget.controller.locations.isNotEmpty)
+              PopupMarkerLayer(
+                options: PopupMarkerLayerOptions(
+                  markers: [
+                    Marker(
+                      point: LatLng(
+                        widget.controller.locations.last.latitude,
+                        widget.controller.locations.last.longitude,
+                      ),
+                      builder: (context) => Icon(
+                        Icons.location_on,
+                        color: Colors.red,
+                      ),
+                    ),
+                  ],
+                  popupDisplayOptions: PopupDisplayOptions(
+                    builder: (context, marker) => Paper(
+                      width: null,
+                      child: Text(snippetText),
+                    ),
+                  ),
+                ),
+              ),
           ],
         );
     }
