@@ -31,7 +31,7 @@ class LocationPointsDetailsScreen extends StatelessWidget {
             physics: isPreview ? const NeverScrollableScrollPhysics() : null,
             itemCount: locations.length,
             itemBuilder: (_, index) => LocationDetails(
-              location: locations[index],
+              location: locations[locations.length - index - 1],
               isPreview: isPreview,
             ),
           );
@@ -57,10 +57,12 @@ class LocationPointsDetailsScreen extends StatelessWidget {
 
     return PlatformScaffold(
       appBar: PlatformAppBar(
-        title: Text(
-          "Location Points",
+        title: Text(l10n.locationPointsScreen_title),
+        material: (_, __) => MaterialAppBarData(
+          centerTitle: true,
         ),
       ),
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         child: content,
       ),

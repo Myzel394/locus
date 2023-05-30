@@ -86,6 +86,9 @@ dependencies:
   version: ^3.0.2
   nearby_connections: ^3.3.0
   english_words: ^4.0.0
+  flutter_map: ^4.0.0
+  flutter_map_marker_popup: ^5.1.0
+  flutter_map_tile_caching: ^8.0.0
 
 # Uncomment this for publishing FLOSS variant
 # Taken from https://github.com/Zverik/every_door/blob/aaf8d2fdeac483041bcac2c7c79ef760b99dff2b/pubspec.yaml#L55

@@ -138,7 +138,6 @@ class _MainScreenState extends State<MainScreen> {
     await showPlatformModalSheet(
       context: context,
       material: MaterialModalSheetData(
-        backgroundColor: Colors.transparent,
         isScrollControlled: true,
         isDismissible: true,
       ),

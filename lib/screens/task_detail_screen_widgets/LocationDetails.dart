@@ -2,12 +2,13 @@ import 'package:battery_plus/battery_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutter_platform_widgets/flutter_platform_widgets.dart'
-    hide PlatformListTile;
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart' hide PlatformListTile;
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/services/location_point_service.dart';
 import 'package:locus/utils/theme.dart';
+import 'package:provider/provider.dart';
 
+import '../../services/settings_service.dart';
 import '../../widgets/PlatformListTile.dart';
 
 class LocationDetails extends StatefulWidget {
@@ -25,6 +26,7 @@ class LocationDetails extends StatefulWidget {
 }
 
 class _LocationDetailsState extends State<LocationDetails> {
+  String address = "";
   bool isOpened = false;
 
   String get formattedString =>
@@ -34,13 +36,10 @@ class _LocationDetailsState extends State<LocationDetails> {
     final l10n = AppLocalizations.of(context);
 
     return {
-      BatteryState.charging:
-          l10n.taskDetails_locationDetails_batteryState_charging,
-      BatteryState.discharging:
-          l10n.taskDetails_locationDetails_batteryState_discharging,
+      BatteryState.charging: l10n.taskDetails_locationDetails_batteryState_charging,
+      BatteryState.discharging: l10n.taskDetails_locationDetails_batteryState_discharging,
       BatteryState.full: l10n.taskDetails_locationDetails_batteryState_full,
-      BatteryState.unknown:
-          l10n.taskDetails_locationDetails_batteryState_unknown,
+      BatteryState.unknown: l10n.taskDetails_locationDetails_batteryState_unknown,
       null: l10n.taskDetails_locationDetails_batteryState_unknown,
     };
   }
@@ -83,6 +82,20 @@ class _LocationDetailsState extends State<LocationDetails> {
     }
   }
 
+  void fetchAddress() async {
+    if (this.address.isNotEmpty) {
+      return;
+    }
+
+    final settings = context.read<SettingsService>();
+
+    final address = await settings.getAddress(widget.location.latitude, widget.location.longitude);
+
+    setState(() {
+      this.address = address;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -94,6 +107,8 @@ class _LocationDetailsState extends State<LocationDetails> {
           onPressed: widget.isPreview
               ? null
               : () {
+                  fetchAddress();
+
                   setState(() {
                     isOpened = !isOpened;
                   });
@@ -101,7 +116,9 @@ class _LocationDetailsState extends State<LocationDetails> {
           child: Align(
             alignment: Alignment.centerLeft,
             child: Text(
-              formattedString,
+              l10n.taskDetails_locationDetails_createdAt_value(
+                widget.location.createdAt,
+              ),
               textAlign: TextAlign.start,
               style: getBodyTextTextStyle(context),
             ),
@@ -123,14 +140,16 @@ class _LocationDetailsState extends State<LocationDetails> {
                   children: <Widget>[
                     PlatformListTile(
                       title: Text(
-                        l10n.taskDetails_locationDetails_createdAt_value(
-                          widget.location.createdAt,
-                        ),
+                        formattedString,
                       ),
-                      subtitle: Text(
-                        l10n.taskDetails_locationDetails_createdAt_label,
+                      leading: const Icon(Icons.my_location),
+                      trailing: const SizedBox.shrink(),
+                    ),
+                    PlatformListTile(
+                      title: Text(
+                        address,
                       ),
-                      leading: Icon(context.platformIcons.time),
+                      leading: Icon(context.platformIcons.location),
                       trailing: const SizedBox.shrink(),
                     ),
                     PlatformListTile(
@@ -139,8 +158,7 @@ class _LocationDetailsState extends State<LocationDetails> {
                           widget.location.accuracy.round(),
                         ),
                       ),
-                      subtitle:
-                          Text(l10n.taskDetails_locationDetails_accuracy_label),
+                      subtitle: Text(l10n.taskDetails_locationDetails_accuracy_label),
                       leading: const Icon(Icons.location_on),
                       trailing: const SizedBox.shrink(),
                     ),
@@ -152,8 +170,7 @@ class _LocationDetailsState extends State<LocationDetails> {
                                 (widget.location.batteryLevel! * 100).floor(),
                               ),
                       ),
-                      subtitle:
-                          Text(l10n.taskDetails_locationDetails_battery_label),
+                      subtitle: Text(l10n.taskDetails_locationDetails_battery_label),
                       leading: Icon(
                         getIconForBatteryLevel(
                           widget.location.batteryLevel,
@@ -184,8 +201,7 @@ class _LocationDetailsState extends State<LocationDetails> {
                       ),
                       leading: PlatformWidget(
                         material: (_, __) => const Icon(Icons.speed),
-                        cupertino: (_, __) =>
-                            const Icon(CupertinoIcons.speedometer),
+                        cupertino: (_, __) => const Icon(CupertinoIcons.speedometer),
                       ),
                       trailing: const SizedBox.shrink(),
                     ),
@@ -197,8 +213,7 @@ class _LocationDetailsState extends State<LocationDetails> {
                                 widget.location.altitude!.toInt().abs(),
                               ),
                       ),
-                      subtitle:
-                          Text(l10n.taskDetails_locationDetails_altitude_label),
+                      subtitle: Text(l10n.taskDetails_locationDetails_altitude_label),
                       leading: PlatformWidget(
                         material: (_, __) => const Icon(Icons.height_rounded),
                         cupertino: (_, __) => const Icon(CupertinoIcons.alt),

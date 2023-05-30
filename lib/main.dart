@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:disable_battery_optimization/disable_battery_optimization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:locus/App.dart';
 import 'package:locus/services/app_update_service.dart';
@@ -29,13 +30,12 @@ void main() async {
     Permission.locationAlways.isGranted,
     TaskService.restore(),
     ViewService.restore(),
-    Platform.isAndroid
-        ? DisableBatteryOptimization.isBatteryOptimizationDisabled
-        : Future.value(true),
+    Platform.isAndroid ? DisableBatteryOptimization.isBatteryOptimizationDisabled : Future.value(true),
     SettingsService.restore(),
     hasGrantedNotificationPermission(),
     LogService.restore(),
     AppUpdateService.restore(),
+    FlutterMapTileCaching.initialise(),
   ]);
   final bool hasLocationAlwaysGranted = futures[0];
   final TaskService taskService = futures[1];
@@ -47,6 +47,7 @@ void main() async {
   final AppUpdateService appUpdateService = futures[7];
 
   await logService.deleteOldLogs();
+  await FMTC.instance('mapStore').manage.createAsync();
 
   appUpdateService.checkForUpdates(force: true);
 
@@ -57,8 +58,7 @@ void main() async {
         ChangeNotifierProvider<ViewService>(create: (_) => viewService),
         ChangeNotifierProvider<SettingsService>(create: (_) => settingsService),
         ChangeNotifierProvider<LogService>(create: (_) => logService),
-        ChangeNotifierProvider<AppUpdateService>(
-            create: (_) => appUpdateService),
+        ChangeNotifierProvider<AppUpdateService>(create: (_) => appUpdateService),
       ],
       child: App(
         hasLocationAlwaysGranted: hasLocationAlwaysGranted,

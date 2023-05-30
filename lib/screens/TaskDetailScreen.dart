@@ -8,10 +8,13 @@ import 'package:locus/services/task_service.dart';
 import 'package:locus/widgets/LocationFetchError.dart';
 import 'package:locus/widgets/LocationsLoadingScreen.dart';
 import 'package:locus/widgets/LocationsMap.dart';
+import 'package:map_launcher/map_launcher.dart';
 
 import '../api/get-locations.dart';
 import '../constants/spacing.dart';
 import '../widgets/LocationFetchEmpty.dart';
+import '../widgets/OpenInMaps.dart';
+import '../widgets/PlatformPopup.dart';
 
 class TaskDetailScreen extends StatefulWidget {
   final Task task;
@@ -104,6 +107,32 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
         cupertino: (_, __) => CupertinoNavigationBarData(
           backgroundColor: CupertinoTheme.of(context).barBackgroundColor.withOpacity(.5),
         ),
+        trailingActions: _controller.locations.isNotEmpty
+            ? [
+                PlatformPopup<String>(
+                  type: PlatformPopupType.tap,
+                  items: [
+                    PlatformPopupMenuItem(
+                      label: PlatformListTile(
+                        leading: Icon(context.platformIcons.location),
+                        trailing: const SizedBox.shrink(),
+                        title: Text(l10n.viewDetails_actions_openLatestLocation),
+                      ),
+                      onPressed: () async {
+                        await showPlatformModalSheet(
+                          context: context,
+                          material: MaterialModalSheetData(),
+                          builder: (context) => OpenInMaps(
+                            destination:
+                                Coords(_controller.locations.last.latitude, _controller.locations.last.longitude),
+                          ),
+                        );
+                      },
+                    )
+                  ],
+                ),
+              ]
+            : [],
       ),
       body: _isError
           ? const LocationFetchError()
