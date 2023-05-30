@@ -120,16 +120,14 @@ class _ImportTaskState extends State<ImportTask> with TickerProviderStateMixin {
                         onPressed: () {
                           Navigator.of(context).pop(ImportScreen.askURL);
                         },
-                        child: Text(
-                            l10n.mainScreen_importTask_action_importMethod_url),
+                        child: Text(l10n.mainScreen_importTask_action_importMethod_url),
                       ),
                       CupertinoActionSheetAction(
                         isDefaultAction: true,
                         onPressed: () {
                           Navigator.of(context).pop(ImportScreen.importFile);
                         },
-                        child: Text(l10n
-                            .mainScreen_importTask_action_importMethod_file),
+                        child: Text(l10n.mainScreen_importTask_action_importMethod_file),
                       ),
                     ],
                   ),
@@ -144,12 +142,10 @@ class _ImportTaskState extends State<ImportTask> with TickerProviderStateMixin {
             await showPlatformModalSheet(
               context: context,
               material: MaterialModalSheetData(
-                backgroundColor: Colors.transparent,
                 isScrollControlled: true,
                 isDismissible: true,
               ),
-              builder: (context) =>
-                  ImportTaskSheet(initialScreen: initialScreen),
+              builder: (context) => ImportTaskSheet(initialScreen: initialScreen),
             );
 
             _controller.forward();

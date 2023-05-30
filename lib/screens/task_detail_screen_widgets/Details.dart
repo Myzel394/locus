@@ -211,7 +211,6 @@ class _DetailsState extends State<Details> {
                             await showPlatformModalSheet(
                               context: context,
                               material: MaterialModalSheetData(
-                                backgroundColor: Colors.transparent,
                                 isScrollControlled: true,
                                 isDismissible: true,
                               ),

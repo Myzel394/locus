@@ -199,7 +199,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             await showPlatformModalSheet(
                               context: context,
                               material: MaterialModalSheetData(
-                                backgroundColor: Colors.transparent,
                                 isScrollControlled: true,
                                 isDismissible: true,
                               ),
@@ -305,6 +304,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         onPressed: (_) async {
                           final shouldPopContext = await showPlatformModalSheet(
                             context: context,
+                            material: MaterialModalSheetData(),
                             builder: (context) => ImportSheet(
                               onImport: (final taskService, final viewService, final settings) async {
                                 await Future.wait([

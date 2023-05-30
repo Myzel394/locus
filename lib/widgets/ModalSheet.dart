@@ -21,7 +21,6 @@ class ModalSheet extends StatelessWidget {
             topLeft: Radius.circular(LARGE_SPACE),
             topRight: Radius.circular(LARGE_SPACE),
           ),
-          color: getSheetColor(context),
         ),
         child: Padding(
           padding: const EdgeInsets.only(

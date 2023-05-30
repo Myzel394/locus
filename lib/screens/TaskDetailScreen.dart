@@ -121,6 +121,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                       onPressed: () async {
                         await showPlatformModalSheet(
                           context: context,
+                          material: MaterialModalSheetData(),
                           builder: (context) => OpenInMaps(
                             destination:
                                 Coords(_controller.locations.last.latitude, _controller.locations.last.longitude),
