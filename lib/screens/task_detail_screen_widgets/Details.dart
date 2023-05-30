@@ -160,8 +160,9 @@ class _DetailsState extends State<Details> {
                     : () {
                         Navigator.of(context).push(
                           PageRouteBuilder(
-                            opaque: false,
+                            opaque: true,
                             fullscreenDialog: true,
+                            barrierColor: Colors.black.withOpacity(0.7),
                             barrierDismissible: true,
                             pageBuilder: (context, _, __) => LocationPointsDetailsScreen(
                               locations: widget.locations,

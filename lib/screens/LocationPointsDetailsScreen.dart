@@ -58,7 +58,11 @@ class LocationPointsDetailsScreen extends StatelessWidget {
     return PlatformScaffold(
       appBar: PlatformAppBar(
         title: Text(l10n.locationPointsScreen_title),
+        material: (_, __) => MaterialAppBarData(
+          centerTitle: true,
+        ),
       ),
+      backgroundColor: Colors.transparent,
       body: SafeArea(
         child: content,
       ),
