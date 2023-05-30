@@ -265,8 +265,8 @@ class Task extends ChangeNotifier {
 
   Future<void> update({
     String? name,
-    List<String>? relays,
-    List<TaskRuntimeTimer>? timers,
+    Iterable<String>? relays,
+    Iterable<TaskRuntimeTimer>? timers,
     bool? deleteAfterRun,
   }) async {
     if (name != null) {
@@ -274,13 +274,16 @@ class Task extends ChangeNotifier {
     }
 
     if (relays != null) {
+      // We need to copy the relays as they somehow also get cleared when `this.relays.clear` is called.
+      final newRelays = [...relays];
       this.relays.clear();
-      this.relays.addAll(relays);
+      this.relays.addAll(newRelays);
     }
 
     if (timers != null) {
+      final newTimers = [...timers];
       this.timers.clear();
-      this.timers.addAll(timers);
+      this.timers.addAll(newTimers);
     }
 
     if (deleteAfterRun != null) {
