@@ -6,6 +6,7 @@ import 'package:apple_maps_flutter/apple_maps_flutter.dart' as AppleMaps;
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
+import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 
@@ -276,6 +277,7 @@ class _LocationsMapState extends State<LocationsMap> {
               urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
               subdomains: const ['a', 'b', 'c'],
               userAgentPackageName: "app.myzel394.locus",
+              tileProvider: FMTC.instance('mapStore').getTileProvider(),
             ),
             CircleLayer(
               circles: widget.controller.locations
