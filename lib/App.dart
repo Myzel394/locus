@@ -100,6 +100,11 @@ class App extends StatelessWidget {
                   dialogBackgroundColor: settings.primaryColor == null
                       ? darkColorScheme.background
                       : HSLColor.fromColor(settings.primaryColor!).withLightness(0.15).toColor(),
+                  inputDecorationTheme: DARK_THEME_MATERIAL.inputDecorationTheme.copyWith(
+                    fillColor: settings.primaryColor == null
+                        ? null
+                        : HSLColor.fromColor(settings.primaryColor!).withLightness(0.3).withSaturation(.5).toColor(),
+                  ),
                 );
               }
 
@@ -118,6 +123,11 @@ class App extends StatelessWidget {
                 dialogBackgroundColor: settings.primaryColor == null
                     ? null
                     : HSLColor.fromColor(settings.primaryColor!).withLightness(0.15).toColor(),
+                inputDecorationTheme: DARK_THEME_MATERIAL.inputDecorationTheme.copyWith(
+                  fillColor: settings.primaryColor == null
+                      ? null
+                      : HSLColor.fromColor(settings.primaryColor!).withLightness(0.3).withSaturation(.5).toColor(),
+                ),
               );
             })(),
             themeMode: ThemeMode.system,
