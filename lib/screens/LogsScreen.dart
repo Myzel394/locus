@@ -69,15 +69,10 @@ class _LogsScreenState extends State<LogsScreen> {
                 physics: const NeverScrollableScrollPhysics(),
                 itemBuilder: (context, final int index) {
                   // Reverse
-                  final Log log =
-                  logService.logs[logService.logs.length - index - 1];
+                  final Log log = logService.logs[logService.logs.length - index - 1];
                   return Stack(
                     children: <Widget>[
-                      Positioned(
-                        left: 0,
-                        right: 0,
-                        top: 0,
-                        bottom: 0,
+                      Positioned.fill(
                         child: Hero(
                           tag: "${log.id}:paper",
                           child: Paper(
@@ -90,8 +85,7 @@ class _LogsScreenState extends State<LogsScreen> {
                         onTap: () {
                           Navigator.of(context).push(
                             PageRouteBuilder(
-                              pageBuilder: (_, __, ___) =>
-                                  LogDetailScreen(log: log),
+                              pageBuilder: (_, __, ___) => LogDetailScreen(log: log),
                               fullscreenDialog: true,
                               barrierColor: Colors.black.withOpacity(.3),
                               opaque: false,
@@ -112,7 +106,6 @@ class _LogsScreenState extends State<LogsScreen> {
                             ),
                           );
                         },
-
                         child: PlatformListTile(
                           leading: Hero(
                             tag: "${log.id}:icon",
@@ -148,18 +141,16 @@ class _LogsScreenState extends State<LogsScreen> {
                           ),
                           trailing: log.initiator == LogInitiator.system
                               ? Hero(
-                            tag: "${log.id}:initiator",
-                            child: PlatformWidget(
-                              material: (_, __) =>
-                              const Icon(
-                                Icons.laptop,
-                              ),
-                              cupertino: (_, __) =>
-                              const Icon(
-                                CupertinoIcons.bolt,
-                              ),
-                            ),
-                          )
+                                  tag: "${log.id}:initiator",
+                                  child: PlatformWidget(
+                                    material: (_, __) => const Icon(
+                                      Icons.laptop,
+                                    ),
+                                    cupertino: (_, __) => const Icon(
+                                      CupertinoIcons.bolt,
+                                    ),
+                                  ),
+                                )
                               : null,
                         ),
                       ),
