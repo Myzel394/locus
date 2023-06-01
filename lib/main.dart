@@ -30,12 +30,15 @@ void main() async {
     Permission.locationAlways.isGranted,
     TaskService.restore(),
     ViewService.restore(),
-    Platform.isAndroid ? DisableBatteryOptimization.isBatteryOptimizationDisabled : Future.value(true),
+    Platform.isAndroid
+        ? DisableBatteryOptimization.isBatteryOptimizationDisabled
+        : Future.value(true),
     SettingsService.restore(),
     hasGrantedNotificationPermission(),
     LogService.restore(),
     AppUpdateService.restore(),
     FlutterMapTileCaching.initialise(),
+    isMIUI(),
   ]);
   final bool hasLocationAlwaysGranted = futures[0];
   final TaskService taskService = futures[1];
@@ -45,6 +48,7 @@ void main() async {
   final bool hasNotificationGranted = futures[5];
   final LogService logService = futures[6];
   final AppUpdateService appUpdateService = futures[7];
+  final bool isMIUI = futures[9];
 
   await logService.deleteOldLogs();
   await FMTC.instance('mapStore').manage.createAsync();
@@ -58,12 +62,14 @@ void main() async {
         ChangeNotifierProvider<ViewService>(create: (_) => viewService),
         ChangeNotifierProvider<SettingsService>(create: (_) => settingsService),
         ChangeNotifierProvider<LogService>(create: (_) => logService),
-        ChangeNotifierProvider<AppUpdateService>(create: (_) => appUpdateService),
+        ChangeNotifierProvider<AppUpdateService>(
+            create: (_) => appUpdateService),
       ],
       child: App(
         hasLocationAlwaysGranted: hasLocationAlwaysGranted,
         hasNotificationGranted: hasNotificationGranted,
         isIgnoringBatteryOptimizations: isIgnoringBatteryOptimizations,
+        isMIUI: isMIUI,
       ),
     ),
   );
