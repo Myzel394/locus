@@ -12,6 +12,7 @@ import 'package:locus/services/manager_service.dart';
 import 'package:locus/services/settings_service.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/services/view_service.dart';
+import 'package:locus/utils/device.dart';
 import 'package:locus/utils/permission.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
@@ -38,7 +39,7 @@ void main() async {
     LogService.restore(),
     AppUpdateService.restore(),
     FlutterMapTileCaching.initialise(),
-    isMIUI(),
+    fetchIsMIUI(),
   ]);
   final bool hasLocationAlwaysGranted = futures[0];
   final TaskService taskService = futures[1];
@@ -48,7 +49,6 @@ void main() async {
   final bool hasNotificationGranted = futures[5];
   final LogService logService = futures[6];
   final AppUpdateService appUpdateService = futures[7];
-  final bool isMIUI = futures[9];
 
   await logService.deleteOldLogs();
   await FMTC.instance('mapStore').manage.createAsync();
@@ -69,7 +69,6 @@ void main() async {
         hasLocationAlwaysGranted: hasLocationAlwaysGranted,
         hasNotificationGranted: hasNotificationGranted,
         isIgnoringBatteryOptimizations: isIgnoringBatteryOptimizations,
-        isMIUI: isMIUI,
       ),
     ),
   );

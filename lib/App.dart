@@ -38,7 +38,6 @@ class App extends StatelessWidget {
   final bool hasLocationAlwaysGranted;
   final bool hasNotificationGranted;
   final bool isIgnoringBatteryOptimizations;
-  final bool isMIUI;
 
   const App({
     required this.hasLocationAlwaysGranted,
@@ -90,6 +89,8 @@ class App extends StatelessWidget {
               );
             })(),
             darkTheme: (() {
+              return DARK_THEME_MATERIAL_MIUI;
+
               if (darkColorScheme != null) {
                 return DARK_THEME_MATERIAL.copyWith(
                   colorScheme: settings.primaryColor == null
