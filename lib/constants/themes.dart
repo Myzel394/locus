@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:locus/constants/colors.dart';
 import 'package:locus/constants/spacing.dart';
-import 'package:locus/utils/OpenFromRightPageTransition.dart';
 
 final LIGHT_THEME_MATERIAL = ThemeData(
   useMaterial3: true,
@@ -104,11 +103,12 @@ final DARK_THEME_MATERIAL_MIUI = ThemeData.dark().copyWith(
       borderRadius: BorderRadius.all(Radius.circular(HUGE_SPACE)),
     ),
   ),
+  primaryColor: MIUI_PRIMARY_COLOR,
   switchTheme: ThemeData.dark().switchTheme.copyWith(),
   // Swipe from right to left
   pageTransitionsTheme: const PageTransitionsTheme(
     builders: {
-      TargetPlatform.android: OpenFromRightPageTransitionsBuilder(),
+      TargetPlatform.android: CupertinoPageTransitionsBuilder(),
     },
   ),
 );
