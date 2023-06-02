@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/screens/ShortcutScreen.dart';
+import 'package:locus/utils/PageRoute.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:quick_actions/quick_actions.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 enum ShortcutType {
   createOneHour,
@@ -36,7 +37,8 @@ void initQuickActions(final BuildContext context) {
     } else {
       Navigator.push(
         context,
-        MaterialPageRoute(
+        NativePageRoute(
+          context: context,
           builder: (_) => ShortcutScreen(
             type: ShortcutType.values.firstWhere(
               (element) => element.name == type,

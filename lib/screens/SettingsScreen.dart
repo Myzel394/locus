@@ -15,6 +15,7 @@ import 'package:locus/screens/settings_screen_widgets/ImportSheet.dart';
 import 'package:locus/screens/settings_screen_widgets/MentionTile.dart';
 import 'package:locus/screens/settings_screen_widgets/TransferSenderScreen.dart';
 import 'package:locus/services/task_service.dart';
+import 'package:locus/utils/PageRoute.dart';
 import 'package:locus/utils/import_export_handler.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/Paper.dart';
@@ -354,7 +355,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               onPressed: (_) {
                                 Navigator.push(
                                   context,
-                                  MaterialPageRoute(
+                                  NativePageRoute(
+                                    context: context,
                                     builder: (context) =>
                                         const TransferSenderScreen(),
                                   ),

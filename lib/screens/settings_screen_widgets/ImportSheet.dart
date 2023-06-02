@@ -11,6 +11,7 @@ import 'package:locus/screens/welcome_screen_widgets/TransferReceiverScreen.dart
 import 'package:locus/services/settings_service.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/services/view_service.dart';
+import 'package:locus/utils/PageRoute.dart';
 
 import '../../constants/spacing.dart';
 import '../../utils/theme.dart';
@@ -126,7 +127,8 @@ class _ImportSheetState extends State<ImportSheet> {
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(
+                          NativePageRoute(
+                            context: context,
                             builder: (context) => TransferReceiverScreen(
                                 onContentReceived: parseRawData),
                           ),
