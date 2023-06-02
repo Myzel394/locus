@@ -95,6 +95,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
           material: (data) => data.textTheme.bodyText2!.color,
           cupertino: (data) => data.textTheme.navTitleTextStyle.color,
         ),
+        tileDescriptionTextColor: isMIUI() ? const Color(0xFF808080) : null,
+      );
+    }
+
+    if (isMIUI()) {
+      return SettingsThemeData(
+        titleTextColor: Colors.black,
+        tileDescriptionTextColor: isMIUI() ? const Color(0xFF666666) : null,
       );
     }
 

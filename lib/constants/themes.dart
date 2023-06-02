@@ -72,13 +72,24 @@ final DARK_THEME_MATERIAL_MIUI = ThemeData.dark().copyWith(
       backgroundColor: MIUI_PRIMARY_COLOR,
       foregroundColor: Colors.white,
       splashFactory: NoSplash.splashFactory,
-      textStyle: TextStyle(
+      textStyle: const TextStyle(
         color: Colors.white,
         fontSize: 18,
         fontWeight: FontWeight.w700,
       ),
     ),
   ),
+  popupMenuTheme: ThemeData.dark().popupMenuTheme.copyWith(
+        color: MIUI_DIALOG_COLOR,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(MEDIUM_SPACE),
+        ),
+        textStyle: const TextStyle(
+          color: Colors.white,
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
   inputDecorationTheme: InputDecorationTheme(
     helperMaxLines: 10,
     errorMaxLines: 10,
