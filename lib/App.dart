@@ -89,7 +89,9 @@ class App extends StatelessWidget {
               );
             })(),
             darkTheme: (() {
-              return DARK_THEME_MATERIAL_MIUI;
+              if (settings.getAndroidTheme() == AndroidTheme.miui) {
+                return DARK_THEME_MATERIAL_MIUI;
+              }
 
               if (darkColorScheme != null) {
                 return DARK_THEME_MATERIAL.copyWith(

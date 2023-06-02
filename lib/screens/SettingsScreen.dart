@@ -15,7 +15,6 @@ import 'package:locus/screens/settings_screen_widgets/ImportSheet.dart';
 import 'package:locus/screens/settings_screen_widgets/MentionTile.dart';
 import 'package:locus/screens/settings_screen_widgets/TransferSenderScreen.dart';
 import 'package:locus/services/task_service.dart';
-import 'package:locus/utils/device.dart';
 import 'package:locus/utils/import_export_handler.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/Paper.dart';
@@ -70,6 +69,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   SettingsThemeData? getTheme() {
+    final settings = context.read<SettingsService>();
+
     if (getIsDarkMode(context)) {
       return SettingsThemeData(
         settingsListBackground: platformThemeData(
@@ -79,7 +80,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         settingsSectionBackground: platformThemeData(
           context,
-          material: (data) => isMIUI()
+          material: (data) => settings.isMIUI()
               ? data.scaffoldBackgroundColor
               : data.dialogBackgroundColor,
           cupertino: (data) => HSLColor.fromColor(data.barBackgroundColor)
@@ -96,14 +97,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
           material: (data) => data.textTheme.bodyText2!.color,
           cupertino: (data) => data.textTheme.navTitleTextStyle.color,
         ),
-        tileDescriptionTextColor: isMIUI() ? const Color(0xFF808080) : null,
+        tileDescriptionTextColor:
+            settings.isMIUI() ? const Color(0xFF808080) : null,
       );
     }
 
-    if (isMIUI()) {
-      return SettingsThemeData(
+    if (settings.isMIUI()) {
+      return const SettingsThemeData(
         titleTextColor: Colors.black,
-        tileDescriptionTextColor: isMIUI() ? const Color(0xFF666666) : null,
+        tileDescriptionTextColor: Color(0xFF666666),
       );
     }
 
@@ -161,20 +163,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 l10n.settingsScreen_settings_androidTheme_miui,
                           },
                           onUpdate: (newValue) {
-                            showDialog(
-                              context: context,
-                              builder: (context) => AlertDialog(
-                                title: Text(l10n.restartRequired_title),
-                                content: Text(l10n.restartRequired_description),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.pop(context),
-                                    child: Text(l10n.closeNeutralAction),
-                                  ),
-                                ],
-                              ),
-                            );
-
                             settings.setAndroidTheme(newValue);
                             settings.save();
                           },

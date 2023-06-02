@@ -7,8 +7,6 @@ import 'package:locus/constants/spacing.dart';
 import 'package:locus/services/settings_service.dart';
 import 'package:provider/provider.dart';
 
-import 'device.dart';
-
 TextStyle getBodyTextTextStyle(final BuildContext context) => platformThemeData(
       context,
       material: (data) => data.textTheme.bodyLarge!,
@@ -75,7 +73,7 @@ TextStyle getCaptionTextStyle(final BuildContext context) => platformThemeData(
 Color getSheetColor(final BuildContext context) {
   final settings = context.read<SettingsService>();
 
-  if (isMIUI() && settings.getAndroidTheme() == AndroidTheme.miui) {
+  if (settings.isMIUI() && settings.getAndroidTheme() == AndroidTheme.miui) {
     return MIUI_DIALOG_COLOR;
   }
 

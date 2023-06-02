@@ -2,16 +2,12 @@ import 'dart:io';
 
 import 'package:device_info_plus/device_info_plus.dart';
 
-bool _isMIUICache = false;
-
-bool isMIUI() => _isMIUICache;
-
-Future<void> fetchIsMIUI() async {
+Future<bool> fetchIsMIUI() async {
   if (!Platform.isAndroid) {
-    return;
+    return false;
   }
 
   final deviceInfo = await DeviceInfoPlugin().androidInfo;
 
-  _isMIUICache = deviceInfo.manufacturer == "Xiaomi";
+  return deviceInfo.manufacturer == "Xiaomi";
 }

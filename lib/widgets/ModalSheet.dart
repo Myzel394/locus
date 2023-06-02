@@ -1,9 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/utils/theme.dart';
+import 'package:provider/provider.dart';
 
 import '../constants/spacing.dart';
-import '../utils/device.dart';
+import '../services/settings_service.dart';
 
 class ModalSheet extends StatelessWidget {
   final Widget child;
@@ -17,15 +18,17 @@ class ModalSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final settings = context.watch<SettingsService>();
+
     return PlatformWidget(
       material: (_, __) => Padding(
-        padding: isMIUI() && !miuiIsGapless
+        padding: settings.isMIUI() && !miuiIsGapless
             ? const EdgeInsets.all(MEDIUM_SPACE)
             : EdgeInsets.zero,
         child: Container(
           decoration: BoxDecoration(
             color: getSheetColor(context),
-            borderRadius: isMIUI() && !miuiIsGapless
+            borderRadius: settings.isMIUI() && !miuiIsGapless
                 ? const BorderRadius.all(Radius.circular(LARGE_SPACE))
                 : const BorderRadius.only(
                     topLeft: Radius.circular(LARGE_SPACE),
@@ -34,7 +37,9 @@ class ModalSheet extends StatelessWidget {
           ),
           child: Padding(
             padding: EdgeInsets.only(
-              top: isMIUI() && !miuiIsGapless ? MEDIUM_SPACE : LARGE_SPACE,
+              top: settings.isMIUI() && !miuiIsGapless
+                  ? MEDIUM_SPACE
+                  : LARGE_SPACE,
               left: MEDIUM_SPACE,
               right: MEDIUM_SPACE,
               bottom: SMALL_SPACE,

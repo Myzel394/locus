@@ -18,7 +18,6 @@ import 'package:provider/provider.dart';
 import '../models/log.dart';
 import '../services/log_service.dart';
 import '../services/settings_service.dart';
-import '../utils/device.dart';
 import '../widgets/PlatformListTile.dart';
 import '../widgets/WarningText.dart';
 
@@ -163,6 +162,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
 
   Widget getScheduleNowWidget() {
     final l10n = AppLocalizations.of(context);
+    final settings = context.read<SettingsService>();
     final switchWidget = PlatformSwitch(
       value: _scheduleNow,
       onChanged: (value) {
@@ -195,8 +195,8 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
 
     return PlatformListTile(
       title: Text(l10n.mainScreen_createTask_scheduleNow),
-      leading: isMIUI() ? explanationWidget : switchWidget,
-      trailing: isMIUI() ? switchWidget : explanationWidget,
+      leading: settings.isMIUI() ? explanationWidget : switchWidget,
+      trailing: settings.isMIUI() ? switchWidget : explanationWidget,
     )
         .animate()
         .then(delay: IN_DELAY * 6)
@@ -215,6 +215,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final settings = context.read<SettingsService>();
 
     return PlatformScaffold(
       appBar: PlatformAppBar(
@@ -321,7 +322,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                               ),
                             ],
                             const SizedBox(height: MEDIUM_SPACE),
-                            if (isMIUI()) ...[
+                            if (settings.isMIUI()) ...[
                               MIUISelectField(
                                 label: l10n.createTask_fields_relays_label,
                                 actionText:

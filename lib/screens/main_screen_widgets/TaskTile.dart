@@ -226,6 +226,7 @@ class _TaskTileState extends State<TaskTile> {
       onTap: () {
         Navigator.of(context).push(
           NativePageRoute(
+            context: context,
             builder: (context) => TaskDetailScreen(
               task: widget.task,
             ),

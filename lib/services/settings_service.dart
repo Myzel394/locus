@@ -65,11 +65,12 @@ class SettingsService extends ChangeNotifier {
     List<String>? relays,
   }) : _relays = relays ?? [];
 
-  static SettingsService createDefault() {
+  static Future<SettingsService> createDefault() async {
     return SettingsService(
       automaticallyLookupAddresses: true,
       primaryColor: null,
-      androidTheme: isMIUI() ? AndroidTheme.miui : AndroidTheme.materialYou,
+      androidTheme:
+          await fetchIsMIUI() ? AndroidTheme.miui : AndroidTheme.materialYou,
       mapProvider:
           isPlatformApple() ? MapProvider.apple : MapProvider.openStreetMap,
       showHints: true,
@@ -102,7 +103,7 @@ class SettingsService extends ChangeNotifier {
       return createDefault();
     }
 
-    final defaultValues = createDefault().toJSON();
+    final defaultValues = (await createDefault()).toJSON();
     final data = Map<String, dynamic>.from(jsonDecode(rawData));
     // Merge data with default values, replace null values with default values
     final mergedData = HashMap<String, dynamic>.from(defaultValues)
@@ -235,4 +236,6 @@ class SettingsService extends ChangeNotifier {
   }
 
   AndroidTheme getAndroidTheme() => androidTheme;
+
+  bool isMIUI() => androidTheme == AndroidTheme.miui;
 }

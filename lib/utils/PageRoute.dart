@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:locus/utils/device.dart';
+import 'package:provider/provider.dart';
+
+import '../services/settings_service.dart';
 
 class NativePageRoute extends MaterialPageRoute {
-  NativePageRoute({required super.builder});
+  final BuildContext context;
+
+  NativePageRoute({required super.builder, required this.context});
 
   @override
-  Duration get transitionDuration =>
-      isMIUI() ? 800.milliseconds : super.transitionDuration;
+  Duration get transitionDuration {
+    final settings = context.watch<SettingsService>();
+
+    return settings.isMIUI() ? 800.milliseconds : super.transitionDuration;
+  }
 }

@@ -15,7 +15,6 @@ import 'package:locus/init_quick_actions.dart';
 import 'package:locus/screens/main_screen_widgets/screens/EmptyScreen.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/services/view_service.dart';
-import 'package:locus/utils/device.dart';
 import 'package:locus/utils/navigation.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/PlatformPopup.dart';
@@ -28,6 +27,7 @@ import '../models/log.dart';
 import '../services/app_update_service.dart';
 import '../services/location_point_service.dart';
 import '../services/log_service.dart';
+import '../services/settings_service.dart';
 import '../utils/platform.dart';
 import 'CreateTaskScreen.dart';
 import 'ImportTaskSheet.dart';
@@ -287,50 +287,49 @@ class _MainScreenState extends State<MainScreen> {
 
   PlatformAppBar? getAppBar() {
     final l10n = AppLocalizations.of(context);
+    final settings = context.read<SettingsService>();
 
-    if (isMIUI()) {
+    if (settings.isMIUI()) {
       return PlatformAppBar(
         title: Row(
           children: <Widget>[
             // We want the same width
             const SizedBox(width: 48),
             Expanded(
-              child: Container(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    TextButton(
-                      onPressed: () {
-                        setState(() {
-                          activeTab = 0;
-                        });
-                      },
-                      child: Icon(
-                        activeTab == 0
-                            ? CupertinoIcons.square_list_fill
-                            : CupertinoIcons.square_list,
-                        color: activeTab == 0
-                            ? MIUI_PRIMARY_COLOR
-                            : getBodyTextColor(context),
-                      ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        activeTab = 0;
+                      });
+                    },
+                    child: Icon(
+                      activeTab == 0
+                          ? CupertinoIcons.square_list_fill
+                          : CupertinoIcons.square_list,
+                      color: activeTab == 0
+                          ? MIUI_PRIMARY_COLOR
+                          : getBodyTextColor(context),
                     ),
-                    TextButton(
-                      onPressed: () {
-                        setState(() {
-                          activeTab = 1;
-                        });
-                      },
-                      child: Icon(
-                        activeTab == 1
-                            ? CupertinoIcons.time_solid
-                            : CupertinoIcons.time,
-                        color: activeTab == 1
-                            ? MIUI_PRIMARY_COLOR
-                            : getBodyTextColor(context),
-                      ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        activeTab = 1;
+                      });
+                    },
+                    child: Icon(
+                      activeTab == 1
+                          ? CupertinoIcons.time_solid
+                          : CupertinoIcons.time,
+                      color: activeTab == 1
+                          ? MIUI_PRIMARY_COLOR
+                          : getBodyTextColor(context),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -376,6 +375,7 @@ class _MainScreenState extends State<MainScreen> {
     final l10n = AppLocalizations.of(context);
     final taskService = context.watch<TaskService>();
     final viewService = context.watch<ViewService>();
+    final settings = context.watch<SettingsService>();
 
     final showEmptyScreen =
         taskService.tasks.isEmpty && viewService.views.isEmpty;
@@ -403,11 +403,11 @@ class _MainScreenState extends State<MainScreen> {
                   width: FAB_DIMENSION,
                   child: Center(
                     child: Icon(
-                      isMIUI() || isCupertino(context)
+                      settings.isMIUI() || isCupertino(context)
                           ? CupertinoIcons.plus
                           : Icons.add,
                       color: Theme.of(context).colorScheme.onPrimary,
-                      size: isMIUI() ? 34 : null,
+                      size: settings.isMIUI() ? 34 : null,
                     ),
                   ),
                 ),
@@ -424,7 +424,7 @@ class _MainScreenState extends State<MainScreen> {
             : null,
       ),
       // Settings bottomNavBar via cupertino data class does not work
-      bottomNavBar: isMIUI()
+      bottomNavBar: settings.isMIUI()
           ? null
           : PlatformNavBar(
               material: (_, __) => MaterialNavBarData(

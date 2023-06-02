@@ -12,7 +12,6 @@ import 'package:locus/services/manager_service.dart';
 import 'package:locus/services/settings_service.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/services/view_service.dart';
-import 'package:locus/utils/device.dart';
 import 'package:locus/utils/permission.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
@@ -39,7 +38,6 @@ void main() async {
     LogService.restore(),
     AppUpdateService.restore(),
     FlutterMapTileCaching.initialise(),
-    fetchIsMIUI(),
   ]);
   final bool hasLocationAlwaysGranted = futures[0];
   final TaskService taskService = futures[1];
