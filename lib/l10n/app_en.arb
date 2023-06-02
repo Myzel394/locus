@@ -221,6 +221,7 @@
   "createTask_title": "Define a name for your task",
   "createTask_fields_name_label": "Name",
   "createTask_sameTaskNameAlreadyExists": "A task with this name already exists. You can create the task, but you will have two tasks with the same name.",
+  "createTask_fields_relays_label": "Relays",
   "createTask_fields_relays_selectLabel": "{count, plural, =0{Select Relays} =1{Selected One Relay} other{Selected {count} Relays}}",
   "@createTask_fields_relays_selectLabel": {
     "placeholders": {
@@ -229,6 +230,7 @@
       }
     }
   },
+  "createTask_fields_timers_label": "Timers",
   "createTask_fields_timers_selectLabel": "{count, plural, =0{Select Timers} =1{Selected One Timer} other{Selected {count} Timers}}",
   "@createTask_fields_timers_selectLabel": {
     "placeholders": {

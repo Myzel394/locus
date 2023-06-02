@@ -7,22 +7,25 @@ import '../utils/device.dart';
 
 class ModalSheet extends StatelessWidget {
   final Widget child;
+  final bool miuiIsGapless;
 
   const ModalSheet({
     Key? key,
     required this.child,
+    this.miuiIsGapless = false,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return PlatformWidget(
       material: (_, __) => Padding(
-        padding:
-            isMIUI() ? const EdgeInsets.all(MEDIUM_SPACE) : EdgeInsets.zero,
+        padding: isMIUI() && !miuiIsGapless
+            ? const EdgeInsets.all(MEDIUM_SPACE)
+            : EdgeInsets.zero,
         child: Container(
           decoration: BoxDecoration(
             color: getSheetColor(context),
-            borderRadius: isMIUI()
+            borderRadius: isMIUI() && !miuiIsGapless
                 ? const BorderRadius.all(Radius.circular(LARGE_SPACE))
                 : const BorderRadius.only(
                     topLeft: Radius.circular(LARGE_SPACE),
@@ -31,7 +34,7 @@ class ModalSheet extends StatelessWidget {
           ),
           child: Padding(
             padding: EdgeInsets.only(
-              top: isMIUI() ? MEDIUM_SPACE : LARGE_SPACE,
+              top: isMIUI() && !miuiIsGapless ? MEDIUM_SPACE : LARGE_SPACE,
               left: MEDIUM_SPACE,
               right: MEDIUM_SPACE,
               bottom: SMALL_SPACE,

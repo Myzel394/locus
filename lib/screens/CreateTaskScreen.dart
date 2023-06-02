@@ -9,6 +9,7 @@ import 'package:locus/constants/spacing.dart';
 import 'package:locus/screens/create_task_screen_widgets/ExampleTasksRoulette.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/utils/theme.dart';
+import 'package:locus/widgets/MIUISelectField.dart';
 import 'package:locus/widgets/RelaySelectSheet.dart';
 import 'package:locus/widgets/TimerWidget.dart';
 import 'package:locus/widgets/TimerWidgetSheet.dart';
@@ -17,6 +18,7 @@ import 'package:provider/provider.dart';
 import '../models/log.dart';
 import '../services/log_service.dart';
 import '../services/settings_service.dart';
+import '../utils/device.dart';
 import '../widgets/PlatformListTile.dart';
 import '../widgets/WarningText.dart';
 
@@ -135,6 +137,30 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
     }
   }
 
+  Future<void> showRelaysSheet() => showPlatformModalSheet(
+        context: context,
+        material: MaterialModalSheetData(
+          backgroundColor: Colors.transparent,
+          isScrollControlled: true,
+          isDismissible: true,
+        ),
+        builder: (_) => RelaySelectSheet(
+          controller: _relaysController,
+        ),
+      );
+
+  Future<void> showTimersSheet() => showPlatformModalSheet(
+        context: context,
+        material: MaterialModalSheetData(
+          backgroundColor: Colors.transparent,
+          isScrollControlled: true,
+          isDismissible: true,
+        ),
+        builder: (_) => TimerWidgetSheet(
+          controller: _timersController,
+        ),
+      );
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -244,96 +270,95 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                               ),
                             ],
                             const SizedBox(height: MEDIUM_SPACE),
-                            Wrap(
-                              alignment: WrapAlignment.spaceEvenly,
-                              spacing: SMALL_SPACE,
-                              crossAxisAlignment: WrapCrossAlignment.center,
-                              direction: Axis.horizontal,
-                              children: <Widget>[
-                                PlatformElevatedButton(
-                                  material: (_, __) =>
-                                      MaterialElevatedButtonData(
-                                    icon: PlatformWidget(
-                                      material: (_, __) =>
-                                          const Icon(Icons.dns_rounded),
-                                      cupertino: (_, __) => const Icon(
-                                          CupertinoIcons.list_bullet),
-                                    ),
-                                  ),
-                                  cupertino: (_, __) =>
-                                      CupertinoElevatedButtonData(
-                                    padding: getSmallButtonPadding(context),
-                                  ),
-                                  onPressed: () {
-                                    showPlatformModalSheet(
-                                      context: context,
-                                      material: MaterialModalSheetData(
-                                        backgroundColor: Colors.transparent,
-                                        isScrollControlled: true,
-                                        isDismissible: true,
-                                      ),
-                                      builder: (_) => RelaySelectSheet(
-                                        controller: _relaysController,
-                                      ),
-                                    );
-                                  },
-                                  child: Text(
-                                      l10n.createTask_fields_relays_selectLabel(
-                                          _relaysController.relays.length)),
-                                )
-                                    .animate()
-                                    .then(delay: IN_DELAY * 4)
-                                    .slide(
-                                      duration: IN_DURATION,
-                                      curve: Curves.easeOut,
-                                      begin: const Offset(0.2, 0),
-                                    )
-                                    .fadeIn(
-                                      delay: IN_DELAY,
-                                      duration: IN_DURATION,
-                                      curve: Curves.easeOut,
-                                    ),
-                                PlatformElevatedButton(
-                                  material: (_, __) =>
-                                      MaterialElevatedButtonData(
-                                    icon: const Icon(Icons.timer_rounded),
-                                  ),
-                                  cupertino: (_, __) =>
-                                      CupertinoElevatedButtonData(
-                                    padding: getSmallButtonPadding(context),
-                                  ),
-                                  onPressed: () async {
-                                    await showPlatformModalSheet(
-                                      context: context,
-                                      material: MaterialModalSheetData(
-                                        backgroundColor: Colors.transparent,
-                                        isScrollControlled: true,
-                                        isDismissible: true,
-                                      ),
-                                      builder: (_) => TimerWidgetSheet(
-                                        controller: _timersController,
-                                      ),
-                                    );
-                                  },
-                                  child: Text(
+                            if (isMIUI()) ...[
+                              MIUISelectField(
+                                label: l10n.createTask_fields_relays_label,
+                                actionText:
+                                    l10n.createTask_fields_relays_selectLabel(
+                                  _relaysController.relays.length,
+                                ),
+                                icon: const Icon(Icons.dns_rounded),
+                                onPressed: showRelaysSheet,
+                              ),
+                              MIUISelectField(
+                                label: l10n.createTask_fields_timers_label,
+                                actionText:
                                     l10n.createTask_fields_timers_selectLabel(
-                                        _timersController.timers.length),
-                                  ),
-                                )
-                                    .animate()
-                                    .then(delay: IN_DELAY * 5)
-                                    .slide(
-                                      duration: IN_DURATION,
-                                      curve: Curves.easeOut,
-                                      begin: const Offset(-0.2, 0),
-                                    )
-                                    .fadeIn(
-                                      delay: IN_DELAY,
-                                      duration: IN_DURATION,
-                                      curve: Curves.easeOut,
+                                  _timersController.timers.length,
+                                ),
+                                icon: const Icon(Icons.timer_rounded),
+                                onPressed: showTimersSheet,
+                              ),
+                            ] else
+                              Wrap(
+                                alignment: WrapAlignment.spaceEvenly,
+                                spacing: SMALL_SPACE,
+                                crossAxisAlignment: WrapCrossAlignment.center,
+                                direction: Axis.horizontal,
+                                children: <Widget>[
+                                  PlatformElevatedButton(
+                                    material: (_, __) =>
+                                        MaterialElevatedButtonData(
+                                      icon: PlatformWidget(
+                                        material: (_, __) =>
+                                            const Icon(Icons.dns_rounded),
+                                        cupertino: (_, __) => const Icon(
+                                            CupertinoIcons.list_bullet),
+                                      ),
                                     ),
-                              ],
-                            ),
+                                    cupertino: (_, __) =>
+                                        CupertinoElevatedButtonData(
+                                      padding: getSmallButtonPadding(context),
+                                    ),
+                                    onPressed: showRelaysSheet,
+                                    child: Text(
+                                      l10n.createTask_fields_relays_selectLabel(
+                                        _relaysController.relays.length,
+                                      ),
+                                    ),
+                                  )
+                                      .animate()
+                                      .then(delay: IN_DELAY * 4)
+                                      .slide(
+                                        duration: IN_DURATION,
+                                        curve: Curves.easeOut,
+                                        begin: const Offset(0.2, 0),
+                                      )
+                                      .fadeIn(
+                                        delay: IN_DELAY,
+                                        duration: IN_DURATION,
+                                        curve: Curves.easeOut,
+                                      ),
+                                  PlatformElevatedButton(
+                                    material: (_, __) =>
+                                        MaterialElevatedButtonData(
+                                      icon: const Icon(Icons.timer_rounded),
+                                    ),
+                                    cupertino: (_, __) =>
+                                        CupertinoElevatedButtonData(
+                                      padding: getSmallButtonPadding(context),
+                                    ),
+                                    onPressed: showTimersSheet,
+                                    child: Text(
+                                      l10n.createTask_fields_timers_selectLabel(
+                                        _timersController.timers.length,
+                                      ),
+                                    ),
+                                  )
+                                      .animate()
+                                      .then(delay: IN_DELAY * 5)
+                                      .slide(
+                                        duration: IN_DURATION,
+                                        curve: Curves.easeOut,
+                                        begin: const Offset(-0.2, 0),
+                                      )
+                                      .fadeIn(
+                                        delay: IN_DELAY,
+                                        duration: IN_DURATION,
+                                        curve: Curves.easeOut,
+                                      ),
+                                ],
+                              ),
                             const SizedBox(height: MEDIUM_SPACE),
                             PlatformListTile(
                               title:
