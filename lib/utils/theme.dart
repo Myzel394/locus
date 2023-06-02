@@ -75,7 +75,7 @@ TextStyle getCaptionTextStyle(final BuildContext context) => platformThemeData(
 Color getSheetColor(final BuildContext context) {
   final settings = context.read<SettingsService>();
 
-  if (isMIUI() && settings.getPrimaryColor(context) == Colors.transparent) {
+  if (isMIUI() && settings.getAndroidTheme() == AndroidTheme.miui) {
     return MIUI_DIALOG_COLOR;
   }
 

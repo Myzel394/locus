@@ -26,6 +26,11 @@ enum GeocoderProvider {
   nominatim,
 }
 
+enum AndroidTheme {
+  materialYou,
+  miui,
+}
+
 // Selects a random provider from the list of available providers, not including
 // the system provider.
 GeocoderProvider selectRandomProvider() {
@@ -40,11 +45,11 @@ class SettingsService extends ChangeNotifier {
   bool automaticallyLookupAddresses;
   bool showHints;
   List<String> _relays;
+  AndroidTheme androidTheme;
 
   GeocoderProvider geocoderProvider;
 
   // null = system default
-  // transparent = MIUI Blue
   Color? primaryColor;
 
   // Apple
@@ -56,13 +61,15 @@ class SettingsService extends ChangeNotifier {
     required this.mapProvider,
     required this.showHints,
     required this.geocoderProvider,
+    required this.androidTheme,
     List<String>? relays,
   }) : _relays = relays ?? [];
 
   static SettingsService createDefault() {
     return SettingsService(
       automaticallyLookupAddresses: true,
-      primaryColor: isMIUI() ? Colors.transparent : null,
+      primaryColor: null,
+      androidTheme: isMIUI() ? AndroidTheme.miui : AndroidTheme.materialYou,
       mapProvider:
           isPlatformApple() ? MapProvider.apple : MapProvider.openStreetMap,
       showHints: true,
@@ -83,6 +90,7 @@ class SettingsService extends ChangeNotifier {
       relays: List<String>.from(data['relays'] ?? []),
       showHints: data['showHints'],
       geocoderProvider: GeocoderProvider.values[data['geocoderProvider']],
+      androidTheme: AndroidTheme.values[data['androidTheme']],
     );
   }
 
@@ -113,6 +121,7 @@ class SettingsService extends ChangeNotifier {
       "relays": _relays,
       "showHints": showHints,
       "geocoderProvider": geocoderProvider.index,
+      "androidTheme": androidTheme.index,
     };
   }
 
@@ -219,4 +228,11 @@ class SettingsService extends ChangeNotifier {
 
     notifyListeners();
   }
+
+  void setAndroidTheme(final AndroidTheme value) {
+    androidTheme = value;
+    notifyListeners();
+  }
+
+  AndroidTheme getAndroidTheme() => androidTheme;
 }
