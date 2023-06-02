@@ -2,9 +2,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+import 'package:locus/constants/colors.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/services/settings_service.dart';
 import 'package:provider/provider.dart';
+
+import 'device.dart';
 
 TextStyle getBodyTextTextStyle(final BuildContext context) => platformThemeData(
       context,
@@ -24,7 +27,8 @@ Color getBodyTextColor(final BuildContext context) => platformThemeData(
       cupertino: (data) => data.textTheme.textStyle.color!,
     );
 
-bool getIsDarkMode(final BuildContext context) => MediaQuery.of(context).platformBrightness == Brightness.dark;
+bool getIsDarkMode(final BuildContext context) =>
+    MediaQuery.of(context).platformBrightness == Brightness.dark;
 
 Color getButtonBackgroundColor(final BuildContext context) => platformThemeData(
       context,
@@ -68,13 +72,23 @@ TextStyle getCaptionTextStyle(final BuildContext context) => platformThemeData(
       cupertino: (data) => data.textTheme.tabLabelTextStyle,
     );
 
-Color getSheetColor(final BuildContext context) => platformThemeData(
-      context,
-      material: (data) => getIsDarkMode(context)
-          ? HSLColor.fromColor(data.scaffoldBackgroundColor.withAlpha(255)).withLightness(.18).toColor()
-          : data.scaffoldBackgroundColor,
-      cupertino: (data) => data.barBackgroundColor,
-    );
+Color getSheetColor(final BuildContext context) {
+  final settings = context.read<SettingsService>();
+
+  if (isMIUI() && settings.getPrimaryColor(context) == Colors.transparent) {
+    return MIUI_DIALOG_COLOR;
+  }
+
+  return platformThemeData(
+    context,
+    material: (data) => getIsDarkMode(context)
+        ? HSLColor.fromColor(data.scaffoldBackgroundColor.withAlpha(255))
+            .withLightness(.18)
+            .toColor()
+        : data.scaffoldBackgroundColor,
+    cupertino: (data) => data.barBackgroundColor,
+  );
+}
 
 double getIconSizeForBodyText(final BuildContext context) => platformThemeData(
       context,
@@ -97,7 +111,9 @@ Map<int, Color> getPrimaryColorShades(final BuildContext context) {
       9,
       (index) => MapEntry(
         (index + 1) * 100,
-        HSLColor.fromColor(primaryColor).withLightness(1 - (index / 10)).toColor(),
+        HSLColor.fromColor(primaryColor)
+            .withLightness(1 - (index / 10))
+            .toColor(),
       ),
     ),
   );
@@ -108,7 +124,8 @@ Map<int, Color> getPrimaryColorShades(final BuildContext context) {
   };
 }
 
-EdgeInsets getSmallButtonPadding(final BuildContext context) => platformThemeData(
+EdgeInsets getSmallButtonPadding(final BuildContext context) =>
+    platformThemeData(
       context,
       material: (data) => const EdgeInsets.symmetric(
         horizontal: MEDIUM_SPACE,

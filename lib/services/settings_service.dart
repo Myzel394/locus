@@ -8,6 +8,7 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../api/get-address.dart';
+import '../utils/device.dart';
 import '../utils/platform.dart';
 
 const STORAGE_KEY = "_app_settings";
@@ -43,6 +44,7 @@ class SettingsService extends ChangeNotifier {
   GeocoderProvider geocoderProvider;
 
   // null = system default
+  // transparent = MIUI Blue
   Color? primaryColor;
 
   // Apple
@@ -60,7 +62,7 @@ class SettingsService extends ChangeNotifier {
   static SettingsService createDefault() {
     return SettingsService(
       automaticallyLookupAddresses: true,
-      primaryColor: null,
+      primaryColor: isMIUI() ? Colors.transparent : null,
       mapProvider:
           isPlatformApple() ? MapProvider.apple : MapProvider.openStreetMap,
       showHints: true,

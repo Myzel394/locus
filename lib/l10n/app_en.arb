@@ -346,6 +346,7 @@
   "settingsScreen_sections_misc": "Miscellaneous",
   "settingsScreen_setting_primaryColor_label": "Primary Color",
   "settingsScreen_setting_primaryColor_systemDefault": "System Default",
+  "settingsScreen_setting_primaryColor_miuiTheme": "MIUI Colors",
   "settingsScreen_setting_lookupAddresses_label": "Automatically lookup addresses",
   "settingsScreen_setting_lookupAddresses_description": "Looks up addresses for locations. This means that a raw location, such as (37.422131, -122.084801) can be mapped to an address. This will send the location to a third party service to get the address. This will only happen when you open the location details screen. If you disable this, you can manually load the address by tapping on the location.",
   "settingsScreen_settings_mapProvider_label": "Map Provider",
