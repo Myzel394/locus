@@ -19,6 +19,7 @@ import 'package:locus/utils/device.dart';
 import 'package:locus/utils/import_export_handler.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/Paper.dart';
+import 'package:locus/widgets/SettingsCaretIcon.dart';
 import 'package:locus/widgets/SettingsColorPicker.dart';
 import 'package:locus/widgets/SettingsDropdownTile.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -262,6 +263,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           material: (_, __) => const Icon(Icons.file_open),
                           cupertino: (_, __) => const Icon(CupertinoIcons.doc),
                         ),
+                        trailing: const SettingsCaretIcon(),
                         onPressed: (_) async {
                           final taskService = context.read<TaskService>();
                           final viewService = context.read<ViewService>();
@@ -326,6 +328,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 cupertino: (_, __) => const Icon(
                                     CupertinoIcons.device_phone_portrait),
                               ),
+                              trailing: const SettingsCaretIcon(),
                               onPressed: (_) {
                                 Navigator.push(
                                   context,
@@ -345,6 +348,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           cupertino: (_, __) =>
                               const Icon(CupertinoIcons.tray_arrow_down_fill),
                         ),
+                        trailing: const SettingsCaretIcon(),
                         onPressed: (_) async {
                           final shouldPopContext = await showPlatformModalSheet(
                             context: context,

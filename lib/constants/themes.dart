@@ -63,6 +63,9 @@ final DARK_THEME_MATERIAL_MIUI = ThemeData.dark().copyWith(
               fontWeight: FontWeight.w400,
               fontSize: 16,
             ),
+        bodySmall: ThemeData.dark().textTheme.bodySmall!.copyWith(
+              color: const Color(0xFF555555),
+            ),
       ),
   buttonBarTheme: ThemeData.dark().buttonBarTheme.copyWith(
         buttonTextTheme: ButtonTextTheme.primary,
