@@ -161,6 +161,57 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
         ),
       );
 
+  Widget getScheduleNowWidget() {
+    final l10n = AppLocalizations.of(context);
+    final switchWidget = PlatformSwitch(
+      value: _scheduleNow,
+      onChanged: (value) {
+        setState(() {
+          _scheduleNow = value;
+        });
+      },
+    );
+    final explanationWidget = PlatformIconButton(
+      icon: Icon(context.platformIcons.help),
+      onPressed: () {
+        showPlatformDialog(
+          context: context,
+          builder: (context) => PlatformAlertDialog(
+            title: Text(l10n.mainScreen_createTask_scheduleNow_help_title),
+            content:
+                Text(l10n.mainScreen_createTask_scheduleNow_help_description),
+            actions: [
+              PlatformDialogAction(
+                child: PlatformText(l10n.closeNeutralAction),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    return PlatformListTile(
+      title: Text(l10n.mainScreen_createTask_scheduleNow),
+      leading: isMIUI() ? explanationWidget : switchWidget,
+      trailing: isMIUI() ? switchWidget : explanationWidget,
+    )
+        .animate()
+        .then(delay: IN_DELAY * 6)
+        .slide(
+          duration: IN_DURATION,
+          curve: Curves.easeOut,
+          begin: const Offset(0, 0.2),
+        )
+        .fadeIn(
+          delay: IN_DELAY,
+          duration: IN_DURATION,
+          curve: Curves.easeOut,
+        );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -279,7 +330,11 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                 ),
                                 icon: const Icon(Icons.dns_rounded),
                                 onPressed: showRelaysSheet,
-                              ),
+                              ).animate().then(delay: IN_DELAY * 4).fadeIn(
+                                    delay: IN_DELAY,
+                                    duration: IN_DURATION,
+                                    curve: Curves.easeOut,
+                                  ),
                               MIUISelectField(
                                 label: l10n.createTask_fields_timers_label,
                                 actionText:
@@ -288,7 +343,11 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                 ),
                                 icon: const Icon(Icons.timer_rounded),
                                 onPressed: showTimersSheet,
-                              ),
+                              ).animate().then(delay: IN_DELAY * 4).fadeIn(
+                                    delay: IN_DELAY,
+                                    duration: IN_DURATION,
+                                    curve: Curves.easeOut,
+                                  ),
                             ] else
                               Wrap(
                                 alignment: WrapAlignment.spaceEvenly,
@@ -360,53 +419,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
                                 ],
                               ),
                             const SizedBox(height: MEDIUM_SPACE),
-                            PlatformListTile(
-                              title:
-                                  Text(l10n.mainScreen_createTask_scheduleNow),
-                              leading: PlatformSwitch(
-                                value: _scheduleNow,
-                                onChanged: (value) {
-                                  setState(() {
-                                    _scheduleNow = value;
-                                  });
-                                },
-                              ),
-                              trailing: PlatformIconButton(
-                                icon: Icon(context.platformIcons.help),
-                                onPressed: () {
-                                  showPlatformDialog(
-                                    context: context,
-                                    builder: (context) => PlatformAlertDialog(
-                                      title: Text(l10n
-                                          .mainScreen_createTask_scheduleNow_help_title),
-                                      content: Text(l10n
-                                          .mainScreen_createTask_scheduleNow_help_description),
-                                      actions: [
-                                        PlatformDialogAction(
-                                          child: PlatformText(
-                                              l10n.closeNeutralAction),
-                                          onPressed: () {
-                                            Navigator.of(context).pop();
-                                          },
-                                        ),
-                                      ],
-                                    ),
-                                  );
-                                },
-                              ),
-                            )
-                                .animate()
-                                .then(delay: IN_DELAY * 6)
-                                .slide(
-                                  duration: IN_DURATION,
-                                  curve: Curves.easeOut,
-                                  begin: const Offset(0, 0.2),
-                                )
-                                .fadeIn(
-                                  delay: IN_DELAY,
-                                  duration: IN_DURATION,
-                                  curve: Curves.easeOut,
-                                ),
+                            getScheduleNowWidget(),
                           ],
                         ),
                       ],
