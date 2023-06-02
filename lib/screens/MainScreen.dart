@@ -10,12 +10,16 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:locus/constants/colors.dart';
 import 'package:locus/init_quick_actions.dart';
 import 'package:locus/screens/main_screen_widgets/screens/EmptyScreen.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/services/view_service.dart';
+import 'package:locus/utils/device.dart';
 import 'package:locus/utils/navigation.dart';
+import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/PlatformPopup.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:uni_links/uni_links.dart';
 
@@ -102,7 +106,8 @@ class _MainScreenState extends State<MainScreen> {
         return;
       }
 
-      final locationData = await LocationPointService.createUsingCurrentLocation(position);
+      final locationData =
+          await LocationPointService.createUsingCurrentLocation(position);
 
       for (final task in runningTasks) {
         await task.publishCurrentLocationNow(
@@ -221,7 +226,9 @@ class _MainScreenState extends State<MainScreen> {
     final l10n = AppLocalizations.of(context);
     final appUpdateService = context.read<AppUpdateService>();
 
-    if (appUpdateService.shouldShowDialogue() && !appUpdateService.hasShownDialogue && mounted) {
+    if (appUpdateService.shouldShowDialogue() &&
+        !appUpdateService.hasShownDialogue &&
+        mounted) {
       await showPlatformDialog(
         context: context,
         barrierDismissible: false,
@@ -236,7 +243,8 @@ class _MainScreenState extends State<MainScreen> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              material: (context, _) => MaterialDialogActionData(icon: const Icon(Icons.watch_later_rounded)),
+              material: (context, _) => MaterialDialogActionData(
+                  icon: const Icon(Icons.watch_later_rounded)),
               child: Text(l10n.updateAvailable_android_remindLater),
             ),
             PlatformDialogAction(
@@ -245,12 +253,14 @@ class _MainScreenState extends State<MainScreen> {
 
                 Navigator.of(context).pop();
               },
-              material: (context, _) => MaterialDialogActionData(icon: const Icon(Icons.block)),
+              material: (context, _) =>
+                  MaterialDialogActionData(icon: const Icon(Icons.block)),
               child: Text(l10n.updateAvailable_android_ignore),
             ),
             PlatformDialogAction(
               onPressed: appUpdateService.openStoreForUpdate,
-              material: (context, _) => MaterialDialogActionData(icon: const Icon(Icons.download)),
+              material: (context, _) =>
+                  MaterialDialogActionData(icon: const Icon(Icons.download)),
               child: Text(l10n.updateAvailable_android_download),
             ),
           ],
@@ -274,8 +284,73 @@ class _MainScreenState extends State<MainScreen> {
     _showUpdateDialogIfRequired();
   }
 
-  PlatformAppBar getAppBar() {
+  PlatformAppBar? getAppBar() {
     final l10n = AppLocalizations.of(context);
+
+    if (isMIUI()) {
+      return PlatformAppBar(
+        title: Row(
+          children: <Widget>[
+            // We want the same width
+            const SizedBox(width: 48),
+            Expanded(
+              child: Container(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    TextButton(
+                      onPressed: () {
+                        setState(() {
+                          activeTab = 0;
+                        });
+                      },
+                      child: Icon(
+                        activeTab == 0
+                            ? CupertinoIcons.square_list_fill
+                            : CupertinoIcons.square_list,
+                        color: activeTab == 0
+                            ? MIUI_PRIMARY_COLOR
+                            : getBodyTextColor(context),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        setState(() {
+                          activeTab = 1;
+                        });
+                      },
+                      child: Icon(
+                        activeTab == 1
+                            ? CupertinoIcons.time_solid
+                            : CupertinoIcons.time,
+                        color: activeTab == 1
+                            ? MIUI_PRIMARY_COLOR
+                            : getBodyTextColor(context),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+        trailingActions: <Widget>[
+          IconButton(
+            icon: Transform.rotate(
+              angle: 0,
+              child: const Icon(MdiIcons.nut),
+            ),
+            onPressed: () {
+              showSettings(context);
+            },
+          ),
+        ],
+      );
+    }
+
+    if (activeTab != 0) {
+      return null;
+    }
 
     return PlatformAppBar(
       title: Text(l10n.appName),
@@ -301,7 +376,8 @@ class _MainScreenState extends State<MainScreen> {
     final taskService = context.watch<TaskService>();
     final viewService = context.watch<ViewService>();
 
-    final showEmptyScreen = taskService.tasks.isEmpty && viewService.views.isEmpty;
+    final showEmptyScreen =
+        taskService.tasks.isEmpty && viewService.views.isEmpty;
 
     if (showEmptyScreen) {
       return PlatformScaffold(
@@ -326,8 +402,11 @@ class _MainScreenState extends State<MainScreen> {
                   width: FAB_DIMENSION,
                   child: Center(
                     child: Icon(
-                      Icons.add,
+                      isMIUI() || isCupertino(context)
+                          ? CupertinoIcons.plus
+                          : Icons.add,
                       color: Theme.of(context).colorScheme.onPrimary,
+                      size: isMIUI() ? 34 : null,
                     ),
                   ),
                 ),
@@ -339,47 +418,53 @@ class _MainScreenState extends State<MainScreen> {
                 ),
                 openColor: Theme.of(context).scaffoldBackgroundColor,
                 closedColor: Theme.of(context).colorScheme.primary,
-              ).animate().scale(duration: 500.ms, delay: 1.seconds, curve: Curves.bounceOut)
+              ).animate().scale(
+                duration: 500.ms, delay: 1.seconds, curve: Curves.bounceOut)
             : null,
       ),
       // Settings bottomNavBar via cupertino data class does not work
-      bottomNavBar: PlatformNavBar(
-        material: (_, __) => MaterialNavBarData(
-            backgroundColor: Theme.of(context).dialogBackgroundColor, elevation: 0, padding: const EdgeInsets.all(0)),
-        itemChanged: (index) {
-          setState(() {
-            activeTab = index;
-          });
-        },
-        currentIndex: activeTab,
-        items: isCupertino(context)
-            ? [
-                BottomNavigationBarItem(
-                  icon: const Icon(CupertinoIcons.home),
-                  label: l10n.mainScreen_overview,
-                ),
-                BottomNavigationBarItem(
-                  icon: const Icon(CupertinoIcons.list_bullet),
-                  label: l10n.mainScreen_logs,
-                ),
-                BottomNavigationBarItem(
-                  icon: const Icon(CupertinoIcons.location_fill),
-                  label: l10n.mainScreen_createTask,
-                ),
-              ]
-            : [
-                BottomNavigationBarItem(
-                  icon: const Icon(Icons.home),
-                  label: l10n.mainScreen_overview,
+      bottomNavBar: isMIUI()
+          ? null
+          : PlatformNavBar(
+              material: (_, __) => MaterialNavBarData(
                   backgroundColor: Theme.of(context).dialogBackgroundColor,
-                ),
-                BottomNavigationBarItem(
-                  icon: const Icon(Icons.history),
-                  label: l10n.mainScreen_logs,
-                ),
-              ],
-      ),
-      appBar: activeTab == 0 ? getAppBar() : null,
+                  elevation: 0,
+                  padding: const EdgeInsets.all(0)),
+              itemChanged: (index) {
+                setState(() {
+                  activeTab = index;
+                });
+              },
+              currentIndex: activeTab,
+              items: isCupertino(context)
+                  ? [
+                      BottomNavigationBarItem(
+                        icon: const Icon(CupertinoIcons.home),
+                        label: l10n.mainScreen_overview,
+                      ),
+                      BottomNavigationBarItem(
+                        icon: const Icon(CupertinoIcons.list_bullet),
+                        label: l10n.mainScreen_logs,
+                      ),
+                      BottomNavigationBarItem(
+                        icon: const Icon(CupertinoIcons.location_fill),
+                        label: l10n.mainScreen_createTask,
+                      ),
+                    ]
+                  : [
+                      BottomNavigationBarItem(
+                        icon: const Icon(Icons.home),
+                        label: l10n.mainScreen_overview,
+                        backgroundColor:
+                            Theme.of(context).dialogBackgroundColor,
+                      ),
+                      BottomNavigationBarItem(
+                        icon: const Icon(Icons.history),
+                        label: l10n.mainScreen_logs,
+                      ),
+                    ],
+            ),
+      appBar: getAppBar(),
       body: (() {
         switch (activeTab) {
           case 0:
