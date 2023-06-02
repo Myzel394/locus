@@ -69,18 +69,6 @@ final DARK_THEME_MATERIAL_MIUI = ThemeData.dark().copyWith(
   buttonBarTheme: ThemeData.dark().buttonBarTheme.copyWith(
         buttonTextTheme: ButtonTextTheme.primary,
       ),
-  elevatedButtonTheme: ElevatedButtonThemeData(
-    style: ElevatedButton.styleFrom(
-      backgroundColor: MIUI_PRIMARY_COLOR,
-      foregroundColor: Colors.white,
-      splashFactory: NoSplash.splashFactory,
-      textStyle: const TextStyle(
-        color: Colors.white,
-        fontSize: 18,
-        fontWeight: FontWeight.w700,
-      ),
-    ),
-  ),
   popupMenuTheme: ThemeData.dark().popupMenuTheme.copyWith(
         color: MIUI_DIALOG_COLOR,
         shape: RoundedRectangleBorder(

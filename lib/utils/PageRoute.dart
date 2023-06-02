@@ -13,6 +13,6 @@ class NativePageRoute extends MaterialPageRoute {
   Duration get transitionDuration {
     final settings = context.read<SettingsService>();
 
-    return settings.isMIUI() ? 800.milliseconds : super.transitionDuration;
+    return settings.isMIUI() ? 700.milliseconds : super.transitionDuration;
   }
 }

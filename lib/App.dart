@@ -2,6 +2,7 @@ import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+import 'package:locus/constants/colors.dart';
 import 'package:locus/screens/MainScreen.dart';
 import 'package:locus/screens/WelcomeScreen.dart';
 import 'package:locus/services/settings_service.dart';
@@ -90,7 +91,29 @@ class App extends StatelessWidget {
             })(),
             darkTheme: (() {
               if (settings.getAndroidTheme() == AndroidTheme.miui) {
-                return DARK_THEME_MATERIAL_MIUI;
+                return DARK_THEME_MATERIAL_MIUI.copyWith(
+                  colorScheme: settings.primaryColor == null
+                      ? null
+                      : createColorScheme(
+                          const ColorScheme.dark(),
+                          settings.primaryColor!,
+                          Brightness.dark,
+                        ),
+                  primaryColor: settings.primaryColor,
+                  elevatedButtonTheme: ElevatedButtonThemeData(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor:
+                          settings.primaryColor ?? MIUI_PRIMARY_COLOR,
+                      foregroundColor: Colors.white,
+                      splashFactory: NoSplash.splashFactory,
+                      textStyle: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                );
               }
 
               if (darkColorScheme != null) {
