@@ -145,6 +145,7 @@ class _MainScreenState extends State<MainScreen> {
       material: MaterialModalSheetData(
         isScrollControlled: true,
         isDismissible: true,
+        backgroundColor: Colors.transparent,
       ),
       builder: (context) => ImportTaskSheet(initialURL: url),
     );

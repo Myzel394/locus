@@ -110,7 +110,9 @@ class _ShareLocationButtonState extends State<ShareLocationButton> {
                           style: getTitle2TextStyle(context),
                           textAlign: TextAlign.center,
                         ),
-                        isMaterial(context) ? const SizedBox(height: LARGE_SPACE) : null,
+                        isMaterial(context)
+                            ? const SizedBox(height: LARGE_SPACE)
+                            : null,
                         QrImageView(
                           data: url,
                           errorCorrectionLevel: QrErrorCorrectLevel.H,
@@ -147,6 +149,7 @@ class _ShareLocationButtonState extends State<ShareLocationButton> {
               material: MaterialModalSheetData(
                 isScrollControlled: true,
                 isDismissible: true,
+                backgroundColor: Colors.transparent,
               ),
               builder: (_) => SendViewByBluetooth(
                 data: data,

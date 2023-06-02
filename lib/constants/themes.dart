@@ -93,16 +93,20 @@ final DARK_THEME_MATERIAL_MIUI = ThemeData.dark().copyWith(
           fontWeight: FontWeight.w600,
         ),
       ),
-  inputDecorationTheme: InputDecorationTheme(
+  inputDecorationTheme: const InputDecorationTheme(
     helperMaxLines: 10,
     errorMaxLines: 10,
+    filled: true,
+    fillColor: MIUI_DIALOG_COLOR,
+    // No border
     border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(MEDIUM_SPACE),
+      borderSide: BorderSide.none,
+      borderRadius: BorderRadius.all(Radius.circular(HUGE_SPACE)),
     ),
   ),
   switchTheme: ThemeData.dark().switchTheme.copyWith(),
   // Swipe from right to left
-  pageTransitionsTheme: PageTransitionsTheme(
+  pageTransitionsTheme: const PageTransitionsTheme(
     builders: {
       TargetPlatform.android: OpenFromRightPageTransitionsBuilder(),
     },

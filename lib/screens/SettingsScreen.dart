@@ -231,6 +231,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               material: MaterialModalSheetData(
                                 isScrollControlled: true,
                                 isDismissible: true,
+                                backgroundColor: Colors.transparent,
                               ),
                               builder: (_) => RelaySelectSheet(
                                 controller: _relayController,
@@ -352,10 +353,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         onPressed: (_) async {
                           final shouldPopContext = await showPlatformModalSheet(
                             context: context,
-                            material: MaterialModalSheetData(),
+                            material: MaterialModalSheetData(
+                              backgroundColor: Colors.transparent,
+                            ),
                             builder: (context) => ImportSheet(
-                              onImport: (final taskService, final viewService,
-                                  final settings) async {
+                              onImport: (
+                                final taskService,
+                                final viewService,
+                                final settings,
+                              ) async {
                                 await Future.wait([
                                   taskService.save(),
                                   viewService.save(),
