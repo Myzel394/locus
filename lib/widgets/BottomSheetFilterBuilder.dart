@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
+import 'package:locus/utils/device.dart';
 
 dynamic defaultExtractor(dynamic element) => element;
 
@@ -87,6 +88,9 @@ class _BottomSheetFilterBuilderState<T>
               spellCheckConfiguration: const SpellCheckConfiguration.disabled(),
               decoration: InputDecoration(
                 hintText: l10n.searchLabel,
+                prefixIcon: Icon(
+                  isMIUI() ? CupertinoIcons.search : Icons.search_rounded,
+                ),
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.clear),
                   onPressed: () {
