@@ -285,55 +285,57 @@ class _MainScreenState extends State<MainScreen> {
     _showUpdateDialogIfRequired();
   }
 
-  PlatformAppBar? getAppBar() {
+  PlatformAppBar? getAppBar([final bool hasScreens = true]) {
     final l10n = AppLocalizations.of(context);
     final settings = context.read<SettingsService>();
 
     if (settings.isMIUI()) {
       return PlatformAppBar(
-        title: Row(
-          children: <Widget>[
-            // We want the same width
-            const SizedBox(width: 48),
-            Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+        title: hasScreens
+            ? Row(
                 children: <Widget>[
-                  TextButton(
-                    onPressed: () {
-                      setState(() {
-                        activeTab = 0;
-                      });
-                    },
-                    child: Icon(
-                      activeTab == 0
-                          ? CupertinoIcons.square_list_fill
-                          : CupertinoIcons.square_list,
-                      color: activeTab == 0
-                          ? MIUI_PRIMARY_COLOR
-                          : getBodyTextColor(context),
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      setState(() {
-                        activeTab = 1;
-                      });
-                    },
-                    child: Icon(
-                      activeTab == 1
-                          ? CupertinoIcons.time_solid
-                          : CupertinoIcons.time,
-                      color: activeTab == 1
-                          ? MIUI_PRIMARY_COLOR
-                          : getBodyTextColor(context),
+                  // We want the same width
+                  const SizedBox(width: 48),
+                  Expanded(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        TextButton(
+                          onPressed: () {
+                            setState(() {
+                              activeTab = 0;
+                            });
+                          },
+                          child: Icon(
+                            activeTab == 0
+                                ? CupertinoIcons.square_list_fill
+                                : CupertinoIcons.square_list,
+                            color: activeTab == 0
+                                ? MIUI_PRIMARY_COLOR
+                                : getBodyTextColor(context),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            setState(() {
+                              activeTab = 1;
+                            });
+                          },
+                          child: Icon(
+                            activeTab == 1
+                                ? CupertinoIcons.time_solid
+                                : CupertinoIcons.time,
+                            color: activeTab == 1
+                                ? MIUI_PRIMARY_COLOR
+                                : getBodyTextColor(context),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
-              ),
-            ),
-          ],
-        ),
+              )
+            : null,
         trailingActions: <Widget>[
           IconButton(
             icon: Transform.rotate(
@@ -382,7 +384,7 @@ class _MainScreenState extends State<MainScreen> {
 
     if (showEmptyScreen) {
       return PlatformScaffold(
-        appBar: getAppBar(),
+        appBar: getAppBar(false),
         body: const EmptyScreen(),
       );
     }
@@ -465,7 +467,7 @@ class _MainScreenState extends State<MainScreen> {
                       ),
                     ],
             ),
-      appBar: getAppBar(),
+      appBar: getAppBar(true),
       body: (() {
         switch (activeTab) {
           case 0:
