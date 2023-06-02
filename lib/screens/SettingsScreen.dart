@@ -146,6 +146,39 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           settings.save();
                         },
                       ),
+                      if (Platform.isAndroid)
+                        SettingsDropdownTile(
+                          title: Text(
+                            l10n.settingsScreen_settings_androidTheme_label,
+                          ),
+                          values: AndroidTheme.values,
+                          value: settings.androidTheme,
+                          leading: const Icon(Icons.design_services_rounded),
+                          textMapping: {
+                            AndroidTheme.materialYou: l10n
+                                .settingsScreen_settings_androidTheme_materialYou,
+                            AndroidTheme.miui:
+                                l10n.settingsScreen_settings_androidTheme_miui,
+                          },
+                          onUpdate: (newValue) {
+                            showDialog(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                title: Text(l10n.restartRequired_title),
+                                content: Text(l10n.restartRequired_description),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context),
+                                    child: Text(l10n.closeNeutralAction),
+                                  ),
+                                ],
+                              ),
+                            );
+
+                            settings.setAndroidTheme(newValue);
+                            settings.save();
+                          },
+                        ),
                     ],
                   ),
                   SettingsSection(

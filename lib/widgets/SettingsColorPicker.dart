@@ -10,7 +10,6 @@ import 'package:locus/widgets/SwapElementAnimation.dart';
 import 'package:settings_ui/settings_ui.dart';
 
 import '../constants/spacing.dart';
-import '../utils/device.dart';
 import 'PlatformListTile.dart';
 
 class ColorDialogPicker extends StatefulWidget {
@@ -208,14 +207,6 @@ class _SettingsColorPickerWidgetRawState
                           widget.onUpdate(null);
                         },
                       ),
-                      if (isMIUI())
-                        PlatformTextButton(
-                          child: Text(l10n
-                              .settingsScreen_setting_primaryColor_miuiTheme),
-                          onPressed: () {
-                            widget.onUpdate(Colors.transparent);
-                          },
-                        ),
                     ] +
                     presetColors
                         .mapIndexed(
