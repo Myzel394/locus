@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:cryptography/cryptography.dart';
+import 'package:flutter/animation.dart';
 import 'package:locus/services/location_point_service.dart';
 import 'package:nostr/nostr.dart';
 
@@ -60,7 +61,7 @@ Future<WebSocket> openSocket({
   return socket;
 }
 
-Future<void Function()> getLocations({
+VoidCallback getLocations({
   required final String nostrPublicKey,
   required final SecretKey encryptionPassword,
   required final List<String> relays,
@@ -68,7 +69,7 @@ Future<void Function()> getLocations({
   required void Function() onEnd,
   bool onlyLatestPosition = false,
   DateTime? from,
-}) async {
+}) {
   final request = Request(generate64RandomHexChars(), [
     Filter(
       kinds: [1000],
@@ -79,11 +80,11 @@ Future<void Function()> getLocations({
   ]);
 
   final List<String> existingIDs = [];
-
   final List<WebSocket> socketProcesses = [];
+  int doneAmount = 0;
 
   for (final relay in relays) {
-    final socketProcess = openSocket(
+    openSocket(
       url: relay,
       request: request,
       encryptionPassword: encryptionPassword,
@@ -96,13 +97,19 @@ Future<void Function()> getLocations({
 
         onLocationFetched(location);
       },
-      onEnd: () {},
-    )..then(socketProcesses.add);
+      onEnd: () {
+        doneAmount++;
+
+        if (doneAmount == relays.length) {
+          onEnd();
+        }
+      },
+    ).then(socketProcesses.add);
   }
 
-  return () async {
+  return () {
     for (final socketProcess in socketProcesses) {
-      final socket = await socketProcess;
+      final socket = socketProcess;
 
       socket.close();
     }
