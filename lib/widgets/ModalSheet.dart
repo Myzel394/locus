@@ -1,35 +1,51 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+import 'package:locus/utils/theme.dart';
+import 'package:provider/provider.dart';
 
 import '../constants/spacing.dart';
-import '../utils/theme.dart';
+import '../services/settings_service.dart';
 
 class ModalSheet extends StatelessWidget {
   final Widget child;
+  final bool miuiIsGapless;
 
   const ModalSheet({
     Key? key,
     required this.child,
+    this.miuiIsGapless = false,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final settings = context.watch<SettingsService>();
+
     return PlatformWidget(
-      material: (_, __) => Container(
-        decoration: BoxDecoration(
-          borderRadius: const BorderRadius.only(
-            topLeft: Radius.circular(LARGE_SPACE),
-            topRight: Radius.circular(LARGE_SPACE),
+      material: (_, __) => Padding(
+        padding: settings.isMIUI() && !miuiIsGapless
+            ? const EdgeInsets.all(MEDIUM_SPACE)
+            : EdgeInsets.zero,
+        child: Container(
+          decoration: BoxDecoration(
+            color: getSheetColor(context),
+            borderRadius: settings.isMIUI() && !miuiIsGapless
+                ? const BorderRadius.all(Radius.circular(LARGE_SPACE))
+                : const BorderRadius.only(
+                    topLeft: Radius.circular(LARGE_SPACE),
+                    topRight: Radius.circular(LARGE_SPACE),
+                  ),
           ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.only(
-            top: LARGE_SPACE,
-            left: MEDIUM_SPACE,
-            right: MEDIUM_SPACE,
-            bottom: SMALL_SPACE,
+          child: Padding(
+            padding: EdgeInsets.only(
+              top: settings.isMIUI() && !miuiIsGapless
+                  ? MEDIUM_SPACE
+                  : LARGE_SPACE,
+              left: MEDIUM_SPACE,
+              right: MEDIUM_SPACE,
+              bottom: SMALL_SPACE,
+            ),
+            child: child,
           ),
-          child: child,
         ),
       ),
       cupertino: (_, __) => CupertinoPopupSurface(

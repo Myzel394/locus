@@ -10,7 +10,6 @@ import 'package:locus/widgets/LocationsLoadingScreen.dart';
 import 'package:locus/widgets/LocationsMap.dart';
 import 'package:map_launcher/map_launcher.dart';
 
-import '../api/get-locations.dart';
 import '../constants/spacing.dart';
 import '../widgets/LocationFetchEmpty.dart';
 import '../widgets/OpenInMaps.dart';
@@ -105,7 +104,8 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
           centerTitle: true,
         ),
         cupertino: (_, __) => CupertinoNavigationBarData(
-          backgroundColor: CupertinoTheme.of(context).barBackgroundColor.withOpacity(.5),
+          backgroundColor:
+              CupertinoTheme.of(context).barBackgroundColor.withOpacity(.5),
         ),
         trailingActions: _controller.locations.isNotEmpty
             ? [
@@ -116,15 +116,19 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                       label: PlatformListTile(
                         leading: Icon(context.platformIcons.location),
                         trailing: const SizedBox.shrink(),
-                        title: Text(l10n.viewDetails_actions_openLatestLocation),
+                        title:
+                            Text(l10n.viewDetails_actions_openLatestLocation),
                       ),
                       onPressed: () async {
                         await showPlatformModalSheet(
                           context: context,
-                          material: MaterialModalSheetData(),
+                          material: MaterialModalSheetData(
+                            backgroundColor: Colors.transparent,
+                          ),
                           builder: (context) => OpenInMaps(
-                            destination:
-                                Coords(_controller.locations.last.latitude, _controller.locations.last.longitude),
+                            destination: Coords(
+                                _controller.locations.last.latitude,
+                                _controller.locations.last.longitude),
                           ),
                         );
                       },
@@ -137,7 +141,9 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
       body: _isError
           ? const LocationFetchError()
           : PageView(
-              physics: _isShowingDetails ? const AlwaysScrollableScrollPhysics() : const NeverScrollableScrollPhysics(),
+              physics: _isShowingDetails
+                  ? const AlwaysScrollableScrollPhysics()
+                  : const NeverScrollableScrollPhysics(),
               scrollDirection: Axis.vertical,
               controller: _pageController,
               children: <Widget>[
