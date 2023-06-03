@@ -2,6 +2,7 @@ import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+import 'package:locus/constants/colors.dart';
 import 'package:locus/screens/MainScreen.dart';
 import 'package:locus/screens/WelcomeScreen.dart';
 import 'package:locus/services/settings_service.dart';
@@ -20,7 +21,8 @@ ColorScheme createColorScheme(
   switch (brightness) {
     case Brightness.dark:
       return baseScheme.copyWith(
-        background: HSLColor.fromColor(primaryColor).withLightness(0.3).toColor(),
+        background:
+            HSLColor.fromColor(primaryColor).withLightness(0.3).toColor(),
         primary: primaryColor,
         brightness: brightness,
         surface: HSLColor.fromColor(primaryColor).withLightness(0.15).toColor(),
@@ -52,7 +54,9 @@ class App extends StatelessWidget {
 
     return DismissKeyboard(
       child: DynamicColorBuilder(
-        builder: (ColorScheme? lightColorScheme, ColorScheme? darkColorScheme) => PlatformApp(
+        builder:
+            (ColorScheme? lightColorScheme, ColorScheme? darkColorScheme) =>
+                PlatformApp(
           title: 'Locus',
           material: (_, __) => MaterialAppData(
             theme: (() {
@@ -65,7 +69,8 @@ class App extends StatelessWidget {
                           settings.primaryColor!,
                           Brightness.light,
                         ),
-                  primaryColor: settings.primaryColor ?? lightColorScheme.primary,
+                  primaryColor:
+                      settings.primaryColor ?? lightColorScheme.primary,
                 );
               }
 
@@ -75,7 +80,8 @@ class App extends StatelessWidget {
                     : createColorScheme(
                         lightColorScheme ??
                             ColorScheme.fromSwatch(
-                              primarySwatch: createMaterialColor(settings.primaryColor!),
+                              primarySwatch:
+                                  createMaterialColor(settings.primaryColor!),
                             ),
                         settings.primaryColor!,
                         Brightness.light,
@@ -84,6 +90,32 @@ class App extends StatelessWidget {
               );
             })(),
             darkTheme: (() {
+              if (settings.getAndroidTheme() == AndroidTheme.miui) {
+                return DARK_THEME_MATERIAL_MIUI.copyWith(
+                  colorScheme: settings.primaryColor == null
+                      ? null
+                      : createColorScheme(
+                          const ColorScheme.dark(),
+                          settings.primaryColor!,
+                          Brightness.dark,
+                        ),
+                  primaryColor: settings.primaryColor,
+                  elevatedButtonTheme: ElevatedButtonThemeData(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor:
+                          settings.primaryColor ?? MIUI_PRIMARY_COLOR,
+                      foregroundColor: Colors.white,
+                      splashFactory: NoSplash.splashFactory,
+                      textStyle: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                );
+              }
+
               if (darkColorScheme != null) {
                 return DARK_THEME_MATERIAL.copyWith(
                   colorScheme: settings.primaryColor == null
@@ -93,17 +125,25 @@ class App extends StatelessWidget {
                           settings.primaryColor!,
                           Brightness.dark,
                         ),
-                  primaryColor: settings.primaryColor ?? darkColorScheme.primary,
-                  scaffoldBackgroundColor: HSLColor.fromColor(settings.primaryColor ?? darkColorScheme.background)
+                  primaryColor:
+                      settings.primaryColor ?? darkColorScheme.primary,
+                  scaffoldBackgroundColor: HSLColor.fromColor(
+                          settings.primaryColor ?? darkColorScheme.background)
                       .withLightness(0.08)
                       .toColor(),
                   dialogBackgroundColor: settings.primaryColor == null
                       ? darkColorScheme.background
-                      : HSLColor.fromColor(settings.primaryColor!).withLightness(0.15).toColor(),
-                  inputDecorationTheme: DARK_THEME_MATERIAL.inputDecorationTheme.copyWith(
+                      : HSLColor.fromColor(settings.primaryColor!)
+                          .withLightness(0.15)
+                          .toColor(),
+                  inputDecorationTheme:
+                      DARK_THEME_MATERIAL.inputDecorationTheme.copyWith(
                     fillColor: settings.primaryColor == null
                         ? null
-                        : HSLColor.fromColor(settings.primaryColor!).withLightness(0.3).withSaturation(.5).toColor(),
+                        : HSLColor.fromColor(settings.primaryColor!)
+                            .withLightness(0.3)
+                            .withSaturation(.5)
+                            .toColor(),
                   ),
                 );
               }
@@ -119,14 +159,22 @@ class App extends StatelessWidget {
                 primaryColor: settings.primaryColor,
                 scaffoldBackgroundColor: settings.primaryColor == null
                     ? null
-                    : HSLColor.fromColor(settings.primaryColor!).withLightness(0.08).toColor(),
+                    : HSLColor.fromColor(settings.primaryColor!)
+                        .withLightness(0.08)
+                        .toColor(),
                 dialogBackgroundColor: settings.primaryColor == null
                     ? null
-                    : HSLColor.fromColor(settings.primaryColor!).withLightness(0.15).toColor(),
-                inputDecorationTheme: DARK_THEME_MATERIAL.inputDecorationTheme.copyWith(
+                    : HSLColor.fromColor(settings.primaryColor!)
+                        .withLightness(0.15)
+                        .toColor(),
+                inputDecorationTheme:
+                    DARK_THEME_MATERIAL.inputDecorationTheme.copyWith(
                   fillColor: settings.primaryColor == null
                       ? null
-                      : HSLColor.fromColor(settings.primaryColor!).withLightness(0.3).withSaturation(.5).toColor(),
+                      : HSLColor.fromColor(settings.primaryColor!)
+                          .withLightness(0.3)
+                          .withSaturation(.5)
+                          .toColor(),
                 ),
               );
             })(),
@@ -142,12 +190,15 @@ class App extends StatelessWidget {
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           onGenerateRoute: (settings) {
-            final screen = hasLocationAlwaysGranted && isIgnoringBatteryOptimizations && hasNotificationGranted
+            final screen = hasLocationAlwaysGranted &&
+                    isIgnoringBatteryOptimizations &&
+                    hasNotificationGranted
                 ? const MainScreen()
                 : WelcomeScreen(
                     hasLocationAlwaysGranted: hasLocationAlwaysGranted,
                     hasNotificationGranted: hasNotificationGranted,
-                    isIgnoringBatteryOptimizations: isIgnoringBatteryOptimizations,
+                    isIgnoringBatteryOptimizations:
+                        isIgnoringBatteryOptimizations,
                   );
 
             return MaterialWithModalsPageRoute(

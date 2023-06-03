@@ -6,6 +6,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart'
     hide PlatformListTile;
 import 'package:locus/services/task_service.dart';
+import 'package:locus/utils/PageRoute.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -224,7 +225,8 @@ class _TaskTileState extends State<TaskTile> {
       ),
       onTap: () {
         Navigator.of(context).push(
-          MaterialPageRoute(
+          NativePageRoute(
+            context: context,
             builder: (context) => TaskDetailScreen(
               task: widget.task,
             ),

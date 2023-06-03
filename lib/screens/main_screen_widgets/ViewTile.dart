@@ -3,6 +3,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart'
     hide PlatformListTile;
 import 'package:locus/services/view_service.dart';
+import 'package:locus/utils/PageRoute.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/PlatformPopup.dart';
 import 'package:provider/provider.dart';
@@ -74,7 +75,8 @@ class ViewTile extends StatelessWidget {
       ),
       onTap: () {
         Navigator.of(context).push(
-          MaterialPageRoute(
+          NativePageRoute(
+            context: context,
             builder: (context) => ViewDetailScreen(
               view: view,
             ),

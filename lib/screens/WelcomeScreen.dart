@@ -13,6 +13,7 @@ import 'package:locus/screens/welcome_screen_widgets/BatteryOptimizationsScreen.
 import 'package:locus/screens/welcome_screen_widgets/LocationPermissionScreen.dart';
 import 'package:locus/screens/welcome_screen_widgets/NotificationPermissionScreen.dart';
 import 'package:locus/screens/welcome_screen_widgets/SimpleContinuePage.dart';
+import 'package:locus/utils/PageRoute.dart';
 import 'package:locus/utils/gms_check.dart';
 import 'package:lottie/lottie.dart';
 
@@ -72,13 +73,15 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   }
 
   void _nextScreen(final int page) {
-    _controller.animateToPage(page, duration: 500.ms, curve: Curves.easeOutExpo);
+    _controller.animateToPage(page,
+        duration: 500.ms, curve: Curves.easeOutExpo);
   }
 
   void _onDone() {
     Navigator.pushAndRemoveUntil(
       context,
-      MaterialPageRoute(
+      NativePageRoute(
+        context: context,
         builder: (context) => const MainScreen(),
       ),
       (route) => false,
@@ -137,7 +140,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       // Background
                       ValueDelegate.color(
                         const ["unlock Konturen", "Kreis", "Fläche 1"],
-                        value: getIsDarkMode(context) ? shades[900] : shades[200],
+                        value:
+                            getIsDarkMode(context) ? shades[900] : shades[200],
                       ),
                     ],
                   ),

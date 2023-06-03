@@ -8,6 +8,7 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import '../api/get-address.dart';
+import '../utils/device.dart';
 import '../utils/platform.dart';
 
 const STORAGE_KEY = "_app_settings";
@@ -25,6 +26,11 @@ enum GeocoderProvider {
   nominatim,
 }
 
+enum AndroidTheme {
+  materialYou,
+  miui,
+}
+
 // Selects a random provider from the list of available providers, not including
 // the system provider.
 GeocoderProvider selectRandomProvider() {
@@ -39,6 +45,7 @@ class SettingsService extends ChangeNotifier {
   bool automaticallyLookupAddresses;
   bool showHints;
   List<String> _relays;
+  AndroidTheme androidTheme;
 
   GeocoderProvider geocoderProvider;
 
@@ -54,13 +61,16 @@ class SettingsService extends ChangeNotifier {
     required this.mapProvider,
     required this.showHints,
     required this.geocoderProvider,
+    required this.androidTheme,
     List<String>? relays,
   }) : _relays = relays ?? [];
 
-  static SettingsService createDefault() {
+  static Future<SettingsService> createDefault() async {
     return SettingsService(
       automaticallyLookupAddresses: true,
       primaryColor: null,
+      androidTheme:
+          await fetchIsMIUI() ? AndroidTheme.miui : AndroidTheme.materialYou,
       mapProvider:
           isPlatformApple() ? MapProvider.apple : MapProvider.openStreetMap,
       showHints: true,
@@ -81,6 +91,7 @@ class SettingsService extends ChangeNotifier {
       relays: List<String>.from(data['relays'] ?? []),
       showHints: data['showHints'],
       geocoderProvider: GeocoderProvider.values[data['geocoderProvider']],
+      androidTheme: AndroidTheme.values[data['androidTheme']],
     );
   }
 
@@ -92,7 +103,7 @@ class SettingsService extends ChangeNotifier {
       return createDefault();
     }
 
-    final defaultValues = createDefault().toJSON();
+    final defaultValues = (await createDefault()).toJSON();
     final data = Map<String, dynamic>.from(jsonDecode(rawData));
     // Merge data with default values, replace null values with default values
     final mergedData = HashMap<String, dynamic>.from(defaultValues)
@@ -111,6 +122,7 @@ class SettingsService extends ChangeNotifier {
       "relays": _relays,
       "showHints": showHints,
       "geocoderProvider": geocoderProvider.index,
+      "androidTheme": androidTheme.index,
     };
   }
 
@@ -217,4 +229,13 @@ class SettingsService extends ChangeNotifier {
 
     notifyListeners();
   }
+
+  void setAndroidTheme(final AndroidTheme value) {
+    androidTheme = value;
+    notifyListeners();
+  }
+
+  AndroidTheme getAndroidTheme() => androidTheme;
+
+  bool isMIUI() => androidTheme == AndroidTheme.miui;
 }

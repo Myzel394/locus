@@ -30,7 +30,9 @@ void main() async {
     Permission.locationAlways.isGranted,
     TaskService.restore(),
     ViewService.restore(),
-    Platform.isAndroid ? DisableBatteryOptimization.isBatteryOptimizationDisabled : Future.value(true),
+    Platform.isAndroid
+        ? DisableBatteryOptimization.isBatteryOptimizationDisabled
+        : Future.value(true),
     SettingsService.restore(),
     hasGrantedNotificationPermission(),
     LogService.restore(),
@@ -58,7 +60,8 @@ void main() async {
         ChangeNotifierProvider<ViewService>(create: (_) => viewService),
         ChangeNotifierProvider<SettingsService>(create: (_) => settingsService),
         ChangeNotifierProvider<LogService>(create: (_) => logService),
-        ChangeNotifierProvider<AppUpdateService>(create: (_) => appUpdateService),
+        ChangeNotifierProvider<AppUpdateService>(
+            create: (_) => appUpdateService),
       ],
       child: App(
         hasLocationAlwaysGranted: hasLocationAlwaysGranted,

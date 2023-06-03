@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+import 'package:locus/utils/PageRoute.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 import '../screens/SettingsScreen.dart';
@@ -14,7 +15,8 @@ Future<void> showSettings(final BuildContext context) async {
   } else {
     Navigator.push(
       context,
-      MaterialPageRoute(
+      NativePageRoute(
+        context: context,
         builder: (context) => const SettingsScreen(),
       ),
     );
