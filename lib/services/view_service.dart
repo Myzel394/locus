@@ -59,8 +59,7 @@ class TaskView extends ChangeNotifier with LocationBase {
     final uri = Uri.parse(url);
     final fragment = uri.fragment;
 
-    final rawParameters =
-        const Utf8Decoder().convert(base64Url.decode(fragment));
+    final rawParameters = const Utf8Decoder().convert(base64Url.decode(fragment));
     final parameters = jsonDecode(rawParameters);
 
     return ViewServiceLinkParameters(
@@ -175,15 +174,13 @@ class TaskView extends ChangeNotifier with LocationBase {
       return "No relays are present in the task.";
     }
 
-    final sameTask = taskService.tasks.firstWhereOrNull(
-        (element) => element.nostrPublicKey == nostrPublicKey);
+    final sameTask = taskService.tasks.firstWhereOrNull((element) => element.nostrPublicKey == nostrPublicKey);
 
     if (sameTask != null) {
       return "This is a task from you (name: ${sameTask.name}).";
     }
 
-    final sameView = viewService.views.firstWhereOrNull(
-        (element) => element.nostrPublicKey == nostrPublicKey);
+    final sameView = viewService.views.firstWhereOrNull((element) => element.nostrPublicKey == nostrPublicKey);
 
     if (sameView != null) {
       return "This is a view from you (name: ${sameView.name}).";
@@ -248,8 +245,10 @@ class ViewService extends ChangeNotifier {
   Future<void> save() async {
     final data = jsonEncode(
       List<Map<String, dynamic>>.from(
-        _views.map(
-          (view) => view.toJSON(),
+        await Future.wait(
+          _views.map(
+            (view) => view.toJSON(),
+          ),
         ),
       ),
     );
