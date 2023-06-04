@@ -1,9 +1,10 @@
+import 'package:easy_debounce/easy_throttle.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/screens/task_detail_screen_widgets/Details.dart';
-import 'package:locus/services/location_point_service.dart';
+import 'package:locus/services/location_fetch_controller.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/widgets/LocationFetchError.dart';
 import 'package:locus/widgets/LocationsLoadingScreen.dart';
@@ -14,6 +15,9 @@ import '../constants/spacing.dart';
 import '../widgets/LocationFetchEmpty.dart';
 import '../widgets/OpenInMaps.dart';
 import '../widgets/PlatformPopup.dart';
+
+const DEBOUNCE_DURATION = Duration(seconds: 2);
+const DEFAULT_LOCATION_LIMIT = 50;
 
 class TaskDetailScreen extends StatefulWidget {
   final Task task;
@@ -29,9 +33,7 @@ class TaskDetailScreen extends StatefulWidget {
 
 class _TaskDetailScreenState extends State<TaskDetailScreen> {
   final PageController _pageController = PageController();
-  final LocationsMapController _controller = LocationsMapController();
-  void Function()? _unsubscribeGetLocations;
-  bool _isLoading = true;
+  late final LocationFetcher _locationFetcher;
   bool _isError = false;
   bool _isShowingDetails = false;
 
@@ -39,7 +41,27 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   void initState() {
     super.initState();
 
-    addListener();
+    _locationFetcher = widget.task.createLocationFetcher(
+      onLocationFetched: (final location) {
+        // Only update partially to avoid lag
+        EasyThrottle.throttle(
+          "${widget.task.id}:location-fetch",
+          DEBOUNCE_DURATION,
+          () {
+            if (!mounted) {
+              return;
+            }
+            setState(() {});
+          },
+        );
+      },
+    );
+
+    _locationFetcher.fetchMore(
+      onEnd: () {
+        setState(() {});
+      },
+    );
 
     _pageController.addListener(() {
       if (_pageController.page == 0) {
@@ -57,38 +79,9 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   @override
   void dispose() {
     _pageController.dispose();
-
-    _unsubscribeGetLocations?.call();
+    _locationFetcher.dispose();
 
     super.dispose();
-  }
-
-  void addListener() async {
-    _unsubscribeGetLocations = await widget.task.getLocations(
-      onLocationFetched: (final LocationPointService location) {
-        if (!mounted) {
-          return;
-        }
-
-        _controller.add(location);
-        setState(() {});
-      },
-      onEnd: () {
-        if (!mounted) {
-          return;
-        }
-
-        // Sort locations
-        final locations = _controller.locations.toList();
-        locations.sort((a, b) => a.createdAt.compareTo(b.createdAt));
-        _controller.clear();
-        _controller.addAll(locations);
-
-        setState(() {
-          _isLoading = false;
-        });
-      },
-    );
   }
 
   @override
@@ -107,7 +100,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
           backgroundColor:
               CupertinoTheme.of(context).barBackgroundColor.withOpacity(.5),
         ),
-        trailingActions: _controller.locations.isNotEmpty
+        trailingActions: _locationFetcher.controller.locations.isNotEmpty
             ? [
                 PlatformPopup<String>(
                   type: PlatformPopupType.tap,
@@ -127,12 +120,30 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                           ),
                           builder: (context) => OpenInMaps(
                             destination: Coords(
-                                _controller.locations.last.latitude,
-                                _controller.locations.last.longitude),
+                              _locationFetcher
+                                  .controller.locations.last.latitude,
+                              _locationFetcher
+                                  .controller.locations.last.longitude,
+                            ),
                           ),
                         );
                       },
-                    )
+                    ),
+                    // If the fetched locations are less than the limit,
+                    // there are definitely no more locations to fetch
+                    if (_locationFetcher.canFetchMore)
+                      PlatformPopupMenuItem(
+                        label: PlatformListTile(
+                          leading: Icon(context.platformIcons.refresh),
+                          trailing: const SizedBox.shrink(),
+                          title: Text(l10n.locationFetcher_actions_fetchMore),
+                        ),
+                        onPressed: () {
+                          _locationFetcher.fetchMore(onEnd: () {
+                            setState(() {});
+                          });
+                        },
+                      ),
                   ],
                 ),
               ]
@@ -152,25 +163,63 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                   children: <Widget>[
                     Expanded(
                       flex: 9,
-                      child: _isLoading
-                          ? SafeArea(
-                              child: Padding(
-                                padding: const EdgeInsets.all(MEDIUM_SPACE),
-                                child: LocationsLoadingScreen(
-                                  locations: _controller.locations,
-                                  onTimeout: () {
-                                    setState(() {
-                                      _isError = true;
-                                    });
-                                  },
-                                ),
+                      child: (() {
+                        if (_locationFetcher.controller.locations.isNotEmpty) {
+                          return Stack(
+                            children: <Widget>[
+                              LocationsMap(
+                                controller: _locationFetcher.controller,
                               ),
-                            )
-                          : _controller.locations.isEmpty
-                              ? const LocationFetchEmpty()
-                              : LocationsMap(
-                                  controller: _controller,
+                              if (_locationFetcher.isLoading)
+                                Positioned(
+                                  left: 0,
+                                  right: 0,
+                                  top: 0,
+                                  child: Container(
+                                    color: Colors.black.withOpacity(.8),
+                                    child: Padding(
+                                      padding:
+                                          const EdgeInsets.all(MEDIUM_SPACE),
+                                      child: Row(
+                                        children: <Widget>[
+                                          PlatformCircularProgressIndicator(),
+                                          const SizedBox(width: SMALL_SPACE),
+                                          Flexible(
+                                            child: Text(
+                                              l10n.locationIsStillFetching,
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
                                 ),
+                            ],
+                          );
+                        }
+
+                        if (_locationFetcher.isLoading) {
+                          return SafeArea(
+                            child: Padding(
+                              padding: const EdgeInsets.all(MEDIUM_SPACE),
+                              child: LocationsLoadingScreen(
+                                locations:
+                                    _locationFetcher.controller.locations,
+                                onTimeout: () {
+                                  setState(() {
+                                    _isError = true;
+                                  });
+                                },
+                              ),
+                            ),
+                          );
+                        }
+
+                        return const LocationFetchEmpty();
+                      })(),
                     ),
                     Expanded(
                       flex: 1,
@@ -200,7 +249,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                 SafeArea(
                   child: SingleChildScrollView(
                     child: Details(
-                      locations: _controller.locations,
+                      locations: _locationFetcher.controller.locations,
                       task: widget.task,
                       onGoBack: () {
                         _pageController.animateToPage(

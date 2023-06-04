@@ -9,7 +9,6 @@ import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:flutter_map_tile_caching/flutter_map_tile_caching.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
-
 // Provided by the flutter_map package
 import 'package:latlong2/latlong.dart';
 import 'package:locus/services/settings_service.dart';
@@ -26,7 +25,8 @@ class LocationsMapController extends ChangeNotifier {
 
   // To inform our wrappers to update the map, we use a stream.
   // This emits event to which our wrappers listen to.
-  final StreamController<Map<String, dynamic>> _eventEmitter = StreamController.broadcast();
+  final StreamController<Map<String, dynamic>> _eventEmitter =
+      StreamController.broadcast();
 
   LocationsMapController({
     List<LocationPointService>? locations,
@@ -43,7 +43,8 @@ class LocationsMapController extends ChangeNotifier {
 
   bool get useAppleMaps => Platform.isIOS;
 
-  UnmodifiableListView<LocationPointService> get locations => UnmodifiableListView(_locations);
+  UnmodifiableListView<LocationPointService> get locations =>
+      UnmodifiableListView(_locations);
 
   @override
   void dispose() {
@@ -72,8 +73,15 @@ class LocationsMapController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void sort() {
+    // Sort descending
+    _locations.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+    notifyListeners();
+  }
+
   // Groups the locations by hour and returns a map of the hour and the number of locations in that hour.
-  Map<DateTime, List<LocationPointService>> getLocationsPerHour() => locations.fold(
+  Map<DateTime, List<LocationPointService>> getLocationsPerHour() =>
+      locations.fold(
         {},
         (final Map<DateTime, List<LocationPointService>> value, element) {
           final date = normalizeDateTime(element.createdAt);
@@ -118,7 +126,8 @@ class _LocationsMapState extends State<LocationsMap> {
   AppleMaps.AppleMapController? appleMapsController;
   MapController? flutterMapController;
 
-  static toAppleCoordinate(final LatLng latLng) => AppleMaps.LatLng(latLng.latitude, latLng.longitude);
+  static toAppleCoordinate(final LatLng latLng) =>
+      AppleMaps.LatLng(latLng.latitude, latLng.longitude);
 
   bool get shouldUseAppleMaps {
     final settings = context.watch<SettingsService>();
@@ -129,9 +138,14 @@ class _LocationsMapState extends State<LocationsMap> {
   String get snippetText {
     final location = widget.controller.locations.last;
 
-    final batteryInfo = location.batteryLevel == null ? "" : "Battery at ${(location.batteryLevel! * 100).ceil()}%";
-    final dateInfo = "Date: ${DateFormat.yMd().add_jm().format(location.createdAt)}";
-    final speedInfo = location.speed == null ? "" : "Moving at ${(location.speed!.abs() * 3.6).ceil()} km/h";
+    final batteryInfo = location.batteryLevel == null
+        ? ""
+        : "Battery at ${(location.batteryLevel! * 100).ceil()}%";
+    final dateInfo =
+        "Date: ${DateFormat.yMd().add_jm().format(location.createdAt)}";
+    final speedInfo = location.speed == null
+        ? ""
+        : "Moving at ${(location.speed!.abs() * 3.6).ceil()} km/h";
 
     return [
       batteryInfo,
@@ -144,7 +158,8 @@ class _LocationsMapState extends State<LocationsMap> {
   void initState() {
     super.initState();
 
-    _controllerSubscription = widget.controller.eventListener.listen(eventEmitterListener);
+    _controllerSubscription =
+        widget.controller.eventListener.listen(eventEmitterListener);
 
     if (widget.initWithUserPosition) {
       fetchUserPosition();

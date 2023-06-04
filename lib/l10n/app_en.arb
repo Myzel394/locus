@@ -17,6 +17,7 @@
   "locationsLoadingError": "An error occurred while loading locations",
   "locationFetchError": "There was an error fetching the locations. Please try again later.",
   "locationFetchEmptyError": "No locations found. Maybe there hasn't been shared a location yet or they expired.",
+  "locationIsStillFetching": "Locations are still being fetched... These may not be the latest locations.",
   "goBack": "Go back",
   "closePositiveSheetAction": "Done",
   "closeNeutralAction": "Ok",
@@ -27,6 +28,7 @@
   "uniLinksOpenError": "Link could not be opened",
   "actionNotUndoable": "This action cannot be undone!",
   "linkCopiedToClipboard": "Link copied to clipboard!",
+  "textCopiedToClipboard": "Text copied to clipboard!",
   "nostrRelaysLabel": "Nostr Relays",
   "nostrPublicKeyLabel": "Public Nostr key",
   "signPublicKeyLabel": "Public Sign key",
@@ -43,6 +45,7 @@
   "updateAvailable_android_download": "Download update",
   "updateAvailable_android_remindLater": "Remind me later",
   "updateAvailable_android_ignore": "Ignore updates",
+  "locationFetcher_actions_fetchMore": "Download older locations",
   "doNotShowAgainLabel": "Do not show again",
   "fields_errors_isEmpty": "This field is required",
   "fields_errors_invalidCharacters": "This field contains invalid characters",
@@ -249,6 +252,24 @@
   "taskDetails_goToDetails": "Go to Details",
   "taskDetails_lastKnownLocation": "Last known location",
   "taskDetails_noLocations": "No locations saved yet",
+  "taskDetails_summary": "{count, plural, =1{One location saved} other{{count} locations saved}} ranging from {startDate} to {endDate}",
+  "@taskDetails_summary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "startDate": {
+        "type": "DateTime",
+        "format": "yyyy MMMM dd, HH:mm:ss",
+        "isCustomDateFormat": "true"
+      },
+      "endDate": {
+        "type": "DateTime",
+        "format": "yyyy MMMM dd, HH:mm:ss",
+        "isCustomDateFormat": "true"
+      }
+    }
+  },
   "taskDetails_mostRecentLocationExplanation": "This is the most recent location saved",
   "taskDetails_locationDetails": "Location Details",
   "taskDetails_savedLocations": "{count, plural, =0{No locations saved yet} =1{One location saved} other{{count} locations saved}}",

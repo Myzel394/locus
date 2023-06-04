@@ -4,7 +4,6 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart'
     hide PlatformListTile;
 import 'package:locus/services/view_service.dart';
 
-import '../../api/get-locations.dart';
 import '../../constants/spacing.dart';
 import '../../services/location_point_service.dart';
 import '../../utils/theme.dart';
@@ -50,7 +49,7 @@ class _ViewImportOverviewState extends State<ViewImportOverview> {
 
   addListener() async {
     _unsubscribeGetLocations = await widget.view.getLocations(
-      onlyLatestPosition: true,
+      limit: 1,
       onLocationFetched: (final LocationPointService location) {
         if (!mounted) {
           return;
