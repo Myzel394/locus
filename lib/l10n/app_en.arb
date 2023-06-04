@@ -28,6 +28,7 @@
   "uniLinksOpenError": "Link could not be opened",
   "actionNotUndoable": "This action cannot be undone!",
   "linkCopiedToClipboard": "Link copied to clipboard!",
+  "textCopiedToClipboard": "Text copied to clipboard!",
   "nostrRelaysLabel": "Nostr Relays",
   "nostrPublicKeyLabel": "Public Nostr key",
   "signPublicKeyLabel": "Public Sign key",
