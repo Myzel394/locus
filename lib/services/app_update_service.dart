@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:locus/constants/values.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:version/version.dart';
 
@@ -54,11 +53,7 @@ class AppUpdateService extends ChangeNotifier {
 
   bool get isUpdateAvailable => _isUpdateAvailable;
 
-  Future<Version> getCurrentVersion() async {
-    final packageInfo = await PackageInfo.fromPlatform();
-
-    return Version.parse(packageInfo.version);
-  }
+  Future<Version> getCurrentVersion() async => Version.parse(CURRENT_APP_VERSION);
 
   Future<void> checkForUpdates({final bool force = false}) async {
     if (_outDateDate != null && !force) {
