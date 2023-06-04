@@ -8,6 +8,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:locus/api/nostr-events.dart';
 import 'package:locus/constants/app.dart';
 import 'package:locus/models/log.dart';
+import 'package:locus/services/location_base.dart';
 import 'package:locus/services/log_service.dart';
 import 'package:locus/utils/cryptography.dart';
 import 'package:nostr/nostr.dart';
@@ -31,7 +32,7 @@ enum TaskLinkPublishProgress {
 
 const uuid = Uuid();
 
-class Task extends ChangeNotifier {
+class Task extends ChangeNotifier with LocationBase {
   final String id;
   final DateTime createdAt;
 
@@ -377,7 +378,7 @@ class Task extends ChangeNotifier {
   VoidCallback getLocations({
     required void Function(LocationPointService) onLocationFetched,
     required void Function() onEnd,
-    bool onlyLatestPosition = false,
+    int? limit,
     DateTime? from,
   }) =>
       getLocationsAPI.getLocations(
@@ -387,7 +388,7 @@ class Task extends ChangeNotifier {
         onLocationFetched: onLocationFetched,
         onEnd: onEnd,
         from: from,
-        onlyLatestPosition: onlyLatestPosition,
+        limit: limit,
       );
 
   @override

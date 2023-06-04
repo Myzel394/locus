@@ -67,14 +67,17 @@ VoidCallback getLocations({
   required final List<String> relays,
   required void Function(LocationPointService) onLocationFetched,
   required void Function() onEnd,
-  bool onlyLatestPosition = false,
+  int? limit,
   DateTime? from,
+  DateTime? until,
 }) {
   final request = Request(generate64RandomHexChars(), [
     Filter(
       kinds: [1000],
       authors: [nostrPublicKey],
-      limit: onlyLatestPosition ? 1 : null,
+      limit: limit,
+      until:
+          until == null ? null : (until.millisecondsSinceEpoch / 1000).floor(),
       since: from == null ? null : (from.millisecondsSinceEpoch / 1000).floor(),
     ),
   ]);

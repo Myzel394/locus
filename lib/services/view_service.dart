@@ -188,7 +188,7 @@ class TaskView extends ChangeNotifier {
   VoidCallback getLocations({
     required void Function(LocationPointService) onLocationFetched,
     required void Function() onEnd,
-    bool onlyLatestPosition = false,
+    int? limit,
     DateTime? from,
   }) =>
       getLocationsAPI.getLocations(
@@ -198,7 +198,7 @@ class TaskView extends ChangeNotifier {
         onLocationFetched: onLocationFetched,
         onEnd: onEnd,
         from: from,
-        onlyLatestPosition: onlyLatestPosition,
+        limit: limit,
       );
 
   @override
