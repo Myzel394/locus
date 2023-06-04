@@ -28,7 +28,5 @@ Future<bool> hasGrantedNotificationPermission() async {
     return true;
   }
 
-  final permissionStatus = await Permission.notification.status;
-
-  return permissionStatus.isGranted;
+  return true;
 }

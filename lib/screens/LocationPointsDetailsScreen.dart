@@ -55,15 +55,16 @@ class LocationPointsDetailsScreen extends StatelessWidget {
     if (isPreview) {
       return Column(
         children: <Widget>[
-          Text(
-            l10n.taskDetails_summary(
-              locations.length,
-              locations.first.createdAt,
-              locations.last.createdAt,
+          if (locations.isNotEmpty)
+            Text(
+              l10n.taskDetails_summary(
+                locations.length,
+                locations.first.createdAt,
+                locations.last.createdAt,
+              ),
+              style: getCaptionTextStyle(context),
+              textAlign: TextAlign.center,
             ),
-            style: getCaptionTextStyle(context),
-            textAlign: TextAlign.center,
-          ),
           const SizedBox(
             height: SMALL_SPACE,
           ),

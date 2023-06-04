@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:locus/screens/welcome_screen_widgets/SimpleContinuePage.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:lottie/lottie.dart';
@@ -13,30 +14,25 @@ class LocationPermissionScreen extends StatelessWidget {
     Key? key,
   }) : super(key: key);
 
-  Future<PermissionStatus> _checkPermission(
-      {bool withoutRequest = false}) async {
-    var alwaysPermission = await Permission.locationAlways.status;
+  Future<bool> _checkPermission() async {
+    final alwaysPermission = await Geolocator.checkPermission();
 
     // We first need to request locationWhenInUse, because it is required to request locationAlways
-    if (alwaysPermission.isGranted == false) {
-      var whenInUsePermission = await Permission.locationWhenInUse.status;
-      if (whenInUsePermission.isGranted == false && !withoutRequest) {
-        whenInUsePermission = await Permission.locationWhenInUse.request();
-        if (whenInUsePermission.isGranted == false) {
-          return whenInUsePermission;
-        }
+    if (alwaysPermission != LocationPermission.always) {
+      final whenInUse = await Geolocator.requestPermission();
+
+      if (whenInUse != LocationPermission.whileInUse) {
+        return false;
+      }
+
+      final always = await Geolocator.requestPermission();
+
+      if (always != LocationPermission.always) {
+        return false;
       }
     }
 
-    if (alwaysPermission.isGranted == false && !withoutRequest) {
-      alwaysPermission = await Permission.locationAlways.request();
-
-      if (alwaysPermission.isGranted == false) {
-        return alwaysPermission;
-      }
-    }
-
-    return alwaysPermission;
+    return true;
   }
 
   @override
@@ -72,7 +68,7 @@ class LocationPermissionScreen extends StatelessWidget {
       ),
       onContinue: () async {
         final permission = await _checkPermission();
-        if (permission.isGranted) {
+        if (permission) {
           onGranted();
         } else {
           await openAppSettings();
