@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/cupertino.dart';
 
 import '../widgets/LocationsMap.dart';
@@ -53,9 +51,13 @@ class LocationFetcher extends ChangeNotifier {
     required void Function() onEnd,
   }) {
     _hasLoaded = false;
-    final fetchMoreLimit = controller.locations.isEmpty
-        ? INITIAL_LOAD_AMOUNT
-        : controller.locations.length + LOAD_MORE_AMOUNT;
+    // If `from` is specified, we don't want to limit the amount of locations
+    // by default
+    final fetchMoreLimit = from == null
+        ? controller.locations.isEmpty
+            ? INITIAL_LOAD_AMOUNT
+            : controller.locations.length + LOAD_MORE_AMOUNT
+        : null;
     _moreFetchAmount = 0;
 
     _getLocationsUnsubscribe = location.getLocations(
@@ -78,7 +80,7 @@ class LocationFetcher extends ChangeNotifier {
         _locationIDS.add(location.id);
         onLocationFetched(location);
       },
-      limit: limit == null ? fetchMoreLimit : min(limit!, fetchMoreLimit),
+      limit: limit ?? fetchMoreLimit,
       from: from,
     );
 

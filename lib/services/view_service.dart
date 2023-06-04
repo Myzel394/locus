@@ -9,8 +9,10 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/utils/cryptography.dart';
 import 'package:nostr/nostr.dart';
+import 'package:uuid/uuid.dart';
 
 import '../api/get-locations.dart' as getLocationsAPI;
+import 'location_base.dart';
 import 'location_point_service.dart';
 
 const storage = FlutterSecureStorage();
@@ -30,16 +32,18 @@ class ViewServiceLinkParameters {
   });
 }
 
-class TaskView extends ChangeNotifier {
+class TaskView extends ChangeNotifier with LocationBase {
   final SecretKey _encryptionPassword;
   final String nostrPublicKey;
   final List<String> relays;
+  final String id;
   String? name;
 
   TaskView({
     required final SecretKey encryptionPassword,
     required this.nostrPublicKey,
     required this.relays,
+    required this.id,
     this.name,
   }) : _encryptionPassword = encryptionPassword;
 
@@ -73,6 +77,8 @@ class TaskView extends ChangeNotifier {
       nostrPublicKey: json["nostrPublicKey"],
       relays: List<String>.from(json["relays"]),
       name: json["name"],
+      // Required for migration
+      id: json["id"] ?? const Uuid().v4(),
     );
   }
 
@@ -121,6 +127,7 @@ class TaskView extends ChangeNotifier {
                 ),
                 nostrPublicKey: data['nostrPublicKey'],
                 relays: List<String>.from(data['relays']),
+                id: const Uuid().v4(),
               ),
             );
           } catch (error) {
