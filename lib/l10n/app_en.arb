@@ -251,6 +251,24 @@
   "taskDetails_goToDetails": "Go to Details",
   "taskDetails_lastKnownLocation": "Last known location",
   "taskDetails_noLocations": "No locations saved yet",
+  "taskDetails_summary": "{count, plural, =1{One location saved} other{{count} locations saved}} ranging from {startDate} to {endDate}",
+  "@taskDetails_summary": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "startDate": {
+        "type": "DateTime",
+        "format": "yyyy MMMM dd, HH:mm:ss",
+        "isCustomDateFormat": "true"
+      },
+      "endDate": {
+        "type": "DateTime",
+        "format": "yyyy MMMM dd, HH:mm:ss",
+        "isCustomDateFormat": "true"
+      }
+    }
+  },
   "taskDetails_mostRecentLocationExplanation": "This is the most recent location saved",
   "taskDetails_locationDetails": "Location Details",
   "taskDetails_savedLocations": "{count, plural, =0{No locations saved yet} =1{One location saved} other{{count} locations saved}}",
