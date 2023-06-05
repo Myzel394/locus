@@ -1,10 +1,16 @@
 import 'dart:io';
 
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:locus/constants/app.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 Future<bool> hasOSNotificationPermission() async {
   if (!Platform.isAndroid) {
+    return false;
+  }
+
+  if (isFLOSSFlavor) {
+    // GMS not available
     return false;
   }
 
