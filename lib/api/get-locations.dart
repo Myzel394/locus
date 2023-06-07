@@ -2,6 +2,8 @@ import 'dart:io';
 
 import 'package:cryptography/cryptography.dart';
 import 'package:flutter/animation.dart';
+import 'package:flutter_logs/flutter_logs.dart';
+import 'package:locus/constants/values.dart';
 import 'package:locus/services/location_point_service.dart';
 import 'package:nostr/nostr.dart';
 
@@ -12,6 +14,12 @@ Future<WebSocket> openSocket({
   required void Function(LocationPointService) onLocationFetched,
   required void Function() onEnd,
 }) async {
+  FlutterLogs.logInfo(
+    LOG_TAG,
+    "Nostr Socket $url",
+    "Creating socket...",
+  );
+
   final List<Future<LocationPointService>> decryptionProcesses = [];
 
   bool hasReceivedEvent = false;
@@ -21,31 +29,58 @@ Future<WebSocket> openSocket({
 
   socket.add(request.serialize());
 
+  FlutterLogs.logInfo(
+    LOG_TAG,
+    "Nostr Socket $url",
+    "Socket created, listening...",
+  );
+
   socket.listen((rawEvent) {
     final event = Message.deserialize(rawEvent);
 
     switch (event.type) {
       case "EVENT":
-        hasReceivedEvent = true;
-
-        final locationProcess = LocationPointService.fromEncrypted(
-          event.message.content,
-          encryptionPassword,
+        FlutterLogs.logInfo(
+          LOG_TAG,
+          "Nostr Socket $url - Event",
+          "New event received, decrypting...",
         );
 
-        decryptionProcesses.add(locationProcess);
+        hasReceivedEvent = true;
 
-        locationProcess.then((location) {
-          onLocationFetched(location);
-          decryptionProcesses.remove(locationProcess);
+        try {
+          final locationProcess = LocationPointService.fromEncrypted(
+            event.message.content,
+            encryptionPassword,
+          );
 
-          if (decryptionProcesses.isEmpty && hasReceivedEndOfStream) {
-            onEnd();
-          }
-        });
+          decryptionProcesses.add(locationProcess);
+
+          locationProcess.then((location) {
+            onLocationFetched(location);
+            decryptionProcesses.remove(locationProcess);
+
+            if (decryptionProcesses.isEmpty && hasReceivedEndOfStream) {
+              onEnd();
+            }
+          });
+        } catch (error) {
+          FlutterLogs.logErrorTrace(
+            LOG_TAG,
+            "Nostr Socket $url - Event",
+            "Error while decrypting event.",
+            error as Error,
+          );
+        }
 
         break;
       case "EOSE":
+        FlutterLogs.logInfo(
+          LOG_TAG,
+          "Nostr Socket $url - End of Stream",
+          "End of stream received.",
+        );
+
         socket.close();
 
         hasReceivedEndOfStream = true;
