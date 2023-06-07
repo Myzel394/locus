@@ -1,8 +1,10 @@
 import 'dart:io';
 
 import 'package:disable_battery_optimization/disable_battery_optimization.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:locus/App.dart';
@@ -25,11 +27,30 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
 
+  await FlutterLogs.initLogs(
+    logLevelsEnabled: [
+      LogLevel.INFO,
+      LogLevel.WARNING,
+      LogLevel.ERROR,
+      LogLevel.SEVERE
+    ],
+    timeStampFormat: TimeStampFormat.TIME_FORMAT_READABLE,
+    directoryStructure: DirectoryStructure.FOR_DATE,
+    logTypesEnabled: ["device", "network", "errors"],
+    logFileExtension: LogFileExtension.LOG,
+    logsWriteDirectoryName: "LocusLogs",
+    logsExportDirectoryName: "LocusLogs/Exported",
+    debugFileOperations: true,
+    isDebuggable: kDebugMode,
+  );
+
   final futures = await Future.wait<dynamic>([
     Geolocator.checkPermission(),
     TaskService.restore(),
     ViewService.restore(),
-    Platform.isAndroid ? DisableBatteryOptimization.isBatteryOptimizationDisabled : Future.value(true),
+    Platform.isAndroid
+        ? DisableBatteryOptimization.isBatteryOptimizationDisabled
+        : Future.value(true),
     SettingsService.restore(),
     hasGrantedNotificationPermission(),
     LogService.restore(),
@@ -55,7 +76,8 @@ void main() async {
         ChangeNotifierProvider<ViewService>(create: (_) => viewService),
         ChangeNotifierProvider<SettingsService>(create: (_) => settingsService),
         ChangeNotifierProvider<LogService>(create: (_) => logService),
-        ChangeNotifierProvider<AppUpdateService>(create: (_) => appUpdateService),
+        ChangeNotifierProvider<AppUpdateService>(
+            create: (_) => appUpdateService),
       ],
       child: App(
         hasLocationAlwaysGranted: hasLocationAlwaysGranted,
