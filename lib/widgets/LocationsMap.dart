@@ -126,7 +126,7 @@ class _LocationsMapState extends State<LocationsMap> {
   static toAppleCoordinate(final LatLng latLng) => AppleMaps.LatLng(latLng.latitude, latLng.longitude);
 
   bool get shouldUseAppleMaps {
-    final settings = context.watch<SettingsService>();
+    final settings = context.read<SettingsService>();
 
     return settings.getMapProvider() == MapProvider.apple;
   }
@@ -153,6 +153,10 @@ class _LocationsMapState extends State<LocationsMap> {
 
     if (widget.initWithUserPosition) {
       fetchUserPosition();
+    }
+
+    if (!shouldUseAppleMaps) {
+      flutterMapController = MapController();
     }
   }
 
