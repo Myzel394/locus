@@ -17,7 +17,6 @@ import 'package:locus/services/task_service.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:locus/utils/navigation.dart';
 import 'package:locus/utils/theme.dart';
-import 'package:locus/widgets/PlatformPopup.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:uni_links/uni_links.dart';
@@ -106,8 +105,7 @@ class _MainScreenState extends State<MainScreen> {
         return;
       }
 
-      final locationData =
-          await LocationPointService.createUsingCurrentLocation(position);
+      final locationData = await LocationPointService.createUsingCurrentLocation(position);
 
       for (final task in runningTasks) {
         await task.publishCurrentLocationNow(
@@ -249,8 +247,7 @@ class _MainScreenState extends State<MainScreen> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              material: (context, _) => MaterialDialogActionData(
-                  icon: const Icon(Icons.watch_later_rounded)),
+              material: (context, _) => MaterialDialogActionData(icon: const Icon(Icons.watch_later_rounded)),
               child: Text(l10n.updateAvailable_android_remindLater),
             ),
             PlatformDialogAction(
@@ -259,14 +256,12 @@ class _MainScreenState extends State<MainScreen> {
 
                 Navigator.of(context).pop();
               },
-              material: (context, _) =>
-                  MaterialDialogActionData(icon: const Icon(Icons.block)),
+              material: (context, _) => MaterialDialogActionData(icon: const Icon(Icons.block)),
               child: Text(l10n.updateAvailable_android_ignore),
             ),
             PlatformDialogAction(
               onPressed: appUpdateService.openStoreForUpdate,
-              material: (context, _) =>
-                  MaterialDialogActionData(icon: const Icon(Icons.download)),
+              material: (context, _) => MaterialDialogActionData(icon: const Icon(Icons.download)),
               child: Text(l10n.updateAvailable_android_download),
             ),
           ],
@@ -315,12 +310,8 @@ class _MainScreenState extends State<MainScreen> {
                             });
                           },
                           child: Icon(
-                            activeTab == 0
-                                ? CupertinoIcons.square_list_fill
-                                : CupertinoIcons.square_list,
-                            color: activeTab == 0
-                                ? primaryColor
-                                : getBodyTextColor(context),
+                            activeTab == 0 ? CupertinoIcons.square_list_fill : CupertinoIcons.square_list,
+                            color: activeTab == 0 ? primaryColor : getBodyTextColor(context),
                           ),
                         ),
                         TextButton(
@@ -330,12 +321,8 @@ class _MainScreenState extends State<MainScreen> {
                             });
                           },
                           child: Icon(
-                            activeTab == 1
-                                ? CupertinoIcons.time_solid
-                                : CupertinoIcons.time,
-                            color: activeTab == 1
-                                ? primaryColor
-                                : getBodyTextColor(context),
+                            activeTab == 1 ? CupertinoIcons.time_solid : CupertinoIcons.time,
+                            color: activeTab == 1 ? primaryColor : getBodyTextColor(context),
                           ),
                         ),
                       ],
@@ -407,9 +394,7 @@ class _MainScreenState extends State<MainScreen> {
                   width: FAB_DIMENSION,
                   child: Center(
                     child: Icon(
-                      settings.isMIUI() || isCupertino(context)
-                          ? CupertinoIcons.plus
-                          : Icons.add,
+                      settings.isMIUI() || isCupertino(context) ? CupertinoIcons.plus : Icons.add,
                       color: Theme.of(context).colorScheme.onPrimary,
                       size: settings.isMIUI() ? 34 : null,
                     ),
@@ -423,8 +408,7 @@ class _MainScreenState extends State<MainScreen> {
                 ),
                 openColor: Theme.of(context).scaffoldBackgroundColor,
                 closedColor: Theme.of(context).colorScheme.primary,
-              ).animate().scale(
-                duration: 500.ms, delay: 1.seconds, curve: Curves.bounceOut)
+              ).animate().scale(duration: 500.ms, delay: 1.seconds, curve: Curves.bounceOut)
             : null,
       ),
       // Settings bottomNavBar via cupertino data class does not work
@@ -460,8 +444,7 @@ class _MainScreenState extends State<MainScreen> {
                       BottomNavigationBarItem(
                         icon: const Icon(Icons.home),
                         label: l10n.mainScreen_overview,
-                        backgroundColor:
-                            Theme.of(context).dialogBackgroundColor,
+                        backgroundColor: Theme.of(context).dialogBackgroundColor,
                       ),
                       BottomNavigationBarItem(
                         icon: const Icon(Icons.history),
