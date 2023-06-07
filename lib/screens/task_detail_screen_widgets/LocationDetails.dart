@@ -110,7 +110,11 @@ class _LocationDetailsState extends State<LocationDetails> {
           onPressed: widget.isPreview
               ? null
               : () {
-                  fetchAddress();
+                  final settings = context.read<SettingsService>();
+
+                  if (settings.getAutomaticallyLookupAddresses()) {
+                    fetchAddress();
+                  }
 
                   setState(() {
                     isOpened = !isOpened;
@@ -158,13 +162,34 @@ class _LocationDetailsState extends State<LocationDetails> {
                       },
                     ),
                     PlatformListTile(
-                      title: Text(
-                        address,
-                      ),
+                      title: address.isEmpty
+                          ? Row(
+                              children: <Widget>[
+                                Flexible(
+                                  child: Container(
+                                    constraints: const BoxConstraints(
+                                      minWidth: 120,
+                                      maxWidth: 260,
+                                    ),
+                                    height: 20,
+                                    decoration: BoxDecoration(
+                                      color: getCaptionTextStyle(context).color,
+                                      borderRadius: const BorderRadius.all(
+                                        Radius.circular(MEDIUM_SPACE),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            )
+                          : Text(
+                              address,
+                            ),
                       leading: Icon(context.platformIcons.location),
                       trailing: const SizedBox.shrink(),
                       onTap: () {
                         if (address.isEmpty) {
+                          fetchAddress();
                           return;
                         }
 

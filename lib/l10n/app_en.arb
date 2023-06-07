@@ -338,6 +338,7 @@
   },
   "viewDetails_title": "View Details",
   "viewDetails_actions_openLatestLocation": "Open Maps to latest location",
+  "viewDetails_actions_showLocationList": "Show Location List",
   "loadingLocationsTitle": "Loading locations: {count}",
   "@loadingLocationsTitle": {
     "placeholders": {

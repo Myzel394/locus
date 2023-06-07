@@ -1,24 +1,30 @@
+import 'package:easy_debounce/easy_throttle.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart' hide PlatformListTile;
+import 'package:locus/screens/LocationPointsDetailsScreen.dart';
 import 'package:locus/services/view_service.dart';
+import 'package:locus/utils/PageRoute.dart';
 import 'package:locus/utils/bunny.dart';
 import 'package:locus/widgets/EmptyLocationsThresholdScreen.dart';
 import 'package:locus/widgets/FillUpPaint.dart';
 import 'package:locus/widgets/LocationFetchEmpty.dart';
-import 'package:locus/widgets/LocationFetchError.dart';
 import 'package:locus/widgets/LocationsMap.dart';
 import 'package:locus/widgets/OpenInMaps.dart';
+import 'package:locus/widgets/PlatformFlavorWidget.dart';
 import 'package:locus/widgets/PlatformPopup.dart';
 import 'package:map_launcher/map_launcher.dart';
 
 import '../constants/spacing.dart';
+import '../services/location_fetch_controller.dart';
 import '../services/location_point_service.dart';
 import '../utils/theme.dart';
+import '../widgets/LocationStillFetchingBanner.dart';
 import '../widgets/LocationsLoadingScreen.dart';
 import '../widgets/PlatformListTile.dart';
+
+const DEBOUNCE_DURATION = Duration(seconds: 2);
 
 class LineSliderTickMarkShape extends SliderTickMarkShape {
   final double tickWidth;
@@ -76,12 +82,14 @@ class ViewDetailScreen extends StatefulWidget {
 }
 
 class _ViewDetailScreenState extends State<ViewDetailScreen> {
-  void Function()? _unsubscribeGetLocations;
+  // `_controller` is used to control the actively shown locations on the map
   final LocationsMapController _controller = LocationsMapController();
-  bool _isLoading = true;
-  bool _isError = false;
 
-  double timeOffset = 0;
+  // `_locationFetcher.controller` is used to control ALL locations
+  late final LocationFetcher _locationFetcher;
+
+  final PageController _pageController = PageController();
+  bool _isError = false;
 
   @override
   void initState() {
@@ -89,35 +97,65 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
 
     emptyLocationsCount++;
 
-    _unsubscribeGetLocations = widget.view.getLocations(
-      from: DateTime.now().subtract(1.days),
-      onLocationFetched: (final LocationPointService location) {
+    _locationFetcher = widget.view.createLocationFetcher(
+      onLocationFetched: (final location) {
         emptyLocationsCount = 0;
-        if (!mounted) {
-          return;
-        }
 
         _controller.add(location);
-        setState(() {});
+        // Only update partially to avoid lag
+        EasyThrottle.throttle(
+          "${widget.view.id}:location-fetch",
+          DEBOUNCE_DURATION,
+          () {
+            if (!mounted) {
+              return;
+            }
+            setState(() {});
+          },
+        );
       },
-      onEnd: () {
-        if (!mounted) {
-          return;
-        }
+    );
 
-        setState(() {
-          _isLoading = false;
-        });
+    _locationFetcher.fetchMore(
+      onEnd: () {
+        setState(() {});
       },
     );
   }
 
   @override
   void dispose() {
-    _unsubscribeGetLocations?.call();
+    _locationFetcher.dispose();
     _controller.dispose();
+    _pageController.dispose();
 
     super.dispose();
+  }
+
+  VoidCallback handleTapOnDate(final Iterable<LocationPointService> locations) => () {
+        _controller.clear();
+
+        if (locations.isNotEmpty) {
+          _controller.addAll(locations);
+          _controller.goTo(locations.last);
+        }
+      };
+
+  Widget buildDateSelectButton(
+    final List<LocationPointService> locations,
+    final int hour,
+    final int maxLocations,
+  ) {
+    final shades = getPrimaryColorShades(context);
+
+    return FillUpPaint(
+      color: shades[0]!,
+      fillPercentage: maxLocations == 0 ? 0 : (locations.length.toDouble() / maxLocations),
+      size: Size(
+        MediaQuery.of(context).size.width / 24,
+        MediaQuery.of(context).size.height * (1 / 12),
+      ),
+    );
   }
 
   @override
@@ -127,34 +165,56 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
     final maxLocations = locationsPerHour.values.isEmpty
         ? 0
         : locationsPerHour.values.fold(0, (value, element) => value > element.length ? value : element.length);
-    final shades = getPrimaryColorShades(context);
 
     return PlatformScaffold(
       appBar: PlatformAppBar(
         title: Text(l10n.viewDetails_title),
         trailingActions: _controller.locations.isNotEmpty
             ? <Widget>[
-                PlatformPopup<String>(
-                  type: PlatformPopupType.tap,
-                  items: [
-                    PlatformPopupMenuItem(
-                      label: PlatformListTile(
-                        leading: Icon(context.platformIcons.location),
-                        trailing: const SizedBox.shrink(),
-                        title: Text(l10n.viewDetails_actions_openLatestLocation),
-                      ),
-                      onPressed: () async {
-                        await showPlatformModalSheet(
+                Padding(
+                  padding: const EdgeInsets.all(SMALL_SPACE),
+                  child: PlatformPopup<String>(
+                    type: PlatformPopupType.tap,
+                    items: [
+                      PlatformPopupMenuItem(
+                        label: PlatformListTile(
+                          leading: Icon(context.platformIcons.location),
+                          trailing: const SizedBox.shrink(),
+                          title: Text(l10n.viewDetails_actions_openLatestLocation),
+                        ),
+                        onPressed: () => showPlatformModalSheet(
                           context: context,
                           material: MaterialModalSheetData(),
                           builder: (context) => OpenInMaps(
                             destination:
                                 Coords(_controller.locations.last.latitude, _controller.locations.last.longitude),
                           ),
-                        );
-                      },
-                    )
-                  ],
+                        ),
+                      ),
+                      PlatformPopupMenuItem(
+                        label: PlatformListTile(
+                          leading: PlatformFlavorWidget(
+                            material: (_, __) => const Icon(Icons.list_rounded),
+                            cupertino: (_, __) => const Icon(CupertinoIcons.list_bullet),
+                          ),
+                          trailing: const SizedBox.shrink(),
+                          title: Text(l10n.viewDetails_actions_showLocationList),
+                        ),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            NativePageRoute(
+                              context: context,
+                              builder: (context) => LocationPointsDetailsScreen(
+                                locations: _controller.locations,
+                                isPreview: false,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               ]
             : [],
@@ -167,15 +227,65 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
       ),
       body: (() {
         if (_isError) {
-          return const LocationFetchError();
+          return const LocationFetchEmpty();
         }
 
-        if (_isLoading) {
+        if (_locationFetcher.controller.locations.isNotEmpty) {
+          return PageView(
+            physics: const NeverScrollableScrollPhysics(),
+            children: <Widget>[
+              Column(
+                children: <Widget>[
+                  Expanded(
+                    flex: 11,
+                    child: Stack(
+                      children: <Widget>[
+                        LocationsMap(
+                          controller: _controller,
+                        ),
+                        if (_locationFetcher.isLoading) const LocationStillFetchingBanner(),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: List.generate(24, (index) => 23 - index).map((hour) {
+                        final date = DateTime.now().subtract(Duration(hours: hour));
+                        final normalizedDate = LocationsMapController.normalizeDateTime(date);
+                        final locations = locationsPerHour[normalizedDate] ?? [];
+                        final child = buildDateSelectButton(
+                          locations,
+                          hour,
+                          maxLocations,
+                        );
+
+                        return PlatformWidget(
+                          material: (_, __) => InkWell(
+                            onTap: handleTapOnDate(locations),
+                            child: child,
+                          ),
+                          cupertino: (_, __) => GestureDetector(
+                            onTap: handleTapOnDate(locations),
+                            child: child,
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          );
+        }
+
+        if (_locationFetcher.isLoading) {
           return SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(MEDIUM_SPACE),
               child: LocationsLoadingScreen(
-                locations: _controller.locations,
+                locations: _locationFetcher.controller.locations,
                 onTimeout: () {
                   setState(() {
                     _isError = true;
@@ -190,60 +300,7 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
           return const EmptyLocationsThresholdScreen();
         }
 
-        if (_controller.locations.isEmpty) {
-          return const LocationFetchEmpty();
-        }
-
-        return Column(
-          children: <Widget>[
-            Expanded(
-              flex: 11,
-              child: LocationsMap(
-                controller: _controller,
-              ),
-            ),
-            Expanded(
-              flex: 1,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: List.generate(24, (index) => 23 - index).map((hour) {
-                  final date = DateTime.now().subtract(Duration(hours: hour));
-                  final normalizedDate = LocationsMapController.normalizeDateTime(date);
-
-                  final onTap = () {
-                    _controller.clear();
-
-                    final locations = locationsPerHour[normalizedDate] ?? [];
-
-                    if (locations.isNotEmpty) {
-                      _controller.addAll(locations);
-                      _controller.goTo(locations.last);
-                    }
-                  };
-                  final child = FillUpPaint(
-                    color: shades[0]!,
-                    fillPercentage: (locationsPerHour[normalizedDate]?.length ?? 0).toDouble() / maxLocations,
-                    size: Size(
-                      MediaQuery.of(context).size.width / 24,
-                      MediaQuery.of(context).size.height * (1 / 12),
-                    ),
-                  );
-
-                  return PlatformWidget(
-                    material: (_, __) => InkWell(
-                      onTap: onTap,
-                      child: child,
-                    ),
-                    cupertino: (_, __) => GestureDetector(
-                      onTap: onTap,
-                      child: child,
-                    ),
-                  );
-                }).toList(),
-              ),
-            ),
-          ],
-        );
+        return const LocationFetchEmpty();
       })(),
     );
   }

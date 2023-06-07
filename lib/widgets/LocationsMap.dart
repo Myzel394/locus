@@ -56,7 +56,7 @@ class LocationsMapController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void addAll(List<LocationPointService> locations) {
+  void addAll(Iterable<LocationPointService> locations) {
     _locations.addAll(locations);
     notifyListeners();
   }
@@ -73,12 +73,12 @@ class LocationsMapController extends ChangeNotifier {
 
   void sort() {
     // Sort descending
-    _locations.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+    _locations.sort((a, b) => b.createdAt.compareTo(a.createdAt));
     notifyListeners();
   }
 
   // Groups the locations by hour and returns a map of the hour and the number of locations in that hour.
-  Map<DateTime, List<LocationPointService>> getLocationsPerHour() => locations.fold(
+  Map<DateTime, List<LocationPointService>> getLocationsPerHour() => _locations.fold(
         {},
         (final Map<DateTime, List<LocationPointService>> value, element) {
           final date = normalizeDateTime(element.createdAt);

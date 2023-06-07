@@ -9,6 +9,7 @@ import 'package:locus/services/task_service.dart';
 import 'package:locus/utils/bunny.dart';
 import 'package:locus/widgets/EmptyLocationsThresholdScreen.dart';
 import 'package:locus/widgets/LocationFetchError.dart';
+import 'package:locus/widgets/LocationStillFetchingBanner.dart';
 import 'package:locus/widgets/LocationsLoadingScreen.dart';
 import 'package:locus/widgets/LocationsMap.dart';
 import 'package:map_launcher/map_launcher.dart';
@@ -102,8 +103,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
           centerTitle: true,
         ),
         cupertino: (_, __) => CupertinoNavigationBarData(
-          backgroundColor:
-              CupertinoTheme.of(context).barBackgroundColor.withOpacity(.5),
+          backgroundColor: CupertinoTheme.of(context).barBackgroundColor.withOpacity(.5),
         ),
         trailingActions: _locationFetcher.controller.locations.isNotEmpty
             ? [
@@ -114,8 +114,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                       label: PlatformListTile(
                         leading: Icon(context.platformIcons.location),
                         trailing: const SizedBox.shrink(),
-                        title:
-                            Text(l10n.viewDetails_actions_openLatestLocation),
+                        title: Text(l10n.viewDetails_actions_openLatestLocation),
                       ),
                       onPressed: () async {
                         await showPlatformModalSheet(
@@ -125,10 +124,8 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                           ),
                           builder: (context) => OpenInMaps(
                             destination: Coords(
-                              _locationFetcher
-                                  .controller.locations.last.latitude,
-                              _locationFetcher
-                                  .controller.locations.last.longitude,
+                              _locationFetcher.controller.locations.last.latitude,
+                              _locationFetcher.controller.locations.last.longitude,
                             ),
                           ),
                         );
@@ -157,9 +154,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
       body: _isError
           ? const LocationFetchError()
           : PageView(
-              physics: _isShowingDetails
-                  ? const AlwaysScrollableScrollPhysics()
-                  : const NeverScrollableScrollPhysics(),
+              physics: _isShowingDetails ? const AlwaysScrollableScrollPhysics() : const NeverScrollableScrollPhysics(),
               scrollDirection: Axis.vertical,
               controller: _pageController,
               children: <Widget>[
@@ -175,33 +170,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                               LocationsMap(
                                 controller: _locationFetcher.controller,
                               ),
-                              if (_locationFetcher.isLoading)
-                                Positioned(
-                                  left: 0,
-                                  right: 0,
-                                  top: 0,
-                                  child: Container(
-                                    color: Colors.black.withOpacity(.8),
-                                    child: Padding(
-                                      padding:
-                                          const EdgeInsets.all(MEDIUM_SPACE),
-                                      child: Row(
-                                        children: <Widget>[
-                                          PlatformCircularProgressIndicator(),
-                                          const SizedBox(width: SMALL_SPACE),
-                                          Flexible(
-                                            child: Text(
-                                              l10n.locationIsStillFetching,
-                                              style: const TextStyle(
-                                                color: Colors.white,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
+                              if (_locationFetcher.isLoading) const LocationStillFetchingBanner(),
                             ],
                           );
                         }
@@ -211,8 +180,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                             child: Padding(
                               padding: const EdgeInsets.all(MEDIUM_SPACE),
                               child: LocationsLoadingScreen(
-                                locations:
-                                    _locationFetcher.controller.locations,
+                                locations: _locationFetcher.controller.locations,
                                 onTimeout: () {
                                   setState(() {
                                     _isError = true;
