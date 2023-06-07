@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart' hide PlatformListTile;
 import 'package:locus/screens/LocationPointsDetailsScreen.dart';
+import 'package:locus/screens/view_details_screen_widgets/ViewLocationPointsScreen.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:locus/utils/PageRoute.dart';
 import 'package:locus/utils/bunny.dart';
@@ -20,6 +21,7 @@ import '../constants/spacing.dart';
 import '../services/location_fetch_controller.dart';
 import '../services/location_point_service.dart';
 import '../utils/theme.dart';
+import '../widgets/LocationFetchError.dart';
 import '../widgets/LocationStillFetchingBanner.dart';
 import '../widgets/LocationsLoadingScreen.dart';
 import '../widgets/PlatformListTile.dart';
@@ -88,7 +90,6 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
   // `_locationFetcher.controller` is used to control ALL locations
   late final LocationFetcher _locationFetcher;
 
-  final PageController _pageController = PageController();
   bool _isError = false;
 
   @override
@@ -127,7 +128,6 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
   void dispose() {
     _locationFetcher.dispose();
     _controller.dispose();
-    _pageController.dispose();
 
     super.dispose();
   }
@@ -205,9 +205,8 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
                             context,
                             NativePageRoute(
                               context: context,
-                              builder: (context) => LocationPointsDetailsScreen(
-                                locations: _controller.locations,
-                                isPreview: false,
+                              builder: (context) => ViewLocationPointsScreen(
+                                locationFetcher: _locationFetcher,
                               ),
                             ),
                           );
@@ -227,7 +226,7 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
       ),
       body: (() {
         if (_isError) {
-          return const LocationFetchEmpty();
+          return const LocationFetchError();
         }
 
         if (_locationFetcher.controller.locations.isNotEmpty) {

@@ -154,7 +154,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
       body: _isError
           ? const LocationFetchError()
           : PageView(
-              physics: _isShowingDetails ? const AlwaysScrollableScrollPhysics() : const NeverScrollableScrollPhysics(),
+              physics: const NeverScrollableScrollPhysics(),
               scrollDirection: Axis.vertical,
               controller: _pageController,
               children: <Widget>[
