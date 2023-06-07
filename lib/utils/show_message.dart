@@ -5,10 +5,21 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 
 ScaffoldFeatureController<SnackBar, SnackBarClosedReason>? _oldSnackBar;
 
-Future<void> showSuccessMessage(
+enum MessageType {
+  success,
+  error,
+}
+
+final Map<MessageType, Color> MESSAGE_TYPE_COLOR_MAP = {
+  MessageType.success: Colors.green,
+  MessageType.error: Colors.red,
+};
+
+Future<void> showMessage(
   final BuildContext context,
-  final String message,
-) async {
+  final String message, {
+  final MessageType type = MessageType.success,
+}) async {
   final l10n = AppLocalizations.of(context);
 
   if (isMaterial(context)) {
@@ -21,7 +32,7 @@ Future<void> showSuccessMessage(
     _oldSnackBar = ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: Colors.green,
+        backgroundColor: MESSAGE_TYPE_COLOR_MAP[type],
       ),
     );
   } else {
