@@ -2,12 +2,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutter_platform_widgets/flutter_platform_widgets.dart'
-    hide PlatformListTile;
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart' hide PlatformListTile;
 import 'package:locus/services/view_service.dart';
 import 'package:locus/utils/bunny.dart';
 import 'package:locus/widgets/EmptyLocationsThresholdScreen.dart';
 import 'package:locus/widgets/FillUpPaint.dart';
+import 'package:locus/widgets/LocationFetchEmpty.dart';
 import 'package:locus/widgets/LocationFetchError.dart';
 import 'package:locus/widgets/LocationsMap.dart';
 import 'package:locus/widgets/OpenInMaps.dart';
@@ -28,32 +28,28 @@ class LineSliderTickMarkShape extends SliderTickMarkShape {
   }) : super();
 
   @override
-  Size getPreferredSize(
-      {required SliderThemeData sliderTheme, required bool isEnabled}) {
+  Size getPreferredSize({required SliderThemeData sliderTheme, required bool isEnabled}) {
     // We don't need this
     return Size.zero;
   }
 
   @override
-  void paint(PaintingContext context,
-      Offset center, {
-        required RenderBox parentBox,
-        required SliderThemeData sliderTheme,
-        required Animation<double> enableAnimation,
-        required Offset thumbCenter,
-        required bool isEnabled,
-        required TextDirection textDirection,
-      }) {
+  void paint(
+    PaintingContext context,
+    Offset center, {
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required Animation<double> enableAnimation,
+    required Offset thumbCenter,
+    required bool isEnabled,
+    required TextDirection textDirection,
+  }) {
     // This block is just copied from `slider_theme`
     final bool isTickMarkRightOfThumb = center.dx > thumbCenter.dx;
-    final begin = isTickMarkRightOfThumb
-        ? sliderTheme.disabledInactiveTickMarkColor
-        : sliderTheme.disabledActiveTickMarkColor;
-    final end = isTickMarkRightOfThumb
-        ? sliderTheme.inactiveTickMarkColor
-        : sliderTheme.activeTickMarkColor;
-    final Paint paint = Paint()
-      ..color = ColorTween(begin: begin, end: end).evaluate(enableAnimation)!;
+    final begin =
+        isTickMarkRightOfThumb ? sliderTheme.disabledInactiveTickMarkColor : sliderTheme.disabledActiveTickMarkColor;
+    final end = isTickMarkRightOfThumb ? sliderTheme.inactiveTickMarkColor : sliderTheme.activeTickMarkColor;
+    final Paint paint = Paint()..color = ColorTween(begin: begin, end: end).evaluate(enableAnimation)!;
 
     final trackHeight = sliderTheme.trackHeight!;
 
@@ -130,10 +126,7 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
     final locationsPerHour = _controller.getLocationsPerHour();
     final maxLocations = locationsPerHour.values.isEmpty
         ? 0
-        : locationsPerHour.values.fold(
-        0,
-            (value, element) =>
-        value > element.length ? value : element.length);
+        : locationsPerHour.values.fold(0, (value, element) => value > element.length ? value : element.length);
     final shades = getPrimaryColorShades(context);
 
     return PlatformScaffold(
@@ -141,45 +134,36 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
         title: Text(l10n.viewDetails_title),
         trailingActions: _controller.locations.isNotEmpty
             ? <Widget>[
-          PlatformPopup<String>(
-            type: PlatformPopupType.tap,
-            items: [
-              PlatformPopupMenuItem(
-                label: PlatformListTile(
-                  leading: Icon(context.platformIcons.location),
-                  trailing: const SizedBox.shrink(),
-                  title:
-                  Text(l10n.viewDetails_actions_openLatestLocation),
+                PlatformPopup<String>(
+                  type: PlatformPopupType.tap,
+                  items: [
+                    PlatformPopupMenuItem(
+                      label: PlatformListTile(
+                        leading: Icon(context.platformIcons.location),
+                        trailing: const SizedBox.shrink(),
+                        title: Text(l10n.viewDetails_actions_openLatestLocation),
+                      ),
+                      onPressed: () async {
+                        await showPlatformModalSheet(
+                          context: context,
+                          material: MaterialModalSheetData(),
+                          builder: (context) => OpenInMaps(
+                            destination:
+                                Coords(_controller.locations.last.latitude, _controller.locations.last.longitude),
+                          ),
+                        );
+                      },
+                    )
+                  ],
                 ),
-                onPressed: () async {
-                  await showPlatformModalSheet(
-                    context: context,
-                    material: MaterialModalSheetData(),
-                    builder: (context) =>
-                        OpenInMaps(
-                          destination: Coords(
-                              _controller.locations.last.latitude,
-                              _controller.locations.last.longitude),
-                        ),
-                  );
-                },
-              )
-            ],
-          ),
-        ]
+              ]
             : [],
-        material: (_, __) =>
-            MaterialAppBarData(
-              centerTitle: true,
-            ),
-        cupertino: (_, __) =>
-            CupertinoNavigationBarData(
-              backgroundColor:
-              CupertinoTheme
-                  .of(context)
-                  .barBackgroundColor
-                  .withOpacity(.5),
-            ),
+        material: (_, __) => MaterialAppBarData(
+          centerTitle: true,
+        ),
+        cupertino: (_, __) => CupertinoNavigationBarData(
+          backgroundColor: CupertinoTheme.of(context).barBackgroundColor.withOpacity(.5),
+        ),
       ),
       body: (() {
         if (_isError) {
@@ -206,6 +190,10 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
           return const EmptyLocationsThresholdScreen();
         }
 
+        if (_controller.locations.isEmpty) {
+          return const LocationFetchEmpty();
+        }
+
         return Column(
           children: <Widget>[
             Expanded(
@@ -218,18 +206,14 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
               flex: 1,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: List.generate(24, (index) => 23 - index)
-                    .map((hour) {
-                  final date =
-                  DateTime.now().subtract(Duration(hours: hour));
-                  final normalizedDate =
-                  LocationsMapController.normalizeDateTime(date);
+                children: List.generate(24, (index) => 23 - index).map((hour) {
+                  final date = DateTime.now().subtract(Duration(hours: hour));
+                  final normalizedDate = LocationsMapController.normalizeDateTime(date);
 
                   final onTap = () {
                     _controller.clear();
 
-                    final locations =
-                        locationsPerHour[normalizedDate] ?? [];
+                    final locations = locationsPerHour[normalizedDate] ?? [];
 
                     if (locations.isNotEmpty) {
                       _controller.addAll(locations);
@@ -238,33 +222,22 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
                   };
                   final child = FillUpPaint(
                     color: shades[0]!,
-                    fillPercentage:
-                    (locationsPerHour[normalizedDate]?.length ?? 0)
-                        .toDouble() /
-                        maxLocations,
+                    fillPercentage: (locationsPerHour[normalizedDate]?.length ?? 0).toDouble() / maxLocations,
                     size: Size(
-                      MediaQuery
-                          .of(context)
-                          .size
-                          .width / 24,
-                      MediaQuery
-                          .of(context)
-                          .size
-                          .height * (1 / 12),
+                      MediaQuery.of(context).size.width / 24,
+                      MediaQuery.of(context).size.height * (1 / 12),
                     ),
                   );
 
                   return PlatformWidget(
-                    material: (_, __) =>
-                        InkWell(
-                          onTap: onTap,
-                          child: child,
-                        ),
-                    cupertino: (_, __) =>
-                        GestureDetector(
-                          onTap: onTap,
-                          child: child,
-                        ),
+                    material: (_, __) => InkWell(
+                      onTap: onTap,
+                      child: child,
+                    ),
+                    cupertino: (_, __) => GestureDetector(
+                      onTap: onTap,
+                      child: child,
+                    ),
                   );
                 }).toList(),
               ),
