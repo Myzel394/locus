@@ -4,9 +4,11 @@ import 'dart:math';
 
 import 'package:cryptography/cryptography.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:locus/api/nostr-events.dart';
 import 'package:locus/constants/app.dart';
+import 'package:locus/constants/values.dart';
 import 'package:locus/models/log.dart';
 import 'package:locus/services/location_base.dart';
 import 'package:locus/services/log_service.dart';
@@ -103,6 +105,12 @@ class Task extends ChangeNotifier with LocationBase {
     List<TaskRuntimeTimer> timers = const [],
     bool deleteAfterRun = false,
   }) async {
+    FlutterLogs.logInfo(
+      LOG_TAG,
+      "Task",
+      "Creating new task.",
+    );
+
     final secretKey = await generateSecretKey();
 
     return Task(
@@ -240,6 +248,12 @@ class Task extends ChangeNotifier with LocationBase {
   // Starts the actual execution of the task. You should only call this if either the user wants to manually start the
   // task or if the task is scheduled to run.
   Future<void> startExecutionImmediately() async {
+    FlutterLogs.logInfo(
+      LOG_TAG,
+      "Task $id",
+      "Starting execution of task...",
+    );
+
     await storage.write(
       key: taskKey,
       value: jsonEncode({
@@ -254,11 +268,23 @@ class Task extends ChangeNotifier with LocationBase {
     }
 
     notifyListeners();
+
+    FlutterLogs.logInfo(
+      LOG_TAG,
+      "Task $id",
+      "Execution of task started!",
+    );
   }
 
   // Stops the actual execution of the task. You should only call this if either the user wants to manually stop the
   // task or if the task is scheduled to stop.
   Future<void> stopExecutionImmediately() async {
+    FlutterLogs.logInfo(
+      LOG_TAG,
+      "Task $id",
+      "Stopping execution of task...",
+    );
+
     await storage.delete(key: taskKey);
 
     for (final timer in timers) {
@@ -266,6 +292,12 @@ class Task extends ChangeNotifier with LocationBase {
     }
 
     notifyListeners();
+
+    FlutterLogs.logInfo(
+      LOG_TAG,
+      "Task $id",
+      "Execution of task stopped!",
+    );
   }
 
   Future<void> update({
@@ -429,6 +461,12 @@ class TaskService extends ChangeNotifier {
   }
 
   Future<void> save() async {
+    FlutterLogs.logInfo(
+      LOG_TAG,
+      "Task Service",
+      "Saving tasks...",
+    );
+
     // await all `toJson` functions
     final data = await Future.wait<Map<String, dynamic>>(
       _tasks.map(
@@ -437,6 +475,11 @@ class TaskService extends ChangeNotifier {
     );
 
     await storage.write(key: KEY, value: jsonEncode(data));
+    FlutterLogs.logInfo(
+      LOG_TAG,
+      "Task Service",
+      "Saved tasks successfully!",
+    );
   }
 
   Task getByID(final String id) {
@@ -468,8 +511,11 @@ class TaskService extends ChangeNotifier {
   // Does a general check up state of the task.
   // Checks if the task should be running / should be deleted etc.
   Future<void> checkup(final LogService logService) async {
+    FlutterLogs.logInfo(LOG_TAG, "Task Service", "Doing checkup...");
+
     for (final task in tasks) {
       if (!task.isInfinite() && task.nextEndDate() == null) {
+        FlutterLogs.logInfo(LOG_TAG, "Task Service", "Removing task.");
         // Delete task
         remove(task);
         await save();
@@ -481,6 +527,7 @@ class TaskService extends ChangeNotifier {
           ),
         );
       } else if (!(await task.shouldRunNow()) && (await task.isRunning())) {
+        FlutterLogs.logInfo(LOG_TAG, "Task Service", "Stopping task.");
         await task.stopExecutionImmediately();
 
         await logService.addLog(
@@ -493,6 +540,8 @@ class TaskService extends ChangeNotifier {
         );
       }
     }
+
+    FlutterLogs.logInfo(LOG_TAG, "Task Service", "Checkup done.");
   }
 
   Stream<Task> getRunningTasks() async* {

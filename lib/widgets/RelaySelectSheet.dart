@@ -3,8 +3,10 @@ import 'dart:collection';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
+import 'package:locus/constants/values.dart';
 import 'package:locus/utils/load_status.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/BottomSheetFilterBuilder.dart';
@@ -103,7 +105,7 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
       }
 
       final normalizedSelectedRelays =
-          widget.controller.relays.map(removeProtocol);
+      widget.controller.relays.map(removeProtocol);
 
       if (normalizedSelectedRelays.contains(value)) {
         setState(() {
@@ -158,6 +160,12 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
   }
 
   Future<void> fetchAvailableRelays() async {
+    FlutterLogs.logInfo(
+      LOG_TAG,
+      "Relay Select Sheet",
+      "Fetching available relays...",
+    );
+
     try {
       final relays = await getNostrRelays();
 
@@ -167,7 +175,14 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
         availableRelays = relays;
         loadStatus = LoadStatus.success;
       });
-    } catch (_) {
+    } catch (error) {
+      FlutterLogs.logErrorTrace(
+        LOG_TAG,
+        "Relay Select Sheet",
+        "Failed to fetch available relays",
+        error as Error,
+      );
+
       setState(() {
         loadStatus = LoadStatus.error;
       });
@@ -201,27 +216,29 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
           itemBuilder: (context, rawIndex) {
             if (isValueNew && rawIndex == 0) {
               return PlatformWidget(
-                material: (context, _) => ListTile(
-                  title: Text(
-                    l10n.addNewValueLabel(_newValue),
-                  ),
-                  leading: const Icon(
-                    Icons.add,
-                  ),
-                  onTap: () {
-                    widget.controller.add(_searchController.value.text);
-                    _searchController.clear();
-                  },
-                ),
-                cupertino: (context, _) => CupertinoButton(
-                  child: Text(
-                    l10n.addNewValueLabel(_newValue),
-                  ),
-                  onPressed: () {
-                    widget.controller.add(_searchController.value.text);
-                    _searchController.clear();
-                  },
-                ),
+                material: (context, _) =>
+                    ListTile(
+                      title: Text(
+                        l10n.addNewValueLabel(_newValue),
+                      ),
+                      leading: const Icon(
+                        Icons.add,
+                      ),
+                      onTap: () {
+                        widget.controller.add(_searchController.value.text);
+                        _searchController.clear();
+                      },
+                    ),
+                cupertino: (context, _) =>
+                    CupertinoButton(
+                      child: Text(
+                        l10n.addNewValueLabel(_newValue),
+                      ),
+                      onPressed: () {
+                        widget.controller.add(_searchController.value.text);
+                        _searchController.clear();
+                      },
+                    ),
               );
             }
 
@@ -229,38 +246,40 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
             final relay = allRelays[index];
 
             return PlatformWidget(
-              material: (context, _) => CheckboxListTile(
-                title: Text(
-                  relay.length >= 6 ? relay.substring(6) : relay,
-                ),
-                value: widget.controller.relays.contains(relay),
-                onChanged: (newValue) {
-                  if (newValue == null) {
-                    return;
-                  }
+              material: (context, _) =>
+                  CheckboxListTile(
+                    title: Text(
+                      relay.length >= 6 ? relay.substring(6) : relay,
+                    ),
+                    value: widget.controller.relays.contains(relay),
+                    onChanged: (newValue) {
+                      if (newValue == null) {
+                        return;
+                      }
 
-                  if (newValue) {
-                    widget.controller.add(relay);
-                  } else {
-                    widget.controller.remove(relay);
-                  }
-                },
-              ),
-              cupertino: (context, _) => CupertinoListTile(
-                title: Text(
-                  relay.length >= 6 ? relay.substring(6) : relay,
-                ),
-                trailing: CupertinoSwitch(
-                  value: widget.controller.relays.contains(relay),
-                  onChanged: (newValue) {
-                    if (newValue) {
-                      widget.controller.add(relay);
-                    } else {
-                      widget.controller.remove(relay);
-                    }
-                  },
-                ),
-              ),
+                      if (newValue) {
+                        widget.controller.add(relay);
+                      } else {
+                        widget.controller.remove(relay);
+                      }
+                    },
+                  ),
+              cupertino: (context, _) =>
+                  CupertinoListTile(
+                    title: Text(
+                      relay.length >= 6 ? relay.substring(6) : relay,
+                    ),
+                    trailing: CupertinoSwitch(
+                      value: widget.controller.relays.contains(relay),
+                      onChanged: (newValue) {
+                        if (newValue) {
+                          widget.controller.add(relay);
+                        } else {
+                          widget.controller.remove(relay);
+                        }
+                      },
+                    ),
+                  ),
             );
           },
         );
@@ -275,59 +294,67 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
     return DraggableScrollableSheet(
       expand: false,
       controller: _sheetController,
-      builder: (context, controller) => ModalSheet(
-        miuiIsGapless: true,
-        child: Column(
-          children: <Widget>[
-            if (loadStatus == LoadStatus.loading)
-              Expanded(
-                child: Center(
-                  child: PlatformCircularProgressIndicator(),
-                ),
-              )
-            else if (loadStatus == LoadStatus.error)
-              Text(
-                l10n.unknownError,
-                style: TextStyle(
-                  color: getErrorColor(context),
-                ),
-              )
-            else if (availableRelays.isNotEmpty)
-              Expanded(
-                child: buildRelaySelectSheet(controller),
-              ),
-            const SizedBox(height: MEDIUM_SPACE),
-            PlatformTextButton(
-              material: (_, __) => MaterialTextButtonData(
-                icon: const Icon(Icons.shuffle),
-              ),
-              onPressed: loadStatus == LoadStatus.success
-                  ? () {
-                      final relays = availableRelays.toList();
-                      relays.shuffle();
+      builder: (context, controller) =>
+          ModalSheet(
+            miuiIsGapless: true,
+            child: Column(
+              children: <Widget>[
+                if (loadStatus == LoadStatus.loading)
+                  Expanded(
+                    child: Center(
+                      child: PlatformCircularProgressIndicator(),
+                    ),
+                  )
+                else
+                  if (loadStatus == LoadStatus.error)
+                    Text(
+                      l10n.unknownError,
+                      style: TextStyle(
+                        color: getErrorColor(context),
+                      ),
+                    )
+                  else
+                    if (availableRelays.isNotEmpty)
+                      Expanded(
+                        child: buildRelaySelectSheet(controller),
+                      ),
+                const SizedBox(height: MEDIUM_SPACE),
+                PlatformTextButton(
+                  material: (_, __) =>
+                      MaterialTextButtonData(
+                        icon: const Icon(Icons.shuffle),
+                      ),
+                  onPressed: loadStatus == LoadStatus.success
+                      ? () {
+                    final relays = availableRelays.toList();
+                    relays.shuffle();
 
-                      widget.controller.clear();
-                      widget.controller.addAll(relays.take(5).toList());
-                    }
-                  : null,
-              child: Text(l10n.relaySelectSheet_selectRandomRelays(5)),
+                    widget.controller.clear();
+                    widget.controller.addAll(relays.take(5).toList());
+                  }
+                      : null,
+                  child: Text(l10n.relaySelectSheet_selectRandomRelays(5)),
+                ),
+                const SizedBox(height: SMALL_SPACE),
+                PlatformElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  material: (_, __) =>
+                      MaterialElevatedButtonData(
+                        icon: const Icon(Icons.done),
+                      ),
+                  child: Text(l10n.closePositiveSheetAction),
+                ),
+                SizedBox(
+                  height: MediaQuery
+                      .of(context)
+                      .viewInsets
+                      .bottom,
+                )
+              ],
             ),
-            const SizedBox(height: SMALL_SPACE),
-            PlatformElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              material: (_, __) => MaterialElevatedButtonData(
-                icon: const Icon(Icons.done),
-              ),
-              child: Text(l10n.closePositiveSheetAction),
-            ),
-            SizedBox(
-              height: MediaQuery.of(context).viewInsets.bottom,
-            )
-          ],
-        ),
-      ),
+          ),
     );
   }
 }

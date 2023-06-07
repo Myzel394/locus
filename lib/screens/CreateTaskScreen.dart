@@ -3,11 +3,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart'
     hide PlatformListTile;
 import 'package:locus/constants/spacing.dart';
-import 'package:locus/constants/values.dart';
 import 'package:locus/screens/create_task_screen_widgets/ExampleTasksRoulette.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/utils/theme.dart';
@@ -127,12 +125,6 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> {
       if (_scheduleNow) {
         await task.startSchedule(startNowIfNextRunIsUnknown: true);
       }
-
-      FlutterLogs.logInfo(
-        LOG_TAG,
-        "CreateTask",
-        "New task created successfully.",
-      );
 
       if (mounted) {
         widget.onCreated();
