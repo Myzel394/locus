@@ -234,9 +234,7 @@ class _MainScreenState extends State<MainScreen> {
     final l10n = AppLocalizations.of(context);
     final appUpdateService = context.read<AppUpdateService>();
 
-    if (appUpdateService.shouldShowDialogue() &&
-        !appUpdateService.hasShownDialogue &&
-        mounted) {
+    if (appUpdateService.shouldShowDialogue() && !appUpdateService.hasShownDialogue && mounted) {
       await showPlatformDialog(
         context: context,
         barrierDismissible: false,
@@ -367,17 +365,12 @@ class _MainScreenState extends State<MainScreen> {
     return PlatformAppBar(
       title: Text(l10n.appName),
       trailingActions: [
-        PlatformPopup<String>(
-          type: PlatformPopupType.tap,
-          items: [
-            PlatformPopupMenuItem(
-              label: Text(l10n.settingsScreen_title),
-              onPressed: () {
-                showSettings(context);
-              },
-            ),
-          ],
-        )
+        PlatformIconButton(
+          icon: Icon(context.platformIcons.settings),
+          onPressed: () {
+            showSettings(context);
+          },
+        ),
       ],
     );
   }
@@ -389,8 +382,7 @@ class _MainScreenState extends State<MainScreen> {
     final viewService = context.watch<ViewService>();
     final settings = context.watch<SettingsService>();
 
-    final showEmptyScreen =
-        taskService.tasks.isEmpty && viewService.views.isEmpty;
+    final showEmptyScreen = taskService.tasks.isEmpty && viewService.views.isEmpty;
 
     if (showEmptyScreen) {
       return PlatformScaffold(

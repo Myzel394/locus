@@ -6,6 +6,8 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/screens/task_detail_screen_widgets/Details.dart';
 import 'package:locus/services/location_fetch_controller.dart';
 import 'package:locus/services/task_service.dart';
+import 'package:locus/utils/bunny.dart';
+import 'package:locus/widgets/EmptyLocationsThresholdScreen.dart';
 import 'package:locus/widgets/LocationFetchError.dart';
 import 'package:locus/widgets/LocationsLoadingScreen.dart';
 import 'package:locus/widgets/LocationsMap.dart';
@@ -41,8 +43,11 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
   void initState() {
     super.initState();
 
+    emptyLocationsCount++;
+
     _locationFetcher = widget.task.createLocationFetcher(
       onLocationFetched: (final location) {
+        emptyLocationsCount = 0;
         // Only update partially to avoid lag
         EasyThrottle.throttle(
           "${widget.task.id}:location-fetch",
@@ -216,6 +221,10 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                               ),
                             ),
                           );
+                        }
+
+                        if (emptyLocationsCount > EMPTY_LOCATION_THRESHOLD) {
+                          return const EmptyLocationsThresholdScreen();
                         }
 
                         return const LocationFetchEmpty();

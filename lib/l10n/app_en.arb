@@ -29,6 +29,7 @@
   "actionNotUndoable": "This action cannot be undone!",
   "linkCopiedToClipboard": "Link copied to clipboard!",
   "textCopiedToClipboard": "Text copied to clipboard!",
+  "increaseVolume": "Turn up the volume",
   "nostrRelaysLabel": "Nostr Relays",
   "nostrPublicKeyLabel": "Public Nostr key",
   "signPublicKeyLabel": "Public Sign key",
@@ -522,5 +523,7 @@
   "logs_task_creationContext_description": "{context, select, inApp{Task created inside the App} quickAction{Task created via Quick Action} other{Unknown error occurred}}",
   "logs_title": "Locus automatically creates logs",
   "logs_description": "Logs are kept for 7 days and are automatically deleted afterwards.",
-  "locationPointsScreen_title": "Location Points"
+  "locationPointsScreen_title": "Location Points",
+  "bunny_unavailable": "Sorry, but it seems as if your friend is as lost as this song.",
+  "bunny_unavailable_action": "What's this song?"
 }
