@@ -73,7 +73,7 @@ class LocationsMapController extends ChangeNotifier {
 
   void sort() {
     // Sort descending
-    _locations.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+    _locations.sort((a, b) => b.createdAt.compareTo(a.createdAt));
     notifyListeners();
   }
 

@@ -32,7 +32,7 @@ class LocationPointsDetailsScreen extends StatelessWidget {
             physics: isPreview ? const NeverScrollableScrollPhysics() : null,
             itemCount: locations.length,
             itemBuilder: (_, index) => LocationDetails(
-              location: locations[locations.length - index - 1],
+              location: locations[index],
               isPreview: isPreview,
             ),
           );

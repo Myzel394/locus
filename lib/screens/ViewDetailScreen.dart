@@ -3,13 +3,16 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart' hide PlatformListTile;
+import 'package:locus/screens/LocationPointsDetailsScreen.dart';
 import 'package:locus/services/view_service.dart';
+import 'package:locus/utils/PageRoute.dart';
 import 'package:locus/utils/bunny.dart';
 import 'package:locus/widgets/EmptyLocationsThresholdScreen.dart';
 import 'package:locus/widgets/FillUpPaint.dart';
 import 'package:locus/widgets/LocationFetchEmpty.dart';
 import 'package:locus/widgets/LocationsMap.dart';
 import 'package:locus/widgets/OpenInMaps.dart';
+import 'package:locus/widgets/PlatformFlavorWidget.dart';
 import 'package:locus/widgets/PlatformPopup.dart';
 import 'package:map_launcher/map_launcher.dart';
 
@@ -37,22 +40,22 @@ class LineSliderTickMarkShape extends SliderTickMarkShape {
   }
 
   @override
-  void paint(PaintingContext context,
-      Offset center, {
-        required RenderBox parentBox,
-        required SliderThemeData sliderTheme,
-        required Animation<double> enableAnimation,
-        required Offset thumbCenter,
-        required bool isEnabled,
-        required TextDirection textDirection,
-      }) {
+  void paint(
+    PaintingContext context,
+    Offset center, {
+    required RenderBox parentBox,
+    required SliderThemeData sliderTheme,
+    required Animation<double> enableAnimation,
+    required Offset thumbCenter,
+    required bool isEnabled,
+    required TextDirection textDirection,
+  }) {
     // This block is just copied from `slider_theme`
     final bool isTickMarkRightOfThumb = center.dx > thumbCenter.dx;
     final begin =
-    isTickMarkRightOfThumb ? sliderTheme.disabledInactiveTickMarkColor : sliderTheme.disabledActiveTickMarkColor;
+        isTickMarkRightOfThumb ? sliderTheme.disabledInactiveTickMarkColor : sliderTheme.disabledActiveTickMarkColor;
     final end = isTickMarkRightOfThumb ? sliderTheme.inactiveTickMarkColor : sliderTheme.activeTickMarkColor;
-    final Paint paint = Paint()
-      ..color = ColorTween(begin: begin, end: end).evaluate(enableAnimation)!;
+    final Paint paint = Paint()..color = ColorTween(begin: begin, end: end).evaluate(enableAnimation)!;
 
     final trackHeight = sliderTheme.trackHeight!;
 
@@ -85,9 +88,8 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
   // `_locationFetcher.controller` is used to control ALL locations
   late final LocationFetcher _locationFetcher;
 
+  final PageController _pageController = PageController();
   bool _isError = false;
-
-  double timeOffset = 0;
 
   @override
   void initState() {
@@ -104,7 +106,7 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
         EasyThrottle.throttle(
           "${widget.view.id}:location-fetch",
           DEBOUNCE_DURATION,
-              () {
+          () {
             if (!mounted) {
               return;
             }
@@ -125,12 +127,12 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
   void dispose() {
     _locationFetcher.dispose();
     _controller.dispose();
+    _pageController.dispose();
 
     super.dispose();
   }
 
-  VoidCallback handleTapOnDate(final Iterable<LocationPointService> locations) =>
-          () {
+  VoidCallback handleTapOnDate(final Iterable<LocationPointService> locations) => () {
         _controller.clear();
 
         if (locations.isNotEmpty) {
@@ -139,23 +141,19 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
         }
       };
 
-  Widget buildDateSelectButton(final List<LocationPointService> locations,
-      final int hour,
-      final int maxLocations,) {
+  Widget buildDateSelectButton(
+    final List<LocationPointService> locations,
+    final int hour,
+    final int maxLocations,
+  ) {
     final shades = getPrimaryColorShades(context);
 
     return FillUpPaint(
       color: shades[0]!,
       fillPercentage: maxLocations == 0 ? 0 : (locations.length.toDouble() / maxLocations),
       size: Size(
-        MediaQuery
-            .of(context)
-            .size
-            .width / 24,
-        MediaQuery
-            .of(context)
-            .size
-            .height * (1 / 12),
+        MediaQuery.of(context).size.width / 24,
+        MediaQuery.of(context).size.height * (1 / 12),
       ),
     );
   }
@@ -173,42 +171,59 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
         title: Text(l10n.viewDetails_title),
         trailingActions: _controller.locations.isNotEmpty
             ? <Widget>[
-          PlatformPopup<String>(
-            type: PlatformPopupType.tap,
-            items: [
-              PlatformPopupMenuItem(
-                label: PlatformListTile(
-                  leading: Icon(context.platformIcons.location),
-                  trailing: const SizedBox.shrink(),
-                  title: Text(l10n.viewDetails_actions_openLatestLocation),
-                ),
-                onPressed: () async {
-                  await showPlatformModalSheet(
-                    context: context,
-                    material: MaterialModalSheetData(),
-                    builder: (context) =>
-                        OpenInMaps(
-                          destination:
-                          Coords(_controller.locations.last.latitude, _controller.locations.last.longitude),
+                Padding(
+                  padding: const EdgeInsets.all(SMALL_SPACE),
+                  child: PlatformPopup<String>(
+                    type: PlatformPopupType.tap,
+                    items: [
+                      PlatformPopupMenuItem(
+                        label: PlatformListTile(
+                          leading: Icon(context.platformIcons.location),
+                          trailing: const SizedBox.shrink(),
+                          title: Text(l10n.viewDetails_actions_openLatestLocation),
                         ),
-                  );
-                },
-              )
-            ],
-          ),
-        ]
+                        onPressed: () => showPlatformModalSheet(
+                          context: context,
+                          material: MaterialModalSheetData(),
+                          builder: (context) => OpenInMaps(
+                            destination:
+                                Coords(_controller.locations.last.latitude, _controller.locations.last.longitude),
+                          ),
+                        ),
+                      ),
+                      PlatformPopupMenuItem(
+                        label: PlatformListTile(
+                          leading: PlatformFlavorWidget(
+                            material: (_, __) => const Icon(Icons.list_rounded),
+                            cupertino: (_, __) => const Icon(CupertinoIcons.list_bullet),
+                          ),
+                          trailing: const SizedBox.shrink(),
+                          title: Text(l10n.viewDetails_actions_showLocationList),
+                        ),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            NativePageRoute(
+                              context: context,
+                              builder: (context) => LocationPointsDetailsScreen(
+                                locations: _controller.locations,
+                                isPreview: false,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ]
             : [],
-        material: (_, __) =>
-            MaterialAppBarData(
-              centerTitle: true,
-            ),
-        cupertino: (_, __) =>
-            CupertinoNavigationBarData(
-              backgroundColor: CupertinoTheme
-                  .of(context)
-                  .barBackgroundColor
-                  .withOpacity(.5),
-            ),
+        material: (_, __) => MaterialAppBarData(
+          centerTitle: true,
+        ),
+        cupertino: (_, __) => CupertinoNavigationBarData(
+          backgroundColor: CupertinoTheme.of(context).barBackgroundColor.withOpacity(.5),
+        ),
       ),
       body: (() {
         if (_isError) {
@@ -216,47 +231,50 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
         }
 
         if (_locationFetcher.controller.locations.isNotEmpty) {
-          return Column(
+          return PageView(
+            physics: const NeverScrollableScrollPhysics(),
             children: <Widget>[
-              Expanded(
-                flex: 11,
-                child: Stack(
-                  children: <Widget>[
-                    LocationsMap(
-                      controller: _controller,
+              Column(
+                children: <Widget>[
+                  Expanded(
+                    flex: 11,
+                    child: Stack(
+                      children: <Widget>[
+                        LocationsMap(
+                          controller: _controller,
+                        ),
+                        if (_locationFetcher.isLoading) const LocationStillFetchingBanner(),
+                      ],
                     ),
-                    if (_locationFetcher.isLoading) const LocationStillFetchingBanner(),
-                  ],
-                ),
-              ),
-              Expanded(
-                flex: 1,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: List.generate(24, (index) => 23 - index).map((hour) {
-                    final date = DateTime.now().subtract(Duration(hours: hour));
-                    final normalizedDate = LocationsMapController.normalizeDateTime(date);
-                    final locations = locationsPerHour[normalizedDate] ?? [];
-                    final child = buildDateSelectButton(
-                      locations,
-                      hour,
-                      maxLocations,
-                    );
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: List.generate(24, (index) => 23 - index).map((hour) {
+                        final date = DateTime.now().subtract(Duration(hours: hour));
+                        final normalizedDate = LocationsMapController.normalizeDateTime(date);
+                        final locations = locationsPerHour[normalizedDate] ?? [];
+                        final child = buildDateSelectButton(
+                          locations,
+                          hour,
+                          maxLocations,
+                        );
 
-                    return PlatformWidget(
-                      material: (_, __) =>
-                          InkWell(
+                        return PlatformWidget(
+                          material: (_, __) => InkWell(
                             onTap: handleTapOnDate(locations),
                             child: child,
                           ),
-                      cupertino: (_, __) =>
-                          GestureDetector(
+                          cupertino: (_, __) => GestureDetector(
                             onTap: handleTapOnDate(locations),
                             child: child,
                           ),
-                    );
-                  }).toList(),
-                ),
+                        );
+                      }).toList(),
+                    ),
+                  ),
+                ],
               ),
             ],
           );
