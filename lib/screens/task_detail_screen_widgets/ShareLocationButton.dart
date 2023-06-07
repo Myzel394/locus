@@ -3,8 +3,10 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
+import 'package:locus/constants/values.dart';
 import 'package:locus/screens/task_detail_screen_widgets/SendViewByBluetooth.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/widgets/SingularElementDialog.dart';
@@ -39,46 +41,58 @@ class _ShareLocationButtonState extends State<ShareLocationButton> {
   void openShareLocationDialog() async {
     final l10n = AppLocalizations.of(context);
 
+    FlutterLogs.logInfo(
+      LOG_TAG,
+      "Share Location",
+      "Showing selection dialog.",
+    );
+
     final shouldShare = await showPlatformDialog(
       context: context,
-      builder: (context) => PlatformAlertDialog(
-        title: Text(l10n.shareLocation_title),
-        content: Text(l10n.shareLocation_description),
-        actions: createCancellableDialogActions(context, [
-          PlatformDialogAction(
-            child: Text(l10n.shareLocation_actions_createQRCode),
-            material: (_, __) => MaterialDialogActionData(
-              icon: const Icon(Icons.qr_code),
-            ),
-            onPressed: () => Navigator.of(context).pop("qr"),
-          ),
-          PlatformDialogAction(
-            child: Text(l10n.shareLocation_actions_shareFile),
-            material: (_, __) => MaterialDialogActionData(
-              icon: const Icon(Icons.share_rounded),
-            ),
-            onPressed: () => Navigator.of(context).pop("share"),
-          ),
-          if (Platform.isAndroid)
-            PlatformDialogAction(
-              material: (_, __) => MaterialDialogActionData(
-                icon: const Icon(Icons.bluetooth_audio_rounded),
+      builder: (context) =>
+          PlatformAlertDialog(
+            title: Text(l10n.shareLocation_title),
+            content: Text(l10n.shareLocation_description),
+            actions: createCancellableDialogActions(context, [
+              PlatformDialogAction(
+                child: Text(l10n.shareLocation_actions_createQRCode),
+                material: (_, __) =>
+                    MaterialDialogActionData(
+                      icon: const Icon(Icons.qr_code),
+                    ),
+                onPressed: () => Navigator.of(context).pop("qr"),
               ),
-              onPressed: () => Navigator.of(context).pop("bluetooth"),
-              child: Text(l10n.shareLocation_actions_shareBluetooth),
-            ),
-          PlatformDialogAction(
-            child: Text(l10n.shareLocation_actions_shareLink),
-            cupertino: (_, __) => CupertinoDialogActionData(
-              isDefaultAction: true,
-            ),
-            material: (_, __) => MaterialDialogActionData(
-              icon: const Icon(Icons.link_rounded),
-            ),
-            onPressed: () => Navigator.of(context).pop("link"),
+              PlatformDialogAction(
+                child: Text(l10n.shareLocation_actions_shareFile),
+                material: (_, __) =>
+                    MaterialDialogActionData(
+                      icon: const Icon(Icons.share_rounded),
+                    ),
+                onPressed: () => Navigator.of(context).pop("share"),
+              ),
+              if (Platform.isAndroid)
+                PlatformDialogAction(
+                  material: (_, __) =>
+                      MaterialDialogActionData(
+                        icon: const Icon(Icons.bluetooth_audio_rounded),
+                      ),
+                  onPressed: () => Navigator.of(context).pop("bluetooth"),
+                  child: Text(l10n.shareLocation_actions_shareBluetooth),
+                ),
+              PlatformDialogAction(
+                child: Text(l10n.shareLocation_actions_shareLink),
+                cupertino: (_, __) =>
+                    CupertinoDialogActionData(
+                      isDefaultAction: true,
+                    ),
+                material: (_, __) =>
+                    MaterialDialogActionData(
+                      icon: const Icon(Icons.link_rounded),
+                    ),
+                onPressed: () => Navigator.of(context).pop("link"),
+              ),
+            ]),
           ),
-        ]),
-      ),
     );
 
     if (!mounted) {
@@ -88,6 +102,12 @@ class _ShareLocationButtonState extends State<ShareLocationButton> {
     setState(() {
       isLoading = true;
     });
+
+    FlutterLogs.logInfo(
+      LOG_TAG,
+      "Share Location",
+      "Selected value=$shouldShare.",
+    );
 
     try {
       switch (shouldShare) {
@@ -100,7 +120,8 @@ class _ShareLocationButtonState extends State<ShareLocationButton> {
 
           await showSingularElementDialog(
               context: context,
-              builder: (context) => Column(
+              builder: (context) =>
+                  Column(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: List<Widget>.from(
@@ -110,9 +131,7 @@ class _ShareLocationButtonState extends State<ShareLocationButton> {
                           style: getTitle2TextStyle(context),
                           textAlign: TextAlign.center,
                         ),
-                        isMaterial(context)
-                            ? const SizedBox(height: LARGE_SPACE)
-                            : null,
+                        isMaterial(context) ? const SizedBox(height: LARGE_SPACE) : null,
                         QrImageView(
                           data: url,
                           errorCorrectionLevel: QrErrorCorrectLevel.H,
@@ -151,14 +170,21 @@ class _ShareLocationButtonState extends State<ShareLocationButton> {
                 isDismissible: true,
                 backgroundColor: Colors.transparent,
               ),
-              builder: (_) => SendViewByBluetooth(
-                data: data,
-              ),
+              builder: (_) =>
+                  SendViewByBluetooth(
+                    data: data,
+                  ),
             );
           }
           break;
       }
-    } catch (_) {
+    } catch (error) {
+      FlutterLogs.logErrorTrace(
+        LOG_TAG,
+        "Share Location",
+        "Error while sharing location.",
+        error as Error,
+      );
     } finally {
       setState(() {
         isLoading = false;
@@ -171,9 +197,10 @@ class _ShareLocationButtonState extends State<ShareLocationButton> {
     final l10n = AppLocalizations.of(context);
 
     return PlatformElevatedButton(
-      material: (_, __) => MaterialElevatedButtonData(
-        icon: const Icon(Icons.share_location_rounded),
-      ),
+      material: (_, __) =>
+          MaterialElevatedButtonData(
+            icon: const Icon(Icons.share_location_rounded),
+          ),
       onPressed: isLoading ? null : openShareLocationDialog,
       child: Text(l10n.shareLocation_title),
     );

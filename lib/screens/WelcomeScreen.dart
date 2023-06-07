@@ -73,8 +73,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   }
 
   void _nextScreen(final int page) {
-    _controller.animateToPage(page,
-        duration: 500.ms, curve: Curves.easeOutExpo);
+    _controller.animateToPage(
+      page,
+      duration: 500.ms,
+      curve: Curves.easeOutExpo,
+    );
   }
 
   void _onDone() {

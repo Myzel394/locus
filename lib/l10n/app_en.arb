@@ -414,6 +414,9 @@
       }
     }
   },
+  "settingsScreen_exportLogs": "Export Logs",
+  "settingsScreen_exportLogs_shareText": "Here are my Locus logs",
+  "settingsScreen_exportLogs_error": "There was an error exporting the logs",
   "support_title": "Support Locus",
   "support_description": "Locus is a free open source project. This means that I don't make any money from it. If you like the app and want to support me, you can do so by multiple ways. Thank you very much! :)",
   "support_options_develop": "Help developing Locus",

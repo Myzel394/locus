@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show PlatformException;
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:locus/init_quick_actions.dart';
@@ -16,7 +17,6 @@ import 'package:locus/services/task_service.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:locus/utils/navigation.dart';
 import 'package:locus/utils/theme.dart';
-import 'package:locus/widgets/PlatformPopup.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:uni_links/uni_links.dart';
@@ -137,20 +137,20 @@ class _MainScreenState extends State<MainScreen> {
     _positionStream = null;
   }
 
-  Future<void> _importUniLink(final String url) async {
-    await showPlatformModalSheet(
-      context: context,
-      material: MaterialModalSheetData(
-        isScrollControlled: true,
-        isDismissible: true,
-        backgroundColor: Colors.transparent,
-      ),
-      builder: (context) => ImportTaskSheet(initialURL: url),
-    );
-  }
+  Future<void> _importUniLink(final String url) => showPlatformModalSheet(
+        context: context,
+        material: MaterialModalSheetData(
+          isScrollControlled: true,
+          isDismissible: true,
+          backgroundColor: Colors.transparent,
+        ),
+        builder: (context) => ImportTaskSheet(initialURL: url),
+      );
 
   Future<void> initUniLinks() async {
     final l10n = AppLocalizations.of(context);
+
+    FlutterLogs.logInfo(LOG_TAG, "Uni Links", "Initiating uni links...");
 
     _uniLinksStream = linkStream.listen((final String? link) {
       if (link != null) {
@@ -166,6 +166,13 @@ class _MainScreenState extends State<MainScreen> {
         await _importUniLink(initialLink);
       }
     } on PlatformException catch (error) {
+      FlutterLogs.logErrorTrace(
+        LOG_TAG,
+        "Uni Links",
+        "Error initializing uni links.",
+        error as Error,
+      );
+
       showPlatformDialog(
         context: context,
         builder: (_) => PlatformAlertDialog(

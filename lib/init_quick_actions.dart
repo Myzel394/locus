@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+import 'package:locus/constants/values.dart';
 import 'package:locus/screens/ShortcutScreen.dart';
 import 'package:locus/utils/PageRoute.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
@@ -23,7 +25,13 @@ const SHORTCUT_TYPE_ICON_MAP = {
 void initQuickActions(final BuildContext context) {
   final l10n = AppLocalizations.of(context);
 
+  FlutterLogs.logInfo(
+      LOG_TAG, "Quick Actions", "Initializing quick actions...");
+
   actions.initialize((type) async {
+    FlutterLogs.logInfo(
+        LOG_TAG, "Quick Actions", "Quick action $type triggered.");
+
     if (isCupertino(context)) {
       showCupertinoModalBottomSheet(
         context: context,
@@ -66,4 +74,7 @@ void initQuickActions(final BuildContext context) {
       icon: "ic_quick_actions_stop_all_tasks",
     ),
   ]);
+
+  FlutterLogs.logInfo(
+      LOG_TAG, "Quick Actions", "Quick actions initialized successfully!");
 }

@@ -3,8 +3,10 @@ import 'dart:convert';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
+import 'package:locus/constants/values.dart';
 import 'package:locus/screens/import_task_sheet_widgets/ImportSelection.dart';
 import 'package:locus/screens/import_task_sheet_widgets/ImportSuccess.dart';
 import 'package:locus/screens/import_task_sheet_widgets/NameForm.dart';
@@ -45,7 +47,8 @@ class ImportTaskSheet extends StatefulWidget {
   State<ImportTaskSheet> createState() => _ImportTaskSheetState();
 }
 
-class _ImportTaskSheetState extends State<ImportTaskSheet> with TickerProviderStateMixin {
+class _ImportTaskSheetState extends State<ImportTaskSheet>
+    with TickerProviderStateMixin {
   final _nameController = TextEditingController();
   final _urlController = TextEditingController();
   ImportScreen _screen = ImportScreen.ask;
@@ -146,6 +149,12 @@ class _ImportTaskSheetState extends State<ImportTaskSheet> with TickerProviderSt
   void _importFile() async {
     final l10n = AppLocalizations.of(context);
 
+    FlutterLogs.logInfo(
+      LOG_TAG,
+      "Import Task",
+      "Importing task from file...",
+    );
+
     FilePickerResult? result;
 
     setState(() {
@@ -158,14 +167,28 @@ class _ImportTaskSheetState extends State<ImportTaskSheet> with TickerProviderSt
       result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ["json"],
-        dialogTitle: l10n.mainScreen_importTask_action_importMethod_file_selectFile,
+        dialogTitle:
+        l10n.mainScreen_importTask_action_importMethod_file_selectFile,
         withData: true,
       );
-    } catch (_) {
+    } catch (error) {
+      FlutterLogs.logErrorTrace(
+        LOG_TAG,
+        "Import Task",
+        "Error calling `.pickFiles`.",
+        error as Error,
+      );
+
       setState(() {
         errorMessage = l10n.unknownError;
       });
     }
+
+    FlutterLogs.logInfo(
+      LOG_TAG,
+      "Import Task",
+      "File picker returned file. Parsing content...",
+    );
 
     try {
       if (result == null) {
@@ -176,7 +199,13 @@ class _ImportTaskSheetState extends State<ImportTaskSheet> with TickerProviderSt
 
         parseViewData(taskView);
       }
-    } catch (_) {
+    } catch (error) {
+      FlutterLogs.logErrorTrace(
+        LOG_TAG,
+        "Import Task",
+        "Error parsing file.",
+        error as Error,
+      );
     } finally {
       setState(() {
         isLoading = false;
@@ -188,6 +217,12 @@ class _ImportTaskSheetState extends State<ImportTaskSheet> with TickerProviderSt
     final url = _urlController.text;
     final l10n = AppLocalizations.of(context);
 
+    FlutterLogs.logInfo(
+      LOG_TAG,
+      "Import Task",
+      "Importing task from URL...",
+    );
+
     try {
       setState(() {
         isLoading = true;
@@ -198,7 +233,14 @@ class _ImportTaskSheetState extends State<ImportTaskSheet> with TickerProviderSt
       final taskView = await TaskView.fetchFromNostr(parameters);
 
       parseViewData(taskView);
-    } catch (_) {
+    } catch (error) {
+      FlutterLogs.logErrorTrace(
+        LOG_TAG,
+        "Import Task",
+        "Error fetching task from URL.",
+        error as Error,
+      );
+
       setState(() {
         errorMessage = l10n.unknownError;
         _screen = ImportScreen.error;
@@ -222,7 +264,10 @@ class _ImportTaskSheetState extends State<ImportTaskSheet> with TickerProviderSt
         ModalSheet(
           child: Padding(
             padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom,
+              bottom: MediaQuery
+                  .of(context)
+                  .viewInsets
+                  .bottom,
             ),
             child: Column(
               children: <Widget>[
@@ -246,86 +291,103 @@ class _ImportTaskSheetState extends State<ImportTaskSheet> with TickerProviderSt
                       }
                     },
                   )
-                else if (_screen == ImportScreen.askURL)
-                  URLForm(
-                    isFetching: isLoading,
-                    controller: _urlController,
-                    onImport: _importURL,
-                  )
-                else if (_screen == ImportScreen.askName)
-                  NameForm(
-                    controller: _nameController,
-                    onSubmitted: () {
-                      _taskView!.update(name: _nameController.text);
+                else
+                  if (_screen == ImportScreen.askURL)
+                    URLForm(
+                      isFetching: isLoading,
+                      controller: _urlController,
+                      onImport: _importURL,
+                    )
+                  else
+                    if (_screen == ImportScreen.askName)
+                      NameForm(
+                        controller: _nameController,
+                        onSubmitted: () {
+                          _taskView!.update(name: _nameController.text);
 
-                      importView();
-                    },
-                  )
-                else if (_screen == ImportScreen.importFile)
-                  Column(
-                    children: <Widget>[
-                      Text(
-                        l10n.mainScreen_importTask_action_import_isLoading,
-                        style: getSubTitleTextStyle(context),
-                      ),
-                      const SizedBox(height: SMALL_SPACE),
-                      if (isLoading)
-                        const CircularProgressIndicator()
-                      else if (errorMessage != null)
-                        Text(
-                          errorMessage!,
-                          style: getBodyTextTextStyle(context).copyWith(color: getErrorColor(context)),
-                        ),
-                    ],
-                  )
-                else if (_screen == ImportScreen.bluetoothReceive)
-                  ReceiveViewByBluetooth(
-                    onImport: parseViewData,
-                  )
-                else if (_screen == ImportScreen.present)
-                  ViewImportOverview(
-                    view: _taskView!,
-                    onImport: () {
-                      setState(() {
-                        _screen = ImportScreen.askName;
-                      });
-                    },
-                  )
-                else if (_screen == ImportScreen.done)
-                  ImportSuccess(
-                    onClose: () {
-                      if (!mounted) {
-                        return;
-                      }
+                          importView();
+                        },
+                      )
+                    else
+                      if (_screen == ImportScreen.importFile)
+                        Column(
+                          children: <Widget>[
+                            Text(
+                              l10n
+                                  .mainScreen_importTask_action_import_isLoading,
+                              style: getSubTitleTextStyle(context),
+                            ),
+                            const SizedBox(height: SMALL_SPACE),
+                            if (isLoading)
+                              const CircularProgressIndicator()
+                            else
+                              if (errorMessage != null)
+                                Text(
+                                  errorMessage!,
+                                  style: getBodyTextTextStyle(context)
+                                      .copyWith(color: getErrorColor(context)),
+                                ),
+                          ],
+                        )
+                      else
+                        if (_screen == ImportScreen.bluetoothReceive)
+                          ReceiveViewByBluetooth(
+                            onImport: parseViewData,
+                          )
+                        else
+                          if (_screen == ImportScreen.present)
+                            ViewImportOverview(
+                              view: _taskView!,
+                              onImport: () {
+                                setState(() {
+                                  _screen = ImportScreen.askName;
+                                });
+                              },
+                            )
+                          else
+                            if (_screen == ImportScreen.done)
+                              ImportSuccess(
+                                onClose: () {
+                                  if (!mounted) {
+                                    return;
+                                  }
 
-                      Navigator.of(context).pop(_taskView!);
-                    },
-                  )
-                else if (_screen == ImportScreen.error)
-                  Column(
-                    children: <Widget>[
-                      Icon(context.platformIcons.error, size: 64, color: getErrorColor(context)),
-                      const SizedBox(height: MEDIUM_SPACE),
-                      Text(
-                        l10n.taskImportError,
-                        style: getSubTitleTextStyle(context),
-                      ),
-                      const SizedBox(height: SMALL_SPACE),
-                      Text(
-                        errorMessage!,
-                        style: getBodyTextTextStyle(context).copyWith(color: getErrorColor(context)),
-                      ),
-                      const SizedBox(height: LARGE_SPACE),
-                      PlatformElevatedButton(
-                        padding: const EdgeInsets.all(MEDIUM_SPACE),
-                        onPressed: reset,
-                        material: (_, __) => MaterialElevatedButtonData(
-                          icon: const Icon(Icons.arrow_back_rounded),
-                        ),
-                        child: Text(l10n.goBack),
-                      ),
-                    ],
-                  ),
+                                  Navigator.of(context).pop(_taskView!);
+                                },
+                              )
+                            else
+                              if (_screen == ImportScreen.error)
+                                Column(
+                                  children: <Widget>[
+                                    Icon(context.platformIcons.error,
+                                        size: 64,
+                                        color: getErrorColor(context)),
+                                    const SizedBox(height: MEDIUM_SPACE),
+                                    Text(
+                                      l10n.taskImportError,
+                                      style: getSubTitleTextStyle(context),
+                                    ),
+                                    const SizedBox(height: SMALL_SPACE),
+                                    Text(
+                                      errorMessage!,
+                                      style: getBodyTextTextStyle(context)
+                                          .copyWith(
+                                          color: getErrorColor(context)),
+                                    ),
+                                    const SizedBox(height: LARGE_SPACE),
+                                    PlatformElevatedButton(
+                                      padding: const EdgeInsets.all(
+                                          MEDIUM_SPACE),
+                                      onPressed: reset,
+                                      material: (_, __) =>
+                                          MaterialElevatedButtonData(
+                                            icon: const Icon(
+                                                Icons.arrow_back_rounded),
+                                          ),
+                                      child: Text(l10n.goBack),
+                                    ),
+                                  ],
+                                ),
                 const SizedBox(height: LARGE_SPACE),
               ],
             ),
