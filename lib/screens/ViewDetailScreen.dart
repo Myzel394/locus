@@ -132,14 +132,18 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
     super.dispose();
   }
 
-  VoidCallback handleTapOnDate(final Iterable<LocationPointService> locations) => () {
-        _controller.clear();
+  VoidCallback handleTapOnDate(final Iterable<LocationPointService> locations) {
+    return () {
+      _controller.clear();
 
-        if (locations.isNotEmpty) {
-          _controller.addAll(locations);
-          _controller.goTo(locations.last);
-        }
-      };
+      if (locations.isNotEmpty) {
+        _controller.addAll(locations);
+        _controller.goTo(locations.last);
+      }
+
+      setState(() {});
+    };
+  }
 
   Widget buildDateSelectButton(
     final List<LocationPointService> locations,
@@ -161,7 +165,7 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final locationsPerHour = _controller.getLocationsPerHour();
+    final locationsPerHour = _locationFetcher.controller.getLocationsPerHour();
     final maxLocations = locationsPerHour.values.isEmpty
         ? 0
         : locationsPerHour.values.fold(0, (value, element) => value > element.length ? value : element.length);
@@ -169,7 +173,7 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
     return PlatformScaffold(
       appBar: PlatformAppBar(
         title: Text(l10n.viewDetails_title),
-        trailingActions: _controller.locations.isNotEmpty
+        trailingActions: _locationFetcher.controller.locations.isNotEmpty
             ? <Widget>[
                 Padding(
                   padding: const EdgeInsets.all(SMALL_SPACE),
@@ -186,8 +190,10 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
                           context: context,
                           material: MaterialModalSheetData(),
                           builder: (context) => OpenInMaps(
-                            destination:
-                                Coords(_controller.locations.last.latitude, _controller.locations.last.longitude),
+                            destination: Coords(
+                              _locationFetcher.controller.locations.last.latitude,
+                              _locationFetcher.controller.locations.last.longitude,
+                            ),
                           ),
                         ),
                       ),
