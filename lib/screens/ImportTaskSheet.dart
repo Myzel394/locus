@@ -138,7 +138,14 @@ class _ImportTaskSheetState extends State<ImportTaskSheet> with TickerProviderSt
           _screen = ImportScreen.present;
         });
       }
-    } catch (_) {
+    } catch (error) {
+      FlutterLogs.logErrorTrace(
+        LOG_TAG,
+        "Import Task",
+        "Error validating task view.",
+        error as Error,
+      );
+
       setState(() {
         errorMessage = l10n.unknownError;
         _screen = ImportScreen.error;

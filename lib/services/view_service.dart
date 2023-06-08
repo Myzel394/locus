@@ -72,7 +72,7 @@ class TaskView extends ChangeNotifier with LocationBase {
       encryptionPassword: SecretKey(List<int>.from(json["encryptionPassword"])),
       nostrPublicKey: json["nostrPublicKey"],
       relays: List<String>.from(json["relays"]),
-      name: json["name"],
+      name: json["name"] ?? "Unnamed Task",
       // Required for migration
       id: json["id"] ?? const Uuid().v4(),
       alarms: List<LocationAlarmServiceBase>.from(
