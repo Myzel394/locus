@@ -33,6 +33,9 @@ jobs:
       - name: Generate Localizations 🌐
         run: flutter gen-l10n
 
+      - name: Run Tests 🧪
+        run: flutter test
+
       - name: Build Android App - GMS variant 📱
         run: flutter build apk --dart-define=app.flavor=gms --debug
 
