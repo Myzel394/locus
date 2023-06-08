@@ -13,7 +13,7 @@ final MAYBE_POINT = LatLng(40.04136, -75.48662);
 
 void main() {
   group("Radius based location with whenEnter", () {
-    final alarm = RadiusBasedRegionLocationAlarm(
+    final alarm = RadiusBasedRegionLocationAlarm.create(
       type: RadiusBasedRegionLocationAlarmType.whenEnter,
       center: CENTER,
       radius: RADIUS,

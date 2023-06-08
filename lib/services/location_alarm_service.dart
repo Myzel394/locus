@@ -1,7 +1,10 @@
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:uuid/uuid.dart';
 import 'location_point_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+const uuid = Uuid();
 
 enum LocationAlarmTriggerType {
   yes,
@@ -10,6 +13,8 @@ enum LocationAlarmTriggerType {
 }
 
 abstract class LocationAlarmServiceBase {
+  final String id;
+
   String get IDENTIFIER;
 
   String createNotificationTitle(final AppLocalizations l10n, final String viewName);
@@ -19,6 +24,10 @@ abstract class LocationAlarmServiceBase {
   // Checks if the alarm should be triggered
   // This function will be called each time the background fetch is updated and there are new locations
   LocationAlarmTriggerType check(final LocationPointService previousLocation, final LocationPointService nextLocation);
+
+  String getStorageKey() => "location_alarm_service:$IDENTIFIER:$id";
+
+  const LocationAlarmServiceBase(this.id);
 }
 
 enum RadiusBasedRegionLocationAlarmType {
@@ -34,21 +43,36 @@ class RadiusBasedRegionLocationAlarm extends LocationAlarmServiceBase {
   final double radius;
   final RadiusBasedRegionLocationAlarmType type;
 
-  RadiusBasedRegionLocationAlarm({
+  const RadiusBasedRegionLocationAlarm({
     required this.center,
     required this.radius,
     required this.type,
     required this.zoneName,
-  });
+    required String id,
+  }) : super(id);
 
   String get IDENTIFIER => "radius_based_region";
 
-  factory RadiusBasedRegionLocationAlarm.fromJSON(final Map<String, dynamic> data) =>
-      RadiusBasedRegionLocationAlarm(
+  factory RadiusBasedRegionLocationAlarm.fromJSON(final Map<String, dynamic> data) => RadiusBasedRegionLocationAlarm(
         center: LatLng(data["center"]["latitude"], data["center"]["longitude"]),
         radius: data["radius"],
         type: RadiusBasedRegionLocationAlarmType.values[data["alarmType"]],
         zoneName: data["zoneName"],
+        id: data["id"],
+      );
+
+  factory RadiusBasedRegionLocationAlarm.create({
+    required final LatLng center,
+    required final double radius,
+    required final RadiusBasedRegionLocationAlarmType type,
+    required final String zoneName,
+  }) =>
+      RadiusBasedRegionLocationAlarm(
+        center: center,
+        radius: radius,
+        type: type,
+        zoneName: zoneName,
+        id: uuid.v4(),
       );
 
   @override
@@ -59,6 +83,7 @@ class RadiusBasedRegionLocationAlarm extends LocationAlarmServiceBase {
       "radius": radius,
       "zoneName": zoneName,
       "alarmType": type.index,
+      "id": id,
     };
   }
 
