@@ -22,10 +22,12 @@ class ModalSheet extends StatelessWidget {
 
     return PlatformWidget(
       material: (_, __) => Padding(
-        padding: settings.isMIUI() && !miuiIsGapless
-            ? const EdgeInsets.all(MEDIUM_SPACE)
-            : EdgeInsets.zero,
+        padding: settings.isMIUI() && !miuiIsGapless ? const EdgeInsets.all(MEDIUM_SPACE) : EdgeInsets.zero,
         child: Container(
+          width: double.infinity,
+          constraints: const BoxConstraints(
+            maxWidth: 1200,
+          ),
           decoration: BoxDecoration(
             color: getSheetColor(context),
             borderRadius: settings.isMIUI() && !miuiIsGapless
@@ -37,9 +39,7 @@ class ModalSheet extends StatelessWidget {
           ),
           child: Padding(
             padding: EdgeInsets.only(
-              top: settings.isMIUI() && !miuiIsGapless
-                  ? MEDIUM_SPACE
-                  : LARGE_SPACE,
+              top: settings.isMIUI() && !miuiIsGapless ? MEDIUM_SPACE : LARGE_SPACE,
               left: MEDIUM_SPACE,
               right: MEDIUM_SPACE,
               bottom: SMALL_SPACE,
