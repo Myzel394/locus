@@ -60,11 +60,11 @@ Future<void> checkViewAlarms({
         if (alarm is RadiusBasedRegionLocationAlarm) {
           final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
-          await flutterLocalNotificationsPlugin.show(
-            location.createdAt.microsecondsSinceEpoch,
+          flutterLocalNotificationsPlugin.show(
+            location.createdAt.millisecondsSinceEpoch,
             l10n.locationAlarm_radiusBasedRegion_notificationTitle_whenEnter(
               view.name,
-              alarm.zoneName,
+              "test",
             ),
             l10n.locationAlarm_notification_description,
             NotificationDetails(
@@ -77,6 +77,7 @@ Future<void> checkViewAlarms({
               ),
             ),
             payload: jsonEncode({
+              "type": NotificationActionType.openTaskView.index,
               "taskViewID": view.id,
             }),
           );

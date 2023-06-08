@@ -229,33 +229,6 @@ class _MainScreenState extends State<MainScreen> {
       initUniLinks();
 
       taskService.checkup(logService);
-
-      final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-      final viewService = context.read<ViewService>();
-      final view = viewService.views.first;
-
-      final l10n = AppLocalizations.of(context);
-      flutterLocalNotificationsPlugin.show(
-        0,
-        l10n.locationAlarm_radiusBasedRegion_notificationTitle_whenEnter(
-          view.name,
-          "test",
-        ),
-        l10n.locationAlarm_notification_description,
-        NotificationDetails(
-          android: AndroidNotificationDetails(
-            AndroidChannelIDs.locationAlarms.name,
-            l10n.androidNotificationChannel_locationAlarms_name,
-            channelDescription: l10n.androidNotificationChannel_locationAlarms_description,
-            importance: Importance.max,
-            priority: Priority.max,
-          ),
-        ),
-        payload: jsonEncode({
-          "type": NotificationActionType.openTaskView.index,
-          "taskViewID": view.id,
-        }),
-      );
     });
 
     taskService.addListener(updateView);
