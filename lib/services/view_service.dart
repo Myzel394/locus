@@ -40,17 +40,21 @@ class TaskView extends ChangeNotifier with LocationBase {
   final List<String> relays;
   final List<LocationAlarmServiceBase> alarms;
   final String id;
+  DateTime lastAlarmCheck;
   String name;
 
   TaskView({
     required final SecretKey encryptionPassword,
     required this.nostrPublicKey,
     required this.relays,
-    required this.id,
     required this.name,
+    String? id,
+    DateTime? lastAlarmCheck,
     List<LocationAlarmServiceBase>? alarms,
   })  : _encryptionPassword = encryptionPassword,
-        alarms = alarms ?? [];
+        alarms = alarms ?? [],
+        lastAlarmCheck = lastAlarmCheck ?? DateTime.now(),
+        id = id ?? const Uuid().v4();
 
   static ViewServiceLinkParameters parseLink(final String url) {
     final uri = Uri.parse(url);
@@ -67,26 +71,25 @@ class TaskView extends ChangeNotifier with LocationBase {
     );
   }
 
-  factory TaskView.fromJSON(final Map<String, dynamic> json) {
-    return TaskView(
-      encryptionPassword: SecretKey(List<int>.from(json["encryptionPassword"])),
-      nostrPublicKey: json["nostrPublicKey"],
-      relays: List<String>.from(json["relays"]),
-      name: json["name"] ?? "Unnamed Task",
-      // Required for migration
-      id: json["id"] ?? const Uuid().v4(),
-      alarms: List<LocationAlarmServiceBase>.from(
-        json["alarms"].map((alarm) {
-          final identifier = LocationAlarmType.values.firstWhere((element) => element == alarm["_IDENTIFIER"]);
+  factory TaskView.fromJSON(final Map<String, dynamic> json) => TaskView(
+        encryptionPassword: SecretKey(List<int>.from(json["encryptionPassword"])),
+        nostrPublicKey: json["nostrPublicKey"],
+        relays: List<String>.from(json["relays"]),
+        name: json["name"] ?? "Unnamed Task",
+        // Required for migration
+        id: json["id"] ?? const Uuid().v4(),
+        alarms: List<LocationAlarmServiceBase>.from(
+          json["alarms"].map((alarm) {
+            final identifier = LocationAlarmType.values.firstWhere((element) => element == alarm["_IDENTIFIER"]);
 
-          switch (identifier) {
-            case LocationAlarmType.radiusBasedRegion:
-              return RadiusBasedRegionLocationAlarm.fromJSON(alarm);
-          }
-        }),
-      ),
-    );
-  }
+            switch (identifier) {
+              case LocationAlarmType.radiusBasedRegion:
+                return RadiusBasedRegionLocationAlarm.fromJSON(alarm);
+            }
+          }),
+        ),
+        lastAlarmCheck: json["lastAlarmCheck"] != null ? DateTime.parse(json["lastAlarmCheck"]) : DateTime.now(),
+      );
 
   static Future<TaskView> fetchFromNostr(
     final AppLocalizations l10n,
@@ -135,7 +138,6 @@ class TaskView extends ChangeNotifier with LocationBase {
                 nostrPublicKey: data['nostrPublicKey'],
                 relays: List<String>.from(data['relays']),
                 name: l10n.longFormattedDate(DateTime.now()),
-                id: const Uuid().v4(),
               ),
             );
           } catch (error) {
