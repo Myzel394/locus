@@ -165,7 +165,7 @@
   "welcomeScreen_description": "Share your location with your friends and family fully privately and securely.",
   "welcomeScreen_getStarted": "Get Started",
   "welcomeScreen_locationPermission_title": "Allow access to your location",
-  "welcomeScreen_locationPermission_description": "We need the permission to access your location in the background in order to store your location history. You will first be asked to grant location access while the app is in use. After that, we will ask you to grant location access in the background. This is necessary to share yur location when you don't have the app constantly opened.",
+  "welcomeScreen_locationPermission_description": "We need the permission to access your location in the background in order to store your location history. You will first be asked to grant location access while the app is in use. After that, we will ask you to grant location access in the background. This is necessary to share your location when you don't have the app constantly opened.",
   "welcomeScreen_permissions_allow": "Allow",
   "welcomeScreen_notificationPermission_title": "We need your permission to send you notifications",
   "welcomeScreen_notificationPermission_description": "We need your permission to send you notifications while the app is in the foreground to update your location in real-time. We will only send you notifications when you are sharing your location with someone.",
