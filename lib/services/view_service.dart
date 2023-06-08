@@ -158,8 +158,6 @@ class TaskView extends ChangeNotifier with LocationBase {
     return completer.future;
   }
 
-  bool get hasAlarms => alarms.isNotEmpty;
-
   void update({
     final String? name,
   }) {
@@ -221,11 +219,63 @@ class TaskView extends ChangeNotifier with LocationBase {
         limit: limit,
       );
 
+  Future<List<LocationPointService>> getLocationsAsFuture({
+    int? limit,
+    DateTime? from,
+  }) =>
+      getLocationsAPI.getLocationsAsFuture(
+        encryptionPassword: _encryptionPassword,
+        nostrPublicKey: nostrPublicKey,
+        relays: relays,
+        from: from,
+        limit: limit,
+      );
+
   @override
   void dispose() {
     _encryptionPassword.destroy();
 
     super.dispose();
+  }
+
+  Future<void> checkAlarm({
+    required final void Function(
+            LocationAlarmServiceBase alarm, LocationPointService previousLocation, LocationPointService nextLocation)
+        onTrigger,
+    required final void Function(
+            LocationAlarmServiceBase alarm, LocationPointService previousLocation, LocationPointService nextLocation)
+        onMaybeTrigger,
+  }) async {
+    lastAlarmCheck = DateTime.now();
+
+    final locations = await getLocationsAsFuture(
+      from: lastAlarmCheck,
+    );
+
+    if (locations.isEmpty) {
+      return;
+    }
+
+    locations.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+
+    LocationPointService oldLocation = locations.first;
+
+    // Iterate over each location but the first one
+    for (final location in locations.skip(1)) {
+      for (final alarm in alarms) {
+        final checkResult = alarm.check(oldLocation, location);
+
+        if (checkResult == LocationAlarmTriggerType.yes) {
+          onTrigger(alarm, oldLocation, location);
+          break;
+        } else if (checkResult == LocationAlarmTriggerType.maybe) {
+          onMaybeTrigger(alarm, oldLocation, location);
+          break;
+        }
+      }
+
+      oldLocation = location;
+    }
   }
 }
 
@@ -237,6 +287,9 @@ class ViewService extends ChangeNotifier {
   }) : _views = views;
 
   UnmodifiableListView<TaskView> get views => UnmodifiableListView(_views);
+
+  UnmodifiableListView<TaskView> get viewsWithAlarms =>
+      UnmodifiableListView(_views.where((view) => view.alarms.isNotEmpty));
 
   static Future<ViewService> restore() async {
     final rawViews = await storage.read(key: KEY);

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:cryptography/cryptography.dart';
@@ -112,7 +113,7 @@ VoidCallback getLocations({
       authors: [nostrPublicKey],
       limit: limit,
       until:
-          until == null ? null : (until.millisecondsSinceEpoch / 1000).floor(),
+      until == null ? null : (until.millisecondsSinceEpoch / 1000).floor(),
       since: from == null ? null : (from.millisecondsSinceEpoch / 1000).floor(),
     ),
   ]);
@@ -152,4 +153,34 @@ VoidCallback getLocations({
       socket.close();
     }
   };
+}
+
+Future<List<LocationPointService>> getLocationsAsFuture({
+  required final String nostrPublicKey,
+  required final SecretKey encryptionPassword,
+  required final List<String> relays,
+  int? limit,
+  DateTime? from,
+  DateTime? until,
+}) async {
+  final completer = Completer<List<LocationPointService>>();
+
+  final List<LocationPointService> locations = [];
+
+  getLocations(
+    nostrPublicKey: nostrPublicKey,
+    encryptionPassword: encryptionPassword,
+    relays: relays,
+    limit: limit,
+    from: from,
+    until: until,
+    onLocationFetched: (final LocationPointService location) {
+      locations.add(location);
+    },
+    onEnd: () {
+      completer.complete(locations);
+    },
+  );
+
+  return completer.future;
 }

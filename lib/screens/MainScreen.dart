@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:animations/animations.dart';
@@ -8,11 +9,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show PlatformException;
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:locus/init_quick_actions.dart';
 import 'package:locus/screens/main_screen_widgets/screens/EmptyScreen.dart';
+import 'package:locus/services/manager_service.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:locus/utils/PageRoute.dart';
@@ -22,6 +25,7 @@ import 'package:material_design_icons_flutter/material_design_icons_flutter.dart
 import 'package:provider/provider.dart';
 import 'package:uni_links/uni_links.dart';
 
+import '../constants/notifications.dart';
 import '../constants/values.dart';
 import '../models/log.dart';
 import '../services/app_update_service.dart';
@@ -52,6 +56,7 @@ class _MainScreenState extends State<MainScreen> {
   int activeTab = 0;
   Stream<Position>? _positionStream;
   StreamSubscription<String?>? _uniLinksStream;
+  Timer? _viewsAlarmCheckerTimer;
 
   void _changeTab(final int newTab) {
     final settings = context.read<SettingsService>();
@@ -222,12 +227,53 @@ class _MainScreenState extends State<MainScreen> {
       initUniLinks();
 
       taskService.checkup(logService);
+
+      final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+      final viewService = context.read<ViewService>();
+      final view = viewService.views.first;
+
+      final l10n = AppLocalizations.of(context);
+      flutterLocalNotificationsPlugin.show(
+        0,
+        l10n.locationAlarm_radiusBasedRegion_notificationTitle_whenEnter(
+          view.name,
+          "test",
+        ),
+        l10n.locationAlarm_notification_description,
+        NotificationDetails(
+          android: AndroidNotificationDetails(
+            AndroidChannelIDs.locationAlarms.name,
+            l10n.androidNotificationChannel_locationAlarms_name,
+            channelDescription: l10n.androidNotificationChannel_locationAlarms_description,
+            importance: Importance.max,
+            priority: Priority.max,
+          ),
+        ),
+        payload: jsonEncode({
+          "type": NotificationActionType.openTaskView.index,
+          "taskViewID": view.id,
+        }),
+      );
     });
 
     taskService.addListener(updateView);
     appUpdateService.addListener(updateView);
 
     initBackground();
+
+    _viewsAlarmCheckerTimer = Timer.periodic(
+      const Duration(minutes: 1),
+      (_) {
+        final viewService = context.read<ViewService>();
+        final l10n = AppLocalizations.of(context);
+
+        if (viewService.viewsWithAlarms.isEmpty) {
+          return;
+        }
+
+        checkViewAlarms(l10n: l10n, views: viewService.viewsWithAlarms);
+      },
+    );
   }
 
   @override
@@ -239,6 +285,7 @@ class _MainScreenState extends State<MainScreen> {
 
     _tabController.dispose();
 
+    _viewsAlarmCheckerTimer?.cancel();
     _uniLinksStream?.cancel();
 
     _removeLiveLocationUpdate();
