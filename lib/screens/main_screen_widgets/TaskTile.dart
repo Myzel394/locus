@@ -3,8 +3,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutter_platform_widgets/flutter_platform_widgets.dart'
-    hide PlatformListTile;
+import 'package:flutter_logs/flutter_logs.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart' hide PlatformListTile;
+import 'package:locus/constants/values.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/utils/PageRoute.dart';
 import 'package:provider/provider.dart';
@@ -41,12 +42,9 @@ class _TaskTileState extends State<TaskTile> {
     final l10n = AppLocalizations.of(context);
 
     return {
-      TaskLinkPublishProgress.encrypting:
-          l10n.taskAction_generateLink_process_encrypting,
-      TaskLinkPublishProgress.publishing:
-          l10n.taskAction_generateLink_process_publishing,
-      TaskLinkPublishProgress.creatingURI:
-          l10n.taskAction_generateLink_process_creatingURI,
+      TaskLinkPublishProgress.encrypting: l10n.taskAction_generateLink_process_encrypting,
+      TaskLinkPublishProgress.publishing: l10n.taskAction_generateLink_process_publishing,
+      TaskLinkPublishProgress.creatingURI: l10n.taskAction_generateLink_process_creatingURI,
     };
   }
 
@@ -75,6 +73,7 @@ class _TaskTileState extends State<TaskTile> {
                       try {
                         if (value) {
                           await widget.task.startExecutionImmediately();
+                          taskService.update(widget.task);
                           await logService.addLog(
                             Log.taskStatusChanged(
                               initiator: LogInitiator.user,
@@ -84,10 +83,8 @@ class _TaskTileState extends State<TaskTile> {
                             ),
                           );
                           final nextEndDate = widget.task.nextEndDate();
-                          final locationData = await LocationPointService
-                              .createUsingCurrentLocation();
 
-                          widget.task.publishCurrentLocationNow(locationData);
+                          widget.task.publishCurrentLocationNow();
 
                           if (!mounted) {
                             return;
@@ -101,8 +98,7 @@ class _TaskTileState extends State<TaskTile> {
                             context: context,
                             builder: (_) => PlatformAlertDialog(
                               title: Text(l10n.taskAction_started_title),
-                              content: Text(l10n
-                                  .taskAction_started_runsUntil(nextEndDate)),
+                              content: Text(l10n.taskAction_started_runsUntil(nextEndDate)),
                               actions: <Widget>[
                                 PlatformDialogActionButton(
                                   child: Text(l10n.closeNeutralAction),
@@ -123,8 +119,9 @@ class _TaskTileState extends State<TaskTile> {
                               active: false,
                             ),
                           );
-                          final nextStartDate =
-                              await widget.task.startScheduleTomorrow();
+                          final nextStartDate = await widget.task.startScheduleTomorrow();
+
+                          taskService.update(widget.task);
 
                           if (!mounted) {
                             return;
@@ -138,8 +135,7 @@ class _TaskTileState extends State<TaskTile> {
                             context: context,
                             builder: (_) => PlatformAlertDialog(
                               title: Text(l10n.taskAction_stopped_title),
-                              content: Text(l10n.taskAction_stopped_startsAgain(
-                                  nextStartDate)),
+                              content: Text(l10n.taskAction_stopped_startsAgain(nextStartDate)),
                               actions: <Widget>[
                                 PlatformDialogActionButton(
                                   child: Text(l10n.closeNeutralAction),
@@ -151,9 +147,13 @@ class _TaskTileState extends State<TaskTile> {
                             ),
                           );
                         }
-
-                        taskService.update(widget.task);
-                      } catch (_) {
+                      } catch (error) {
+                        FlutterLogs.logErrorTrace(
+                          LOG_TAG,
+                          "Task Tile",
+                          "Error while starting/stopping task",
+                          error as Error,
+                        );
                       } finally {
                         setState(() {
                           isLoading = false;
@@ -184,8 +184,7 @@ class _TaskTileState extends State<TaskTile> {
                       } catch (e) {}
                     }
 
-                    if (progress != TaskLinkPublishProgress.done &&
-                        Platform.isAndroid) {
+                    if (progress != TaskLinkPublishProgress.done && Platform.isAndroid) {
                       final scaffold = ScaffoldMessenger.of(context);
 
                       snackBar = scaffold.showSnackBar(
