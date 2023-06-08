@@ -40,15 +40,15 @@ class TaskView extends ChangeNotifier with LocationBase {
   final List<String> relays;
   final List<LocationAlarmServiceBase> alarms;
   final String id;
-  String? name;
+  String name;
 
   TaskView({
     required final SecretKey encryptionPassword,
     required this.nostrPublicKey,
     required this.relays,
     required this.id,
+    required this.name,
     List<LocationAlarmServiceBase>? alarms,
-    this.name,
   })  : _encryptionPassword = encryptionPassword,
         alarms = alarms ?? [];
 
@@ -89,6 +89,7 @@ class TaskView extends ChangeNotifier with LocationBase {
   }
 
   static Future<TaskView> fetchFromNostr(
+    final AppLocalizations l10n,
     final ViewServiceLinkParameters parameters,
   ) async {
     final completer = Completer<TaskView>();
@@ -133,6 +134,7 @@ class TaskView extends ChangeNotifier with LocationBase {
                 ),
                 nostrPublicKey: data['nostrPublicKey'],
                 relays: List<String>.from(data['relays']),
+                name: l10n.longFormattedDate(DateTime.now()),
                 id: const Uuid().v4(),
               ),
             );
@@ -153,6 +155,8 @@ class TaskView extends ChangeNotifier with LocationBase {
 
     return completer.future;
   }
+
+  bool get hasAlarms => alarms.isNotEmpty;
 
   void update({
     final String? name,
