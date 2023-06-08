@@ -76,51 +76,48 @@ class _BottomSheetFilterBuilderState<T> extends State<BottomSheetFilterBuilder> 
     final l10n = AppLocalizations.of(context);
     final settings = context.watch<SettingsService>();
 
-    return ModalSheet(
-      miuiIsGapless: true,
-      child: Column(
-        children: <Widget>[
-          Focus(
-            onFocusChange: widget.onSearchFocusChanged,
-            child: PlatformWidget(
-              material: (_, __) => TextField(
-                controller: widget.searchController,
-                onChanged: (value) {
-                  updateElements();
-                },
-                spellCheckConfiguration: const SpellCheckConfiguration.disabled(),
-                decoration: InputDecoration(
-                  hintText: l10n.searchLabel,
-                  prefixIcon: Icon(
-                    settings.isMIUI() ? CupertinoIcons.search : Icons.search_rounded,
-                  ),
-                  suffixIcon: IconButton(
-                    icon: const Icon(Icons.clear),
-                    onPressed: () {
-                      widget.searchController!.clear();
-                      updateElements();
-                    },
-                  ),
+    return Column(
+      children: <Widget>[
+        Focus(
+          onFocusChange: widget.onSearchFocusChanged,
+          child: PlatformWidget(
+            material: (_, __) => TextField(
+              controller: widget.searchController,
+              onChanged: (value) {
+                updateElements();
+              },
+              spellCheckConfiguration: const SpellCheckConfiguration.disabled(),
+              decoration: InputDecoration(
+                hintText: l10n.searchLabel,
+                prefixIcon: Icon(
+                  settings.isMIUI() ? CupertinoIcons.search : Icons.search_rounded,
+                ),
+                suffixIcon: IconButton(
+                  icon: const Icon(Icons.clear),
+                  onPressed: () {
+                    widget.searchController!.clear();
+                    updateElements();
+                  },
                 ),
               ),
-              cupertino: (_, __) => CupertinoSearchTextField(
-                controller: widget.searchController,
-                onChanged: (value) {
-                  updateElements();
-                },
-                placeholder: l10n.searchLabel,
-              ),
+            ),
+            cupertino: (_, __) => CupertinoSearchTextField(
+              controller: widget.searchController,
+              onChanged: (value) {
+                updateElements();
+              },
+              placeholder: l10n.searchLabel,
             ),
           ),
-          const SizedBox(height: SMALL_SPACE),
-          Expanded(
-            child: widget.builder(
-              context,
-              _elements,
-            ),
+        ),
+        const SizedBox(height: SMALL_SPACE),
+        Expanded(
+          child: widget.builder(
+            context,
+            _elements,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

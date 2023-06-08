@@ -7,13 +7,13 @@ import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/constants/values.dart';
-import 'package:locus/services/cache_service.dart';
 import 'package:locus/utils/load_status.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/BottomSheetFilterBuilder.dart';
 import 'package:locus/widgets/ModalSheet.dart';
 
 import '../api/nostr-relays.dart';
+import '../utils/cache.dart';
 
 String removeProtocol(final String url) => url.toLowerCase().replaceAll(RegExp(r'^wss://'), '');
 
@@ -165,7 +165,8 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
     );
 
     try {
-      final relays = await CacheManager.withCache<List<String>>(getNostrRelays, "relays")();
+      final relaysData = await withCache(getNostrRelays, "relays")();
+      final relays = List<String>.from(relaysData["relays"] as List<dynamic>);
 
       relays.shuffle();
 
