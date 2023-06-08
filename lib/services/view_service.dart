@@ -75,6 +75,16 @@ class TaskView extends ChangeNotifier with LocationBase {
       name: json["name"],
       // Required for migration
       id: json["id"] ?? const Uuid().v4(),
+      alarms: List<LocationAlarmServiceBase>.from(
+        json["alarms"].map((alarm) {
+          final identifier = LocationAlarmType.values.firstWhere((element) => element == alarm["_IDENTIFIER"]);
+
+          switch (identifier) {
+            case LocationAlarmType.radiusBasedRegion:
+              return RadiusBasedRegionLocationAlarm.fromJSON(alarm);
+          }
+        }),
+      ),
     );
   }
 
@@ -160,6 +170,8 @@ class TaskView extends ChangeNotifier with LocationBase {
       "nostrPublicKey": nostrPublicKey,
       "relays": relays,
       "name": name,
+      "id": id,
+      "alarms": alarms.map((alarm) => alarm.toJSON()).toList(),
     };
   }
 

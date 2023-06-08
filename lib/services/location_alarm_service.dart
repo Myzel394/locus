@@ -12,10 +12,14 @@ enum LocationAlarmTriggerType {
   maybe,
 }
 
+enum LocationAlarmType {
+  radiusBasedRegion,
+}
+
 abstract class LocationAlarmServiceBase {
   final String id;
 
-  String get IDENTIFIER;
+  LocationAlarmType get IDENTIFIER;
 
   String createNotificationTitle(final AppLocalizations l10n, final String viewName);
 
@@ -51,7 +55,7 @@ class RadiusBasedRegionLocationAlarm extends LocationAlarmServiceBase {
     required String id,
   }) : super(id);
 
-  String get IDENTIFIER => "radius_based_region";
+  LocationAlarmType get IDENTIFIER => LocationAlarmType.radiusBasedRegion;
 
   factory RadiusBasedRegionLocationAlarm.fromJSON(final Map<String, dynamic> data) => RadiusBasedRegionLocationAlarm(
         center: LatLng(data["center"]["latitude"], data["center"]["longitude"]),
@@ -78,7 +82,7 @@ class RadiusBasedRegionLocationAlarm extends LocationAlarmServiceBase {
   @override
   Map<String, dynamic> toJSON() {
     return {
-      "type": IDENTIFIER,
+      "_IDENTIFIER": IDENTIFIER.name,
       "center": center.toJson(),
       "radius": radius,
       "zoneName": zoneName,
