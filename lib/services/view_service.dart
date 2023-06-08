@@ -12,6 +12,7 @@ import 'package:nostr/nostr.dart';
 import 'package:uuid/uuid.dart';
 
 import '../api/get-locations.dart' as getLocationsAPI;
+import 'location_alarm_service.dart';
 import 'location_base.dart';
 import 'location_point_service.dart';
 
@@ -36,6 +37,7 @@ class TaskView extends ChangeNotifier with LocationBase {
   final SecretKey _encryptionPassword;
   final String nostrPublicKey;
   final List<String> relays;
+  final List<LocationAlarmServiceBase> alarms;
   final String id;
   String? name;
 
@@ -44,8 +46,10 @@ class TaskView extends ChangeNotifier with LocationBase {
     required this.nostrPublicKey,
     required this.relays,
     required this.id,
+    List<LocationAlarmServiceBase>? alarms,
     this.name,
-  }) : _encryptionPassword = encryptionPassword;
+  })  : _encryptionPassword = encryptionPassword,
+        alarms = alarms ?? [];
 
   getUIName(final BuildContext context) {
     if (name == null) {

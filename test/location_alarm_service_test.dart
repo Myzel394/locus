@@ -62,7 +62,7 @@ void main() {
   });
 
   group("Radius based location with whenLeave", () {
-    final alarm = RadiusBasedRegionLocationAlarm(
+    final alarm = RadiusBasedRegionLocationAlarm.create(
       type: RadiusBasedRegionLocationAlarmType.whenLeave,
       center: CENTER,
       radius: RADIUS,
