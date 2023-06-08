@@ -49,3 +49,8 @@ Please set a realistic priority on how important this issue is to you. We will f
 * [ ] Medium
 * [ ] High
 * [ ] Urgent
+ 
+## Logs
+<!-- Locus generates logs by default. If you attach your log file, this will help us much more speeding up the process. You do not have to attach the file, but you may be asked to do so later -->
+ 
+<!-- How to export logs: Open Locus > Open Settings (top right icon) > Scroll completely down > Press the bottom "Export Logs" at the very bottom > You can now share the file - Transfer it to your PC however you like or import it via GitHub mobile. Attach the .zip file to this issue -->
