@@ -10,6 +10,7 @@ import 'package:locus/services/task_service.dart';
 import 'package:locus/utils/cryptography.dart';
 import 'package:nostr/nostr.dart';
 import 'package:uuid/uuid.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../api/get-locations.dart' as getLocationsAPI;
 import 'location_alarm_service.dart';
@@ -50,14 +51,6 @@ class TaskView extends ChangeNotifier with LocationBase {
     this.name,
   })  : _encryptionPassword = encryptionPassword,
         alarms = alarms ?? [];
-
-  getUIName(final BuildContext context) {
-    if (name == null) {
-      return "Unnamed Task";
-    } else {
-      return name;
-    }
-  }
 
   static ViewServiceLinkParameters parseLink(final String url) {
     final uri = Uri.parse(url);
@@ -170,24 +163,25 @@ class TaskView extends ChangeNotifier with LocationBase {
     };
   }
 
-  Future<String?> validate({
+  Future<String?> validate(
+    final AppLocalizations l10n, {
     required final TaskService taskService,
     required final ViewService viewService,
   }) async {
     if (relays.isEmpty) {
-      return "No relays are present in the task.";
+      return l10n.taskImport_error_no_relays;
     }
 
     final sameTask = taskService.tasks.firstWhereOrNull((element) => element.nostrPublicKey == nostrPublicKey);
 
     if (sameTask != null) {
-      return "This is a task from you (name: ${sameTask.name}).";
+      return l10n.taskImport_error_sameTask(sameTask.name);
     }
 
     final sameView = viewService.views.firstWhereOrNull((element) => element.nostrPublicKey == nostrPublicKey);
 
     if (sameView != null) {
-      return "This is a view from you (name: ${sameView.name}).";
+      return l10n.taskImport_error_sameView(sameView.name);
     }
 
     return null;

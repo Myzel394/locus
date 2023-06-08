@@ -14,6 +14,33 @@
     }
   },
   "taskImportError": "An error occurred while importing the task",
+  "taskImport_error_no_relays": "No relays are present in the task.",
+  "taskImport_error_sameTask": "This is a task from you (name: {name}).",
+  "@taskImport_error_sameTask": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "taskImport_error_sameView": "This is a view from you (name: {name}).",
+  "@taskImport_error_sameView": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "longFormattedDate": "{date}",
+  "@longFormattedDate": {
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "MMMM d, yyyy HH:mm",
+        "isCustomDateFormat": "true"
+      }
+    }
+  },
   "locationsLoadingError": "An error occurred while loading locations",
   "locationFetchError": "There was an error fetching the locations. Please try again later.",
   "locationFetchEmptyError": "No locations found. Maybe there hasn't been shared a location yet or they expired.",
