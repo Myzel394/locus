@@ -14,6 +14,8 @@ import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:locus/init_quick_actions.dart';
+import 'package:locus/main.dart';
+import 'package:locus/screens/ViewDetailScreen.dart';
 import 'package:locus/screens/main_screen_widgets/screens/EmptyScreen.dart';
 import 'package:locus/services/manager_service.dart';
 import 'package:locus/services/task_service.dart';
@@ -274,6 +276,41 @@ class _MainScreenState extends State<MainScreen> {
         checkViewAlarms(l10n: l10n, views: viewService.viewsWithAlarms);
       },
     );
+
+    selectedNotificationsStream.stream.listen((notification) {
+      FlutterLogs.logInfo(
+        LOG_TAG,
+        "Notification",
+        "Notification received: ${notification.payload}",
+      );
+
+      try {
+        final data = jsonDecode(notification.payload ?? "{}");
+        final type = NotificationActionType.values[data["type"]];
+
+        switch (type) {
+          case NotificationActionType.openTaskView:
+            final viewService = context.read<ViewService>();
+
+            Navigator.of(context).push(
+              NativePageRoute(
+                context: context,
+                builder: (_) => ViewDetailScreen(
+                  view: viewService.getViewById(data["taskViewID"]),
+                ),
+              ),
+            );
+            break;
+        }
+      } catch (error) {
+        FlutterLogs.logErrorTrace(
+          LOG_TAG,
+          "Notification",
+          "Error handling notification.",
+          error as Error,
+        );
+      }
+    });
   }
 
   @override

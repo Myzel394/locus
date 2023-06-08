@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:disable_battery_optimization/disable_battery_optimization.dart';
@@ -19,6 +20,8 @@ import 'package:locus/utils/permission.dart';
 import 'package:provider/provider.dart';
 
 const storage = FlutterSecureStorage();
+
+final StreamController<NotificationResponse> selectedNotificationsStream = StreamController.broadcast();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -48,7 +51,7 @@ void main() async {
   await flutterLocalNotificationsPlugin.initialize(
     initializationSettings,
     onDidReceiveNotificationResponse: (notification) {
-      print(notification);
+      selectedNotificationsStream.add(notification);
     },
   );
 
