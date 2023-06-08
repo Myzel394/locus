@@ -45,7 +45,7 @@ class LocationPointService {
         headingAccuracy = headingAccuracy == 0.0 ? null : headingAccuracy,
         batteryLevel = batteryLevel == 0.0 ? null : batteryLevel;
 
-  factory LocationPointService.dummyFromLatLng(final LatLng latLng, [final double accuracy = 10.0]) =>
+  factory LocationPointService.dummyFromLatLng(final LatLng latLng, {final double accuracy = 10.0}) =>
       LocationPointService(
         id: uuid.v4(),
         createdAt: DateTime.now(),

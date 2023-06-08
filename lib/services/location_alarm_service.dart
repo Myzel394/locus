@@ -80,13 +80,12 @@ class RadiusBasedRegionLocationAlarm extends LocationAlarmServiceBase {
       center.latitude,
       center.longitude,
     );
-    final distance = fullDistance - radius - location.accuracy;
 
-    if (fullDistance < radius) {
+    if (fullDistance < radius && location.accuracy < radius) {
       return LocationAlarmTriggerType.yes;
     }
 
-    if (distance > 0) {
+    if (fullDistance - location.accuracy - radius > 0) {
       return LocationAlarmTriggerType.no;
     }
 
@@ -105,6 +104,10 @@ class RadiusBasedRegionLocationAlarm extends LocationAlarmServiceBase {
         }
 
         if (previousInside == LocationAlarmTriggerType.maybe && nextInside == LocationAlarmTriggerType.yes) {
+          return LocationAlarmTriggerType.yes;
+        }
+
+        if (previousInside == LocationAlarmTriggerType.no && nextInside == LocationAlarmTriggerType.maybe) {
           return LocationAlarmTriggerType.maybe;
         }
 
@@ -118,6 +121,10 @@ class RadiusBasedRegionLocationAlarm extends LocationAlarmServiceBase {
         }
 
         if (previousInside == LocationAlarmTriggerType.maybe && nextInside == LocationAlarmTriggerType.no) {
+          return LocationAlarmTriggerType.yes;
+        }
+
+        if (previousInside == LocationAlarmTriggerType.yes && nextInside == LocationAlarmTriggerType.maybe) {
           return LocationAlarmTriggerType.maybe;
         }
 
