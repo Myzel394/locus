@@ -526,5 +526,17 @@
   "logs_description": "Logs are kept for 7 days and are automatically deleted afterwards.",
   "locationPointsScreen_title": "Location Points",
   "bunny_unavailable": "Sorry, but it seems as if your friend is as lost as this song.",
-  "bunny_unavailable_action": "What's this song?"
+  "bunny_unavailable_action": "What's this song?",
+  "locationAlarm_radiusBasedRegion_notificationTitle_whenEnter": "{name} has entered zone {zone}",
+  "@locationAlarm_radiusBasedRegion_notificationTitle_whenEnter": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "zone": {
+        "type": "String"
+      }
+    }
+  },
+  "locationAlarm_radiusBasedRegion_notificationTitle_whenExit": "{name} has left zone {zone}"
 }
