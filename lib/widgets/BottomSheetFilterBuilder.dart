@@ -4,6 +4,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/services/settings_service.dart';
+import 'package:locus/widgets/ModalSheet.dart';
 import 'package:provider/provider.dart';
 
 dynamic defaultExtractor(dynamic element) => element;
@@ -31,12 +32,10 @@ class BottomSheetFilterBuilder<T> extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<BottomSheetFilterBuilder> createState() =>
-      _BottomSheetFilterBuilderState<T>();
+  State<BottomSheetFilterBuilder> createState() => _BottomSheetFilterBuilderState<T>();
 }
 
-class _BottomSheetFilterBuilderState<T>
-    extends State<BottomSheetFilterBuilder> {
+class _BottomSheetFilterBuilderState<T> extends State<BottomSheetFilterBuilder> {
   List<T> _elements = [];
 
   @override
@@ -77,50 +76,51 @@ class _BottomSheetFilterBuilderState<T>
     final l10n = AppLocalizations.of(context);
     final settings = context.watch<SettingsService>();
 
-    return Column(
-      children: <Widget>[
-        Focus(
-          onFocusChange: widget.onSearchFocusChanged,
-          child: PlatformWidget(
-            material: (_, __) => TextField(
-              controller: widget.searchController,
-              onChanged: (value) {
-                updateElements();
-              },
-              spellCheckConfiguration: const SpellCheckConfiguration.disabled(),
-              decoration: InputDecoration(
-                hintText: l10n.searchLabel,
-                prefixIcon: Icon(
-                  settings.isMIUI()
-                      ? CupertinoIcons.search
-                      : Icons.search_rounded,
-                ),
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.clear),
-                  onPressed: () {
-                    widget.searchController!.clear();
-                    updateElements();
-                  },
+    return ModalSheet(
+      miuiIsGapless: true,
+      child: Column(
+        children: <Widget>[
+          Focus(
+            onFocusChange: widget.onSearchFocusChanged,
+            child: PlatformWidget(
+              material: (_, __) => TextField(
+                controller: widget.searchController,
+                onChanged: (value) {
+                  updateElements();
+                },
+                spellCheckConfiguration: const SpellCheckConfiguration.disabled(),
+                decoration: InputDecoration(
+                  hintText: l10n.searchLabel,
+                  prefixIcon: Icon(
+                    settings.isMIUI() ? CupertinoIcons.search : Icons.search_rounded,
+                  ),
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.clear),
+                    onPressed: () {
+                      widget.searchController!.clear();
+                      updateElements();
+                    },
+                  ),
                 ),
               ),
-            ),
-            cupertino: (_, __) => CupertinoSearchTextField(
-              controller: widget.searchController,
-              onChanged: (value) {
-                updateElements();
-              },
-              placeholder: l10n.searchLabel,
+              cupertino: (_, __) => CupertinoSearchTextField(
+                controller: widget.searchController,
+                onChanged: (value) {
+                  updateElements();
+                },
+                placeholder: l10n.searchLabel,
+              ),
             ),
           ),
-        ),
-        const SizedBox(height: SMALL_SPACE),
-        Expanded(
-          child: widget.builder(
-            context,
-            _elements,
+          const SizedBox(height: SMALL_SPACE),
+          Expanded(
+            child: widget.builder(
+              context,
+              _elements,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

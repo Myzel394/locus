@@ -7,6 +7,7 @@ import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/constants/values.dart';
+import 'package:locus/services/cache_service.dart';
 import 'package:locus/utils/load_status.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/BottomSheetFilterBuilder.dart';
@@ -14,11 +15,9 @@ import 'package:locus/widgets/ModalSheet.dart';
 
 import '../api/nostr-relays.dart';
 
-String removeProtocol(final String url) =>
-    url.toLowerCase().replaceAll(RegExp(r'^wss://'), '');
+String removeProtocol(final String url) => url.toLowerCase().replaceAll(RegExp(r'^wss://'), '');
 
-String addProtocol(final String url) =>
-    url.toLowerCase().startsWith('wss://') ? url : 'wss://$url';
+String addProtocol(final String url) => url.toLowerCase().startsWith('wss://') ? url : 'wss://$url';
 
 class RelayController extends ChangeNotifier {
   late final List<String> _relays;
@@ -104,8 +103,7 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
         return;
       }
 
-      final normalizedSelectedRelays =
-      widget.controller.relays.map(removeProtocol);
+      final normalizedSelectedRelays = widget.controller.relays.map(removeProtocol);
 
       if (normalizedSelectedRelays.contains(value)) {
         setState(() {
@@ -116,7 +114,7 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
 
       final newValue = addProtocol(value);
 
-      if (Uri.parse(newValue) == null) {
+      if (Uri.tryParse(newValue) == null) {
         setState(() {
           _newValue = "";
         });
@@ -167,7 +165,7 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
     );
 
     try {
-      final relays = await getNostrRelays();
+      final relays = await CacheManager.withCache<List<String>>(getNostrRelays, "relays")();
 
       relays.shuffle();
 
@@ -202,11 +200,8 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
       },
       extractValue: (dynamic element) => element as String,
       builder: (_, List<dynamic> foundRelays) {
-        final uncheckedFoundRelays = foundRelays
-            .where((element) => !checkedRelaysSet.contains(element))
-            .toList();
-        final allRelays = List<String>.from(
-            [...widget.controller.relays, ...uncheckedFoundRelays]);
+        final uncheckedFoundRelays = foundRelays.where((element) => !checkedRelaysSet.contains(element)).toList();
+        final allRelays = List<String>.from([...widget.controller.relays, ...uncheckedFoundRelays]);
 
         final length = allRelays.length + (isValueNew ? 1 : 0);
 
@@ -216,29 +211,27 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
           itemBuilder: (context, rawIndex) {
             if (isValueNew && rawIndex == 0) {
               return PlatformWidget(
-                material: (context, _) =>
-                    ListTile(
-                      title: Text(
-                        l10n.addNewValueLabel(_newValue),
-                      ),
-                      leading: const Icon(
-                        Icons.add,
-                      ),
-                      onTap: () {
-                        widget.controller.add(_searchController.value.text);
-                        _searchController.clear();
-                      },
-                    ),
-                cupertino: (context, _) =>
-                    CupertinoButton(
-                      child: Text(
-                        l10n.addNewValueLabel(_newValue),
-                      ),
-                      onPressed: () {
-                        widget.controller.add(_searchController.value.text);
-                        _searchController.clear();
-                      },
-                    ),
+                material: (context, _) => ListTile(
+                  title: Text(
+                    l10n.addNewValueLabel(_newValue),
+                  ),
+                  leading: const Icon(
+                    Icons.add,
+                  ),
+                  onTap: () {
+                    widget.controller.add(_searchController.value.text);
+                    _searchController.clear();
+                  },
+                ),
+                cupertino: (context, _) => CupertinoButton(
+                  child: Text(
+                    l10n.addNewValueLabel(_newValue),
+                  ),
+                  onPressed: () {
+                    widget.controller.add(_searchController.value.text);
+                    _searchController.clear();
+                  },
+                ),
               );
             }
 
@@ -246,40 +239,38 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
             final relay = allRelays[index];
 
             return PlatformWidget(
-              material: (context, _) =>
-                  CheckboxListTile(
-                    title: Text(
-                      relay.length >= 6 ? relay.substring(6) : relay,
-                    ),
-                    value: widget.controller.relays.contains(relay),
-                    onChanged: (newValue) {
-                      if (newValue == null) {
-                        return;
-                      }
+              material: (context, _) => CheckboxListTile(
+                title: Text(
+                  relay.length >= 6 ? relay.substring(6) : relay,
+                ),
+                value: widget.controller.relays.contains(relay),
+                onChanged: (newValue) {
+                  if (newValue == null) {
+                    return;
+                  }
 
-                      if (newValue) {
-                        widget.controller.add(relay);
-                      } else {
-                        widget.controller.remove(relay);
-                      }
-                    },
-                  ),
-              cupertino: (context, _) =>
-                  CupertinoListTile(
-                    title: Text(
-                      relay.length >= 6 ? relay.substring(6) : relay,
-                    ),
-                    trailing: CupertinoSwitch(
-                      value: widget.controller.relays.contains(relay),
-                      onChanged: (newValue) {
-                        if (newValue) {
-                          widget.controller.add(relay);
-                        } else {
-                          widget.controller.remove(relay);
-                        }
-                      },
-                    ),
-                  ),
+                  if (newValue) {
+                    widget.controller.add(relay);
+                  } else {
+                    widget.controller.remove(relay);
+                  }
+                },
+              ),
+              cupertino: (context, _) => CupertinoListTile(
+                title: Text(
+                  relay.length >= 6 ? relay.substring(6) : relay,
+                ),
+                trailing: CupertinoSwitch(
+                  value: widget.controller.relays.contains(relay),
+                  onChanged: (newValue) {
+                    if (newValue) {
+                      widget.controller.add(relay);
+                    } else {
+                      widget.controller.remove(relay);
+                    }
+                  },
+                ),
+              ),
             );
           },
         );
@@ -294,67 +285,59 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
     return DraggableScrollableSheet(
       expand: false,
       controller: _sheetController,
-      builder: (context, controller) =>
-          ModalSheet(
-            miuiIsGapless: true,
-            child: Column(
-              children: <Widget>[
-                if (loadStatus == LoadStatus.loading)
-                  Expanded(
-                    child: Center(
-                      child: PlatformCircularProgressIndicator(),
-                    ),
-                  )
-                else
-                  if (loadStatus == LoadStatus.error)
-                    Text(
-                      l10n.unknownError,
-                      style: TextStyle(
-                        color: getErrorColor(context),
-                      ),
-                    )
-                  else
-                    if (availableRelays.isNotEmpty)
-                      Expanded(
-                        child: buildRelaySelectSheet(controller),
-                      ),
-                const SizedBox(height: MEDIUM_SPACE),
-                PlatformTextButton(
-                  material: (_, __) =>
-                      MaterialTextButtonData(
-                        icon: const Icon(Icons.shuffle),
-                      ),
-                  onPressed: loadStatus == LoadStatus.success
-                      ? () {
-                    final relays = availableRelays.toList();
-                    relays.shuffle();
+      builder: (context, controller) => ModalSheet(
+        miuiIsGapless: true,
+        child: Column(
+          children: <Widget>[
+            if (loadStatus == LoadStatus.loading)
+              Expanded(
+                child: Center(
+                  child: PlatformCircularProgressIndicator(),
+                ),
+              )
+            else if (loadStatus == LoadStatus.error)
+              Text(
+                l10n.unknownError,
+                style: TextStyle(
+                  color: getErrorColor(context),
+                ),
+              )
+            else if (availableRelays.isNotEmpty)
+              Expanded(
+                child: buildRelaySelectSheet(controller),
+              ),
+            const SizedBox(height: MEDIUM_SPACE),
+            PlatformTextButton(
+              material: (_, __) => MaterialTextButtonData(
+                icon: const Icon(Icons.shuffle),
+              ),
+              onPressed: loadStatus == LoadStatus.success
+                  ? () {
+                      final relays = availableRelays.toList();
+                      relays.shuffle();
 
-                    widget.controller.clear();
-                    widget.controller.addAll(relays.take(5).toList());
-                  }
-                      : null,
-                  child: Text(l10n.relaySelectSheet_selectRandomRelays(5)),
-                ),
-                const SizedBox(height: SMALL_SPACE),
-                PlatformElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  material: (_, __) =>
-                      MaterialElevatedButtonData(
-                        icon: const Icon(Icons.done),
-                      ),
-                  child: Text(l10n.closePositiveSheetAction),
-                ),
-                SizedBox(
-                  height: MediaQuery
-                      .of(context)
-                      .viewInsets
-                      .bottom,
-                )
-              ],
+                      widget.controller.clear();
+                      widget.controller.addAll(relays.take(5).toList());
+                    }
+                  : null,
+              child: Text(l10n.relaySelectSheet_selectRandomRelays(5)),
             ),
-          ),
+            const SizedBox(height: SMALL_SPACE),
+            PlatformElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              material: (_, __) => MaterialElevatedButtonData(
+                icon: const Icon(Icons.done),
+              ),
+              child: Text(l10n.closePositiveSheetAction),
+            ),
+            SizedBox(
+              height: MediaQuery.of(context).viewInsets.bottom,
+            )
+          ],
+        ),
+      ),
     );
   }
 }
