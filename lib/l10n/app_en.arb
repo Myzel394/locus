@@ -538,5 +538,5 @@
       }
     }
   },
-  "locationAlarm_radiusBasedRegion_notificationTitle_whenExit": "{name} has left zone {zone}"
+  "locationAlarm_radiusBasedRegion_notificationTitle_whenLeave": "{name} has left zone {zone}"
 }

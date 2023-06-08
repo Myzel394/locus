@@ -3,6 +3,12 @@ import 'package:latlong2/latlong.dart';
 import 'location_point_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+enum LocationAlarmTriggerType {
+  yes,
+  no,
+  maybe,
+}
+
 abstract class LocationAlarmServiceBase {
   String get IDENTIFIER;
 
@@ -12,7 +18,7 @@ abstract class LocationAlarmServiceBase {
 
   // Checks if the alarm should be triggered
   // This function will be called each time the background fetch is updated and there are new locations
-  bool check(final LocationPointService previousLocation, final LocationPointService nextLocation);
+  LocationAlarmTriggerType check(final LocationPointService previousLocation, final LocationPointService nextLocation);
 }
 
 enum RadiusBasedRegionLocationAlarmType {
@@ -37,7 +43,8 @@ class RadiusBasedRegionLocationAlarm extends LocationAlarmServiceBase {
 
   String get IDENTIFIER => "radius_based_region";
 
-  factory RadiusBasedRegionLocationAlarm.fromJSON(final Map<String, dynamic> data) => RadiusBasedRegionLocationAlarm(
+  factory RadiusBasedRegionLocationAlarm.fromJSON(final Map<String, dynamic> data) =>
+      RadiusBasedRegionLocationAlarm(
         center: LatLng(data["center"]["latitude"], data["center"]["longitude"]),
         radius: data["radius"],
         type: RadiusBasedRegionLocationAlarmType.values[data["alarmType"]],
@@ -66,24 +73,60 @@ class RadiusBasedRegionLocationAlarm extends LocationAlarmServiceBase {
   }
 
   // Checks if a given location was inside. If not, it must be outside
-  bool _wasInside(final LocationPointService location) {
-    final distance = Geolocator.distanceBetween(
+  LocationAlarmTriggerType _wasInside(final LocationPointService location) {
+    final fullDistance = Geolocator.distanceBetween(
       location.latitude,
       location.longitude,
       center.latitude,
       center.longitude,
     );
+    final distance = fullDistance - radius - location.accuracy;
 
-    return distance <= radius;
+    if (fullDistance < radius) {
+      return LocationAlarmTriggerType.yes;
+    }
+
+    if (distance > 0) {
+      return LocationAlarmTriggerType.no;
+    }
+
+    return LocationAlarmTriggerType.maybe;
   }
 
   @override
-  bool check(final previousLocation, final nextLocation) {
+  LocationAlarmTriggerType check(final previousLocation, final nextLocation) {
+    final previousInside = _wasInside(previousLocation);
+    final nextInside = _wasInside(nextLocation);
+
     switch (type) {
       case RadiusBasedRegionLocationAlarmType.whenEnter:
-        return !_wasInside(previousLocation) && _wasInside(nextLocation);
+        if (previousInside == LocationAlarmTriggerType.no && nextInside == LocationAlarmTriggerType.yes) {
+          return LocationAlarmTriggerType.yes;
+        }
+
+        if (previousInside == LocationAlarmTriggerType.maybe && nextInside == LocationAlarmTriggerType.yes) {
+          return LocationAlarmTriggerType.maybe;
+        }
+
+        if (previousInside == LocationAlarmTriggerType.maybe && nextInside == LocationAlarmTriggerType.maybe) {
+          return LocationAlarmTriggerType.maybe;
+        }
+        break;
       case RadiusBasedRegionLocationAlarmType.whenLeave:
-        return _wasInside(previousLocation) && !_wasInside(nextLocation);
+        if (previousInside == LocationAlarmTriggerType.yes && nextInside == LocationAlarmTriggerType.no) {
+          return LocationAlarmTriggerType.yes;
+        }
+
+        if (previousInside == LocationAlarmTriggerType.maybe && nextInside == LocationAlarmTriggerType.no) {
+          return LocationAlarmTriggerType.maybe;
+        }
+
+        if (previousInside == LocationAlarmTriggerType.maybe && nextInside == LocationAlarmTriggerType.maybe) {
+          return LocationAlarmTriggerType.maybe;
+        }
+        break;
     }
+
+    return LocationAlarmTriggerType.no;
   }
 }
