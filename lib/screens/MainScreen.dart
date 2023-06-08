@@ -15,6 +15,7 @@ import 'package:locus/init_quick_actions.dart';
 import 'package:locus/screens/main_screen_widgets/screens/EmptyScreen.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/services/view_service.dart';
+import 'package:locus/utils/PageRoute.dart';
 import 'package:locus/utils/navigation.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
@@ -46,10 +47,25 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   final listViewKey = GlobalKey();
+  final PageController _tabController = PageController();
   late final TaskService taskService;
   int activeTab = 0;
   Stream<Position>? _positionStream;
   StreamSubscription<String?>? _uniLinksStream;
+
+  void _changeTab(final int newTab) {
+    final settings = context.read<SettingsService>();
+
+    setState(() {
+      activeTab = newTab;
+    });
+
+    _tabController.animateToPage(
+      newTab,
+      duration: getTransitionDuration(context),
+      curve: Curves.easeInOut,
+    );
+  }
 
   void initBackground() async {
     BackgroundFetch.start();
@@ -221,6 +237,8 @@ class _MainScreenState extends State<MainScreen> {
     taskService.removeListener(updateView);
     appUpdateService.removeListener(updateView);
 
+    _tabController.dispose();
+
     _uniLinksStream?.cancel();
 
     _removeLiveLocationUpdate();
@@ -305,9 +323,7 @@ class _MainScreenState extends State<MainScreen> {
                       children: <Widget>[
                         TextButton(
                           onPressed: () {
-                            setState(() {
-                              activeTab = 0;
-                            });
+                            _changeTab(0);
                           },
                           child: Icon(
                             activeTab == 0 ? CupertinoIcons.square_list_fill : CupertinoIcons.square_list,
@@ -316,9 +332,7 @@ class _MainScreenState extends State<MainScreen> {
                         ),
                         TextButton(
                           onPressed: () {
-                            setState(() {
-                              activeTab = 1;
-                            });
+                            _changeTab(1);
                           },
                           child: Icon(
                             activeTab == 1 ? CupertinoIcons.time_solid : CupertinoIcons.time,
@@ -345,10 +359,6 @@ class _MainScreenState extends State<MainScreen> {
       );
     }
 
-    if (activeTab != 0) {
-      return null;
-    }
-
     return PlatformAppBar(
       title: Text(l10n.appName),
       trailingActions: [
@@ -359,6 +369,48 @@ class _MainScreenState extends State<MainScreen> {
           },
         ),
       ],
+    );
+  }
+
+  PlatformNavBar? getBottomNavBar() {
+    final l10n = AppLocalizations.of(context);
+    final settings = context.read<SettingsService>();
+
+    if (settings.isMIUI()) {
+      return null;
+    }
+
+    return PlatformNavBar(
+      material: (_, __) => MaterialNavBarData(
+          backgroundColor: Theme.of(context).dialogBackgroundColor, elevation: 0, padding: const EdgeInsets.all(0)),
+      itemChanged: _changeTab,
+      currentIndex: activeTab,
+      items: isCupertino(context)
+          ? [
+              BottomNavigationBarItem(
+                icon: const Icon(CupertinoIcons.home),
+                label: l10n.mainScreen_overview,
+              ),
+              BottomNavigationBarItem(
+                icon: const Icon(CupertinoIcons.list_bullet),
+                label: l10n.mainScreen_logs,
+              ),
+              BottomNavigationBarItem(
+                icon: const Icon(CupertinoIcons.location_fill),
+                label: l10n.mainScreen_createTask,
+              ),
+            ]
+          : [
+              BottomNavigationBarItem(
+                icon: const Icon(Icons.home),
+                label: l10n.mainScreen_overview,
+                backgroundColor: Theme.of(context).dialogBackgroundColor,
+              ),
+              BottomNavigationBarItem(
+                icon: const Icon(Icons.history),
+                label: l10n.mainScreen_logs,
+              ),
+            ],
     );
   }
 
@@ -412,67 +464,22 @@ class _MainScreenState extends State<MainScreen> {
             : null,
       ),
       // Settings bottomNavBar via cupertino data class does not work
-      bottomNavBar: settings.isMIUI()
-          ? null
-          : PlatformNavBar(
-              material: (_, __) => MaterialNavBarData(
-                  backgroundColor: Theme.of(context).dialogBackgroundColor,
-                  elevation: 0,
-                  padding: const EdgeInsets.all(0)),
-              itemChanged: (index) {
-                setState(() {
-                  activeTab = index;
-                });
-              },
-              currentIndex: activeTab,
-              items: isCupertino(context)
-                  ? [
-                      BottomNavigationBarItem(
-                        icon: const Icon(CupertinoIcons.home),
-                        label: l10n.mainScreen_overview,
-                      ),
-                      BottomNavigationBarItem(
-                        icon: const Icon(CupertinoIcons.list_bullet),
-                        label: l10n.mainScreen_logs,
-                      ),
-                      BottomNavigationBarItem(
-                        icon: const Icon(CupertinoIcons.location_fill),
-                        label: l10n.mainScreen_createTask,
-                      ),
-                    ]
-                  : [
-                      BottomNavigationBarItem(
-                        icon: const Icon(Icons.home),
-                        label: l10n.mainScreen_overview,
-                        backgroundColor: Theme.of(context).dialogBackgroundColor,
-                      ),
-                      BottomNavigationBarItem(
-                        icon: const Icon(Icons.history),
-                        label: l10n.mainScreen_logs,
-                      ),
-                    ],
-            ),
+      bottomNavBar: getBottomNavBar(),
       appBar: getAppBar(true),
-      body: (() {
-        switch (activeTab) {
-          case 0:
-            return const OverviewScreen();
-          case 1:
-            return const LogsScreen();
-          case 2:
-            return CreateTaskScreen(
+      body: PageView(
+        controller: _tabController,
+        physics: const NeverScrollableScrollPhysics(),
+        children: <Widget>[
+          const OverviewScreen(),
+          const LogsScreen(),
+          if (isCupertino(context))
+            CreateTaskScreen(
               onCreated: () {
-                if (isCupertino(context)) {
-                  setState(() {
-                    activeTab = 0;
-                  });
-                } else {
-                  Navigator.pop(context);
-                }
+                _changeTab(0);
               },
-            );
-        }
-      })(),
+            ),
+        ],
+      ),
     );
   }
 }

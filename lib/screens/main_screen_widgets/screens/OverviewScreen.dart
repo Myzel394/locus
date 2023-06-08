@@ -26,15 +26,21 @@ class OverviewScreen extends StatefulWidget {
   State<OverviewScreen> createState() => _OverviewScreenState();
 }
 
-class _OverviewScreenState extends State<OverviewScreen> {
-  final _hintTypeFuture = getHintTypeForMainScreen();
+class _OverviewScreenState extends State<OverviewScreen> with AutomaticKeepAliveClientMixin {
+  bool get wantKeepAlive => true;
 
+  final _hintTypeFuture = getHintTypeForMainScreen();
   bool showHint = true;
 
   @override
   Widget build(BuildContext context) {
-    final windowHeight = MediaQuery.of(context).size.height - kToolbarHeight;
-    final l10n = AppLocalizations.of(context)!;
+    super.build(context);
+
+    final windowHeight = MediaQuery
+        .of(context)
+        .size
+        .height - kToolbarHeight;
+    final l10n = AppLocalizations.of(context);
     final appUpdateService = context.watch<AppUpdateService>();
     final taskService = context.watch<TaskService>();
     final viewService = context.watch<ViewService>();
@@ -79,101 +85,108 @@ class _OverviewScreenState extends State<OverviewScreen> {
                 children: <Widget>[
                   if (taskService.tasks.isNotEmpty)
                     PlatformWidget(
-                      material: (context, __) => Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: MEDIUM_SPACE),
-                            child: ChipCaption(
-                              l10n.mainScreen_tasksSection,
-                              icon: Icons.task_rounded,
-                            ),
-                          ).animate().fadeIn(duration: 1.seconds),
-                          ListView.builder(
-                            shrinkWrap: true,
-                            padding: const EdgeInsets.only(top: MEDIUM_SPACE),
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: taskService.tasks.length,
-                            itemBuilder: (context, index) {
-                              final task = taskService.tasks[index];
+                      material: (context, __) =>
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: MEDIUM_SPACE),
+                                child: ChipCaption(
+                                  l10n.mainScreen_tasksSection,
+                                  icon: Icons.task_rounded,
+                                ),
+                              ).animate().fadeIn(duration: 1.seconds),
+                              ListView.builder(
+                                shrinkWrap: true,
+                                padding: const EdgeInsets.only(top: MEDIUM_SPACE),
+                                physics: const NeverScrollableScrollPhysics(),
+                                itemCount: taskService.tasks.length,
+                                itemBuilder: (context, index) {
+                                  final task = taskService.tasks[index];
 
-                              return TaskTile(
-                                task: task,
-                              )
-                                  .animate()
-                                  .then(delay: 100.ms * index)
-                                  .slide(
+                                  return TaskTile(
+                                    task: task,
+                                  )
+                                      .animate()
+                                      .then(delay: 100.ms * index)
+                                      .slide(
                                     duration: 1.seconds,
                                     curve: Curves.easeOut,
                                     begin: const Offset(0, 0.2),
                                   )
-                                  .fadeIn(
+                                      .fadeIn(
                                     delay: 100.ms,
                                     duration: 1.seconds,
                                     curve: Curves.easeOut,
                                   );
-                            },
-                          ),
-                        ],
-                      ),
-                      cupertino: (context, __) => CupertinoListSection(
-                        header: Text(
-                          l10n.mainScreen_tasksSection,
-                        ),
-                        children: taskService.tasks
-                            .map(
-                              (task) => TaskTile(
-                                task: task,
+                                },
                               ),
+                            ],
+                          ),
+                      cupertino: (context, __) =>
+                          CupertinoListSection(
+                            header: Text(
+                              l10n.mainScreen_tasksSection,
+                            ),
+                            children: taskService.tasks
+                                .map(
+                                  (task) =>
+                                  TaskTile(
+                                    task: task,
+                                  ),
                             )
-                            .toList(),
-                      ),
+                                .toList(),
+                          ),
                     ),
                   if (viewService.views.isNotEmpty)
                     PlatformWidget(
-                      material: (context, __) => Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: MEDIUM_SPACE),
-                            child: ChipCaption(
-                              l10n.mainScreen_viewsSection,
-                              icon: context.platformIcons.eyeSolid,
-                            ),
-                          ).animate().fadeIn(duration: 1.seconds),
-                          ListView.builder(
-                            shrinkWrap: true,
-                            padding: const EdgeInsets.only(top: MEDIUM_SPACE),
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: viewService.views.length,
-                            itemBuilder: (context, index) => ViewTile(
-                              view: viewService.views[index],
-                            )
-                                .animate()
-                                .then(delay: 100.ms * index)
-                                .slide(
-                                  duration: 1.seconds,
-                                  curve: Curves.easeOut,
-                                  begin: const Offset(0, 0.2),
-                                )
-                                .fadeIn(
-                                  delay: 100.ms,
-                                  duration: 1.seconds,
-                                  curve: Curves.easeOut,
+                      material: (context, __) =>
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: MEDIUM_SPACE),
+                                child: ChipCaption(
+                                  l10n.mainScreen_viewsSection,
+                                  icon: context.platformIcons.eyeSolid,
                                 ),
-                          ),
-                        ],
-                      ),
-                      cupertino: (context, __) => CupertinoListSection(
-                        header: Text(l10n.mainScreen_viewsSection),
-                        children: viewService.views
-                            .map(
-                              (view) => ViewTile(
-                                view: view,
+                              ).animate().fadeIn(duration: 1.seconds),
+                              ListView.builder(
+                                shrinkWrap: true,
+                                padding: const EdgeInsets.only(top: MEDIUM_SPACE),
+                                physics: const NeverScrollableScrollPhysics(),
+                                itemCount: viewService.views.length,
+                                itemBuilder: (context, index) =>
+                                    ViewTile(
+                                      view: viewService.views[index],
+                                    )
+                                        .animate()
+                                        .then(delay: 100.ms * index)
+                                        .slide(
+                                      duration: 1.seconds,
+                                      curve: Curves.easeOut,
+                                      begin: const Offset(0, 0.2),
+                                    )
+                                        .fadeIn(
+                                      delay: 100.ms,
+                                      duration: 1.seconds,
+                                      curve: Curves.easeOut,
+                                    ),
                               ),
+                            ],
+                          ),
+                      cupertino: (context, __) =>
+                          CupertinoListSection(
+                            header: Text(l10n.mainScreen_viewsSection),
+                            children: viewService.views
+                                .map(
+                                  (view) =>
+                                  ViewTile(
+                                    view: view,
+                                  ),
                             )
-                            .toList(),
-                      ),
+                                .toList(),
+                          ),
                     ),
                 ],
               ),

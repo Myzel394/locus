@@ -22,9 +22,13 @@ class LogsScreen extends StatefulWidget {
   State<LogsScreen> createState() => _LogsScreenState();
 }
 
-class _LogsScreenState extends State<LogsScreen> {
+class _LogsScreenState extends State<LogsScreen> with AutomaticKeepAliveClientMixin {
+  bool get wantKeepAlive => true;
+
   @override
   Widget build(BuildContext context) {
+    super.build(context);
+
     final l10n = AppLocalizations.of(context);
     final logService = context.watch<LogService>();
 
