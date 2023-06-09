@@ -12,15 +12,17 @@ class MapBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Positioned(
-      left: 0,
-      right: 0,
-      top: 0,
-      child: Container(
-        color: Colors.black.withOpacity(.8),
-        child: Padding(
-          padding: const EdgeInsets.all(MEDIUM_SPACE),
-          child: child,
+    return SafeArea(
+      child: Positioned(
+        left: 0,
+        right: 0,
+        top: 0,
+        child: Container(
+          color: Colors.black.withOpacity(.8),
+          child: Padding(
+            padding: const EdgeInsets.all(MEDIUM_SPACE),
+            child: child,
+          ),
         ),
       ),
     );
