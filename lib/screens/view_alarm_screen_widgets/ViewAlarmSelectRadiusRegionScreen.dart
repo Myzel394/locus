@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -127,28 +128,33 @@ class _ViewAlarmSelectRadiusRegionScreenState
     if (isCupertino(context)) {
       showCupertinoModalBottomSheet(
         context: context,
-        backgroundColor: Colors.transparent,
-        builder: (context) => Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Text(
-              l10n.location_addAlarm_radiusBased_help_title,
-              style: getTitleTextStyle(context),
+        backgroundColor: getSheetColor(context),
+        builder: (context) => SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(MEDIUM_SPACE),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Text(
+                  l10n.location_addAlarm_radiusBased_help_title,
+                  style: getTitleTextStyle(context),
+                ),
+                const SizedBox(height: MEDIUM_SPACE),
+                Text(l10n.location_addAlarm_radiusBased_help_description),
+                const SizedBox(height: MEDIUM_SPACE),
+                CupertinoListTile(
+                  title: Text(
+                      l10n.location_addAlarm_radiusBased_help_tapDescription),
+                  leading: const Icon(Icons.touch_app_rounded),
+                ),
+                CupertinoListTile(
+                  title: Text(
+                      l10n.location_addAlarm_radiusBased_help_pinchDescription),
+                  leading: const Icon(Icons.pinch_rounded),
+                ),
+              ],
             ),
-            const SizedBox(height: MEDIUM_SPACE),
-            Text(l10n.location_addAlarm_radiusBased_help_description),
-            const SizedBox(height: MEDIUM_SPACE),
-            ListTile(
-              title:
-                  Text(l10n.location_addAlarm_radiusBased_help_tapDescription),
-              leading: const Icon(Icons.touch_app_rounded),
-            ),
-            ListTile(
-              title: Text(
-                  l10n.location_addAlarm_radiusBased_help_pinchDescription),
-              leading: const Icon(Icons.pinch_rounded),
-            ),
-          ],
+          ),
         ),
       );
     } else {

@@ -1,19 +1,22 @@
 import 'dart:math';
 
+import 'package:apple_maps_flutter/apple_maps_flutter.dart' as AppleMaps;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_map/plugin_api.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/screens/view_alarm_screen_widgets/ViewAlarmSelectRadiusRegionScreen.dart';
 import 'package:locus/services/location_alarm_service.dart';
 import 'package:locus/services/location_point_service.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:locus/utils/theme.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:provider/provider.dart';
-import 'package:latlong2/latlong.dart';
 
+import '../../services/settings_service.dart';
 import '../../widgets/PlatformFlavorWidget.dart';
 
 class ViewAlarmScreen extends StatefulWidget {
@@ -33,8 +36,9 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
 
   void _addNewAlarm() async {
     final viewService = context.read<ViewService>();
-    final RadiusBasedRegionLocationAlarm? alarm = await Navigator.of(context).push(
-      MaterialPageRoute(
+    final RadiusBasedRegionLocationAlarm? alarm =
+        await Navigator.of(context).push(
+      MaterialWithModalsPageRoute(
         builder: (context) => const ViewAlarmSelectRadiusRegionScreen(),
       ),
     );
@@ -116,6 +120,80 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
     setState(() {});
   }
 
+  Widget buildMap(final RadiusBasedRegionLocationAlarm alarm) {
+    final settings = context.read<SettingsService>();
+
+    if (settings.mapProvider == MapProvider.apple) {
+      return AppleMaps.AppleMap(
+        initialCameraPosition: AppleMaps.CameraPosition(
+          target: AppleMaps.LatLng(
+            alarm.center.latitude,
+            alarm.center.longitude,
+          ),
+          zoom: 18 - log(alarm.radius / 35) / log(2),
+        ),
+        myLocationEnabled: true,
+        circles: {
+          if (lastLocation != null)
+            AppleMaps.Circle(
+              circleId: AppleMaps.CircleId("lastLocation"),
+              center: AppleMaps.LatLng(
+                lastLocation!.latitude,
+                lastLocation!.longitude,
+              ),
+              radius: 5,
+              fillColor: Colors.blue.withOpacity(0.5),
+              strokeWidth: 0,
+            ),
+          AppleMaps.Circle(
+            circleId: AppleMaps.CircleId("alarm"),
+            center: AppleMaps.LatLng(
+              alarm.center.latitude,
+              alarm.center.longitude,
+            ),
+            radius: alarm.radius,
+            fillColor: Colors.red.withOpacity(0.3),
+            strokeWidth: 0,
+          ),
+        },
+      );
+    }
+
+    return FlutterMap(
+      options: MapOptions(
+        center: alarm.center,
+        maxZoom: 18,
+        // create zoom based off of radius
+        zoom: 18 - log(alarm.radius / 35) / log(2),
+      ),
+      children: [
+        TileLayer(
+          urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+          subdomains: const ['a', 'b', 'c'],
+          userAgentPackageName: "app.myzel394.locus",
+        ),
+        CircleLayer(
+          circles: [
+            if (lastLocation != null)
+              CircleMarker(
+                point: LatLng(lastLocation!.latitude, lastLocation!.longitude),
+                radius: 5,
+                color: Colors.blue,
+              ),
+            CircleMarker(
+              point: alarm.center,
+              useRadiusInMeter: true,
+              color: Colors.red.withOpacity(0.3),
+              borderStrokeWidth: 5,
+              borderColor: Colors.red,
+              radius: alarm.radius,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -139,7 +217,8 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
                           itemCount: widget.view.alarms.length,
                           itemBuilder: (context, index) {
                             final RadiusBasedRegionLocationAlarm alarm =
-                                widget.view.alarms[index] as RadiusBasedRegionLocationAlarm;
+                                widget.view.alarms[index]
+                                    as RadiusBasedRegionLocationAlarm;
 
                             return Column(
                               mainAxisSize: MainAxisSize.min,
@@ -150,7 +229,8 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
                                   trailing: PlatformIconButton(
                                     icon: Icon(context.platformIcons.delete),
                                     onPressed: () async {
-                                      final viewService = context.read<ViewService>();
+                                      final viewService =
+                                          context.read<ViewService>();
 
                                       widget.view.removeAlarm(alarm);
                                       await viewService.update(widget.view);
@@ -158,45 +238,14 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
                                   ),
                                 ),
                                 ClipRRect(
-                                  borderRadius: BorderRadius.circular(LARGE_SPACE),
+                                  borderRadius:
+                                      BorderRadius.circular(LARGE_SPACE),
                                   child: SizedBox(
                                     width: double.infinity,
                                     height: 200,
                                     child: IgnorePointer(
                                       ignoring: true,
-                                      child: FlutterMap(
-                                        options: MapOptions(
-                                          center: alarm.center,
-                                          maxZoom: 18,
-                                          // create zoom based off of radius
-                                          zoom: 18 - log(alarm.radius / 35) / log(2),
-                                        ),
-                                        children: [
-                                          TileLayer(
-                                            urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                                            subdomains: const ['a', 'b', 'c'],
-                                            userAgentPackageName: "app.myzel394.locus",
-                                          ),
-                                          CircleLayer(
-                                            circles: [
-                                              if (lastLocation != null)
-                                                CircleMarker(
-                                                  point: LatLng(lastLocation!.latitude, lastLocation!.longitude),
-                                                  radius: 5,
-                                                  color: Colors.blue,
-                                                ),
-                                              CircleMarker(
-                                                point: alarm.center,
-                                                useRadiusInMeter: true,
-                                                color: Colors.red.withOpacity(0.3),
-                                                borderStrokeWidth: 5,
-                                                borderColor: Colors.red,
-                                                radius: alarm.radius,
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
+                                      child: buildMap(alarm),
                                     ),
                                   ),
                                 ),
@@ -205,18 +254,23 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
                           },
                         ),
                         Padding(
-                          padding: const EdgeInsets.symmetric(vertical: MEDIUM_SPACE),
+                          padding: const EdgeInsets.symmetric(
+                              vertical: MEDIUM_SPACE),
                           child: PlatformElevatedButton(
                             onPressed: _addNewAlarm,
                             material: (_, __) => MaterialElevatedButtonData(
                               icon: const Icon(Icons.add),
                             ),
-                            child: Text(l10n.location_manageAlarms_addNewAlarm_actionLabel),
+                            child: Text(l10n
+                                .location_manageAlarms_addNewAlarm_actionLabel),
                           ),
                         ),
                         Padding(
-                          padding: const EdgeInsets.symmetric(vertical: MEDIUM_SPACE),
-                          child: Text(l10n.location_manageAlarms_lastCheck_description(widget.view.lastAlarmCheck)),
+                          padding: const EdgeInsets.symmetric(
+                              vertical: MEDIUM_SPACE),
+                          child: Text(
+                              l10n.location_manageAlarms_lastCheck_description(
+                                  widget.view.lastAlarmCheck)),
                         ),
                       ],
                     ),
