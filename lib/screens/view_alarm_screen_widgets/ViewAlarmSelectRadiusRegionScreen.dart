@@ -1,5 +1,7 @@
-import 'package:flutter/cupertino.dart';
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:geolocator/geolocator.dart';
@@ -13,9 +15,6 @@ import 'package:locus/widgets/MapBanner.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
-import 'dart:math' as math;
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-
 import 'package:vibration/vibration.dart';
 
 class ViewAlarmSelectRadiusRegionScreen extends StatefulWidget {
@@ -24,10 +23,12 @@ class ViewAlarmSelectRadiusRegionScreen extends StatefulWidget {
   });
 
   @override
-  State<ViewAlarmSelectRadiusRegionScreen> createState() => _ViewAlarmSelectRadiusRegionScreenState();
+  State<ViewAlarmSelectRadiusRegionScreen> createState() =>
+      _ViewAlarmSelectRadiusRegionScreenState();
 }
 
-class _ViewAlarmSelectRadiusRegionScreenState extends State<ViewAlarmSelectRadiusRegionScreen> {
+class _ViewAlarmSelectRadiusRegionScreenState
+    extends State<ViewAlarmSelectRadiusRegionScreen> {
   final controller = MapController();
   LatLng? alarmCenter;
   bool isInScaleMode = false;
@@ -138,11 +139,13 @@ class _ViewAlarmSelectRadiusRegionScreenState extends State<ViewAlarmSelectRadiu
             Text(l10n.location_addAlarm_radiusBased_help_description),
             const SizedBox(height: MEDIUM_SPACE),
             ListTile(
-              title: Text(l10n.location_addAlarm_radiusBased_help_tapDescription),
+              title:
+                  Text(l10n.location_addAlarm_radiusBased_help_tapDescription),
               leading: const Icon(Icons.touch_app_rounded),
             ),
             ListTile(
-              title: Text(l10n.location_addAlarm_radiusBased_help_pinchDescription),
+              title: Text(
+                  l10n.location_addAlarm_radiusBased_help_pinchDescription),
               leading: const Icon(Icons.pinch_rounded),
             ),
           ],
@@ -160,11 +163,13 @@ class _ViewAlarmSelectRadiusRegionScreenState extends State<ViewAlarmSelectRadiu
               Text(l10n.location_addAlarm_radiusBased_help_description),
               const SizedBox(height: MEDIUM_SPACE),
               ListTile(
-                title: Text(l10n.location_addAlarm_radiusBased_help_tapDescription),
+                title: Text(
+                    l10n.location_addAlarm_radiusBased_help_tapDescription),
                 leading: const Icon(Icons.touch_app_rounded),
               ),
               ListTile(
-                title: Text(l10n.location_addAlarm_radiusBased_help_pinchDescription),
+                title: Text(
+                    l10n.location_addAlarm_radiusBased_help_pinchDescription),
                 leading: const Icon(Icons.pinch_rounded),
               ),
             ],
@@ -192,6 +197,9 @@ class _ViewAlarmSelectRadiusRegionScreenState extends State<ViewAlarmSelectRadiu
         title: Text(l10n.location_addAlarm_radiusBased_title),
         trailingActions: [
           PlatformIconButton(
+            cupertino: (_, __) => CupertinoIconButtonData(
+              padding: EdgeInsets.zero,
+            ),
             icon: Icon(context.platformIcons.help),
             onPressed: showHelp,
           ),
@@ -260,7 +268,8 @@ class _ViewAlarmSelectRadiusRegionScreenState extends State<ViewAlarmSelectRadiu
                         ),
                         children: [
                           TileLayer(
-                            urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                            urlTemplate:
+                                'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
                             subdomains: const ['a', 'b', 'c'],
                             userAgentPackageName: "app.myzel394.locus",
                           ),
@@ -289,7 +298,8 @@ class _ViewAlarmSelectRadiusRegionScreenState extends State<ViewAlarmSelectRadiu
                           const Icon(Icons.pinch_rounded),
                           const SizedBox(width: MEDIUM_SPACE),
                           Flexible(
-                            child: Text(l10n.location_addAlarm_radiusBased_isInScaleMode),
+                            child: Text(l10n
+                                .location_addAlarm_radiusBased_isInScaleMode),
                           ),
                         ],
                       ),
