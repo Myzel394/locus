@@ -6,7 +6,6 @@ import 'package:locus/constants/spacing.dart';
 import 'package:locus/screens/view_alarm_screen_widgets/ViewAlarmSelectRadiusRegionScreen.dart';
 import 'package:locus/services/location_alarm_service.dart';
 import 'package:locus/services/view_service.dart';
-import 'package:locus/utils/PageRoute.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:provider/provider.dart';
 
@@ -79,6 +78,24 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+
+    widget.view.addListener(updateView);
+  }
+
+  @override
+  void dispose() {
+    widget.view.removeListener(updateView);
+
+    super.dispose();
+  }
+
+  updateView() {
+    setState(() {});
+  }
+
+  @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
 
@@ -90,7 +107,29 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
         child: Padding(
           padding: const EdgeInsets.all(MEDIUM_SPACE),
           child: Center(
-            child: widget.view.alarms.isEmpty ? getEmptyState() : null,
+            child: widget.view.alarms.isEmpty
+                ? getEmptyState()
+                : ListView.builder(
+                    itemCount: widget.view.alarms.length,
+                    itemBuilder: (context, index) {
+                      final RadiusBasedRegionLocationAlarm alarm =
+                          widget.view.alarms[index] as RadiusBasedRegionLocationAlarm;
+
+                      return PlatformListTile(
+                        title: Text(alarm.zoneName),
+                        leading: alarm.getIcon(context),
+                        trailing: PlatformIconButton(
+                          icon: Icon(context.platformIcons.delete),
+                          onPressed: () async {
+                            final viewService = context.read<ViewService>();
+
+                            widget.view.removeAlarm(alarm);
+                            await viewService.update(widget.view);
+                          },
+                        ),
+                      );
+                    },
+                  ),
           ),
         ),
       ),
