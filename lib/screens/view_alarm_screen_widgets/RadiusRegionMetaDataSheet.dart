@@ -1,10 +1,11 @@
 import 'package:basic_utils/basic_utils.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_platform_widgets/flutter_platform_widgets.dart' hide PlatformListTile;
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart'
+    hide PlatformListTile;
 import 'package:latlong2/latlong.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/services/location_alarm_service.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:locus/utils/theme.dart';
 
 import '../../widgets/ModalSheet.dart';
@@ -21,7 +22,8 @@ class RadiusRegionMetaDataSheet extends StatefulWidget {
   });
 
   @override
-  State<RadiusRegionMetaDataSheet> createState() => _RadiusRegionMetaDataSheetState();
+  State<RadiusRegionMetaDataSheet> createState() =>
+      _RadiusRegionMetaDataSheetState();
 }
 
 class _RadiusRegionMetaDataSheetState extends State<RadiusRegionMetaDataSheet> {
@@ -57,7 +59,8 @@ class _RadiusRegionMetaDataSheetState extends State<RadiusRegionMetaDataSheet> {
                     });
                   },
                   leading: const Icon(Icons.arrow_circle_right_rounded),
-                  title: Text(l10n.location_addAlarm_radiusBased_trigger_whenEnter),
+                  title: Text(
+                      l10n.location_addAlarm_radiusBased_trigger_whenEnter),
                 ),
                 PlatformListTile(
                   onTap: () {
@@ -66,7 +69,8 @@ class _RadiusRegionMetaDataSheetState extends State<RadiusRegionMetaDataSheet> {
                     });
                   },
                   leading: const Icon(Icons.arrow_circle_left_rounded),
-                  title: Text(l10n.location_addAlarm_radiusBased_trigger_whenLeave),
+                  title: Text(
+                      l10n.location_addAlarm_radiusBased_trigger_whenLeave),
                 ),
               ]
             : [
@@ -77,7 +81,7 @@ class _RadiusRegionMetaDataSheetState extends State<RadiusRegionMetaDataSheet> {
                 const SizedBox(height: MEDIUM_SPACE),
                 Form(
                   key: _formKey,
-                  child: TextFormField(
+                  child: PlatformTextFormField(
                     autofocus: true,
                     keyboardType: TextInputType.text,
                     controller: _nameController,
