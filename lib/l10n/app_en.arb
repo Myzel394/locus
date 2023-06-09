@@ -573,6 +573,16 @@
   "location_manageAlarms_empty_title": "No Alarms",
   "location_manageAlarms_empty_description": "Add alarms to be notified when certain conditions are met (e.g. when this person enters a certain area).",
   "location_manageAlarms_addNewAlarm_actionLabel": "Add Alarm",
+  "location_manageAlarms_lastCheck_description": "Last checked at {date}",
+  "@location_manageAlarms_lastCheck_description": {
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "MMMM d, HH:mm",
+        "isCustomDateFormat": "true"
+      }
+    }
+  },
   "location_addAlarm_radiusBased_title": "Add radius-based Alarm",
   "location_addAlarm_radiusBased_isInScaleMode": "You can now scale the radius by pinching and zooming into the map. Tap on the screen to go back to normal mode.",
   "location_addAlarm_radiusBased_addLabel": "Select region",
