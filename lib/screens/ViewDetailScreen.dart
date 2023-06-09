@@ -189,12 +189,12 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
                     title: Text(l10n.location_addAlarm_title),
                     trailing: const SizedBox.shrink(),
                   ),
-                  onPressed: () => Navigator.of(context).push(NativePageRoute(
-                    context: context,
-                    builder: (_) => ViewAlarmSelectRadiusRegionScreen(
-                      onRadiusSelected: (_, __) {},
+                  onPressed: () => Navigator.of(context).push(
+                    NativePageRoute(
+                      context: context,
+                      builder: (_) => const ViewAlarmSelectRadiusRegionScreen(),
                     ),
-                  )),
+                  ),
                 ),
                 if (_locationFetcher.controller.locations.isNotEmpty)
                   PlatformPopupMenuItem(

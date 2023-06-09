@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -7,6 +5,8 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:locus/constants/spacing.dart';
+import 'package:locus/screens/view_alarm_screen_widgets/RadiusRegionMetaDataSheet.dart';
+import 'package:locus/services/location_alarm_service.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/MapBanner.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
@@ -17,10 +17,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:vibration/vibration.dart';
 
 class ViewAlarmSelectRadiusRegionScreen extends StatefulWidget {
-  final void Function(LatLng center, double radius) onRadiusSelected;
-
   const ViewAlarmSelectRadiusRegionScreen({
-    required this.onRadiusSelected,
     super.key,
   });
 
@@ -81,7 +78,30 @@ class _ViewAlarmSelectRadiusRegionScreenState extends State<ViewAlarmSelectRadiu
         ],
       );
 
-  void _selectRegion() {}
+  Future<void> _selectRegion() async {
+    final l10n = AppLocalizations.of(context);
+
+    final RadiusBasedRegionLocationAlarm? alarm = await showPlatformModalSheet(
+      context: context,
+      material: MaterialModalSheetData(
+        backgroundColor: Colors.transparent,
+        isDismissible: true,
+        isScrollControlled: true,
+      ),
+      builder: (_) => RadiusRegionMetaDataSheet(
+        center: alarmCenter!,
+        radius: radius,
+      ),
+    );
+
+    if (!mounted) {
+      return;
+    }
+
+    if (alarm != null) {
+      Navigator.pop(context, alarm);
+    }
+  }
 
   void showHelp() {
     final l10n = AppLocalizations.of(context);
@@ -148,6 +168,9 @@ class _ViewAlarmSelectRadiusRegionScreenState extends State<ViewAlarmSelectRadiu
     final l10n = AppLocalizations.of(context);
 
     return PlatformScaffold(
+      material: (_, __) => MaterialScaffoldData(
+        resizeToAvoidBottomInset: false,
+      ),
       appBar: PlatformAppBar(
         title: Text(l10n.location_addAlarm_radiusBased_title),
         trailingActions: [

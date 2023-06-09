@@ -576,5 +576,10 @@
   "location_addAlarm_radiusBased_help_title": "Radius-based Alarms",
   "location_addAlarm_radiusBased_help_description": "Radius-based alarms are triggered either when leaving or entering a region. After defining your region, you can decide when your alarm should trigger.",
   "location_addAlarm_radiusBased_help_tapDescription": "Tap on the map to mark the center of your region",
-  "location_addAlarm_radiusBased_help_pinchDescription": "Press and hold to enter into scale mode. You can then change the radius by pinching and zooming into the map."
+  "location_addAlarm_radiusBased_help_pinchDescription": "Press and hold to enter into scale mode. You can then change the radius by pinching and zooming into the map.",
+  "location_addAlarm_radiusBased_trigger_title": "When should your alarm trigger?",
+  "location_addAlarm_radiusBased_trigger_whenEnter": "Trigger when entering",
+  "location_addAlarm_radiusBased_trigger_whenLeave": "Trigger when leaving",
+  "location_addAlarm_radiusBased_name_description": "Please enter a name for this region",
+  "location_addAlarm_actionLabel": "Add Alarm"
 }
