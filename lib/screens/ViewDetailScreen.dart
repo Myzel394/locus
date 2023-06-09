@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart' hide PlatformListTile;
 import 'package:locus/screens/LocationPointsDetailsScreen.dart';
+import 'package:locus/screens/view_alarm_screen_widgets/ViewAlarmScreen.dart';
 import 'package:locus/screens/view_alarm_screen_widgets/ViewAlarmSelectRadiusRegionScreen.dart';
 import 'package:locus/screens/view_details_screen_widgets/ViewLocationPointsScreen.dart';
 import 'package:locus/services/view_service.dart';
@@ -184,15 +185,15 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
                   label: PlatformListTile(
                     leading: PlatformFlavorWidget(
                       cupertino: (_, __) => const Icon(CupertinoIcons.alarm),
-                      material: (_, __) => const Icon(Icons.add_alarm_rounded),
+                      material: (_, __) => const Icon(Icons.alarm_rounded),
                     ),
-                    title: Text(l10n.location_addAlarm_title),
+                    title: Text(l10n.location_manageAlarms_title),
                     trailing: const SizedBox.shrink(),
                   ),
                   onPressed: () => Navigator.of(context).push(
                     NativePageRoute(
                       context: context,
-                      builder: (_) => const ViewAlarmSelectRadiusRegionScreen(),
+                      builder: (_) => ViewAlarmScreen(view: widget.view),
                     ),
                   ),
                 ),
