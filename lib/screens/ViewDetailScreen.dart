@@ -2,10 +2,9 @@ import 'package:easy_debounce/easy_throttle.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutter_platform_widgets/flutter_platform_widgets.dart' hide PlatformListTile;
-import 'package:locus/screens/LocationPointsDetailsScreen.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart'
+    hide PlatformListTile;
 import 'package:locus/screens/view_alarm_screen_widgets/ViewAlarmScreen.dart';
-import 'package:locus/screens/view_alarm_screen_widgets/ViewAlarmSelectRadiusRegionScreen.dart';
 import 'package:locus/screens/view_details_screen_widgets/ViewLocationPointsScreen.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:locus/utils/PageRoute.dart';
@@ -38,7 +37,8 @@ class LineSliderTickMarkShape extends SliderTickMarkShape {
   }) : super();
 
   @override
-  Size getPreferredSize({required SliderThemeData sliderTheme, required bool isEnabled}) {
+  Size getPreferredSize(
+      {required SliderThemeData sliderTheme, required bool isEnabled}) {
     // We don't need this
     return Size.zero;
   }
@@ -56,10 +56,14 @@ class LineSliderTickMarkShape extends SliderTickMarkShape {
   }) {
     // This block is just copied from `slider_theme`
     final bool isTickMarkRightOfThumb = center.dx > thumbCenter.dx;
-    final begin =
-        isTickMarkRightOfThumb ? sliderTheme.disabledInactiveTickMarkColor : sliderTheme.disabledActiveTickMarkColor;
-    final end = isTickMarkRightOfThumb ? sliderTheme.inactiveTickMarkColor : sliderTheme.activeTickMarkColor;
-    final Paint paint = Paint()..color = ColorTween(begin: begin, end: end).evaluate(enableAnimation)!;
+    final begin = isTickMarkRightOfThumb
+        ? sliderTheme.disabledInactiveTickMarkColor
+        : sliderTheme.disabledActiveTickMarkColor;
+    final end = isTickMarkRightOfThumb
+        ? sliderTheme.inactiveTickMarkColor
+        : sliderTheme.activeTickMarkColor;
+    final Paint paint = Paint()
+      ..color = ColorTween(begin: begin, end: end).evaluate(enableAnimation)!;
 
     final trackHeight = sliderTheme.trackHeight!;
 
@@ -156,7 +160,8 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
 
     return FillUpPaint(
       color: shades[0]!,
-      fillPercentage: maxLocations == 0 ? 0 : (locations.length.toDouble() / maxLocations),
+      fillPercentage:
+          maxLocations == 0 ? 0 : (locations.length.toDouble() / maxLocations),
       size: Size(
         MediaQuery.of(context).size.width / 24,
         MediaQuery.of(context).size.height * (1 / 12),
@@ -170,14 +175,19 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
     final locationsPerHour = _locationFetcher.controller.getLocationsPerHour();
     final maxLocations = locationsPerHour.values.isEmpty
         ? 0
-        : locationsPerHour.values.fold(0, (value, element) => value > element.length ? value : element.length);
+        : locationsPerHour.values.fold(
+            0,
+            (value, element) =>
+                value > element.length ? value : element.length);
 
     return PlatformScaffold(
       appBar: PlatformAppBar(
         title: Text(l10n.viewDetails_title),
         trailingActions: <Widget>[
           Padding(
-            padding: const EdgeInsets.all(SMALL_SPACE),
+            padding: isMaterial(context)
+                ? const EdgeInsets.all(SMALL_SPACE)
+                : EdgeInsets.zero,
             child: PlatformPopup<String>(
               type: PlatformPopupType.tap,
               items: [
@@ -220,7 +230,8 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
                     label: PlatformListTile(
                       leading: PlatformFlavorWidget(
                         material: (_, __) => const Icon(Icons.list_rounded),
-                        cupertino: (_, __) => const Icon(CupertinoIcons.list_bullet),
+                        cupertino: (_, __) =>
+                            const Icon(CupertinoIcons.list_bullet),
                       ),
                       trailing: const SizedBox.shrink(),
                       title: Text(l10n.viewDetails_actions_showLocationList),
@@ -245,7 +256,8 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
           centerTitle: true,
         ),
         cupertino: (_, __) => CupertinoNavigationBarData(
-          backgroundColor: CupertinoTheme.of(context).barBackgroundColor.withOpacity(.5),
+          backgroundColor:
+              CupertinoTheme.of(context).barBackgroundColor.withOpacity(.5),
         ),
       ),
       body: (() {
@@ -266,7 +278,8 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
                         LocationsMap(
                           controller: _controller,
                         ),
-                        if (_locationFetcher.isLoading) const LocationStillFetchingBanner(),
+                        if (_locationFetcher.isLoading)
+                          const LocationStillFetchingBanner(),
                       ],
                     ),
                   ),
@@ -274,10 +287,14 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
                     flex: 1,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: List.generate(24, (index) => 23 - index).map((hour) {
-                        final date = DateTime.now().subtract(Duration(hours: hour));
-                        final normalizedDate = LocationsMapController.normalizeDateTime(date);
-                        final locations = locationsPerHour[normalizedDate] ?? [];
+                      children:
+                          List.generate(24, (index) => 23 - index).map((hour) {
+                        final date =
+                            DateTime.now().subtract(Duration(hours: hour));
+                        final normalizedDate =
+                            LocationsMapController.normalizeDateTime(date);
+                        final locations =
+                            locationsPerHour[normalizedDate] ?? [];
                         final child = buildDateSelectButton(
                           locations,
                           hour,
