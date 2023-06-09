@@ -8,34 +8,28 @@ import 'package:locus/services/settings_service.dart';
 import 'package:locus/utils/PageRoute.dart';
 import 'package:provider/provider.dart';
 
-TextStyle getBodyTextTextStyle(final BuildContext context) =>
-    platformThemeData(
+TextStyle getBodyTextTextStyle(final BuildContext context) => platformThemeData(
       context,
       material: (data) => data.textTheme.bodyLarge!,
       cupertino: (data) => data.textTheme.textStyle,
     );
 
-Color getErrorColor(final BuildContext context) =>
-    platformThemeData(
+Color getErrorColor(final BuildContext context) => platformThemeData(
       context,
       material: (data) => data.colorScheme.error,
       cupertino: (data) => CupertinoColors.systemRed,
     );
 
-Color getBodyTextColor(final BuildContext context) =>
-    platformThemeData(
+Color getBodyTextColor(final BuildContext context) => platformThemeData(
       context,
       material: (data) => data.textTheme.bodyLarge!.color!,
       cupertino: (data) => data.textTheme.textStyle.color!,
     );
 
 bool getIsDarkMode(final BuildContext context) =>
-    MediaQuery
-        .of(context)
-        .platformBrightness == Brightness.dark;
+    MediaQuery.of(context).platformBrightness == Brightness.dark;
 
-Color getButtonBackgroundColor(final BuildContext context) =>
-    platformThemeData(
+Color getButtonBackgroundColor(final BuildContext context) => platformThemeData(
       context,
       material: (data) {
         if (getIsDarkMode(context)) {
@@ -47,36 +41,31 @@ Color getButtonBackgroundColor(final BuildContext context) =>
       cupertino: (data) => data.primaryColor,
     );
 
-Color getButtonTextColor(final BuildContext context) =>
-    platformThemeData(
+Color getButtonTextColor(final BuildContext context) => platformThemeData(
       context,
       material: (data) => data.colorScheme.primary,
       cupertino: (data) => data.primaryContrastingColor,
     );
 
-TextStyle getTitleTextStyle(final BuildContext context) =>
-    platformThemeData(
+TextStyle getTitleTextStyle(final BuildContext context) => platformThemeData(
       context,
       material: (data) => data.textTheme.headlineLarge!,
       cupertino: (data) => data.textTheme.navLargeTitleTextStyle,
     );
 
-TextStyle getTitle2TextStyle(final BuildContext context) =>
-    platformThemeData(
+TextStyle getTitle2TextStyle(final BuildContext context) => platformThemeData(
       context,
       material: (data) => data.textTheme.headlineSmall!,
       cupertino: (data) => data.textTheme.navTitleTextStyle,
     );
 
-TextStyle getSubTitleTextStyle(final BuildContext context) =>
-    platformThemeData(
+TextStyle getSubTitleTextStyle(final BuildContext context) => platformThemeData(
       context,
       material: (data) => data.textTheme.titleMedium!,
       cupertino: (data) => data.textTheme.navTitleTextStyle,
     );
 
-TextStyle getCaptionTextStyle(final BuildContext context) =>
-    platformThemeData(
+TextStyle getCaptionTextStyle(final BuildContext context) => platformThemeData(
       context,
       material: (data) => data.textTheme.bodySmall!,
       cupertino: (data) => data.textTheme.tabLabelTextStyle,
@@ -91,25 +80,22 @@ Color getSheetColor(final BuildContext context) {
 
   return platformThemeData(
     context,
-    material: (data) =>
-    getIsDarkMode(context)
+    material: (data) => getIsDarkMode(context)
         ? HSLColor.fromColor(data.scaffoldBackgroundColor.withAlpha(255))
-        .withLightness(.18)
-        .toColor()
+            .withLightness(.18)
+            .toColor()
         : data.scaffoldBackgroundColor,
-    cupertino: (data) => data.barBackgroundColor,
+    cupertino: (data) => data.barBackgroundColor.withOpacity(1),
   );
 }
 
-double getIconSizeForBodyText(final BuildContext context) =>
-    platformThemeData(
+double getIconSizeForBodyText(final BuildContext context) => platformThemeData(
       context,
       material: (data) => data.textTheme.bodyLarge!.fontSize ?? 16,
       cupertino: (data) => data.textTheme.textStyle.fontSize ?? 16,
     );
 
-double getActionButtonSize(final BuildContext context) =>
-    platformThemeData(
+double getActionButtonSize(final BuildContext context) => platformThemeData(
       context,
       material: (data) => data.textTheme.titleLarge!.fontSize ?? 16,
       cupertino: (data) => data.textTheme.actionTextStyle.fontSize ?? 16,
@@ -122,13 +108,12 @@ Map<int, Color> getPrimaryColorShades(final BuildContext context) {
   final colorShades = Map.fromEntries(
     List.generate(
       9,
-          (index) =>
-          MapEntry(
-            (index + 1) * 100,
-            HSLColor.fromColor(primaryColor)
-                .withLightness(1 - (index / 10))
-                .toColor(),
-          ),
+      (index) => MapEntry(
+        (index + 1) * 100,
+        HSLColor.fromColor(primaryColor)
+            .withLightness(1 - (index / 10))
+            .toColor(),
+      ),
     ),
   );
 
@@ -141,28 +126,27 @@ Map<int, Color> getPrimaryColorShades(final BuildContext context) {
 EdgeInsets getSmallButtonPadding(final BuildContext context) =>
     platformThemeData(
       context,
-      material: (data) =>
-      const EdgeInsets.symmetric(
+      material: (data) => const EdgeInsets.symmetric(
         horizontal: MEDIUM_SPACE,
         vertical: SMALL_SPACE,
       ),
-      cupertino: (data) =>
-      const EdgeInsets.symmetric(
+      cupertino: (data) => const EdgeInsets.symmetric(
         horizontal: SMALL_SPACE,
         vertical: TINY_SPACE,
       ),
     );
 
-List<Widget> createCancellableDialogActions(final BuildContext context,
-    final Iterable<Widget> actions,) {
+List<Widget> createCancellableDialogActions(
+  final BuildContext context,
+  final Iterable<Widget> actions,
+) {
   final l10n = AppLocalizations.of(context);
 
   final cancelWidget = PlatformDialogAction(
     child: Text(l10n.cancelLabel),
-    material: (_, __) =>
-        MaterialDialogActionData(
-          icon: const Icon(Icons.cancel_outlined),
-        ),
+    material: (_, __) => MaterialDialogActionData(
+      icon: const Icon(Icons.cancel_outlined),
+    ),
     onPressed: () => Navigator.of(context).pop(""),
   );
 
@@ -179,12 +163,12 @@ List<Widget> createCancellableDialogActions(final BuildContext context,
   ];
 }
 
-Color getHighlightColor(final BuildContext context) =>
-    platformThemeData(
+Color getHighlightColor(final BuildContext context) => platformThemeData(
       context,
       material: (data) => data.primaryColorLight.withOpacity(.8),
       cupertino: (_) => CupertinoColors.systemYellow,
     );
 
 Duration getTransitionDuration(final BuildContext context) =>
-    NativePageRoute(context: context, builder: (_) => const SizedBox.shrink()).transitionDuration;
+    NativePageRoute(context: context, builder: (_) => const SizedBox.shrink())
+        .transitionDuration;
