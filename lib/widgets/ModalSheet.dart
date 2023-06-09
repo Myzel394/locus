@@ -20,42 +20,47 @@ class ModalSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final settings = context.watch<SettingsService>();
 
-    return PlatformWidget(
-      material: (_, __) => Padding(
-        padding: settings.isMIUI() && !miuiIsGapless ? const EdgeInsets.all(MEDIUM_SPACE) : EdgeInsets.zero,
-        child: Container(
-          width: double.infinity,
-          constraints: const BoxConstraints(
-            maxWidth: 1200,
+    return Padding(
+      padding: EdgeInsets.only(
+        bottom: MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: PlatformWidget(
+        material: (_, __) => Padding(
+          padding: settings.isMIUI() && !miuiIsGapless ? const EdgeInsets.all(MEDIUM_SPACE) : EdgeInsets.zero,
+          child: Container(
+            width: double.infinity,
+            constraints: const BoxConstraints(
+              maxWidth: 1200,
+            ),
+            decoration: BoxDecoration(
+              color: getSheetColor(context),
+              borderRadius: settings.isMIUI() && !miuiIsGapless
+                  ? const BorderRadius.all(Radius.circular(LARGE_SPACE))
+                  : const BorderRadius.only(
+                      topLeft: Radius.circular(LARGE_SPACE),
+                      topRight: Radius.circular(LARGE_SPACE),
+                    ),
+            ),
+            child: Padding(
+              padding: EdgeInsets.only(
+                top: settings.isMIUI() && !miuiIsGapless ? MEDIUM_SPACE : LARGE_SPACE,
+                left: MEDIUM_SPACE,
+                right: MEDIUM_SPACE,
+                bottom: SMALL_SPACE,
+              ),
+              child: child,
+            ),
           ),
-          decoration: BoxDecoration(
-            color: getSheetColor(context),
-            borderRadius: settings.isMIUI() && !miuiIsGapless
-                ? const BorderRadius.all(Radius.circular(LARGE_SPACE))
-                : const BorderRadius.only(
-                    topLeft: Radius.circular(LARGE_SPACE),
-                    topRight: Radius.circular(LARGE_SPACE),
-                  ),
-          ),
+        ),
+        cupertino: (_, __) => CupertinoPopupSurface(
+          isSurfacePainted: true,
           child: Padding(
-            padding: EdgeInsets.only(
-              top: settings.isMIUI() && !miuiIsGapless ? MEDIUM_SPACE : LARGE_SPACE,
-              left: MEDIUM_SPACE,
-              right: MEDIUM_SPACE,
-              bottom: SMALL_SPACE,
+            padding: const EdgeInsets.symmetric(
+              vertical: LARGE_SPACE,
+              horizontal: MEDIUM_SPACE,
             ),
             child: child,
           ),
-        ),
-      ),
-      cupertino: (_, __) => CupertinoPopupSurface(
-        isSurfacePainted: true,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            vertical: LARGE_SPACE,
-            horizontal: MEDIUM_SPACE,
-          ),
-          child: child,
         ),
       ),
     );
