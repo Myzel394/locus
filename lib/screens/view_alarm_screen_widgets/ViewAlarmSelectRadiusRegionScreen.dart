@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
@@ -8,6 +9,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/MapBanner.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:shimmer/shimmer.dart';
 import 'dart:math' as math;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -81,6 +83,66 @@ class _ViewAlarmSelectRadiusRegionScreenState extends State<ViewAlarmSelectRadiu
 
   void _selectRegion() {}
 
+  void showHelp() {
+    final l10n = AppLocalizations.of(context);
+
+    if (isCupertino(context)) {
+      showCupertinoModalBottomSheet(
+        context: context,
+        backgroundColor: Colors.transparent,
+        builder: (context) => Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Text(
+              l10n.location_addAlarm_radiusBased_help_title,
+              style: getTitleTextStyle(context),
+            ),
+            const SizedBox(height: MEDIUM_SPACE),
+            Text(l10n.location_addAlarm_radiusBased_help_description),
+            const SizedBox(height: MEDIUM_SPACE),
+            ListTile(
+              title: Text(l10n.location_addAlarm_radiusBased_help_tapDescription),
+              leading: const Icon(Icons.touch_app_rounded),
+            ),
+            ListTile(
+              title: Text(l10n.location_addAlarm_radiusBased_help_pinchDescription),
+              leading: const Icon(Icons.pinch_rounded),
+            ),
+          ],
+        ),
+      );
+    } else {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(l10n.location_addAlarm_radiusBased_help_title),
+          icon: Icon(context.platformIcons.help),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Text(l10n.location_addAlarm_radiusBased_help_description),
+              const SizedBox(height: MEDIUM_SPACE),
+              ListTile(
+                title: Text(l10n.location_addAlarm_radiusBased_help_tapDescription),
+                leading: const Icon(Icons.touch_app_rounded),
+              ),
+              ListTile(
+                title: Text(l10n.location_addAlarm_radiusBased_help_pinchDescription),
+                leading: const Icon(Icons.pinch_rounded),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(l10n.closeNeutralAction),
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -88,6 +150,12 @@ class _ViewAlarmSelectRadiusRegionScreenState extends State<ViewAlarmSelectRadiu
     return PlatformScaffold(
       appBar: PlatformAppBar(
         title: Text(l10n.location_addAlarm_radiusBased_title),
+        trailingActions: [
+          PlatformIconButton(
+            icon: Icon(context.platformIcons.help),
+            onPressed: showHelp,
+          ),
+        ],
       ),
       body: GestureDetector(
         onScaleUpdate: isInScaleMode

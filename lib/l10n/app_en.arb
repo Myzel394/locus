@@ -571,6 +571,10 @@
   "androidNotificationChannel_locationAlarms_description": "Receive notifications for location alarms",
   "location_addAlarm_title": "Add Alarm",
   "location_addAlarm_radiusBased_title": "Add radius-based Alarm",
-  "location_addAlarm_radiusBased_isInScaleMode": "You can now scale the radius by pinching and zooming into the map. Tap on the screen to go back to the normal mode.",
-  "location_addAlarm_radiusBased_addLabel": "Select region"
+  "location_addAlarm_radiusBased_isInScaleMode": "You can now scale the radius by pinching and zooming into the map. Tap on the screen to go back to normal mode.",
+  "location_addAlarm_radiusBased_addLabel": "Select region",
+  "location_addAlarm_radiusBased_help_title": "Radius-based Alarms",
+  "location_addAlarm_radiusBased_help_description": "Radius-based alarms are triggered either when leaving or entering a region. After defining your region, you can decide when your alarm should trigger.",
+  "location_addAlarm_radiusBased_help_tapDescription": "Tap on the map to mark the center of your region",
+  "location_addAlarm_radiusBased_help_pinchDescription": "Press and hold to enter into scale mode. You can then change the radius by pinching and zooming into the map."
 }
