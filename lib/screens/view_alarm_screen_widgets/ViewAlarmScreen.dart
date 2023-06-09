@@ -8,6 +8,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/screens/view_alarm_screen_widgets/ViewAlarmSelectRadiusRegionScreen.dart';
 import 'package:locus/services/location_alarm_service.dart';
+import 'package:locus/services/location_point_service.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:provider/provider.dart';
@@ -28,6 +29,8 @@ class ViewAlarmScreen extends StatefulWidget {
 }
 
 class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
+  LocationPointService? lastLocation;
+
   void _addNewAlarm() async {
     final viewService = context.read<ViewService>();
     final RadiusBasedRegionLocationAlarm? alarm = await Navigator.of(context).push(
@@ -86,6 +89,20 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
     super.initState();
 
     widget.view.addListener(updateView);
+
+    widget.view.getLocations(
+      onLocationFetched: (final location) {
+        if (!mounted) {
+          return;
+        }
+
+        setState(() {
+          lastLocation = location;
+        });
+      },
+      onEnd: () {},
+      limit: 1,
+    );
   }
 
   @override
@@ -171,6 +188,12 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
                                     ),
                                     CircleLayer(
                                       circles: [
+                                        if (lastLocation != null)
+                                          CircleMarker(
+                                            point: LatLng(lastLocation!.latitude, lastLocation!.longitude),
+                                            radius: 5,
+                                            color: Colors.blue,
+                                          ),
                                         CircleMarker(
                                           point: alarm.center,
                                           useRadiusInMeter: true,
