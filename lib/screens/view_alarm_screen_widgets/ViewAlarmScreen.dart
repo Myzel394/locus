@@ -1,5 +1,8 @@
+import 'dart:math';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_map/plugin_api.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:locus/constants/spacing.dart';
@@ -8,6 +11,7 @@ import 'package:locus/services/location_alarm_service.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:provider/provider.dart';
+import 'package:latlong2/latlong.dart';
 
 import '../../widgets/PlatformFlavorWidget.dart';
 
@@ -105,28 +109,84 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(MEDIUM_SPACE),
+          padding: const EdgeInsets.symmetric(horizontal: MEDIUM_SPACE),
           child: Center(
             child: widget.view.alarms.isEmpty
                 ? getEmptyState()
                 : ListView.builder(
-                    itemCount: widget.view.alarms.length,
+                    shrinkWrap: true,
+                    itemCount: widget.view.alarms.length + 1,
                     itemBuilder: (context, index) {
+                      if (index == widget.view.alarms.length) {
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: LARGE_SPACE),
+                          child: PlatformElevatedButton(
+                            onPressed: _addNewAlarm,
+                            material: (_, __) => MaterialElevatedButtonData(
+                              icon: const Icon(Icons.add),
+                            ),
+                            child: Text(l10n.location_manageAlarms_addNewAlarm_actionLabel),
+                          ),
+                        );
+                      }
+
                       final RadiusBasedRegionLocationAlarm alarm =
                           widget.view.alarms[index] as RadiusBasedRegionLocationAlarm;
 
-                      return PlatformListTile(
-                        title: Text(alarm.zoneName),
-                        leading: alarm.getIcon(context),
-                        trailing: PlatformIconButton(
-                          icon: Icon(context.platformIcons.delete),
-                          onPressed: () async {
-                            final viewService = context.read<ViewService>();
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          PlatformListTile(
+                            title: Text(alarm.zoneName),
+                            leading: alarm.getIcon(context),
+                            trailing: PlatformIconButton(
+                              icon: Icon(context.platformIcons.delete),
+                              onPressed: () async {
+                                final viewService = context.read<ViewService>();
 
-                            widget.view.removeAlarm(alarm);
-                            await viewService.update(widget.view);
-                          },
-                        ),
+                                widget.view.removeAlarm(alarm);
+                                await viewService.update(widget.view);
+                              },
+                            ),
+                          ),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(LARGE_SPACE),
+                            child: SizedBox(
+                              width: double.infinity,
+                              height: 200,
+                              child: IgnorePointer(
+                                ignoring: true,
+                                child: FlutterMap(
+                                  options: MapOptions(
+                                    center: alarm.center,
+                                    maxZoom: 18,
+                                    // create zoom based off of radius
+                                    zoom: 18 - log(alarm.radius / 35) / log(2),
+                                  ),
+                                  children: [
+                                    TileLayer(
+                                      urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                                      subdomains: const ['a', 'b', 'c'],
+                                      userAgentPackageName: "app.myzel394.locus",
+                                    ),
+                                    CircleLayer(
+                                      circles: [
+                                        CircleMarker(
+                                          point: alarm.center,
+                                          useRadiusInMeter: true,
+                                          color: Colors.red.withOpacity(0.3),
+                                          borderStrokeWidth: 5,
+                                          borderColor: Colors.red,
+                                          radius: alarm.radius,
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       );
                     },
                   ),

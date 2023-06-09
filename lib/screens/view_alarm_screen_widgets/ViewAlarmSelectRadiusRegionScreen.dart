@@ -98,8 +98,6 @@ class _ViewAlarmSelectRadiusRegionScreenState extends State<ViewAlarmSelectRadiu
       );
 
   Future<void> _selectRegion() async {
-    final l10n = AppLocalizations.of(context);
-
     final RadiusBasedRegionLocationAlarm? alarm = await showPlatformModalSheet(
       context: context,
       material: MaterialModalSheetData(
