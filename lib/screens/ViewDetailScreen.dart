@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart' hide PlatformListTile;
 import 'package:locus/screens/LocationPointsDetailsScreen.dart';
-import 'package:locus/screens/ViewAlarmManagerScreen.dart';
+import 'package:locus/screens/ViewAlarmSelectRadiusRegionScreen.dart';
 import 'package:locus/screens/view_details_screen_widgets/ViewLocationPointsScreen.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:locus/utils/PageRoute.dart';
@@ -191,7 +191,9 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
                   ),
                   onPressed: () => Navigator.of(context).push(NativePageRoute(
                     context: context,
-                    builder: (_) => const ViewAlarmManagerScreen(),
+                    builder: (_) => ViewAlarmSelectRadiusRegionScreen(
+                      onRadiusSelected: (_, __) {},
+                    ),
                   )),
                 ),
                 if (_locationFetcher.controller.locations.isNotEmpty)
