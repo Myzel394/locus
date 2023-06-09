@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart' hide PlatformListTile;
 import 'package:locus/screens/LocationPointsDetailsScreen.dart';
+import 'package:locus/screens/ViewAlarmManagerScreen.dart';
 import 'package:locus/screens/view_details_screen_widgets/ViewLocationPointsScreen.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:locus/utils/PageRoute.dart';
@@ -173,56 +174,70 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
     return PlatformScaffold(
       appBar: PlatformAppBar(
         title: Text(l10n.viewDetails_title),
-        trailingActions: _locationFetcher.controller.locations.isNotEmpty
-            ? <Widget>[
-                Padding(
-                  padding: const EdgeInsets.all(SMALL_SPACE),
-                  child: PlatformPopup<String>(
-                    type: PlatformPopupType.tap,
-                    items: [
-                      PlatformPopupMenuItem(
-                        label: PlatformListTile(
-                          leading: Icon(context.platformIcons.location),
-                          trailing: const SizedBox.shrink(),
-                          title: Text(l10n.viewDetails_actions_openLatestLocation),
-                        ),
-                        onPressed: () => showPlatformModalSheet(
-                          context: context,
-                          material: MaterialModalSheetData(),
-                          builder: (context) => OpenInMaps(
-                            destination: Coords(
-                              _locationFetcher.controller.locations.last.latitude,
-                              _locationFetcher.controller.locations.last.longitude,
-                            ),
-                          ),
-                        ),
-                      ),
-                      PlatformPopupMenuItem(
-                        label: PlatformListTile(
-                          leading: PlatformFlavorWidget(
-                            material: (_, __) => const Icon(Icons.list_rounded),
-                            cupertino: (_, __) => const Icon(CupertinoIcons.list_bullet),
-                          ),
-                          trailing: const SizedBox.shrink(),
-                          title: Text(l10n.viewDetails_actions_showLocationList),
-                        ),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            NativePageRoute(
-                              context: context,
-                              builder: (context) => ViewLocationPointsScreen(
-                                locationFetcher: _locationFetcher,
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ],
+        trailingActions: <Widget>[
+          Padding(
+            padding: const EdgeInsets.all(SMALL_SPACE),
+            child: PlatformPopup<String>(
+              type: PlatformPopupType.tap,
+              items: [
+                PlatformPopupMenuItem(
+                  label: PlatformListTile(
+                    leading: PlatformFlavorWidget(
+                      cupertino: (_, __) => const Icon(CupertinoIcons.alarm),
+                      material: (_, __) => const Icon(Icons.add_alarm_rounded),
+                    ),
+                    title: Text(l10n.location_addAlarm_title),
+                    trailing: const SizedBox.shrink(),
                   ),
+                  onPressed: () => Navigator.of(context).push(NativePageRoute(
+                    context: context,
+                    builder: (_) => const ViewAlarmManagerScreen(),
+                  )),
                 ),
-              ]
-            : [],
+                if (_locationFetcher.controller.locations.isNotEmpty)
+                  PlatformPopupMenuItem(
+                    label: PlatformListTile(
+                      leading: Icon(context.platformIcons.location),
+                      trailing: const SizedBox.shrink(),
+                      title: Text(l10n.viewDetails_actions_openLatestLocation),
+                    ),
+                    onPressed: () => showPlatformModalSheet(
+                      context: context,
+                      material: MaterialModalSheetData(),
+                      builder: (context) => OpenInMaps(
+                        destination: Coords(
+                          _locationFetcher.controller.locations.last.latitude,
+                          _locationFetcher.controller.locations.last.longitude,
+                        ),
+                      ),
+                    ),
+                  ),
+                if (_locationFetcher.controller.locations.isNotEmpty)
+                  PlatformPopupMenuItem(
+                    label: PlatformListTile(
+                      leading: PlatformFlavorWidget(
+                        material: (_, __) => const Icon(Icons.list_rounded),
+                        cupertino: (_, __) => const Icon(CupertinoIcons.list_bullet),
+                      ),
+                      trailing: const SizedBox.shrink(),
+                      title: Text(l10n.viewDetails_actions_showLocationList),
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        NativePageRoute(
+                          context: context,
+                          builder: (context) => ViewLocationPointsScreen(
+                            locationFetcher: _locationFetcher,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+              ],
+            ),
+          ),
+        ],
         material: (_, __) => MaterialAppBarData(
           centerTitle: true,
         ),
