@@ -1,3 +1,5 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:uuid/uuid.dart';
@@ -58,7 +60,7 @@ class RadiusBasedRegionLocationAlarm extends LocationAlarmServiceBase {
   LocationAlarmType get IDENTIFIER => LocationAlarmType.radiusBasedRegion;
 
   factory RadiusBasedRegionLocationAlarm.fromJSON(final Map<String, dynamic> data) => RadiusBasedRegionLocationAlarm(
-        center: LatLng(data["center"]["latitude"], data["center"]["longitude"]),
+        center: LatLng.fromJson(data["center"]),
         radius: data["radius"],
         type: RadiusBasedRegionLocationAlarmType.values[data["alarmType"]],
         zoneName: data["zoneName"],
@@ -164,5 +166,14 @@ class RadiusBasedRegionLocationAlarm extends LocationAlarmServiceBase {
     }
 
     return LocationAlarmTriggerType.no;
+  }
+
+  Icon getIcon(final BuildContext context) {
+    switch (type) {
+      case RadiusBasedRegionLocationAlarmType.whenEnter:
+        return const Icon(Icons.arrow_circle_right_rounded);
+      case RadiusBasedRegionLocationAlarmType.whenLeave:
+        return const Icon(Icons.arrow_circle_left_rounded);
+    }
   }
 }
