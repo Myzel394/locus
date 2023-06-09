@@ -65,11 +65,7 @@ class LogService extends ChangeNotifier {
 
   Future<void> deleteOldLogs() async {
     final terminationDate = DateTime.now().subtract(LOGS_LIFETIME);
-    final oldLogs = _logs.where((log) => log.createdAt.isBefore(terminationDate));
-
-    for (final log in oldLogs) {
-      _logs.remove(log);
-    }
+    _logs.removeWhere((log) => log.createdAt.isBefore(terminationDate));
 
     await save();
   }
