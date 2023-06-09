@@ -60,8 +60,6 @@ class _MainScreenState extends State<MainScreen> {
   Timer? _viewsAlarmCheckerTimer;
 
   void _changeTab(final int newTab) {
-    final settings = context.read<SettingsService>();
-
     setState(() {
       activeTab = newTab;
     });
