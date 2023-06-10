@@ -13,6 +13,8 @@ const LOCATION_INTERVAL = Duration(minutes: 2);
 const TRANSFER_DATA_USERNAME = "locus_transfer";
 final TRANSFER_SUCCESS_MESSAGE = Uint8List.fromList([1, 2, 3, 4]);
 
-const CURRENT_APP_VERSION = "0.8.1";
+const CURRENT_APP_VERSION = "0.8.2";
 
 const LOG_TAG = "LocusLog";
+
+const HTTP_TIMEOUT = Duration(seconds: 30);

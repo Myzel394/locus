@@ -50,6 +50,9 @@ Please set a realistic priority on how important this issue is to you. We will f
 * [ ] High
 * [ ] Urgent
  
+## App Version
+Please add the version you have installed here. You can find the version by opening Locus > Tap on the top right settings icon > Scroll completely down > At the very bottom you can find your version with your flavor, for example "Version 0.8.1 (GMS)" or "Version 0.7.0 (FLOSS)".
+ 
 ## Logs
 <!-- Locus generates logs by default. If you attach your log file, this will help us much more speeding up the process. You do not have to attach the file, but you may be asked to do so later -->
  
