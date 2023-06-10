@@ -131,27 +131,47 @@ class _ViewAlarmSelectRadiusRegionScreenState
         backgroundColor: getSheetColor(context),
         builder: (context) => SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(MEDIUM_SPACE),
+            padding: const EdgeInsets.all(LARGE_SPACE),
             child: Column(
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
                 Text(
                   l10n.location_addAlarm_radiusBased_help_title,
                   style: getTitleTextStyle(context),
                 ),
                 const SizedBox(height: MEDIUM_SPACE),
-                Text(l10n.location_addAlarm_radiusBased_help_description),
-                const SizedBox(height: MEDIUM_SPACE),
-                CupertinoListTile(
-                  title: Text(
-                      l10n.location_addAlarm_radiusBased_help_tapDescription),
-                  leading: const Icon(Icons.touch_app_rounded),
+                Text(
+                  l10n.location_addAlarm_radiusBased_help_description,
+                  style: getBodyTextTextStyle(context),
                 ),
-                CupertinoListTile(
-                  title: Text(
-                      l10n.location_addAlarm_radiusBased_help_pinchDescription),
-                  leading: const Icon(Icons.pinch_rounded),
+                const SizedBox(height: LARGE_SPACE),
+                Row(
+                  children: <Widget>[
+                    const Icon(Icons.touch_app_rounded),
+                    const SizedBox(width: MEDIUM_SPACE),
+                    Flexible(
+                      child: Text(l10n
+                          .location_addAlarm_radiusBased_help_tapDescription),
+                    ),
+                  ],
                 ),
+                const SizedBox(height: SMALL_SPACE),
+                Row(
+                  children: <Widget>[
+                    const Icon(Icons.pinch_rounded),
+                    const SizedBox(width: MEDIUM_SPACE),
+                    Flexible(
+                      child: Text(l10n
+                          .location_addAlarm_radiusBased_help_pinchDescription),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: LARGE_SPACE),
+                CupertinoButton.filled(
+                  child: Text(l10n.closeNeutralAction),
+                  onPressed: () => Navigator.pop(context),
+                )
               ],
             ),
           ),
