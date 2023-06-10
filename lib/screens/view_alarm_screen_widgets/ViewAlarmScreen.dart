@@ -125,18 +125,19 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
 
     if (settings.mapProvider == MapProvider.apple) {
       return AppleMaps.AppleMap(
+        key: ValueKey(alarm.id),
         initialCameraPosition: AppleMaps.CameraPosition(
           target: AppleMaps.LatLng(
             alarm.center.latitude,
             alarm.center.longitude,
           ),
-          zoom: 18 - log(alarm.radius / 35) / log(2),
+          zoom: 18 - log(alarm.radius / 30) / log(2),
         ),
         myLocationEnabled: true,
         circles: {
           if (lastLocation != null)
             AppleMaps.Circle(
-              circleId: AppleMaps.CircleId("lastLocation"),
+              circleId: AppleMaps.CircleId("${alarm.id}:lastLocation"),
               center: AppleMaps.LatLng(
                 lastLocation!.latitude,
                 lastLocation!.longitude,
@@ -146,7 +147,7 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
               strokeWidth: 0,
             ),
           AppleMaps.Circle(
-            circleId: AppleMaps.CircleId("alarm"),
+            circleId: AppleMaps.CircleId("${alarm.id}:alarm"),
             center: AppleMaps.LatLng(
               alarm.center.latitude,
               alarm.center.longitude,
@@ -220,36 +221,41 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
                                 widget.view.alarms[index]
                                     as RadiusBasedRegionLocationAlarm;
 
-                            return Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                PlatformListTile(
-                                  title: Text(alarm.zoneName),
-                                  leading: alarm.getIcon(context),
-                                  trailing: PlatformIconButton(
-                                    icon: Icon(context.platformIcons.delete),
-                                    onPressed: () async {
-                                      final viewService =
-                                          context.read<ViewService>();
+                            return Padding(
+                              padding: const EdgeInsets.only(
+                                bottom: MEDIUM_SPACE,
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: <Widget>[
+                                  PlatformListTile(
+                                    title: Text(alarm.zoneName),
+                                    leading: alarm.getIcon(context),
+                                    trailing: PlatformIconButton(
+                                      icon: Icon(context.platformIcons.delete),
+                                      onPressed: () async {
+                                        final viewService =
+                                            context.read<ViewService>();
 
-                                      widget.view.removeAlarm(alarm);
-                                      await viewService.update(widget.view);
-                                    },
-                                  ),
-                                ),
-                                ClipRRect(
-                                  borderRadius:
-                                      BorderRadius.circular(LARGE_SPACE),
-                                  child: SizedBox(
-                                    width: double.infinity,
-                                    height: 200,
-                                    child: IgnorePointer(
-                                      ignoring: true,
-                                      child: buildMap(alarm),
+                                        widget.view.removeAlarm(alarm);
+                                        await viewService.update(widget.view);
+                                      },
                                     ),
                                   ),
-                                ),
-                              ],
+                                  ClipRRect(
+                                    borderRadius:
+                                        BorderRadius.circular(LARGE_SPACE),
+                                    child: SizedBox(
+                                      width: double.infinity,
+                                      height: 200,
+                                      child: IgnorePointer(
+                                        ignoring: true,
+                                        child: buildMap(alarm),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             );
                           },
                         ),
