@@ -256,8 +256,7 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
           centerTitle: true,
         ),
         cupertino: (_, __) => CupertinoNavigationBarData(
-          backgroundColor:
-              CupertinoTheme.of(context).barBackgroundColor.withOpacity(.5),
+          backgroundColor: getCupertinoAppBarColorForMapScreen(context),
         ),
       ),
       body: (() {

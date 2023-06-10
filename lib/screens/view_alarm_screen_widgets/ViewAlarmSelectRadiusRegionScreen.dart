@@ -210,6 +210,9 @@ class _ViewAlarmSelectRadiusRegionScreenState
             onPressed: showHelp,
           ),
         ],
+        cupertino: (_, __) => CupertinoNavigationBarData(
+          backgroundColor: getCupertinoAppBarColorForMapScreen(context),
+        ),
       ),
       body: GestureDetector(
         onScaleUpdate: isInScaleMode

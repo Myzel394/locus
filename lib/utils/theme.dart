@@ -172,3 +172,6 @@ Color getHighlightColor(final BuildContext context) => platformThemeData(
 Duration getTransitionDuration(final BuildContext context) =>
     NativePageRoute(context: context, builder: (_) => const SizedBox.shrink())
         .transitionDuration;
+
+Color getCupertinoAppBarColorForMapScreen(final BuildContext context) =>
+    CupertinoTheme.of(context).barBackgroundColor.withOpacity(.5);
