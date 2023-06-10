@@ -12,11 +12,11 @@ class MapBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Positioned(
-        left: 0,
-        right: 0,
-        top: 0,
+    return Positioned(
+      left: 0,
+      right: 0,
+      top: 0,
+      child: SafeArea(
         child: Container(
           color: Colors.black.withOpacity(.8),
           child: Padding(
