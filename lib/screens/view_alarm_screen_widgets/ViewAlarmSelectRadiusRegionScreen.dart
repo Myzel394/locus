@@ -13,11 +13,12 @@ import 'package:locus/screens/view_alarm_screen_widgets/RadiusRegionMetaDataShee
 import 'package:locus/services/location_alarm_service.dart';
 import 'package:locus/services/settings_service.dart';
 import 'package:locus/utils/theme.dart';
-import 'package:locus/widgets/MapBanner.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:vibration/vibration.dart';
+
+import '../../widgets/MapBanner.dart';
 
 class ViewAlarmSelectRadiusRegionScreen extends StatefulWidget {
   const ViewAlarmSelectRadiusRegionScreen({
@@ -285,7 +286,7 @@ class _ViewAlarmSelectRadiusRegionScreenState
         circles: {
           if (alarmCenter != null)
             AppleMaps.Circle(
-              circleId: AppleMaps.CircleId('alarm'),
+              circleId: AppleMaps.CircleId('alarm-${radius.round()}'),
               center: AppleMaps.LatLng(
                 alarmCenter!.latitude,
                 alarmCenter!.longitude,
@@ -293,6 +294,7 @@ class _ViewAlarmSelectRadiusRegionScreenState
               radius: radius,
               fillColor: Colors.red.withOpacity(.3),
               strokeWidth: 5,
+              consumeTapEvents: false,
             ),
         },
       );
