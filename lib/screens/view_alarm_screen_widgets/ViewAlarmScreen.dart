@@ -123,7 +123,9 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
   Widget buildMap(final RadiusBasedRegionLocationAlarm alarm) {
     final settings = context.read<SettingsService>();
 
-    if (settings.mapProvider == MapProvider.apple) {
+    // Apple Maps doesn't seem to be working with multiple maps
+    // see https://github.com/LuisThein/apple_maps_flutter/issues/44
+    if (settings.mapProvider == MapProvider.apple && false) {
       return AppleMaps.AppleMap(
         key: ValueKey(alarm.id),
         initialCameraPosition: AppleMaps.CameraPosition(
