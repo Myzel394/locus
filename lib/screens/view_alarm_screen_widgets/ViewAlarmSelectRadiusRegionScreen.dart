@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:apple_maps_flutter/apple_maps_flutter.dart' as AppleMaps;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -30,7 +31,8 @@ class ViewAlarmSelectRadiusRegionScreen extends StatefulWidget {
 
 class _ViewAlarmSelectRadiusRegionScreenState
     extends State<ViewAlarmSelectRadiusRegionScreen> {
-  final controller = MapController();
+  MapController? flutterMapController;
+  AppleMaps.AppleMapController? appleMapController;
   LatLng? alarmCenter;
   bool isInScaleMode = false;
   double radius = 100;
@@ -40,25 +42,37 @@ class _ViewAlarmSelectRadiusRegionScreenState
   void initState() {
     super.initState();
 
-    Geolocator.getLastKnownPosition().then((location) {
-      if (location == null) {
-        return;
-      }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Geolocator.getLastKnownPosition().then((location) {
+        if (location == null) {
+          return;
+        }
 
-      controller.move(
-        LatLng(location.latitude, location.longitude),
-        13,
-      );
-    });
+        flutterMapController?.move(
+          LatLng(location.latitude, location.longitude),
+          13,
+        );
+        appleMapController?.moveCamera(
+          AppleMaps.CameraUpdate.newLatLng(
+            AppleMaps.LatLng(location.latitude, location.longitude),
+          ),
+        );
+      });
 
-    Geolocator.getCurrentPosition(
-      // We want to get the position as fast as possible
-      desiredAccuracy: LocationAccuracy.lowest,
-    ).then((location) {
-      controller.move(
-        LatLng(location.latitude, location.longitude),
-        13,
-      );
+      Geolocator.getCurrentPosition(
+        // We want to get the position as fast as possible
+        desiredAccuracy: LocationAccuracy.lowest,
+      ).then((location) {
+        flutterMapController?.move(
+          LatLng(location.latitude, location.longitude),
+          13,
+        );
+        appleMapController?.moveCamera(
+          AppleMaps.CameraUpdate.newLatLng(
+            AppleMaps.LatLng(location.latitude, location.longitude),
+          ),
+        );
+      });
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -81,12 +95,12 @@ class _ViewAlarmSelectRadiusRegionScreenState
 
   @override
   void dispose() {
-    controller.dispose();
+    flutterMapController?.dispose();
 
     super.dispose();
   }
 
-  CircleLayer getCircleLayer() => CircleLayer(
+  CircleLayer getFlutterMapCircleLayer() => CircleLayer(
         circles: [
           CircleMarker(
             point: alarmCenter!,
@@ -211,6 +225,121 @@ class _ViewAlarmSelectRadiusRegionScreenState
     }
   }
 
+  void updateZoom(final ScaleUpdateDetails scaleUpdateDetails) async {
+    final mapZoom = await (() async {
+      if (appleMapController != null) {
+        return appleMapController!.getZoomLevel();
+      } else if (flutterMapController != null) {
+        return flutterMapController!.zoom;
+      } else {
+        return 0.0;
+      }
+    })() as double;
+    final difference = scaleUpdateDetails.scale - previousScale;
+    final multiplier = math.pow(2, 18 - mapZoom) * .2;
+
+    final newRadius = math.max<double>(
+      50,
+      difference > 0 ? radius + multiplier : radius - multiplier,
+    );
+
+    setState(() {
+      radius = newRadius;
+    });
+
+    previousScale = scaleUpdateDetails.scale;
+  }
+
+  Widget buildMap() {
+    final settings = context.read<SettingsService>();
+
+    if (settings.mapProvider == MapProvider.apple) {
+      return AppleMaps.AppleMap(
+        initialCameraPosition: const AppleMaps.CameraPosition(
+          target: AppleMaps.LatLng(40, 20),
+          zoom: 13,
+        ),
+        onMapCreated: (controller) {
+          appleMapController = controller;
+        },
+        onLongPress: (_) {
+          if (alarmCenter == null) {
+            return;
+          }
+
+          Vibration.vibrate(duration: 100);
+
+          setState(() {
+            isInScaleMode = true;
+          });
+        },
+        myLocationEnabled: true,
+        onTap: (tapPosition) {
+          setState(() {
+            alarmCenter = LatLng(
+              tapPosition.latitude,
+              tapPosition.longitude,
+            );
+          });
+        },
+        circles: {
+          if (alarmCenter != null)
+            AppleMaps.Circle(
+              circleId: AppleMaps.CircleId('alarm'),
+              center: AppleMaps.LatLng(
+                alarmCenter!.latitude,
+                alarmCenter!.longitude,
+              ),
+              radius: radius,
+              fillColor: Colors.red.withOpacity(.3),
+              strokeWidth: 5,
+            ),
+        },
+      );
+    }
+
+    return FlutterMap(
+      mapController: flutterMapController,
+      options: MapOptions(
+        onLongPress: (_, __) {
+          if (alarmCenter == null) {
+            return;
+          }
+
+          Vibration.vibrate(duration: 100);
+
+          setState(() {
+            isInScaleMode = true;
+          });
+        },
+        center: LatLng(40, 20),
+        zoom: 13,
+        onTap: (tapPosition, location) {
+          setState(() {
+            alarmCenter = location;
+          });
+        },
+        maxZoom: 18,
+      ),
+      children: [
+        TileLayer(
+          urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+          subdomains: const ['a', 'b', 'c'],
+          userAgentPackageName: "app.myzel394.locus",
+        ),
+        if (alarmCenter != null)
+          if (isInScaleMode)
+            Shimmer.fromColors(
+              baseColor: Colors.red,
+              highlightColor: Colors.red.withOpacity(.2),
+              child: getFlutterMapCircleLayer(),
+            )
+          else
+            getFlutterMapCircleLayer(),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -235,24 +364,7 @@ class _ViewAlarmSelectRadiusRegionScreenState
         ),
       ),
       body: GestureDetector(
-        onScaleUpdate: isInScaleMode
-            ? (details) {
-                final mapZoom = controller.zoom;
-                final difference = details.scale - previousScale;
-                final multiplier = math.pow(2, 18 - mapZoom) * .2;
-
-                final newRadius = math.max<double>(
-                  50,
-                  difference > 0 ? radius + multiplier : radius - multiplier,
-                );
-
-                setState(() {
-                  radius = newRadius;
-                });
-
-                previousScale = details.scale;
-              }
-            : null,
+        onScaleUpdate: isInScaleMode ? updateZoom : null,
         onTap: isInScaleMode
             ? () {
                 Vibration.vibrate(duration: 50);
@@ -272,47 +384,7 @@ class _ViewAlarmSelectRadiusRegionScreenState
                   Positioned.fill(
                     child: IgnorePointer(
                       ignoring: isInScaleMode,
-                      child: FlutterMap(
-                        mapController: controller,
-                        options: MapOptions(
-                          onLongPress: (_, __) {
-                            if (alarmCenter == null) {
-                              return;
-                            }
-
-                            Vibration.vibrate(duration: 100);
-
-                            setState(() {
-                              isInScaleMode = true;
-                            });
-                          },
-                          center: LatLng(40, 20),
-                          zoom: 13,
-                          onTap: (tapPosition, location) {
-                            setState(() {
-                              alarmCenter = location;
-                            });
-                          },
-                          maxZoom: 18,
-                        ),
-                        children: [
-                          TileLayer(
-                            urlTemplate:
-                                'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                            subdomains: const ['a', 'b', 'c'],
-                            userAgentPackageName: "app.myzel394.locus",
-                          ),
-                          if (alarmCenter != null)
-                            if (isInScaleMode)
-                              Shimmer.fromColors(
-                                baseColor: Colors.red,
-                                highlightColor: Colors.red.withOpacity(.2),
-                                child: getCircleLayer(),
-                              )
-                            else
-                              getCircleLayer(),
-                        ],
-                      ),
+                      child: buildMap(),
                     ),
                   ),
                   if (isInScaleMode) ...[
