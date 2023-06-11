@@ -148,11 +148,10 @@ class _TaskTileState extends State<TaskTile> {
                           );
                         }
                       } catch (error) {
-                        FlutterLogs.logErrorTrace(
+                        FlutterLogs.logError(
                           LOG_TAG,
                           "Task Tile",
-                          "Error while starting/stopping task",
-                          error as Error,
+                          "Error while starting/stopping task: $error",
                         );
                       } finally {
                         setState(() {

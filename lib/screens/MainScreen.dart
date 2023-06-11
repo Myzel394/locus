@@ -187,11 +187,10 @@ class _MainScreenState extends State<MainScreen> {
         await _importUniLink(initialLink);
       }
     } on PlatformException catch (error) {
-      FlutterLogs.logErrorTrace(
+      FlutterLogs.logError(
         LOG_TAG,
         "Uni Links",
-        "Error initializing uni links.",
-        error as Error,
+        "Error initializing uni links: $error",
       );
 
       showPlatformDialog(

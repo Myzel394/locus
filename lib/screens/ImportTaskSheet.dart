@@ -179,11 +179,10 @@ class _ImportTaskSheetState extends State<ImportTaskSheet> with TickerProviderSt
         withData: true,
       );
     } catch (error) {
-      FlutterLogs.logErrorTrace(
+      FlutterLogs.logError(
         LOG_TAG,
         "Import Task",
-        "Error calling `.pickFiles`.",
-        error as Error,
+        "Error calling `.pickFiles`: $error",
       );
 
       setState(() {
@@ -207,11 +206,10 @@ class _ImportTaskSheetState extends State<ImportTaskSheet> with TickerProviderSt
         parseViewData(taskView);
       }
     } catch (error) {
-      FlutterLogs.logErrorTrace(
+      FlutterLogs.logError(
         LOG_TAG,
         "Import Task",
-        "Error parsing file.",
-        error as Error,
+        "Error parsing file: $error",
       );
     } finally {
       setState(() {
@@ -241,11 +239,10 @@ class _ImportTaskSheetState extends State<ImportTaskSheet> with TickerProviderSt
 
       parseViewData(taskView);
     } catch (error) {
-      FlutterLogs.logErrorTrace(
+      FlutterLogs.logError(
         LOG_TAG,
         "Import Task",
-        "Error fetching task from URL.",
-        error as Error,
+        "Error fetching task from URL: $error",
       );
 
       setState(() {

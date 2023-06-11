@@ -66,11 +66,10 @@ Future<WebSocket> openSocket({
             }
           });
         } catch (error) {
-          FlutterLogs.logErrorTrace(
+          FlutterLogs.logError(
             LOG_TAG,
             "Nostr Socket $url - Event",
-            "Error while decrypting event.",
-            error as Error,
+            "Error while decrypting event: $error",
           );
         }
 
@@ -86,8 +85,7 @@ Future<WebSocket> openSocket({
 
         hasReceivedEndOfStream = true;
 
-        if ((decryptionProcesses.isEmpty && hasReceivedEvent) ||
-            !hasReceivedEvent) {
+        if ((decryptionProcesses.isEmpty && hasReceivedEvent) || !hasReceivedEvent) {
           onEnd();
         }
         break;

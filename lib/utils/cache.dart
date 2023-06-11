@@ -1,22 +1,18 @@
-import 'package:cache_manager/cache_manager.dart';
+// Haven't found a proper cache library yet
+final Map<String, Map<String, dynamic>> _CACHE = {};
 
 Future<T> Function() withCache<T extends Map<String, dynamic>>(
   Future<T> Function() callback,
   final String key,
 ) {
   return () async {
-    try {
-      final cachedValue = await ReadCache.getJson(key: key);
-      if (cachedValue != null) {
-        return cachedValue;
-      }
-    } catch (_) {}
+    if (_CACHE.containsKey(key)) {
+      return _CACHE[key] as T;
+    }
 
     final value = await callback();
-    await WriteCache.setJson(
-      key: key,
-      value: value,
-    );
+
+    _CACHE[key] = value;
 
     return value;
   };

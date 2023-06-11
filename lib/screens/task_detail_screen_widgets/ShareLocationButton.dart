@@ -175,11 +175,10 @@ class _ShareLocationButtonState extends State<ShareLocationButton> {
           break;
       }
     } catch (error) {
-      FlutterLogs.logErrorTrace(
+      FlutterLogs.logError(
         LOG_TAG,
         "Share Location",
-        "Error while sharing location.",
-        error as Error,
+        "Error while sharing location: $error",
       );
     } finally {
       setState(() {
