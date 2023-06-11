@@ -513,6 +513,7 @@
   "logs_values_taskDeleted": "Task deleted",
   "logs_values_taskStatusChanged": "Task status changed",
   "logs_values_updatedLocation": "Location updated",
+  "logs_values_alarmCreated": "Alarm added",
   "log_title_taskCreated": "<{name}> created",
   "@log_title_taskCreated": {
     "placeholders": {
@@ -544,6 +545,14 @@
     "placeholders": {
       "count": {
         "type": "int"
+      }
+    }
+  },
+  "log_title_alarmCreated": "Alarm added for {viewName}",
+  "@log_title_alarmCreated": {
+    "placeholders": {
+      "viewName": {
+        "type": "String"
       }
     }
   },

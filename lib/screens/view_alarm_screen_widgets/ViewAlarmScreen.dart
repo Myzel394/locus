@@ -11,11 +11,13 @@ import 'package:locus/constants/spacing.dart';
 import 'package:locus/screens/view_alarm_screen_widgets/ViewAlarmSelectRadiusRegionScreen.dart';
 import 'package:locus/services/location_alarm_service.dart';
 import 'package:locus/services/location_point_service.dart';
+import 'package:locus/services/log_service.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:provider/provider.dart';
 
+import '../../models/log.dart';
 import '../../services/settings_service.dart';
 import '../../widgets/PlatformFlavorWidget.dart';
 
@@ -36,8 +38,7 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
 
   void _addNewAlarm() async {
     final viewService = context.read<ViewService>();
-    final RadiusBasedRegionLocationAlarm? alarm =
-        await Navigator.of(context).push(
+    final RadiusBasedRegionLocationAlarm? alarm = await Navigator.of(context).push(
       MaterialWithModalsPageRoute(
         builder: (context) => const ViewAlarmSelectRadiusRegionScreen(),
       ),
@@ -220,8 +221,7 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
                           itemCount: widget.view.alarms.length,
                           itemBuilder: (context, index) {
                             final RadiusBasedRegionLocationAlarm alarm =
-                                widget.view.alarms[index]
-                                    as RadiusBasedRegionLocationAlarm;
+                                widget.view.alarms[index] as RadiusBasedRegionLocationAlarm;
 
                             return Padding(
                               padding: const EdgeInsets.only(
@@ -236,17 +236,26 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
                                     trailing: PlatformIconButton(
                                       icon: Icon(context.platformIcons.delete),
                                       onPressed: () async {
-                                        final viewService =
-                                            context.read<ViewService>();
+                                        final viewService = context.read<ViewService>();
+                                        final logService = context.read<LogService>();
 
                                         widget.view.removeAlarm(alarm);
                                         await viewService.update(widget.view);
+
+                                        await logService.addLog(
+                                          Log.createAlarm(
+                                            initiator: LogInitiator.user,
+                                            id: alarm.id,
+                                            alarmType: LocationAlarmType.radiusBasedRegion,
+                                            viewID: widget.view.id,
+                                            viewName: widget.view.name,
+                                          ),
+                                        );
                                       },
                                     ),
                                   ),
                                   ClipRRect(
-                                    borderRadius:
-                                        BorderRadius.circular(LARGE_SPACE),
+                                    borderRadius: BorderRadius.circular(LARGE_SPACE),
                                     child: SizedBox(
                                       width: double.infinity,
                                       height: 200,
@@ -262,23 +271,18 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
                           },
                         ),
                         Padding(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: MEDIUM_SPACE),
+                          padding: const EdgeInsets.symmetric(vertical: MEDIUM_SPACE),
                           child: PlatformElevatedButton(
                             onPressed: _addNewAlarm,
                             material: (_, __) => MaterialElevatedButtonData(
                               icon: const Icon(Icons.add),
                             ),
-                            child: Text(l10n
-                                .location_manageAlarms_addNewAlarm_actionLabel),
+                            child: Text(l10n.location_manageAlarms_addNewAlarm_actionLabel),
                           ),
                         ),
                         Padding(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: MEDIUM_SPACE),
-                          child: Text(
-                              l10n.location_manageAlarms_lastCheck_description(
-                                  widget.view.lastAlarmCheck)),
+                          padding: const EdgeInsets.symmetric(vertical: MEDIUM_SPACE),
+                          child: Text(l10n.location_manageAlarms_lastCheck_description(widget.view.lastAlarmCheck)),
                         ),
                       ],
                     ),

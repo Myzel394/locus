@@ -9,6 +9,7 @@ final Map<LogType, IconData> TYPE_ICON_MAP_MATERIAL = {
   LogType.taskDeleted: Icons.delete,
   LogType.taskStatusChanged: Icons.change_circle_rounded,
   LogType.updatedLocation: Icons.location_on,
+  LogType.alarmCreated: Icons.alarm,
 };
 
 final Map<LogType, IconData> TYPE_ICON_MAP_CUPERTINO = {
@@ -16,6 +17,7 @@ final Map<LogType, IconData> TYPE_ICON_MAP_CUPERTINO = {
   LogType.taskDeleted: CupertinoIcons.delete,
   LogType.taskStatusChanged: CupertinoIcons.arrow_2_circlepath,
   LogType.updatedLocation: CupertinoIcons.location,
+  LogType.alarmCreated: CupertinoIcons.alarm,
 };
 
 class LogIcon extends StatelessWidget {
@@ -47,9 +49,7 @@ class LogIcon extends StatelessWidget {
       cupertino: (_, __) {
         if (log.type == LogType.taskStatusChanged) {
           return Icon(
-            log.taskStatusChangeData.active
-                ? CupertinoIcons.play
-                : CupertinoIcons.pause,
+            log.taskStatusChangeData.active ? CupertinoIcons.play : CupertinoIcons.pause,
             size: size,
           );
         }

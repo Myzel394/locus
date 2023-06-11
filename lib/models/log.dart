@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:locus/services/location_alarm_service.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:uuid/uuid.dart';
 
@@ -12,6 +13,7 @@ enum LogType {
   taskDeleted,
   taskStatusChanged,
   updatedLocation,
+  alarmCreated,
 }
 
 enum LogInitiator {
@@ -54,6 +56,8 @@ class Log {
         );
       case LogType.updatedLocation:
         return l10n.log_title_updatedLocation(updateLocationData.tasks.length);
+      case LogType.alarmCreated:
+        return l10n.log_title_alarmCreated(createAlarmData.viewName);
     }
   }
 
@@ -169,6 +173,33 @@ class Log {
     return UpdateLocationData.fromJSON(jsonDecode(payload));
   }
 
+  factory Log.createAlarm({
+    required LogInitiator initiator,
+    required String viewID,
+    required String viewName,
+    required String id,
+    required LocationAlarmType alarmType,
+  }) =>
+      Log.create(
+        type: LogType.alarmCreated,
+        initiator: initiator,
+        payload: jsonEncode(
+          CreateAlarmData(
+            id: id,
+            type: alarmType,
+            viewID: viewID,
+            viewName: viewName,
+          ).toJSON(),
+        ),
+      );
+
+  CreateAlarmData get createAlarmData {
+    if (type != LogType.alarmCreated) {
+      throw Exception("Log is not of type alarmCreated");
+    }
+    return CreateAlarmData.fromJSON(jsonDecode(payload));
+  }
+
   factory Log.fromJSON(Map<String, dynamic> json) => Log(
         id: json["i"],
         createdAt: DateTime.parse(json["c"]),
@@ -209,8 +240,7 @@ class UpdateLocationData {
     required this.tasks,
   });
 
-  factory UpdateLocationData.fromJSON(Map<String, dynamic> json) =>
-      UpdateLocationData(
+  factory UpdateLocationData.fromJSON(Map<String, dynamic> json) => UpdateLocationData(
         latitude: json["a"],
         longitude: json["o"],
         accuracy: json["c"],
@@ -297,8 +327,7 @@ class TaskStatusChangeData {
     required this.active,
   });
 
-  factory TaskStatusChangeData.fromJSON(Map<String, dynamic> json) =>
-      TaskStatusChangeData(
+  factory TaskStatusChangeData.fromJSON(Map<String, dynamic> json) => TaskStatusChangeData(
         id: json["i"],
         name: json["n"],
         active: json["s"],
@@ -333,4 +362,32 @@ class StopTaskData {
       };
 
   Task getTask(final TaskService taskService) => taskService.getByID(id);
+}
+
+class CreateAlarmData {
+  final String id;
+  final LocationAlarmType type;
+  final String viewID;
+  final String viewName;
+
+  const CreateAlarmData({
+    required this.id,
+    required this.type,
+    required this.viewID,
+    required this.viewName,
+  });
+
+  factory CreateAlarmData.fromJSON(Map<String, dynamic> json) => CreateAlarmData(
+        id: json["i"],
+        type: LocationAlarmType.values[json["t"]],
+        viewID: json["v"],
+        viewName: json["n"],
+      );
+
+  Map<String, dynamic> toJSON() => {
+        "i": id,
+        "v": viewID,
+        "t": type.index,
+        "n": viewName,
+      };
 }
