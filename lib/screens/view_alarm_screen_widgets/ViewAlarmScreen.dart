@@ -37,6 +37,7 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
   LocationPointService? lastLocation;
 
   void _addNewAlarm() async {
+    final logService = context.read<LogService>();
     final viewService = context.read<ViewService>();
     final RadiusBasedRegionLocationAlarm? alarm = await Navigator.of(context).push(
       MaterialWithModalsPageRoute(
@@ -54,6 +55,16 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
 
     widget.view.addAlarm(alarm);
     await viewService.update(widget.view);
+
+    await logService.addLog(
+      Log.createAlarm(
+        initiator: LogInitiator.user,
+        id: alarm.id,
+        alarmType: LocationAlarmType.radiusBasedRegion,
+        viewID: widget.view.id,
+        viewName: widget.view.name,
+      ),
+    );
   }
 
   Widget getEmptyState() {
@@ -243,10 +254,8 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
                                         await viewService.update(widget.view);
 
                                         await logService.addLog(
-                                          Log.createAlarm(
+                                          Log.deleteAlarm(
                                             initiator: LogInitiator.user,
-                                            id: alarm.id,
-                                            alarmType: LocationAlarmType.radiusBasedRegion,
                                             viewID: widget.view.id,
                                             viewName: widget.view.name,
                                           ),

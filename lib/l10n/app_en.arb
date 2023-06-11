@@ -514,6 +514,7 @@
   "logs_values_taskStatusChanged": "Task status changed",
   "logs_values_updatedLocation": "Location updated",
   "logs_values_alarmCreated": "Alarm added",
+  "logs_values_alarmDeleted": "Alarm removed",
   "log_title_taskCreated": "<{name}> created",
   "@log_title_taskCreated": {
     "placeholders": {
@@ -550,6 +551,14 @@
   },
   "log_title_alarmCreated": "Alarm added for {viewName}",
   "@log_title_alarmCreated": {
+    "placeholders": {
+      "viewName": {
+        "type": "String"
+      }
+    }
+  },
+  "log_title_alarmDeleted": "Alarm removed from {viewName}",
+  "@log_title_alarmDeleted": {
     "placeholders": {
       "viewName": {
         "type": "String"

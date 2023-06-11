@@ -25,6 +25,7 @@ class LogTypeInfo extends StatelessWidget {
       LogType.taskStatusChanged: l10n.logs_values_taskStatusChanged,
       LogType.updatedLocation: l10n.logs_values_updatedLocation,
       LogType.alarmCreated: l10n.logs_values_alarmCreated,
+      LogType.alarmDeleted: l10n.logs_values_alarmDeleted,
     };
   }
 

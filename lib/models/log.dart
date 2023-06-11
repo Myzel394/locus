@@ -14,6 +14,7 @@ enum LogType {
   taskStatusChanged,
   updatedLocation,
   alarmCreated,
+  alarmDeleted,
 }
 
 enum LogInitiator {
@@ -58,6 +59,8 @@ class Log {
         return l10n.log_title_updatedLocation(updateLocationData.tasks.length);
       case LogType.alarmCreated:
         return l10n.log_title_alarmCreated(createAlarmData.viewName);
+      case LogType.alarmDeleted:
+        return l10n.log_title_alarmDeleted(deleteAlarmData.viewName);
     }
   }
 
@@ -173,6 +176,29 @@ class Log {
     return UpdateLocationData.fromJSON(jsonDecode(payload));
   }
 
+  factory Log.deleteAlarm({
+    required LogInitiator initiator,
+    required String viewID,
+    required String viewName,
+  }) =>
+      Log.create(
+        type: LogType.alarmDeleted,
+        initiator: initiator,
+        payload: jsonEncode(
+          DeleteAlarmData(
+            viewID: viewID,
+            viewName: viewName,
+          ).toJSON(),
+        ),
+      );
+
+  DeleteAlarmData get deleteAlarmData {
+    if (type != LogType.alarmDeleted) {
+      throw Exception("Log is not of type alarmDeleted");
+    }
+    return DeleteAlarmData.fromJSON(jsonDecode(payload));
+  }
+
   factory Log.createAlarm({
     required LogInitiator initiator,
     required String viewID,
@@ -200,7 +226,8 @@ class Log {
     return CreateAlarmData.fromJSON(jsonDecode(payload));
   }
 
-  factory Log.fromJSON(Map<String, dynamic> json) => Log(
+  factory Log.fromJSON(Map<String, dynamic> json) =>
+      Log(
         id: json["i"],
         createdAt: DateTime.parse(json["c"]),
         type: LogType.values[json["t"]],
@@ -208,7 +235,8 @@ class Log {
         payload: json["p"],
       );
 
-  Map<String, dynamic> toJSON() => {
+  Map<String, dynamic> toJSON() =>
+      {
         "i": id,
         "c": createdAt.toIso8601String(),
         "t": type.index,
@@ -240,27 +268,31 @@ class UpdateLocationData {
     required this.tasks,
   });
 
-  factory UpdateLocationData.fromJSON(Map<String, dynamic> json) => UpdateLocationData(
+  factory UpdateLocationData.fromJSON(Map<String, dynamic> json) =>
+      UpdateLocationData(
         latitude: json["a"],
         longitude: json["o"],
         accuracy: json["c"],
         tasks: List<UpdatedTaskData>.from(
           List<Map<String, dynamic>>.from(json["t"]).map(
-            (task) => UpdatedTaskData(
-              id: task["i"]!,
-              name: task["n"]!,
-            ),
+                (task) =>
+                UpdatedTaskData(
+                  id: task["i"]!,
+                  name: task["n"]!,
+                ),
           ),
         ),
       );
 
-  Map<String, dynamic> toJSON() => {
+  Map<String, dynamic> toJSON() =>
+      {
         "o": latitude,
         "a": longitude,
         "c": accuracy,
         "t": List<Map<String, String>>.from(
           tasks.map(
-            (task) => {
+                (task) =>
+            {
               "i": task.id,
               "n": task.name,
             },
@@ -285,13 +317,15 @@ class CreateTaskData {
     required this.creationContext,
   });
 
-  factory CreateTaskData.fromJSON(Map<String, dynamic> json) => CreateTaskData(
+  factory CreateTaskData.fromJSON(Map<String, dynamic> json) =>
+      CreateTaskData(
         id: json["i"],
         name: json["n"],
         creationContext: TaskCreationContext.values[json["c"]],
       );
 
-  Map<String, dynamic> toJSON() => {
+  Map<String, dynamic> toJSON() =>
+      {
         "i": id,
         "n": name,
         "c": creationContext.index,
@@ -307,11 +341,13 @@ class DeleteTaskData {
     required this.name,
   });
 
-  factory DeleteTaskData.fromJSON(Map<String, dynamic> json) => DeleteTaskData(
+  factory DeleteTaskData.fromJSON(Map<String, dynamic> json) =>
+      DeleteTaskData(
         name: json["n"],
       );
 
-  Map<String, dynamic> toJSON() => {
+  Map<String, dynamic> toJSON() =>
+      {
         "n": name,
       };
 }
@@ -327,13 +363,15 @@ class TaskStatusChangeData {
     required this.active,
   });
 
-  factory TaskStatusChangeData.fromJSON(Map<String, dynamic> json) => TaskStatusChangeData(
+  factory TaskStatusChangeData.fromJSON(Map<String, dynamic> json) =>
+      TaskStatusChangeData(
         id: json["i"],
         name: json["n"],
         active: json["s"],
       );
 
-  Map<String, dynamic> toJSON() => {
+  Map<String, dynamic> toJSON() =>
+      {
         "i": id,
         "n": name,
         "s": active,
@@ -351,12 +389,14 @@ class StopTaskData {
     required this.name,
   });
 
-  factory StopTaskData.fromJSON(Map<String, dynamic> json) => StopTaskData(
+  factory StopTaskData.fromJSON(Map<String, dynamic> json) =>
+      StopTaskData(
         id: json["i"],
         name: json["n"],
       );
 
-  Map<String, dynamic> toJSON() => {
+  Map<String, dynamic> toJSON() =>
+      {
         "i": id,
         "n": name,
       };
@@ -377,17 +417,41 @@ class CreateAlarmData {
     required this.viewName,
   });
 
-  factory CreateAlarmData.fromJSON(Map<String, dynamic> json) => CreateAlarmData(
+  factory CreateAlarmData.fromJSON(Map<String, dynamic> json) =>
+      CreateAlarmData(
         id: json["i"],
         type: LocationAlarmType.values[json["t"]],
         viewID: json["v"],
         viewName: json["n"],
       );
 
-  Map<String, dynamic> toJSON() => {
+  Map<String, dynamic> toJSON() =>
+      {
         "i": id,
         "v": viewID,
         "t": type.index,
+        "n": viewName,
+      };
+}
+
+class DeleteAlarmData {
+  final String viewID;
+  final String viewName;
+
+  const DeleteAlarmData({
+    required this.viewID,
+    required this.viewName,
+  });
+
+  factory DeleteAlarmData.fromJSON(Map<String, dynamic> json) =>
+      DeleteAlarmData(
+        viewID: json["v"],
+        viewName: json["n"],
+      );
+
+  Map<String, dynamic> toJSON() =>
+      {
+        "v": viewID,
         "n": viewName,
       };
 }
