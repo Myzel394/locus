@@ -596,6 +596,18 @@
       }
     }
   },
+  "locationAlarm_radiusBasedRegion_notificationTitle_maybe": "{name} may has entered or left zone {zone}",
+  "@locationAlarm_radiusBasedRegion_notificationTitle_maybe": {
+    "description": "Notification title when it is not clear if the user entered or left a zone; Try to keep this short, will be truncated to 80 characters",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "zone": {
+        "type": "String"
+      }
+    }
+  },
   "locationAlarm_notification_description": "Tap for more information",
   "androidNotificationChannel_locationAlarms_name": "Location Alarms",
   "androidNotificationChannel_locationAlarms_description": "Receive notifications for location alarms",

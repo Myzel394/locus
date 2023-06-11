@@ -41,6 +41,7 @@ class TaskView extends ChangeNotifier with LocationBase {
   final List<LocationAlarmServiceBase> alarms;
   final String id;
   DateTime lastAlarmCheck;
+  DateTime? lastMaybeTrigger;
   String name;
 
   TaskView({
@@ -48,11 +49,11 @@ class TaskView extends ChangeNotifier with LocationBase {
     required this.nostrPublicKey,
     required this.relays,
     required this.name,
+    this.lastMaybeTrigger,
     String? id,
     DateTime? lastAlarmCheck,
     List<LocationAlarmServiceBase>? alarms,
-  })
-      : _encryptionPassword = encryptionPassword,
+  })  : _encryptionPassword = encryptionPassword,
         alarms = alarms ?? [],
         lastAlarmCheck = lastAlarmCheck ?? DateTime.now(),
         id = id ?? const Uuid().v4();
@@ -72,8 +73,7 @@ class TaskView extends ChangeNotifier with LocationBase {
     );
   }
 
-  factory TaskView.fromJSON(final Map<String, dynamic> json) =>
-      TaskView(
+  factory TaskView.fromJSON(final Map<String, dynamic> json) => TaskView(
         encryptionPassword: SecretKey(List<int>.from(json["encryptionPassword"])),
         nostrPublicKey: json["nostrPublicKey"],
         relays: List<String>.from(json["relays"]),
@@ -91,10 +91,13 @@ class TaskView extends ChangeNotifier with LocationBase {
           }),
         ),
         lastAlarmCheck: json["lastAlarmCheck"] != null ? DateTime.parse(json["lastAlarmCheck"]) : DateTime.now(),
+        lastMaybeTrigger: json["lastMaybeTrigger"] != null ? DateTime.parse(json["lastMaybeTrigger"]) : null,
       );
 
-  static Future<TaskView> fetchFromNostr(final AppLocalizations l10n,
-      final ViewServiceLinkParameters parameters,) async {
+  static Future<TaskView> fetchFromNostr(
+    final AppLocalizations l10n,
+    final ViewServiceLinkParameters parameters,
+  ) async {
     final completer = Completer<TaskView>();
 
     final request = Request(generate64RandomHexChars(), [
@@ -176,10 +179,13 @@ class TaskView extends ChangeNotifier with LocationBase {
       "name": name,
       "id": id,
       "alarms": alarms.map((alarm) => alarm.toJSON()).toList(),
+      "lastAlarmCheck": lastAlarmCheck.toIso8601String(),
+      "lastMaybeTrigger": lastMaybeTrigger?.toIso8601String(),
     };
   }
 
-  Future<String?> validate(final AppLocalizations l10n, {
+  Future<String?> validate(
+    final AppLocalizations l10n, {
     required final TaskService taskService,
     required final ViewService viewService,
   }) async {
@@ -239,11 +245,11 @@ class TaskView extends ChangeNotifier with LocationBase {
 
   Future<void> checkAlarm({
     required final void Function(
-        LocationAlarmServiceBase alarm, LocationPointService previousLocation, LocationPointService nextLocation)
-    onTrigger,
+            LocationAlarmServiceBase alarm, LocationPointService previousLocation, LocationPointService nextLocation)
+        onTrigger,
     required final void Function(
-        LocationAlarmServiceBase alarm, LocationPointService previousLocation, LocationPointService nextLocation)
-    onMaybeTrigger,
+            LocationAlarmServiceBase alarm, LocationPointService previousLocation, LocationPointService nextLocation)
+        onMaybeTrigger,
   }) async {
     final locations = await getLocationsAsFuture(
       from: lastAlarmCheck,
@@ -327,7 +333,7 @@ class ViewService extends ChangeNotifier {
       List<Map<String, dynamic>>.from(
         await Future.wait(
           _views.map(
-                (view) => view.toJSON(),
+            (view) => view.toJSON(),
           ),
         ),
       ),
