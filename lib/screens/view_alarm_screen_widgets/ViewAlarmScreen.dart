@@ -19,6 +19,7 @@ import 'package:provider/provider.dart';
 
 import '../../models/log.dart';
 import '../../services/settings_service.dart';
+import '../../utils/PageRoute.dart';
 import '../../widgets/PlatformFlavorWidget.dart';
 
 class ViewAlarmScreen extends StatefulWidget {
@@ -39,11 +40,22 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
   void _addNewAlarm() async {
     final logService = context.read<LogService>();
     final viewService = context.read<ViewService>();
-    final RadiusBasedRegionLocationAlarm? alarm = await Navigator.of(context).push(
-      MaterialWithModalsPageRoute(
-        builder: (context) => const ViewAlarmSelectRadiusRegionScreen(),
-      ),
-    );
+    final RadiusBasedRegionLocationAlarm? alarm = (await (() {
+      if (isCupertino(context)) {
+        return showCupertinoModalBottomSheet(
+          context: context,
+          backgroundColor: Colors.transparent,
+          builder: (_) => const ViewAlarmSelectRadiusRegionScreen(),
+        );
+      }
+
+      return Navigator.of(context).push(
+        NativePageRoute(
+          context: context,
+          builder: (context) => const ViewAlarmSelectRadiusRegionScreen(),
+        ),
+      );
+    })()) as RadiusBasedRegionLocationAlarm?;
 
     if (!mounted) {
       return;
@@ -91,9 +103,10 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
         const SizedBox(height: MEDIUM_SPACE),
         PlatformElevatedButton(
           onPressed: _addNewAlarm,
-          material: (_, __) => MaterialElevatedButtonData(
-            icon: const Icon(Icons.add),
-          ),
+          material: (_, __) =>
+              MaterialElevatedButtonData(
+                icon: const Icon(Icons.add),
+              ),
           child: Text(l10n.location_manageAlarms_addNewAlarm_actionLabel),
         )
       ],
@@ -224,78 +237,88 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
             child: widget.view.alarms.isEmpty
                 ? getEmptyState()
                 : SingleChildScrollView(
-                    child: Column(
-                      children: <Widget>[
-                        ListView.builder(
-                          physics: const NeverScrollableScrollPhysics(),
-                          shrinkWrap: true,
-                          itemCount: widget.view.alarms.length,
-                          itemBuilder: (context, index) {
-                            final RadiusBasedRegionLocationAlarm alarm =
-                                widget.view.alarms[index] as RadiusBasedRegionLocationAlarm;
+              child: Column(
+                children: <Widget>[
+                  ListView.builder(
+                    physics: const NeverScrollableScrollPhysics(),
+                    shrinkWrap: true,
+                    itemCount: widget.view.alarms.length,
+                    itemBuilder: (context, index) {
+                      final RadiusBasedRegionLocationAlarm alarm =
+                      widget.view.alarms[index]
+                      as RadiusBasedRegionLocationAlarm;
 
-                            return Padding(
-                              padding: const EdgeInsets.only(
-                                bottom: MEDIUM_SPACE,
-                              ),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: <Widget>[
-                                  PlatformListTile(
-                                    title: Text(alarm.zoneName),
-                                    leading: alarm.getIcon(context),
-                                    trailing: PlatformIconButton(
-                                      icon: Icon(context.platformIcons.delete),
-                                      onPressed: () async {
-                                        final viewService = context.read<ViewService>();
-                                        final logService = context.read<LogService>();
-
-                                        widget.view.removeAlarm(alarm);
-                                        await viewService.update(widget.view);
-
-                                        await logService.addLog(
-                                          Log.deleteAlarm(
-                                            initiator: LogInitiator.user,
-                                            viewID: widget.view.id,
-                                            viewName: widget.view.name,
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(LARGE_SPACE),
-                                    child: SizedBox(
-                                      width: double.infinity,
-                                      height: 200,
-                                      child: IgnorePointer(
-                                        ignoring: true,
-                                        child: buildMap(alarm),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
+                      return Padding(
+                        padding: const EdgeInsets.only(
+                          bottom: MEDIUM_SPACE,
                         ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: MEDIUM_SPACE),
-                          child: PlatformElevatedButton(
-                            onPressed: _addNewAlarm,
-                            material: (_, __) => MaterialElevatedButtonData(
-                              icon: const Icon(Icons.add),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            PlatformListTile(
+                              title: Text(alarm.zoneName),
+                              leading: alarm.getIcon(context),
+                              trailing: PlatformIconButton(
+                                icon: Icon(context.platformIcons.delete),
+                                onPressed: () async {
+                                  final viewService =
+                                  context.read<ViewService>();
+                                  final logService =
+                                  context.read<LogService>();
+
+                                  widget.view.removeAlarm(alarm);
+                                  await viewService.update(widget.view);
+
+                                  await logService.addLog(
+                                    Log.deleteAlarm(
+                                      initiator: LogInitiator.user,
+                                      viewID: widget.view.id,
+                                      viewName: widget.view.name,
+                                    ),
+                                  );
+                                },
+                              ),
                             ),
-                            child: Text(l10n.location_manageAlarms_addNewAlarm_actionLabel),
+                            ClipRRect(
+                              borderRadius:
+                              BorderRadius.circular(LARGE_SPACE),
+                              child: SizedBox(
+                                width: double.infinity,
+                                height: 200,
+                                child: IgnorePointer(
+                                  ignoring: true,
+                                  child: buildMap(alarm),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: MEDIUM_SPACE),
+                    child: PlatformElevatedButton(
+                      onPressed: _addNewAlarm,
+                      material: (_, __) =>
+                          MaterialElevatedButtonData(
+                            icon: const Icon(Icons.add),
                           ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: MEDIUM_SPACE),
-                          child: Text(l10n.location_manageAlarms_lastCheck_description(widget.view.lastAlarmCheck)),
-                        ),
-                      ],
+                      child: Text(l10n
+                          .location_manageAlarms_addNewAlarm_actionLabel),
                     ),
                   ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: MEDIUM_SPACE),
+                    child: Text(
+                        l10n.location_manageAlarms_lastCheck_description(
+                            widget.view.lastAlarmCheck)),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),

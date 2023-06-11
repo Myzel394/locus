@@ -17,6 +17,7 @@ import 'package:locus/widgets/OpenInMaps.dart';
 import 'package:locus/widgets/PlatformFlavorWidget.dart';
 import 'package:locus/widgets/PlatformPopup.dart';
 import 'package:map_launcher/map_launcher.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 import '../constants/spacing.dart';
 import '../services/location_fetch_controller.dart';
@@ -192,21 +193,30 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
               type: PlatformPopupType.tap,
               items: [
                 PlatformPopupMenuItem(
-                  label: PlatformListTile(
-                    leading: PlatformFlavorWidget(
-                      cupertino: (_, __) => const Icon(CupertinoIcons.alarm),
-                      material: (_, __) => const Icon(Icons.alarm_rounded),
+                    label: PlatformListTile(
+                      leading: PlatformFlavorWidget(
+                        cupertino: (_, __) => const Icon(CupertinoIcons.alarm),
+                        material: (_, __) => const Icon(Icons.alarm_rounded),
+                      ),
+                      title: Text(l10n.location_manageAlarms_title),
+                      trailing: const SizedBox.shrink(),
                     ),
-                    title: Text(l10n.location_manageAlarms_title),
-                    trailing: const SizedBox.shrink(),
-                  ),
-                  onPressed: () => Navigator.of(context).push(
-                    NativePageRoute(
-                      context: context,
-                      builder: (_) => ViewAlarmScreen(view: widget.view),
-                    ),
-                  ),
-                ),
+                    onPressed: () {
+                      if (isCupertino(context)) {
+                        Navigator.of(context).push(
+                          MaterialWithModalsPageRoute(
+                            builder: (_) => ViewAlarmScreen(view: widget.view),
+                          ),
+                        );
+                      } else {
+                        Navigator.of(context).push(
+                          NativePageRoute(
+                            context: context,
+                            builder: (_) => ViewAlarmScreen(view: widget.view),
+                          ),
+                        );
+                      }
+                    }),
                 if (_locationFetcher.controller.locations.isNotEmpty)
                   PlatformPopupMenuItem(
                     label: PlatformListTile(
