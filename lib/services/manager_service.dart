@@ -10,6 +10,7 @@ import 'package:locus/constants/notifications.dart';
 import 'package:locus/constants/values.dart';
 import 'package:locus/services/location_alarm_service.dart';
 import 'package:locus/services/location_point_service.dart';
+import 'package:locus/services/settings_service.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -42,11 +43,10 @@ Future<void> updateLocation() async {
       accuracy: locationData.accuracy,
       tasks: List<UpdatedTaskData>.from(
         runningTasks.map(
-              (task) =>
-              UpdatedTaskData(
-                id: task.id,
-                name: task.name,
-              ),
+          (task) => UpdatedTaskData(
+            id: task.id,
+            name: task.name,
+          ),
         ),
       ),
     ),
@@ -100,11 +100,7 @@ Future<void> checkViewAlarms({
           final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
           flutterLocalNotificationsPlugin.show(
-            int.parse("${DateTime
-                .now()
-                .millisecond}${DateTime
-                .now()
-                .microsecond}"),
+            int.parse("${DateTime.now().millisecond}${DateTime.now().microsecond}"),
             StringUtils.truncate(
               l10n.locationAlarm_radiusBasedRegion_notificationTitle_whenEnter(
                 view.name,
@@ -141,8 +137,9 @@ Future<void> checkViewAlarms({
 
 Future<void> _checkViewAlarms() async {
   final viewService = await ViewService.restore();
+  final settings = await SettingsService.restore();
   final alarmsViews = viewService.viewsWithAlarms;
-  final locale = Locale("en");
+  final locale = Locale(settings.localeName);
   final l10n = await AppLocalizations.delegate.load(locale);
 
   if (alarmsViews.isEmpty) {
@@ -188,14 +185,14 @@ void configureBackgroundFetch() {
       startOnBoot: true,
       stopOnTerminate: false,
     ),
-        (taskId) async {
+    (taskId) async {
       // We only use one taskId to update the location for all tasks,
       // so we don't need to check the taskId.
       await updateLocation();
 
       BackgroundFetch.finish(taskId);
     },
-        (taskId) {
+    (taskId) {
       // Timeout, we need to finish immediately.
       BackgroundFetch.finish(taskId);
     },

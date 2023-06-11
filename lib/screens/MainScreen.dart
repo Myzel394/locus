@@ -284,6 +284,15 @@ class _MainScreenState extends State<MainScreen> {
         );
       }
     });
+
+    _updateLocaleToSettings();
+  }
+
+  void _updateLocaleToSettings() {
+    final settingsService = context.read<SettingsService>();
+
+    settingsService.localeName = AppLocalizations.of(context).localeName;
+    settingsService.save();
   }
 
   @override

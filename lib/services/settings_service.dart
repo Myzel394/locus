@@ -40,6 +40,7 @@ GeocoderProvider selectRandomProvider() {
 }
 
 class SettingsService extends ChangeNotifier {
+  String localeName;
   bool automaticallyLookupAddresses;
   bool showHints;
   List<String> _relays;
@@ -63,6 +64,7 @@ class SettingsService extends ChangeNotifier {
     required this.geocoderProvider,
     required this.androidTheme,
     required this.helpers_hasSeen_radiusBasedAlarms,
+    required this.localeName,
     List<String>? relays,
   }) : _relays = relays ?? [];
 
@@ -75,6 +77,7 @@ class SettingsService extends ChangeNotifier {
       showHints: true,
       geocoderProvider: isSystemGeocoderAvailable() ? GeocoderProvider.system : selectRandomProvider(),
       helpers_hasSeen_radiusBasedAlarms: false,
+      localeName: "en",
     );
   }
 
@@ -90,6 +93,7 @@ class SettingsService extends ChangeNotifier {
       geocoderProvider: GeocoderProvider.values[data['geocoderProvider']],
       androidTheme: AndroidTheme.values[data['androidTheme']],
       helpers_hasSeen_radiusBasedAlarms: data['helpers_hasSeen_radiusBasedAlarms'],
+      localeName: data['localeName'],
     );
   }
 
@@ -122,6 +126,7 @@ class SettingsService extends ChangeNotifier {
       "geocoderProvider": geocoderProvider.index,
       "androidTheme": androidTheme.index,
       "helpers_hasSeen_radiusBasedAlarms": helpers_hasSeen_radiusBasedAlarms,
+      "localeName": localeName,
     };
   }
 
