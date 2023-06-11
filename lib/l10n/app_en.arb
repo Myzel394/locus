@@ -572,8 +572,9 @@
   "locationPointsScreen_title": "Location Points",
   "bunny_unavailable": "Sorry, but it seems as if your friend is as lost as this song.",
   "bunny_unavailable_action": "What's this song?",
-  "locationAlarm_radiusBasedRegion_notificationTitle_whenEnter": "{name} has entered zone {zone}",
+  "locationAlarm_radiusBasedRegion_notificationTitle_whenEnter": "{name} entered zone {zone}",
   "@locationAlarm_radiusBasedRegion_notificationTitle_whenEnter": {
+    "description": "Notification title when entering a zone; Try to keep this short, will be truncated to 80 characters",
     "placeholders": {
       "name": {
         "type": "String"
@@ -583,7 +584,18 @@
       }
     }
   },
-  "locationAlarm_radiusBasedRegion_notificationTitle_whenLeave": "{name} has left zone {zone}",
+  "locationAlarm_radiusBasedRegion_notificationTitle_whenLeave": "{name} left zone {zone}",
+  "@locationAlarm_radiusBasedRegion_notificationTitle_whenLeave": {
+    "description": "Notification title when leaving a zone; Try to keep this short, will be truncated to 80 characters",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "zone": {
+        "type": "String"
+      }
+    }
+  },
   "locationAlarm_notification_description": "Tap for more information",
   "androidNotificationChannel_locationAlarms_name": "Location Alarms",
   "androidNotificationChannel_locationAlarms_description": "Receive notifications for location alarms",

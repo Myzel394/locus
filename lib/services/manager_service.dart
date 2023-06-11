@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:background_fetch/background_fetch.dart';
+import 'package:basic_utils/basic_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:locus/App.dart';
@@ -61,10 +62,13 @@ Future<void> checkViewAlarms({
           final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
           flutterLocalNotificationsPlugin.show(
-            location.createdAt.millisecondsSinceEpoch,
-            l10n.locationAlarm_radiusBasedRegion_notificationTitle_whenEnter(
-              view.name,
-              "test",
+            int.parse("${location.createdAt.millisecond}${location.createdAt.microsecond}"),
+            StringUtils.truncate(
+              l10n.locationAlarm_radiusBasedRegion_notificationTitle_whenEnter(
+                view.name,
+                "test",
+              ),
+              76,
             ),
             l10n.locationAlarm_notification_description,
             NotificationDetails(
