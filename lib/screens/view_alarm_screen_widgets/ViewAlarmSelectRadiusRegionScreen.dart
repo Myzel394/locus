@@ -26,12 +26,10 @@ class ViewAlarmSelectRadiusRegionScreen extends StatefulWidget {
   });
 
   @override
-  State<ViewAlarmSelectRadiusRegionScreen> createState() =>
-      _ViewAlarmSelectRadiusRegionScreenState();
+  State<ViewAlarmSelectRadiusRegionScreen> createState() => _ViewAlarmSelectRadiusRegionScreenState();
 }
 
-class _ViewAlarmSelectRadiusRegionScreenState
-    extends State<ViewAlarmSelectRadiusRegionScreen> {
+class _ViewAlarmSelectRadiusRegionScreenState extends State<ViewAlarmSelectRadiusRegionScreen> {
   MapController? flutterMapController;
   AppleMaps.AppleMapController? appleMapController;
   LatLng? alarmCenter;
@@ -43,37 +41,40 @@ class _ViewAlarmSelectRadiusRegionScreenState
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Geolocator.getLastKnownPosition().then((location) {
-        if (location == null) {
-          return;
-        }
+    final settings = context.read<SettingsService>();
+    if (settings.mapProvider == MapProvider.openStreetMap) {
+      flutterMapController = MapController();
+    }
 
-        flutterMapController?.move(
-          LatLng(location.latitude, location.longitude),
-          13,
-        );
-        appleMapController?.moveCamera(
-          AppleMaps.CameraUpdate.newLatLng(
-            AppleMaps.LatLng(location.latitude, location.longitude),
-          ),
-        );
-      });
+    Geolocator.getLastKnownPosition().then((location) {
+      if (location == null) {
+        return;
+      }
 
-      Geolocator.getCurrentPosition(
-        // We want to get the position as fast as possible
-        desiredAccuracy: LocationAccuracy.lowest,
-      ).then((location) {
-        flutterMapController?.move(
-          LatLng(location.latitude, location.longitude),
-          13,
-        );
-        appleMapController?.moveCamera(
-          AppleMaps.CameraUpdate.newLatLng(
-            AppleMaps.LatLng(location.latitude, location.longitude),
-          ),
-        );
-      });
+      flutterMapController?.move(
+        LatLng(location.latitude, location.longitude),
+        13,
+      );
+      appleMapController?.moveCamera(
+        AppleMaps.CameraUpdate.newLatLng(
+          AppleMaps.LatLng(location.latitude, location.longitude),
+        ),
+      );
+    });
+
+    Geolocator.getCurrentPosition(
+      // We want to get the position as fast as possible
+      desiredAccuracy: LocationAccuracy.lowest,
+    ).then((location) {
+      flutterMapController?.move(
+        LatLng(location.latitude, location.longitude),
+        13,
+      );
+      appleMapController?.moveCamera(
+        AppleMaps.CameraUpdate.newLatLng(
+          AppleMaps.LatLng(location.latitude, location.longitude),
+        ),
+      );
     });
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -166,8 +167,7 @@ class _ViewAlarmSelectRadiusRegionScreenState
                     const Icon(Icons.touch_app_rounded),
                     const SizedBox(width: MEDIUM_SPACE),
                     Flexible(
-                      child: Text(l10n
-                          .location_addAlarm_radiusBased_help_tapDescription),
+                      child: Text(l10n.location_addAlarm_radiusBased_help_tapDescription),
                     ),
                   ],
                 ),
@@ -177,8 +177,7 @@ class _ViewAlarmSelectRadiusRegionScreenState
                     const Icon(Icons.pinch_rounded),
                     const SizedBox(width: MEDIUM_SPACE),
                     Flexible(
-                      child: Text(l10n
-                          .location_addAlarm_radiusBased_help_pinchDescription),
+                      child: Text(l10n.location_addAlarm_radiusBased_help_pinchDescription),
                     ),
                   ],
                 ),
@@ -204,13 +203,11 @@ class _ViewAlarmSelectRadiusRegionScreenState
               Text(l10n.location_addAlarm_radiusBased_help_description),
               const SizedBox(height: MEDIUM_SPACE),
               ListTile(
-                title: Text(
-                    l10n.location_addAlarm_radiusBased_help_tapDescription),
+                title: Text(l10n.location_addAlarm_radiusBased_help_tapDescription),
                 leading: const Icon(Icons.touch_app_rounded),
               ),
               ListTile(
-                title: Text(
-                    l10n.location_addAlarm_radiusBased_help_pinchDescription),
+                title: Text(l10n.location_addAlarm_radiusBased_help_pinchDescription),
                 leading: const Icon(Icons.pinch_rounded),
               ),
             ],
@@ -362,9 +359,7 @@ class _ViewAlarmSelectRadiusRegionScreenState
           ),
         ],
         cupertino: (_, __) => CupertinoNavigationBarData(
-          backgroundColor: isInScaleMode
-              ? null
-              : getCupertinoAppBarColorForMapScreen(context),
+          backgroundColor: isInScaleMode ? null : getCupertinoAppBarColorForMapScreen(context),
         ),
       ),
       body: GestureDetector(
@@ -403,8 +398,7 @@ class _ViewAlarmSelectRadiusRegionScreenState
                           const Icon(Icons.pinch_rounded),
                           const SizedBox(width: MEDIUM_SPACE),
                           Flexible(
-                            child: Text(l10n
-                                .location_addAlarm_radiusBased_isInScaleMode),
+                            child: Text(l10n.location_addAlarm_radiusBased_isInScaleMode),
                           ),
                         ],
                       ),
