@@ -29,15 +29,13 @@ class LocationsMapController extends ChangeNotifier {
 
   // To inform our wrappers to update the map, we use a stream.
   // This emits event to which our wrappers listen to.
-  final StreamController<Map<String, dynamic>> _eventEmitter =
-  StreamController.broadcast();
+  final StreamController<Map<String, dynamic>> _eventEmitter = StreamController.broadcast();
 
   LocationsMapController({
     List<LocationPointService>? locations,
   }) : _locations = locations ?? [];
 
-  static DateTime normalizeDateTime(final DateTime dateTime) =>
-      DateTime(
+  static DateTime normalizeDateTime(final DateTime dateTime) => DateTime(
         dateTime.year,
         dateTime.month,
         dateTime.day,
@@ -48,8 +46,7 @@ class LocationsMapController extends ChangeNotifier {
 
   bool get useAppleMaps => Platform.isIOS;
 
-  UnmodifiableListView<LocationPointService> get locations =>
-      UnmodifiableListView(_locations);
+  UnmodifiableListView<LocationPointService> get locations => UnmodifiableListView(_locations);
 
   @override
   void dispose() {
@@ -85,10 +82,9 @@ class LocationsMapController extends ChangeNotifier {
   }
 
   // Groups the locations by hour and returns a map of the hour and the number of locations in that hour.
-  Map<DateTime, List<LocationPointService>> getLocationsPerHour() =>
-      _locations.fold(
+  Map<DateTime, List<LocationPointService>> getLocationsPerHour() => _locations.fold(
         {},
-            (final Map<DateTime, List<LocationPointService>> value, element) {
+        (final Map<DateTime, List<LocationPointService>> value, element) {
           final date = normalizeDateTime(element.createdAt);
 
           if (value.containsKey(date)) {
@@ -105,6 +101,12 @@ class LocationsMapController extends ChangeNotifier {
     _eventEmitter.add({
       "type": "goTo",
       "location": location,
+    });
+  }
+
+  void goToUserLocation() {
+    _eventEmitter.add({
+      "type": "goToUserLocation",
     });
   }
 }
@@ -126,8 +128,7 @@ class LocationsMapCircle {
     this.strokeWidth = 5.0,
   }) : strokeColor = strokeColor ?? color;
 
-  AppleMaps.Circle get asAppleMaps =>
-      AppleMaps.Circle(
+  AppleMaps.Circle get asAppleMaps => AppleMaps.Circle(
         circleId: AppleMaps.CircleId(center.toString()),
         center: toAppleMapsCoordinates(center),
         radius: radius,
@@ -136,8 +137,7 @@ class LocationsMapCircle {
         strokeWidth: strokeWidth.round(),
       );
 
-  CircleMarker get asFlutterMap =>
-      CircleMarker(
+  CircleMarker get asFlutterMap => CircleMarker(
         point: center,
         color: color,
         borderColor: strokeColor,
@@ -174,8 +174,7 @@ class _LocationsMapState extends State<LocationsMap> {
   AppleMaps.AppleMapController? appleMapsController;
   MapController? flutterMapController;
 
-  static toAppleCoordinate(final LatLng latLng) =>
-      AppleMaps.LatLng(latLng.latitude, latLng.longitude);
+  static toAppleCoordinate(final LatLng latLng) => AppleMaps.LatLng(latLng.latitude, latLng.longitude);
 
   bool get shouldUseAppleMaps {
     final settings = context.read<SettingsService>();
@@ -186,14 +185,9 @@ class _LocationsMapState extends State<LocationsMap> {
   String get snippetText {
     final location = widget.controller.locations.last;
 
-    final batteryInfo = location.batteryLevel == null
-        ? ""
-        : "Battery at ${(location.batteryLevel! * 100).ceil()}%";
-    final dateInfo =
-        "Date: ${DateFormat.yMd().add_jm().format(location.createdAt)}";
-    final speedInfo = location.speed == null
-        ? ""
-        : "Moving at ${(location.speed!.abs() * 3.6).ceil()} km/h";
+    final batteryInfo = location.batteryLevel == null ? "" : "Battery at ${(location.batteryLevel! * 100).ceil()}%";
+    final dateInfo = "Date: ${DateFormat.yMd().add_jm().format(location.createdAt)}";
+    final speedInfo = location.speed == null ? "" : "Moving at ${(location.speed!.abs() * 3.6).ceil()} km/h";
 
     return [
       batteryInfo,
@@ -206,8 +200,7 @@ class _LocationsMapState extends State<LocationsMap> {
   void initState() {
     super.initState();
 
-    _controllerSubscription =
-        widget.controller.eventListener.listen(eventEmitterListener);
+    _controllerSubscription = widget.controller.eventListener.listen(eventEmitterListener);
 
     if (widget.initWithUserPosition) {
       fetchUserPosition();
@@ -252,6 +245,9 @@ class _LocationsMapState extends State<LocationsMap> {
           ),
         );
         break;
+      case "goToUserLocation":
+        await fetchUserPosition();
+        break;
     }
   }
 
@@ -274,9 +270,18 @@ class _LocationsMapState extends State<LocationsMap> {
       return;
     }
 
+    final lastLocationData = await Geolocator.getLastKnownPosition();
+    if (lastLocationData != null) {
+      moveToPosition(LatLng(
+        lastLocationData.latitude,
+        lastLocationData.longitude,
+      ));
+    }
+
     final locationData = await Geolocator.getCurrentPosition(
       // We want to get the position as fast as possible
       desiredAccuracy: LocationAccuracy.lowest,
+      timeLimit: const Duration(seconds: 5),
     );
 
     moveToPosition(LatLng(
@@ -302,39 +307,37 @@ class _LocationsMapState extends State<LocationsMap> {
             myLocationEnabled: true,
             annotations: widget.controller.locations.isNotEmpty
                 ? {
-              AppleMaps.Annotation(
-                annotationId: AppleMaps.AnnotationId(
-                  "annotation_${widget.controller.locations.last.latitude}:${widget.controller.locations.last
-                      .longitude}",
-                ),
-                position: AppleMaps.LatLng(
-                  widget.controller.locations.last.latitude,
-                  widget.controller.locations.last.longitude,
-                ),
-                infoWindow: AppleMaps.InfoWindow(
-                  title: "Last location",
-                  snippet: snippetText,
-                ),
-              ),
-            }
+                    AppleMaps.Annotation(
+                      annotationId: AppleMaps.AnnotationId(
+                        "annotation_${widget.controller.locations.last.latitude}:${widget.controller.locations.last.longitude}",
+                      ),
+                      position: AppleMaps.LatLng(
+                        widget.controller.locations.last.latitude,
+                        widget.controller.locations.last.longitude,
+                      ),
+                      infoWindow: AppleMaps.InfoWindow(
+                        title: "Last location",
+                        snippet: snippetText,
+                      ),
+                    ),
+                  }
                 : {},
             circles: {
               ...widget.circles.map((circle) => circle.asAppleMaps),
               ...widget.controller.locations.map(
-                    (location) =>
-                    AppleMaps.Circle(
-                      circleId: AppleMaps.CircleId(
-                        "circle_${location.latitude}:${location.longitude}",
-                      ),
-                      center: AppleMaps.LatLng(
-                        location.latitude,
-                        location.longitude,
-                      ),
-                      fillColor: Colors.blue.withOpacity(0.2),
-                      strokeColor: Colors.blue,
-                      strokeWidth: location.accuracy < 10 ? 1 : 3,
-                      radius: location.accuracy,
-                    ),
+                (location) => AppleMaps.Circle(
+                  circleId: AppleMaps.CircleId(
+                    "circle_${location.latitude}:${location.longitude}",
+                  ),
+                  center: AppleMaps.LatLng(
+                    location.latitude,
+                    location.longitude,
+                  ),
+                  fillColor: Colors.blue.withOpacity(0.2),
+                  strokeColor: Colors.blue,
+                  strokeWidth: location.accuracy < 10 ? 1 : 3,
+                  radius: location.accuracy,
+                ),
               ),
             });
       case MapProvider.openStreetMap:
@@ -356,16 +359,13 @@ class _LocationsMapState extends State<LocationsMap> {
                 duration: const Duration(milliseconds: 300),
                 opacity: widget.showCircles ? 1 : 0,
                 child: CircleLayer(
-                  circles: widget.circles
-                      .map((circle) => circle.asFlutterMap)
-                      .toList(),
+                  circles: widget.circles.map((circle) => circle.asFlutterMap).toList(),
                 ),
               ),
             CircleLayer(
               circles: widget.controller.locations
                   .map(
-                    (location) =>
-                    CircleMarker(
+                    (location) => CircleMarker(
                       point: LatLng(
                         location.latitude,
                         location.longitude,
@@ -376,7 +376,7 @@ class _LocationsMapState extends State<LocationsMap> {
                       radius: location.accuracy,
                       useRadiusInMeter: true,
                     ),
-              )
+                  )
                   .toList(),
             ),
             if (widget.controller.locations.isNotEmpty)
@@ -388,19 +388,17 @@ class _LocationsMapState extends State<LocationsMap> {
                         widget.controller.locations.last.latitude,
                         widget.controller.locations.last.longitude,
                       ),
-                      builder: (context) =>
-                      const Icon(
+                      builder: (context) => const Icon(
                         Icons.location_on,
                         color: Colors.red,
                       ),
                     ),
                   ],
                   popupDisplayOptions: PopupDisplayOptions(
-                    builder: (context, marker) =>
-                        Paper(
-                          width: null,
-                          child: Text(snippetText),
-                        ),
+                    builder: (context, marker) => Paper(
+                      width: null,
+                      child: Text(snippetText),
+                    ),
                   ),
                 ),
               ),

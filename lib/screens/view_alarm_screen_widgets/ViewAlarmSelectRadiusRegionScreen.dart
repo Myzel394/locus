@@ -27,8 +27,7 @@ class ViewAlarmSelectRadiusRegionScreen extends StatefulWidget {
   });
 
   @override
-  State<ViewAlarmSelectRadiusRegionScreen> createState() =>
-      _ViewAlarmSelectRadiusRegionScreenState();
+  State<ViewAlarmSelectRadiusRegionScreen> createState() => _ViewAlarmSelectRadiusRegionScreenState();
 }
 
 class _ViewAlarmSelectRadiusRegionScreenState extends State<ViewAlarmSelectRadiusRegionScreen> {
@@ -49,7 +48,7 @@ class _ViewAlarmSelectRadiusRegionScreenState extends State<ViewAlarmSelectRadiu
     }
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      _goToCurrentPosition();
+      goToCurrentPosition();
 
       final settings = context.read<SettingsService>();
 
@@ -68,7 +67,7 @@ class _ViewAlarmSelectRadiusRegionScreenState extends State<ViewAlarmSelectRadiu
     });
   }
 
-  void _goToCurrentPosition() async {
+  void goToCurrentPosition() async {
     if (!(await hasGrantedLocationPermission())) {
       return;
     }
@@ -180,8 +179,7 @@ class _ViewAlarmSelectRadiusRegionScreenState extends State<ViewAlarmSelectRadiu
                         const Icon(Icons.touch_app_rounded),
                         const SizedBox(width: MEDIUM_SPACE),
                         Flexible(
-                          child: Text(l10n
-                              .location_addAlarm_radiusBased_help_tapDescription),
+                          child: Text(l10n.location_addAlarm_radiusBased_help_tapDescription),
                         ),
                       ],
                     ),
@@ -191,8 +189,7 @@ class _ViewAlarmSelectRadiusRegionScreenState extends State<ViewAlarmSelectRadiu
                         const Icon(Icons.pinch_rounded),
                         const SizedBox(width: MEDIUM_SPACE),
                         Flexible(
-                          child: Text(l10n
-                              .location_addAlarm_radiusBased_help_pinchDescription),
+                          child: Text(l10n.location_addAlarm_radiusBased_help_pinchDescription),
                         ),
                       ],
                     ),
@@ -219,13 +216,11 @@ class _ViewAlarmSelectRadiusRegionScreenState extends State<ViewAlarmSelectRadiu
                   Text(l10n.location_addAlarm_radiusBased_help_description),
                   const SizedBox(height: MEDIUM_SPACE),
                   ListTile(
-                    title: Text(
-                        l10n.location_addAlarm_radiusBased_help_tapDescription),
+                    title: Text(l10n.location_addAlarm_radiusBased_help_tapDescription),
                     leading: const Icon(Icons.touch_app_rounded),
                   ),
                   ListTile(
-                    title: Text(
-                        l10n.location_addAlarm_radiusBased_help_pinchDescription),
+                    title: Text(l10n.location_addAlarm_radiusBased_help_pinchDescription),
                     leading: const Icon(Icons.pinch_rounded),
                   ),
                 ],
@@ -374,15 +369,27 @@ class _ViewAlarmSelectRadiusRegionScreenState extends State<ViewAlarmSelectRadiu
                 CupertinoIconButtonData(
                   padding: EdgeInsets.zero,
                 ),
+            icon: const Icon(Icons.my_location_rounded),
+            onPressed: () async {
+              final hasGrantedLocation = await requestBasicLocationPermission();
+
+              if (hasGrantedLocation) {
+                goToCurrentPosition();
+              }
+            },
+          ),
+          PlatformIconButton(
+            cupertino: (_, __) =>
+                CupertinoIconButtonData(
+                  padding: EdgeInsets.zero,
+                ),
             icon: Icon(context.platformIcons.help),
             onPressed: showHelp,
           ),
         ],
         cupertino: (_, __) =>
             CupertinoNavigationBarData(
-              backgroundColor: isInScaleMode
-                  ? null
-                  : getCupertinoAppBarColorForMapScreen(context),
+              backgroundColor: isInScaleMode ? null : getCupertinoAppBarColorForMapScreen(context),
             ),
       ),
       body: GestureDetector(

@@ -14,6 +14,7 @@ import 'package:locus/widgets/LocationsMap.dart';
 import 'package:map_launcher/map_launcher.dart';
 
 import '../constants/spacing.dart';
+import '../utils/permission.dart';
 import '../utils/theme.dart';
 import '../widgets/LocationFetchEmpty.dart';
 import '../widgets/OpenInMaps.dart';
@@ -105,54 +106,64 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
         cupertino: (_, __) => CupertinoNavigationBarData(
           backgroundColor: getCupertinoAppBarColorForMapScreen(context),
         ),
-        trailingActions: _locationFetcher.controller.locations.isNotEmpty
-            ? [
-                PlatformPopup<String>(
-                  type: PlatformPopupType.tap,
-                  items: [
-                    PlatformPopupMenuItem(
-                      label: PlatformListTile(
-                        leading: Icon(context.platformIcons.location),
-                        trailing: const SizedBox.shrink(),
-                        title:
-                            Text(l10n.viewDetails_actions_openLatestLocation),
+        trailingActions: [
+          if (_locationFetcher.controller.locations.isNotEmpty)
+            PlatformIconButton(
+              cupertino: (_, __) => CupertinoIconButtonData(
+                padding: EdgeInsets.zero,
+              ),
+              icon: const Icon(Icons.my_location_rounded),
+              onPressed: () {
+                // No need to check for location permission, as the user must enable it to create locations
+                // in the first place
+                _locationFetcher.controller.goToUserLocation();
+              },
+            ),
+          Padding(
+            padding: isMaterial(context) ? const EdgeInsets.all(SMALL_SPACE) : EdgeInsets.zero,
+            child: PlatformPopup<String>(
+              type: PlatformPopupType.tap,
+              items: [
+                PlatformPopupMenuItem(
+                  label: PlatformListTile(
+                    leading: Icon(context.platformIcons.location),
+                    trailing: const SizedBox.shrink(),
+                    title: Text(l10n.viewDetails_actions_openLatestLocation),
+                  ),
+                  onPressed: () async {
+                    await showPlatformModalSheet(
+                      context: context,
+                      material: MaterialModalSheetData(
+                        backgroundColor: Colors.transparent,
                       ),
-                      onPressed: () async {
-                        await showPlatformModalSheet(
-                          context: context,
-                          material: MaterialModalSheetData(
-                            backgroundColor: Colors.transparent,
-                          ),
-                          builder: (context) => OpenInMaps(
-                            destination: Coords(
-                              _locationFetcher
-                                  .controller.locations.last.latitude,
-                              _locationFetcher
-                                  .controller.locations.last.longitude,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                    // If the fetched locations are less than the limit,
-                    // there are definitely no more locations to fetch
-                    if (_locationFetcher.canFetchMore)
-                      PlatformPopupMenuItem(
-                        label: PlatformListTile(
-                          leading: Icon(context.platformIcons.refresh),
-                          trailing: const SizedBox.shrink(),
-                          title: Text(l10n.locationFetcher_actions_fetchMore),
+                      builder: (context) => OpenInMaps(
+                        destination: Coords(
+                          _locationFetcher.controller.locations.last.latitude,
+                          _locationFetcher.controller.locations.last.longitude,
                         ),
-                        onPressed: () {
-                          _locationFetcher.fetchMore(onEnd: () {
-                            setState(() {});
-                          });
-                        },
                       ),
-                  ],
+                    );
+                  },
                 ),
-              ]
-            : [],
+                // If the fetched locations are less than the limit,
+                // there are definitely no more locations to fetch
+                if (_locationFetcher.canFetchMore)
+                  PlatformPopupMenuItem(
+                    label: PlatformListTile(
+                      leading: Icon(context.platformIcons.refresh),
+                      trailing: const SizedBox.shrink(),
+                      title: Text(l10n.locationFetcher_actions_fetchMore),
+                    ),
+                    onPressed: () {
+                      _locationFetcher.fetchMore(onEnd: () {
+                        setState(() {});
+                      });
+                    },
+                  ),
+              ],
+            ),
+          ),
+        ],
       ),
       body: _isError
           ? const LocationFetchError()
@@ -173,8 +184,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                               LocationsMap(
                                 controller: _locationFetcher.controller,
                               ),
-                              if (_locationFetcher.isLoading)
-                                const LocationStillFetchingBanner(),
+                              if (_locationFetcher.isLoading) const LocationStillFetchingBanner(),
                             ],
                           );
                         }
@@ -184,8 +194,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                             child: Padding(
                               padding: const EdgeInsets.all(MEDIUM_SPACE),
                               child: LocationsLoadingScreen(
-                                locations:
-                                    _locationFetcher.controller.locations,
+                                locations: _locationFetcher.controller.locations,
                                 onTimeout: () {
                                   setState(() {
                                     _isError = true;
