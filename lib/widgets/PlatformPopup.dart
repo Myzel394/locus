@@ -32,6 +32,7 @@ class PlatformPopup<T> extends StatefulWidget {
   final PlatformPopupType type;
 
   final bool cupertinoCancellable;
+  final EdgeInsets? cupertinoButtonPadding;
 
   const PlatformPopup({
     Key? key,
@@ -39,6 +40,7 @@ class PlatformPopup<T> extends StatefulWidget {
     required this.items,
     this.type = PlatformPopupType.longPress,
     this.cupertinoCancellable = true,
+    this.cupertinoButtonPadding,
   }) : super(key: key);
 
   @override
@@ -56,6 +58,7 @@ class _PlatformPopupState<T> extends State<PlatformPopup> {
   @override
   Widget build(BuildContext context) {
     return PopupMenu.PlatformPopupMenuButton<int>(
+      cupertinoButtonPadding: widget.cupertinoButtonPadding,
       itemBuilder: (context) => List.from(
         widget.items.mapIndexed(
           (index, item) => PopupMenu.PlatformPopupMenuItem<int>(
