@@ -108,8 +108,7 @@ class _ViewAlarmSelectRadiusRegionScreenState
     super.dispose();
   }
 
-  CircleLayer getFlutterMapCircleLayer() =>
-      CircleLayer(
+  CircleLayer getFlutterMapCircleLayer() => CircleLayer(
         circles: [
           CircleMarker(
             point: alarmCenter!,
@@ -130,11 +129,10 @@ class _ViewAlarmSelectRadiusRegionScreenState
         isDismissible: true,
         isScrollControlled: true,
       ),
-      builder: (_) =>
-          RadiusRegionMetaDataSheet(
-            center: alarmCenter!,
-            radius: radius,
-          ),
+      builder: (_) => RadiusRegionMetaDataSheet(
+        center: alarmCenter!,
+        radius: radius,
+      ),
     );
 
     if (!mounted) {
@@ -153,87 +151,84 @@ class _ViewAlarmSelectRadiusRegionScreenState
       showCupertinoModalBottomSheet(
         context: context,
         backgroundColor: getSheetColor(context),
-        builder: (context) =>
-            SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.all(LARGE_SPACE),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
+        builder: (context) => SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(LARGE_SPACE),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                Text(
+                  l10n.location_addAlarm_radiusBased_help_title,
+                  style: getTitleTextStyle(context),
+                ),
+                const SizedBox(height: MEDIUM_SPACE),
+                Text(
+                  l10n.location_addAlarm_radiusBased_help_description,
+                  style: getBodyTextTextStyle(context),
+                ),
+                const SizedBox(height: LARGE_SPACE),
+                Row(
                   children: <Widget>[
-                    Text(
-                      l10n.location_addAlarm_radiusBased_help_title,
-                      style: getTitleTextStyle(context),
+                    const Icon(Icons.touch_app_rounded),
+                    const SizedBox(width: MEDIUM_SPACE),
+                    Flexible(
+                      child: Text(l10n
+                          .location_addAlarm_radiusBased_help_tapDescription),
                     ),
-                    const SizedBox(height: MEDIUM_SPACE),
-                    Text(
-                      l10n.location_addAlarm_radiusBased_help_description,
-                      style: getBodyTextTextStyle(context),
-                    ),
-                    const SizedBox(height: LARGE_SPACE),
-                    Row(
-                      children: <Widget>[
-                        const Icon(Icons.touch_app_rounded),
-                        const SizedBox(width: MEDIUM_SPACE),
-                        Flexible(
-                          child: Text(l10n
-                              .location_addAlarm_radiusBased_help_tapDescription),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: SMALL_SPACE),
-                    Row(
-                      children: <Widget>[
-                        const Icon(Icons.pinch_rounded),
-                        const SizedBox(width: MEDIUM_SPACE),
-                        Flexible(
-                          child: Text(l10n
-                              .location_addAlarm_radiusBased_help_pinchDescription),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: LARGE_SPACE),
-                    CupertinoButton.filled(
-                      child: Text(l10n.closeNeutralAction),
-                      onPressed: () => Navigator.pop(context),
-                    )
                   ],
                 ),
-              ),
+                const SizedBox(height: SMALL_SPACE),
+                Row(
+                  children: <Widget>[
+                    const Icon(Icons.pinch_rounded),
+                    const SizedBox(width: MEDIUM_SPACE),
+                    Flexible(
+                      child: Text(l10n
+                          .location_addAlarm_radiusBased_help_pinchDescription),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: LARGE_SPACE),
+                CupertinoButton.filled(
+                  child: Text(l10n.closeNeutralAction),
+                  onPressed: () => Navigator.pop(context),
+                )
+              ],
             ),
+          ),
+        ),
       );
     } else {
       showDialog(
         context: context,
-        builder: (context) =>
-            AlertDialog(
-              title: Text(l10n.location_addAlarm_radiusBased_help_title),
-              icon: Icon(context.platformIcons.help),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Text(l10n.location_addAlarm_radiusBased_help_description),
-                  const SizedBox(height: MEDIUM_SPACE),
-                  ListTile(
-                    title: Text(
-                        l10n.location_addAlarm_radiusBased_help_tapDescription),
-                    leading: const Icon(Icons.touch_app_rounded),
-                  ),
-                  ListTile(
-                    title: Text(
-                        l10n
-                            .location_addAlarm_radiusBased_help_pinchDescription),
-                    leading: const Icon(Icons.pinch_rounded),
-                  ),
-                ],
+        builder: (context) => AlertDialog(
+          title: Text(l10n.location_addAlarm_radiusBased_help_title),
+          icon: Icon(context.platformIcons.help),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Text(l10n.location_addAlarm_radiusBased_help_description),
+              const SizedBox(height: MEDIUM_SPACE),
+              ListTile(
+                title: Text(
+                    l10n.location_addAlarm_radiusBased_help_tapDescription),
+                leading: const Icon(Icons.touch_app_rounded),
               ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text(l10n.closeNeutralAction),
-                ),
-              ],
+              ListTile(
+                title: Text(
+                    l10n.location_addAlarm_radiusBased_help_pinchDescription),
+                leading: const Icon(Icons.pinch_rounded),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text(l10n.closeNeutralAction),
             ),
+          ],
+        ),
       );
     }
   }
@@ -359,38 +354,35 @@ class _ViewAlarmSelectRadiusRegionScreenState
     final l10n = AppLocalizations.of(context);
 
     return PlatformScaffold(
-      material: (_, __) =>
-          MaterialScaffoldData(
-            resizeToAvoidBottomInset: false,
-          ),
+      material: (_, __) => MaterialScaffoldData(
+        resizeToAvoidBottomInset: false,
+      ),
       appBar: PlatformAppBar(
         title: Text(l10n.location_addAlarm_radiusBased_title),
         trailingActions: [
           PlatformIconButton(
-            cupertino: (_, __) =>
-                CupertinoIconButtonData(
-                  padding: EdgeInsets.zero,
-                ),
+            cupertino: (_, __) => CupertinoIconButtonData(
+              padding: EdgeInsets.zero,
+            ),
             icon: Icon(context.platformIcons.help),
             onPressed: showHelp,
           ),
         ],
-        cupertino: (_, __) =>
-            CupertinoNavigationBarData(
-              backgroundColor: isInScaleMode
-                  ? null
-                  : getCupertinoAppBarColorForMapScreen(context),
-            ),
+        cupertino: (_, __) => CupertinoNavigationBarData(
+          backgroundColor: isInScaleMode
+              ? null
+              : getCupertinoAppBarColorForMapScreen(context),
+        ),
       ),
       body: GestureDetector(
         onScaleUpdate: isInScaleMode ? updateZoom : null,
         onTap: isInScaleMode
             ? () {
-          Vibration.vibrate(duration: 50);
-          setState(() {
-            isInScaleMode = false;
-          });
-        }
+                Vibration.vibrate(duration: 50);
+                setState(() {
+                  isInScaleMode = false;
+                });
+              }
             : null,
         // We need a `Stack` to disable the map, but also need to show a container to detect the long press again
         child: Column(
@@ -418,8 +410,12 @@ class _ViewAlarmSelectRadiusRegionScreenState
                           const Icon(Icons.pinch_rounded),
                           const SizedBox(width: MEDIUM_SPACE),
                           Flexible(
-                            child: Text(l10n
-                                .location_addAlarm_radiusBased_isInScaleMode),
+                            child: Text(
+                              l10n.location_addAlarm_radiusBased_isInScaleMode,
+                              style: const TextStyle(
+                                color: Colors.white,
+                              ),
+                            ),
                           ),
                         ],
                       ),
