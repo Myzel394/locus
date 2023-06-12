@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -9,12 +7,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/init_quick_actions.dart';
-import 'package:locus/screens/welcome_screen_widgets/BatteryOptimizationsScreen.dart';
-import 'package:locus/screens/welcome_screen_widgets/LocationPermissionScreen.dart';
-import 'package:locus/screens/welcome_screen_widgets/NotificationPermissionScreen.dart';
 import 'package:locus/screens/welcome_screen_widgets/SimpleContinuePage.dart';
 import 'package:locus/utils/PageRoute.dart';
-import 'package:locus/utils/gms_check.dart';
 import 'package:lottie/lottie.dart';
 
 import '../utils/theme.dart';
@@ -22,25 +16,8 @@ import 'MainScreen.dart';
 
 const storage = FlutterSecureStorage();
 
-enum Page {
-  welcome,
-  explanation,
-  locationPermission,
-  notificationPermission,
-  batteryOptimizations,
-  done,
-  usesWrongAppFlavor,
-}
-
 class WelcomeScreen extends StatefulWidget {
-  final bool hasLocationAlwaysGranted;
-  final bool hasNotificationGranted;
-  final bool isIgnoringBatteryOptimizations;
-
   const WelcomeScreen({
-    required this.hasLocationAlwaysGranted,
-    required this.hasNotificationGranted,
-    required this.isIgnoringBatteryOptimizations,
     Key? key,
   }) : super(key: key);
 
@@ -54,12 +31,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   @override
   void initState() {
     super.initState();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (Platform.isAndroid && isUsingWrongAppFlavor()) {
-        _nextScreen(Page.usesWrongAppFlavor.index);
-      }
-    });
 
     // Reset
     actions.clearShortcutItems();
@@ -119,13 +90,13 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       duration: FADE_IN_DURATION,
                     ),
                 onContinue: () {
-                  _nextScreen(Page.explanation.index);
+                  _nextScreen(1);
                 },
               ),
               SimpleContinuePage(
                 title: l10n.welcomeScreen_explanation_title,
                 description: l10n.welcomeScreen_explanation_description,
-                continueLabel: l10n.welcomeScreen_explanation_understood,
+                continueLabel: l10n.welcomeScreen_startLabel,
                 header: Lottie.asset(
                   "assets/lotties/lock.json",
                   delegates: LottieDelegates(
@@ -143,67 +114,13 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       // Background
                       ValueDelegate.color(
                         const ["unlock Konturen", "Kreis", "Fläche 1"],
-                        value:
-                            getIsDarkMode(context) ? shades[900] : shades[200],
+                        value: getIsDarkMode(context) ? shades[900] : shades[200],
                       ),
                     ],
                   ),
                 ),
-                onContinue: () {
-                  if (Platform.isAndroid) {
-                    if (widget.hasLocationAlwaysGranted) {
-                      if (widget.hasNotificationGranted) {
-                        if (widget.isIgnoringBatteryOptimizations) {
-                          _onDone();
-                        } else {
-                          _nextScreen(Page.batteryOptimizations.index);
-                        }
-                      } else {
-                        _nextScreen(Page.notificationPermission.index);
-                      }
-                    } else {
-                      _nextScreen(Page.locationPermission.index);
-                    }
-                  } else {
-                    if (widget.hasLocationAlwaysGranted) {
-                      _onDone();
-                    } else {
-                      _nextScreen(Page.locationPermission.index);
-                    }
-                  }
-                },
+                onContinue: _onDone,
               ),
-              LocationPermissionScreen(
-                onGranted: () {
-                  if (Platform.isAndroid) {
-                    if (widget.hasNotificationGranted) {
-                      if (widget.isIgnoringBatteryOptimizations) {
-                        _onDone();
-                      } else {
-                        _nextScreen(Page.batteryOptimizations.index);
-                      }
-                    } else {
-                      _nextScreen(Page.notificationPermission.index);
-                    }
-                  } else {
-                    _onDone();
-                  }
-                },
-              ),
-              NotificationPermissionScreen(
-                onGranted: () {
-                  if (Platform.isAndroid) {
-                    if (widget.isIgnoringBatteryOptimizations) {
-                      _onDone();
-                    } else {
-                      _nextScreen(Page.batteryOptimizations.index);
-                    }
-                  } else {
-                    _onDone();
-                  }
-                },
-              ),
-              BatteryOptimizationsScreen(onDone: _onDone),
             ],
           ),
         ),
