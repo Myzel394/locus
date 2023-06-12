@@ -99,6 +99,8 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
 
   bool _isError = false;
 
+  bool showAlarms = true;
+
   @override
   void initState() {
     super.initState();
@@ -185,11 +187,31 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
       appBar: PlatformAppBar(
         title: Text(l10n.viewDetails_title),
         trailingActions: <Widget>[
+          if (widget.view.alarms.isNotEmpty)
+            PlatformTextButton(
+              cupertino: (_, __) => CupertinoTextButtonData(
+                padding: EdgeInsets.zero,
+              ),
+              onPressed: () {
+                setState(() {
+                  showAlarms = !showAlarms;
+                });
+              },
+              child: PlatformFlavorWidget(
+                material: (_, __) => showAlarms
+                    ? const Icon(Icons.alarm_rounded)
+                    : const Icon(Icons.alarm_off_rounded),
+                cupertino: (_, __) => showAlarms
+                    ? const Icon(CupertinoIcons.alarm)
+                    : const Icon(Icons.alarm_off_rounded),
+              ),
+            ),
           Padding(
             padding: isMaterial(context)
                 ? const EdgeInsets.all(SMALL_SPACE)
                 : EdgeInsets.zero,
             child: PlatformPopup<String>(
+              cupertinoButtonPadding: EdgeInsets.zero,
               type: PlatformPopupType.tap,
               items: [
                 PlatformPopupMenuItem(
