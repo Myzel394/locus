@@ -45,6 +45,7 @@ class SettingsService extends ChangeNotifier {
   String localeName;
   bool automaticallyLookupAddresses;
   bool showHints;
+  bool userHasSeenWelcomeScreen = false;
   List<String> _relays;
   AndroidTheme androidTheme;
 
@@ -67,6 +68,7 @@ class SettingsService extends ChangeNotifier {
     required this.androidTheme,
     required this.helpers_hasSeen_radiusBasedAlarms,
     required this.localeName,
+    required this.userHasSeenWelcomeScreen,
     List<String>? relays,
   }) : _relays = relays ?? [];
 
@@ -80,6 +82,7 @@ class SettingsService extends ChangeNotifier {
       geocoderProvider: isSystemGeocoderAvailable() ? GeocoderProvider.system : selectRandomProvider(),
       helpers_hasSeen_radiusBasedAlarms: false,
       localeName: "en",
+      userHasSeenWelcomeScreen: false,
     );
   }
 
@@ -96,6 +99,7 @@ class SettingsService extends ChangeNotifier {
       androidTheme: AndroidTheme.values[data['androidTheme']],
       helpers_hasSeen_radiusBasedAlarms: data['helpers_hasSeen_radiusBasedAlarms'],
       localeName: data['localeName'],
+      userHasSeenWelcomeScreen: data['userHasSeenWelcomeScreen'],
     );
   }
 
@@ -129,6 +133,7 @@ class SettingsService extends ChangeNotifier {
       "androidTheme": androidTheme.index,
       "helpers_hasSeen_radiusBasedAlarms": helpers_hasSeen_radiusBasedAlarms,
       "localeName": localeName,
+      "userHasSeenWelcomeScreen": userHasSeenWelcomeScreen,
     };
   }
 
@@ -240,6 +245,12 @@ class SettingsService extends ChangeNotifier {
   }
 
   AndroidTheme getAndroidTheme() => androidTheme;
+
+  Future<void> setHasSeenWelcomeScreen() async {
+    userHasSeenWelcomeScreen = true;
+    notifyListeners();
+    await save();
+  }
 
   bool isMIUI() => androidTheme == AndroidTheme.miui;
 }
