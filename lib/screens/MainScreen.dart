@@ -234,7 +234,6 @@ class _MainScreenState extends State<MainScreen> {
     _initBackground();
     _handleViewAlarmChecker();
     _handleNotifications();
-    _updateLocaleToSettings();
   }
 
   void _handleViewAlarmChecker() {
