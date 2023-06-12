@@ -1,11 +1,13 @@
 import 'dart:collection';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:locus/constants/app.dart';
 
 import '../api/get-address.dart';
 import '../utils/device.dart';
@@ -34,9 +36,7 @@ enum AndroidTheme {
 // Selects a random provider from the list of available providers, not including
 // the system provider.
 GeocoderProvider selectRandomProvider() {
-  final providers = GeocoderProvider.values
-      .where((element) => element != GeocoderProvider.system)
-      .toList();
+  final providers = GeocoderProvider.values.where((element) => element != GeocoderProvider.system).toList();
 
   return providers[Random().nextInt(providers.length)];
 }
@@ -69,24 +69,19 @@ class SettingsService extends ChangeNotifier {
     return SettingsService(
       automaticallyLookupAddresses: true,
       primaryColor: null,
-      androidTheme:
-          await fetchIsMIUI() ? AndroidTheme.miui : AndroidTheme.materialYou,
-      mapProvider:
-          isPlatformApple() ? MapProvider.apple : MapProvider.openStreetMap,
+      androidTheme: await fetchIsMIUI() ? AndroidTheme.miui : AndroidTheme.materialYou,
+      mapProvider: isPlatformApple() ? MapProvider.apple : MapProvider.openStreetMap,
       showHints: true,
-      geocoderProvider: isSystemGeocoderAvailable()
-          ? GeocoderProvider.system
-          : selectRandomProvider(),
+      geocoderProvider: isSystemGeocoderAvailable() ? GeocoderProvider.system : selectRandomProvider(),
     );
   }
 
-  static bool isSystemGeocoderAvailable() => false;
+  static bool isSystemGeocoderAvailable() => isPlatformApple() || (Platform.isAndroid && isGMSFlavor);
 
   static SettingsService fromJSON(final Map<String, dynamic> data) {
     return SettingsService(
       automaticallyLookupAddresses: data['automaticallyLoadLocation'],
-      primaryColor:
-          data['primaryColor'] != null ? Color(data['primaryColor']) : null,
+      primaryColor: data['primaryColor'] != null ? Color(data['primaryColor']) : null,
       mapProvider: MapProvider.values[data['mapProvider']],
       relays: List<String>.from(data['relays'] ?? []),
       showHints: data['showHints'],
@@ -132,14 +127,12 @@ class SettingsService extends ChangeNotifier {
   ) async {
     final providers = [
       getGeocoderProvider(),
-      ...GeocoderProvider.values
-          .where((element) => element != getGeocoderProvider())
+      ...GeocoderProvider.values.where((element) => element != getGeocoderProvider())
     ];
     // If the user does not want to use the system provider,
     // we will not use it, even if it is the only one
     // available (for better privacy)
-    if (!isSystemGeocoderAvailable() ||
-        getGeocoderProvider() != GeocoderProvider.system) {
+    if (!isSystemGeocoderAvailable() || getGeocoderProvider() != GeocoderProvider.system) {
       providers.remove(GeocoderProvider.system);
     }
 
