@@ -1578,6 +1578,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.2"
+  vibration:
+    dependency: "direct main"
+    description:
+      name: vibration
+      sha256: "2938d4bf4ecfdb1cdac6b8f20f40cd3e7b7783edd6ca551a46d144a134473626"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.7.7"
   visibility_detector:
     dependency: "direct main"
     description:

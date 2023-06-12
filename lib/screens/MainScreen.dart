@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:animations/animations.dart';
@@ -12,7 +13,10 @@ import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:locus/init_quick_actions.dart';
+import 'package:locus/main.dart';
+import 'package:locus/screens/ViewDetailScreen.dart';
 import 'package:locus/screens/main_screen_widgets/screens/EmptyScreen.dart';
+import 'package:locus/services/manager_service.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:locus/utils/PageRoute.dart';
@@ -22,6 +26,7 @@ import 'package:material_design_icons_flutter/material_design_icons_flutter.dart
 import 'package:provider/provider.dart';
 import 'package:uni_links/uni_links.dart';
 
+import '../constants/notifications.dart';
 import '../constants/values.dart';
 import '../models/log.dart';
 import '../services/app_update_service.dart';
@@ -52,10 +57,9 @@ class _MainScreenState extends State<MainScreen> {
   int activeTab = 0;
   Stream<Position>? _positionStream;
   StreamSubscription<String?>? _uniLinksStream;
+  Timer? _viewsAlarmCheckerTimer;
 
   void _changeTab(final int newTab) {
-    final settings = context.read<SettingsService>();
-
     setState(() {
       activeTab = newTab;
     });
@@ -67,7 +71,7 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  void initBackground() async {
+  void _initBackground() async {
     BackgroundFetch.start();
   }
 
@@ -121,7 +125,8 @@ class _MainScreenState extends State<MainScreen> {
         return;
       }
 
-      final locationData = await LocationPointService.createUsingCurrentLocation(position);
+      final locationData =
+          await LocationPointService.createUsingCurrentLocation(position);
 
       for (final task in runningTasks) {
         await task.publishCurrentLocationNow(
@@ -163,7 +168,7 @@ class _MainScreenState extends State<MainScreen> {
         builder: (context) => ImportTaskSheet(initialURL: url),
       );
 
-  Future<void> initUniLinks() async {
+  Future<void> _initUniLinks() async {
     final l10n = AppLocalizations.of(context);
 
     FlutterLogs.logInfo(LOG_TAG, "Uni Links", "Initiating uni links...");
@@ -212,21 +217,87 @@ class _MainScreenState extends State<MainScreen> {
 
     final taskService = context.read<TaskService>();
     final appUpdateService = context.read<AppUpdateService>();
+    taskService.addListener(updateView);
+    appUpdateService.addListener(updateView);
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final taskService = context.read<TaskService>();
       final logService = context.read<LogService>();
 
       initQuickActions(context);
-      initUniLinks();
+      _initUniLinks();
+      _updateLocaleToSettings();
 
       taskService.checkup(logService);
     });
 
-    taskService.addListener(updateView);
-    appUpdateService.addListener(updateView);
+    _initBackground();
+    _handleViewAlarmChecker();
+    _handleNotifications();
+  }
 
-    initBackground();
+  void _handleViewAlarmChecker() {
+    _viewsAlarmCheckerTimer = Timer.periodic(
+      const Duration(minutes: 1),
+      (_) {
+        final viewService = context.read<ViewService>();
+        final l10n = AppLocalizations.of(context);
+
+        if (viewService.viewsWithAlarms.isEmpty) {
+          return;
+        }
+
+        checkViewAlarms(
+          l10n: l10n,
+          views: viewService.viewsWithAlarms,
+          viewService: viewService,
+        );
+      },
+    );
+  }
+
+  void _handleNotifications() {
+    selectedNotificationsStream.stream.listen((notification) {
+      FlutterLogs.logInfo(
+        LOG_TAG,
+        "Notification",
+        "Notification received: ${notification.payload}",
+      );
+
+      try {
+        final data = jsonDecode(notification.payload ?? "{}");
+        final type = NotificationActionType.values[data["type"]];
+
+        switch (type) {
+          case NotificationActionType.openTaskView:
+            final viewService = context.read<ViewService>();
+
+            Navigator.of(context).push(
+              NativePageRoute(
+                context: context,
+                builder: (_) => ViewDetailScreen(
+                  view: viewService.getViewById(data["taskViewID"]),
+                ),
+              ),
+            );
+            break;
+        }
+      } catch (error) {
+        FlutterLogs.logErrorTrace(
+          LOG_TAG,
+          "Notification",
+          "Error handling notification.",
+          error as Error,
+        );
+      }
+    });
+  }
+
+  void _updateLocaleToSettings() {
+    final settingsService = context.read<SettingsService>();
+
+    settingsService.localeName = AppLocalizations.of(context).localeName;
+    settingsService.save();
   }
 
   @override
@@ -238,6 +309,7 @@ class _MainScreenState extends State<MainScreen> {
 
     _tabController.dispose();
 
+    _viewsAlarmCheckerTimer?.cancel();
     _uniLinksStream?.cancel();
 
     _removeLiveLocationUpdate();
@@ -249,7 +321,9 @@ class _MainScreenState extends State<MainScreen> {
     final l10n = AppLocalizations.of(context);
     final appUpdateService = context.read<AppUpdateService>();
 
-    if (appUpdateService.shouldShowDialogue() && !appUpdateService.hasShownDialogue && mounted) {
+    if (appUpdateService.shouldShowDialogue() &&
+        !appUpdateService.hasShownDialogue &&
+        mounted) {
       await showPlatformDialog(
         context: context,
         barrierDismissible: false,
@@ -264,7 +338,8 @@ class _MainScreenState extends State<MainScreen> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              material: (context, _) => MaterialDialogActionData(icon: const Icon(Icons.watch_later_rounded)),
+              material: (context, _) => MaterialDialogActionData(
+                  icon: const Icon(Icons.watch_later_rounded)),
               child: Text(l10n.updateAvailable_android_remindLater),
             ),
             PlatformDialogAction(
@@ -273,12 +348,14 @@ class _MainScreenState extends State<MainScreen> {
 
                 Navigator.of(context).pop();
               },
-              material: (context, _) => MaterialDialogActionData(icon: const Icon(Icons.block)),
+              material: (context, _) =>
+                  MaterialDialogActionData(icon: const Icon(Icons.block)),
               child: Text(l10n.updateAvailable_android_ignore),
             ),
             PlatformDialogAction(
               onPressed: appUpdateService.openStoreForUpdate,
-              material: (context, _) => MaterialDialogActionData(icon: const Icon(Icons.download)),
+              material: (context, _) =>
+                  MaterialDialogActionData(icon: const Icon(Icons.download)),
               child: Text(l10n.updateAvailable_android_download),
             ),
           ],
@@ -325,8 +402,12 @@ class _MainScreenState extends State<MainScreen> {
                             _changeTab(0);
                           },
                           child: Icon(
-                            activeTab == 0 ? CupertinoIcons.square_list_fill : CupertinoIcons.square_list,
-                            color: activeTab == 0 ? primaryColor : getBodyTextColor(context),
+                            activeTab == 0
+                                ? CupertinoIcons.square_list_fill
+                                : CupertinoIcons.square_list,
+                            color: activeTab == 0
+                                ? primaryColor
+                                : getBodyTextColor(context),
                           ),
                         ),
                         TextButton(
@@ -334,8 +415,12 @@ class _MainScreenState extends State<MainScreen> {
                             _changeTab(1);
                           },
                           child: Icon(
-                            activeTab == 1 ? CupertinoIcons.time_solid : CupertinoIcons.time,
-                            color: activeTab == 1 ? primaryColor : getBodyTextColor(context),
+                            activeTab == 1
+                                ? CupertinoIcons.time_solid
+                                : CupertinoIcons.time,
+                            color: activeTab == 1
+                                ? primaryColor
+                                : getBodyTextColor(context),
                           ),
                         ),
                       ],
@@ -362,6 +447,9 @@ class _MainScreenState extends State<MainScreen> {
       title: Text(l10n.appName),
       trailingActions: [
         PlatformIconButton(
+          cupertino: (_, __) => CupertinoIconButtonData(
+            padding: EdgeInsets.zero,
+          ),
           icon: Icon(context.platformIcons.settings),
           onPressed: () {
             showSettings(context);
@@ -381,7 +469,9 @@ class _MainScreenState extends State<MainScreen> {
 
     return PlatformNavBar(
       material: (_, __) => MaterialNavBarData(
-          backgroundColor: Theme.of(context).dialogBackgroundColor, elevation: 0, padding: const EdgeInsets.all(0)),
+          backgroundColor: Theme.of(context).dialogBackgroundColor,
+          elevation: 0,
+          padding: const EdgeInsets.all(0)),
       itemChanged: _changeTab,
       currentIndex: activeTab,
       items: isCupertino(context)
@@ -420,7 +510,8 @@ class _MainScreenState extends State<MainScreen> {
     final viewService = context.watch<ViewService>();
     final settings = context.watch<SettingsService>();
 
-    final showEmptyScreen = taskService.tasks.isEmpty && viewService.views.isEmpty;
+    final showEmptyScreen =
+        taskService.tasks.isEmpty && viewService.views.isEmpty;
 
     if (showEmptyScreen) {
       return PlatformScaffold(
@@ -445,7 +536,9 @@ class _MainScreenState extends State<MainScreen> {
                   width: FAB_DIMENSION,
                   child: Center(
                     child: Icon(
-                      settings.isMIUI() || isCupertino(context) ? CupertinoIcons.plus : Icons.add,
+                      settings.isMIUI() || isCupertino(context)
+                          ? CupertinoIcons.plus
+                          : Icons.add,
                       color: Theme.of(context).colorScheme.onPrimary,
                       size: settings.isMIUI() ? 34 : null,
                     ),
@@ -459,7 +552,8 @@ class _MainScreenState extends State<MainScreen> {
                 ),
                 openColor: Theme.of(context).scaffoldBackgroundColor,
                 closedColor: Theme.of(context).colorScheme.primary,
-              ).animate().scale(duration: 500.ms, delay: 1.seconds, curve: Curves.bounceOut)
+              ).animate().scale(
+                duration: 500.ms, delay: 1.seconds, curve: Curves.bounceOut)
             : null,
       ),
       // Settings bottomNavBar via cupertino data class does not work

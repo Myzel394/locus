@@ -1,5 +1,4 @@
 import 'package:easy_debounce/easy_throttle.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
@@ -15,6 +14,7 @@ import 'package:locus/widgets/LocationsMap.dart';
 import 'package:map_launcher/map_launcher.dart';
 
 import '../constants/spacing.dart';
+import '../utils/theme.dart';
 import '../widgets/LocationFetchEmpty.dart';
 import '../widgets/OpenInMaps.dart';
 import '../widgets/PlatformPopup.dart';
@@ -103,7 +103,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
           centerTitle: true,
         ),
         cupertino: (_, __) => CupertinoNavigationBarData(
-          backgroundColor: CupertinoTheme.of(context).barBackgroundColor.withOpacity(.5),
+          backgroundColor: getCupertinoAppBarColorForMapScreen(context),
         ),
         trailingActions: _locationFetcher.controller.locations.isNotEmpty
             ? [
@@ -114,7 +114,8 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                       label: PlatformListTile(
                         leading: Icon(context.platformIcons.location),
                         trailing: const SizedBox.shrink(),
-                        title: Text(l10n.viewDetails_actions_openLatestLocation),
+                        title:
+                            Text(l10n.viewDetails_actions_openLatestLocation),
                       ),
                       onPressed: () async {
                         await showPlatformModalSheet(
@@ -124,8 +125,10 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                           ),
                           builder: (context) => OpenInMaps(
                             destination: Coords(
-                              _locationFetcher.controller.locations.last.latitude,
-                              _locationFetcher.controller.locations.last.longitude,
+                              _locationFetcher
+                                  .controller.locations.last.latitude,
+                              _locationFetcher
+                                  .controller.locations.last.longitude,
                             ),
                           ),
                         );
@@ -170,7 +173,8 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                               LocationsMap(
                                 controller: _locationFetcher.controller,
                               ),
-                              if (_locationFetcher.isLoading) const LocationStillFetchingBanner(),
+                              if (_locationFetcher.isLoading)
+                                const LocationStillFetchingBanner(),
                             ],
                           );
                         }
@@ -180,7 +184,8 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                             child: Padding(
                               padding: const EdgeInsets.all(MEDIUM_SPACE),
                               child: LocationsLoadingScreen(
-                                locations: _locationFetcher.controller.locations,
+                                locations:
+                                    _locationFetcher.controller.locations,
                                 onTimeout: () {
                                   setState(() {
                                     _isError = true;

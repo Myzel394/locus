@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:disable_battery_optimization/disable_battery_optimization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:geolocator/geolocator.dart';
@@ -19,6 +21,8 @@ import 'package:provider/provider.dart';
 
 const storage = FlutterSecureStorage();
 
+final StreamController<NotificationResponse> selectedNotificationsStream = StreamController.broadcast();
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -28,12 +32,7 @@ void main() async {
   ]);
 
   await FlutterLogs.initLogs(
-    logLevelsEnabled: [
-      LogLevel.INFO,
-      LogLevel.WARNING,
-      LogLevel.ERROR,
-      LogLevel.SEVERE
-    ],
+    logLevelsEnabled: [LogLevel.INFO, LogLevel.WARNING, LogLevel.ERROR, LogLevel.SEVERE],
     timeStampFormat: TimeStampFormat.TIME_FORMAT_READABLE,
     directoryStructure: DirectoryStructure.FOR_DATE,
     logTypesEnabled: ["device", "network", "errors"],
@@ -44,13 +43,23 @@ void main() async {
     isDebuggable: kDebugMode,
   );
 
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  const initializationSettings = InitializationSettings(
+    android: AndroidInitializationSettings("ic_launcher_foreground"),
+    iOS: DarwinInitializationSettings(),
+  );
+  await flutterLocalNotificationsPlugin.initialize(
+    initializationSettings,
+    onDidReceiveNotificationResponse: (notification) {
+      selectedNotificationsStream.add(notification);
+    },
+  );
+
   final futures = await Future.wait<dynamic>([
     Geolocator.checkPermission(),
     TaskService.restore(),
     ViewService.restore(),
-    Platform.isAndroid
-        ? DisableBatteryOptimization.isBatteryOptimizationDisabled
-        : Future.value(true),
+    Platform.isAndroid ? DisableBatteryOptimization.isBatteryOptimizationDisabled : Future.value(true),
     SettingsService.restore(),
     hasGrantedNotificationPermission(),
     LogService.restore(),
@@ -76,8 +85,7 @@ void main() async {
         ChangeNotifierProvider<ViewService>(create: (_) => viewService),
         ChangeNotifierProvider<SettingsService>(create: (_) => settingsService),
         ChangeNotifierProvider<LogService>(create: (_) => logService),
-        ChangeNotifierProvider<AppUpdateService>(
-            create: (_) => appUpdateService),
+        ChangeNotifierProvider<AppUpdateService>(create: (_) => appUpdateService),
       ],
       child: App(
         hasLocationAlwaysGranted: hasLocationAlwaysGranted,

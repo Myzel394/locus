@@ -87,6 +87,8 @@ PODS:
     - Flutter
   - url_launcher_ios (0.0.1):
     - Flutter
+  - vibration (1.7.5):
+    - Flutter
   - ZIPFoundation (0.9.15)
 
 DEPENDENCIES:
@@ -112,6 +114,7 @@ DEPENDENCIES:
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
   - uni_links (from `.symlinks/plugins/uni_links/ios`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
+  - vibration (from `.symlinks/plugins/vibration/ios`)
 
 SPEC REPOS:
   trunk:
@@ -169,6 +172,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/uni_links/ios"
   url_launcher_ios:
     :path: ".symlinks/plugins/url_launcher_ios/ios"
+  vibration:
+    :path: ".symlinks/plugins/vibration/ios"
 
 SPEC CHECKSUMS:
   Alamofire: d368e1ff8a298e6dde360e35a3e68e6c610e7204
@@ -200,6 +205,7 @@ SPEC CHECKSUMS:
   Tangram-es: 628b634f7fc09d2217469b9914de00d9de49ff9d
   uni_links: d97da20c7701486ba192624d99bffaaffcfc298a
   url_launcher_ios: 08a3dfac5fb39e8759aeb0abbd5d9480f30fc8b4
+  vibration: 7d883d141656a1c1a6d8d238616b2042a51a1241
   ZIPFoundation: 063163dc828bf699c5be160eb4f58f676322d94f
 
 PODFILE CHECKSUM: 819f6e738594296500811eae0a41f3dceed5a207

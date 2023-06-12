@@ -52,6 +52,9 @@ class _ShareLocationButtonState extends State<ShareLocationButton> {
       builder: (context) => PlatformAlertDialog(
         title: Text(l10n.shareLocation_title),
         content: Text(l10n.shareLocation_description),
+        material: (_, __) => MaterialAlertDialogData(
+          icon: const Icon(Icons.share_location_rounded),
+        ),
         actions: createCancellableDialogActions(context, [
           PlatformDialogAction(
             child: Text(l10n.shareLocation_actions_createQRCode),
@@ -113,27 +116,28 @@ class _ShareLocationButtonState extends State<ShareLocationButton> {
           }
 
           await showSingularElementDialog(
-              context: context,
-              builder: (context) => Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: List<Widget>.from(
-                      [
-                        Text(
-                          l10n.shareLocation_scanToImport(widget.task.name),
-                          style: getTitle2TextStyle(context),
-                          textAlign: TextAlign.center,
-                        ),
-                        isMaterial(context) ? const SizedBox(height: LARGE_SPACE) : null,
-                        QrImageView(
-                          data: url,
-                          errorCorrectionLevel: QrErrorCorrectLevel.H,
-                          gapless: false,
-                          backgroundColor: Colors.white,
-                        ),
-                      ].where((element) => element != null),
-                    ),
-                  ));
+            context: context,
+            builder: (context) => Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: List<Widget>.from(
+                [
+                  Text(
+                    l10n.shareLocation_scanToImport(widget.task.name),
+                    style: getTitle2TextStyle(context),
+                    textAlign: TextAlign.center,
+                  ),
+                  isMaterial(context) ? const SizedBox(height: LARGE_SPACE) : null,
+                  QrImageView(
+                    data: url,
+                    errorCorrectionLevel: QrErrorCorrectLevel.H,
+                    gapless: false,
+                    backgroundColor: Colors.white,
+                  ),
+                ].where((element) => element != null),
+              ),
+            ),
+          );
           break;
         case "share":
           final file = XFile((await _createTempViewKeyFile()).path);

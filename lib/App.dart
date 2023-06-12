@@ -6,6 +6,7 @@ import 'package:locus/constants/colors.dart';
 import 'package:locus/screens/MainScreen.dart';
 import 'package:locus/screens/WelcomeScreen.dart';
 import 'package:locus/services/settings_service.dart';
+import 'package:locus/utils/PageRoute.dart';
 import 'package:locus/utils/color.dart';
 import 'package:locus/widgets/DismissKeyboard.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
@@ -201,10 +202,14 @@ class App extends StatelessWidget {
                         isIgnoringBatteryOptimizations,
                   );
 
-            return MaterialWithModalsPageRoute(
-              builder: (context) => screen,
-              settings: settings,
-            );
+            if (isCupertino(context)) {
+              return MaterialWithModalsPageRoute(
+                builder: (_) => screen,
+                settings: settings,
+              );
+            }
+
+            return NativePageRoute(builder: (_) => screen, context: context);
           },
         ),
       ),

@@ -14,6 +14,33 @@
     }
   },
   "taskImportError": "An error occurred while importing the task",
+  "taskImport_error_no_relays": "No relays are present in the task.",
+  "taskImport_error_sameTask": "This is a task from you (name: {name}).",
+  "@taskImport_error_sameTask": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "taskImport_error_sameView": "This is a view from you (name: {name}).",
+  "@taskImport_error_sameView": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "longFormattedDate": "{date}",
+  "@longFormattedDate": {
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "MMMM d, yyyy HH:mm",
+        "isCustomDateFormat": "true"
+      }
+    }
+  },
   "locationsLoadingError": "An error occurred while loading locations",
   "locationFetchError": "There was an error fetching the locations. Please try again later.",
   "locationFetchEmptyError": "No locations found. Maybe there hasn't been shared a location yet or they expired.",
@@ -339,6 +366,8 @@
   "viewDetails_title": "View Details",
   "viewDetails_actions_openLatestLocation": "Open Maps to latest location",
   "viewDetails_actions_showLocationList": "Show Location List",
+  "viewDetails_actions_showAlarms_show": "Show Alarms",
+  "viewDetails_actions_showAlarms_hide": "Hide Alarms",
   "loadingLocationsTitle": "Loading locations: {count}",
   "@loadingLocationsTitle": {
     "placeholders": {
@@ -486,6 +515,8 @@
   "logs_values_taskDeleted": "Task deleted",
   "logs_values_taskStatusChanged": "Task status changed",
   "logs_values_updatedLocation": "Location updated",
+  "logs_values_alarmCreated": "Alarm added",
+  "logs_values_alarmDeleted": "Alarm removed",
   "log_title_taskCreated": "<{name}> created",
   "@log_title_taskCreated": {
     "placeholders": {
@@ -520,11 +551,92 @@
       }
     }
   },
+  "log_title_alarmCreated": "Alarm added for {viewName}",
+  "@log_title_alarmCreated": {
+    "placeholders": {
+      "viewName": {
+        "type": "String"
+      }
+    }
+  },
+  "log_title_alarmDeleted": "Alarm removed from {viewName}",
+  "@log_title_alarmDeleted": {
+    "placeholders": {
+      "viewName": {
+        "type": "String"
+      }
+    }
+  },
   "logs_system_initiator_description": "This log was created by the system",
   "logs_task_creationContext_description": "{context, select, inApp{Task created inside the App} quickAction{Task created via Quick Action} other{Unknown error occurred}}",
   "logs_title": "Locus automatically creates logs",
   "logs_description": "Logs are kept for 7 days and are automatically deleted afterwards.",
   "locationPointsScreen_title": "Location Points",
   "bunny_unavailable": "Sorry, but it seems as if your friend is as lost as this song.",
-  "bunny_unavailable_action": "What's this song?"
+  "bunny_unavailable_action": "What's this song?",
+  "locationAlarm_radiusBasedRegion_notificationTitle_whenEnter": "{name} entered zone {zone}",
+  "@locationAlarm_radiusBasedRegion_notificationTitle_whenEnter": {
+    "description": "Notification title when entering a zone; Try to keep this short, will be truncated to 80 characters",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "zone": {
+        "type": "String"
+      }
+    }
+  },
+  "locationAlarm_radiusBasedRegion_notificationTitle_whenLeave": "{name} left zone {zone}",
+  "@locationAlarm_radiusBasedRegion_notificationTitle_whenLeave": {
+    "description": "Notification title when leaving a zone; Try to keep this short, will be truncated to 80 characters",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "zone": {
+        "type": "String"
+      }
+    }
+  },
+  "locationAlarm_radiusBasedRegion_notificationTitle_maybe": "{name} may has entered or left zone {zone}",
+  "@locationAlarm_radiusBasedRegion_notificationTitle_maybe": {
+    "description": "Notification title when it is not clear if the user entered or left a zone; Try to keep this short, will be truncated to 80 characters",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "zone": {
+        "type": "String"
+      }
+    }
+  },
+  "locationAlarm_notification_description": "Tap for more information",
+  "androidNotificationChannel_locationAlarms_name": "Location Alarms",
+  "androidNotificationChannel_locationAlarms_description": "Receive notifications for location alarms",
+  "location_manageAlarms_title": "Manage Alarms",
+  "location_manageAlarms_empty_title": "No Alarms",
+  "location_manageAlarms_empty_description": "Add alarms to be notified when certain conditions are met (e.g. when this person enters a certain area).",
+  "location_manageAlarms_addNewAlarm_actionLabel": "Add Alarm",
+  "location_manageAlarms_lastCheck_description": "Last checked at {date}",
+  "@location_manageAlarms_lastCheck_description": {
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "MMMM d, HH:mm",
+        "isCustomDateFormat": "true"
+      }
+    }
+  },
+  "location_addAlarm_radiusBased_title": "Add radius-based Alarm",
+  "location_addAlarm_radiusBased_isInScaleMode": "You can now scale the radius by pinching and zooming into the map. Tap on the screen to go back to normal mode.",
+  "location_addAlarm_radiusBased_addLabel": "Select region",
+  "location_addAlarm_radiusBased_help_title": "Radius-based Alarms",
+  "location_addAlarm_radiusBased_help_description": "Radius-based alarms are triggered either when leaving or entering a region. After defining your region, you can decide when your alarm should trigger.",
+  "location_addAlarm_radiusBased_help_tapDescription": "Tap on the map to mark the center of your region",
+  "location_addAlarm_radiusBased_help_pinchDescription": "Press and hold to enter into scale mode. You can then change the radius by pinching and zooming into the map.",
+  "location_addAlarm_radiusBased_trigger_title": "When should your alarm trigger?",
+  "location_addAlarm_radiusBased_trigger_whenEnter": "Trigger when entering",
+  "location_addAlarm_radiusBased_trigger_whenLeave": "Trigger when leaving",
+  "location_addAlarm_radiusBased_name_description": "Please enter a name for this region",
+  "location_addAlarm_actionLabel": "Add Alarm"
 }

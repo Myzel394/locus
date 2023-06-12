@@ -18,3 +18,4 @@ const CURRENT_APP_VERSION = "0.8.3";
 const LOG_TAG = "LocusLog";
 
 const HTTP_TIMEOUT = Duration(seconds: 30);
+const MAYBE_TRIGGER_MINIMUM_TIME_BETWEEN = Duration(hours: 4);

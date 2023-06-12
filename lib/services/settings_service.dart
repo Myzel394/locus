@@ -34,14 +34,13 @@ enum AndroidTheme {
 // Selects a random provider from the list of available providers, not including
 // the system provider.
 GeocoderProvider selectRandomProvider() {
-  final providers = GeocoderProvider.values
-      .where((element) => element != GeocoderProvider.system)
-      .toList();
+  final providers = GeocoderProvider.values.where((element) => element != GeocoderProvider.system).toList();
 
   return providers[Random().nextInt(providers.length)];
 }
 
 class SettingsService extends ChangeNotifier {
+  String localeName;
   bool automaticallyLookupAddresses;
   bool showHints;
   List<String> _relays;
@@ -55,6 +54,8 @@ class SettingsService extends ChangeNotifier {
   // Apple
   MapProvider mapProvider;
 
+  bool helpers_hasSeen_radiusBasedAlarms = false;
+
   SettingsService({
     required this.automaticallyLookupAddresses,
     required this.primaryColor,
@@ -62,6 +63,8 @@ class SettingsService extends ChangeNotifier {
     required this.showHints,
     required this.geocoderProvider,
     required this.androidTheme,
+    required this.helpers_hasSeen_radiusBasedAlarms,
+    required this.localeName,
     List<String>? relays,
   }) : _relays = relays ?? [];
 
@@ -69,14 +72,12 @@ class SettingsService extends ChangeNotifier {
     return SettingsService(
       automaticallyLookupAddresses: true,
       primaryColor: null,
-      androidTheme:
-          await fetchIsMIUI() ? AndroidTheme.miui : AndroidTheme.materialYou,
-      mapProvider:
-          isPlatformApple() ? MapProvider.apple : MapProvider.openStreetMap,
+      androidTheme: await fetchIsMIUI() ? AndroidTheme.miui : AndroidTheme.materialYou,
+      mapProvider: isPlatformApple() ? MapProvider.apple : MapProvider.openStreetMap,
       showHints: true,
-      geocoderProvider: isSystemGeocoderAvailable()
-          ? GeocoderProvider.system
-          : selectRandomProvider(),
+      geocoderProvider: isSystemGeocoderAvailable() ? GeocoderProvider.system : selectRandomProvider(),
+      helpers_hasSeen_radiusBasedAlarms: false,
+      localeName: "en",
     );
   }
 
@@ -85,13 +86,14 @@ class SettingsService extends ChangeNotifier {
   static SettingsService fromJSON(final Map<String, dynamic> data) {
     return SettingsService(
       automaticallyLookupAddresses: data['automaticallyLoadLocation'],
-      primaryColor:
-          data['primaryColor'] != null ? Color(data['primaryColor']) : null,
+      primaryColor: data['primaryColor'] != null ? Color(data['primaryColor']) : null,
       mapProvider: MapProvider.values[data['mapProvider']],
       relays: List<String>.from(data['relays'] ?? []),
       showHints: data['showHints'],
       geocoderProvider: GeocoderProvider.values[data['geocoderProvider']],
       androidTheme: AndroidTheme.values[data['androidTheme']],
+      helpers_hasSeen_radiusBasedAlarms: data['helpers_hasSeen_radiusBasedAlarms'],
+      localeName: data['localeName'],
     );
   }
 
@@ -123,6 +125,8 @@ class SettingsService extends ChangeNotifier {
       "showHints": showHints,
       "geocoderProvider": geocoderProvider.index,
       "androidTheme": androidTheme.index,
+      "helpers_hasSeen_radiusBasedAlarms": helpers_hasSeen_radiusBasedAlarms,
+      "localeName": localeName,
     };
   }
 
@@ -132,14 +136,12 @@ class SettingsService extends ChangeNotifier {
   ) async {
     final providers = [
       getGeocoderProvider(),
-      ...GeocoderProvider.values
-          .where((element) => element != getGeocoderProvider())
+      ...GeocoderProvider.values.where((element) => element != getGeocoderProvider())
     ];
     // If the user does not want to use the system provider,
     // we will not use it, even if it is the only one
     // available (for better privacy)
-    if (!isSystemGeocoderAvailable() ||
-        getGeocoderProvider() != GeocoderProvider.system) {
+    if (!isSystemGeocoderAvailable() || getGeocoderProvider() != GeocoderProvider.system) {
       providers.remove(GeocoderProvider.system);
     }
 
