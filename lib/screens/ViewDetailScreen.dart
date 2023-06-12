@@ -308,23 +308,21 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
                     child: Stack(
                       children: <Widget>[
                         LocationsMap(
-                          controller: _controller,
-                          circles: showAlarms
-                              ? List<LocationsMapCircle>.from(
-                                  List<RadiusBasedRegionLocationAlarm>.from(
-                                          widget.view.alarms)
-                                      .map(
-                                    (final alarm) => LocationsMapCircle(
-                                      id: alarm.id,
-                                      center: alarm.center,
-                                      radius: alarm.radius,
-                                      color: Colors.red.withOpacity(.3),
-                                      strokeColor: Colors.red,
-                                    ),
-                                  ),
-                                )
-                              : [],
-                        ),
+                            controller: _controller,
+                            showCircles: showAlarms,
+                            circles: List<LocationsMapCircle>.from(
+                              List<RadiusBasedRegionLocationAlarm>.from(
+                                      widget.view.alarms)
+                                  .map(
+                                (final alarm) => LocationsMapCircle(
+                                  id: alarm.id,
+                                  center: alarm.center,
+                                  radius: alarm.radius,
+                                  color: Colors.red.withOpacity(.3),
+                                  strokeColor: Colors.red,
+                                ),
+                              ),
+                            )),
                         if (_locationFetcher.isLoading)
                           const LocationStillFetchingBanner(),
                       ],

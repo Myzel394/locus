@@ -148,12 +148,14 @@ class LocationsMap extends StatefulWidget {
   final bool initWithUserPosition;
 
   final List<LocationsMapCircle> circles;
+  final bool showCircles;
 
   const LocationsMap({
     required this.controller,
     this.initialZoomLevel = 16,
     this.initWithUserPosition = false,
     this.circles = const [],
+    this.showCircles = true,
     Key? key,
   }) : super(key: key);
 
@@ -339,10 +341,14 @@ class _LocationsMapState extends State<LocationsMap> {
               userAgentPackageName: "app.myzel394.locus",
             ),
             if (widget.circles.isNotEmpty)
-              CircleLayer(
-                circles: widget.circles
-                    .map((circle) => circle.asFlutterMap)
-                    .toList(),
+              AnimatedOpacity(
+                duration: const Duration(milliseconds: 300),
+                opacity: widget.showCircles ? 1 : 0,
+                child: CircleLayer(
+                  circles: widget.circles
+                      .map((circle) => circle.asFlutterMap)
+                      .toList(),
+                ),
               ),
             CircleLayer(
               circles: widget.controller.locations
