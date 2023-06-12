@@ -1,8 +1,14 @@
 import 'dart:io';
 
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:locus/constants/app.dart';
+import 'package:locus/utils/theme.dart';
+import 'package:locus/widgets/PlatformDialogActionButton.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 Future<bool> hasOSNotificationPermission() async {
   if (!Platform.isAndroid) {
@@ -37,4 +43,10 @@ Future<bool> hasGrantedNotificationPermission() async {
   final permissionStatus = await Permission.notification.status;
 
   return permissionStatus.isGranted;
+}
+
+Future<bool> hasGrantedAlwaysLocationPermission() async {
+  final permissionStatus = await Geolocator.checkPermission();
+
+  return permissionStatus == LocationPermission.always;
 }

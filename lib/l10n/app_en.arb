@@ -626,5 +626,13 @@
   "location_addAlarm_radiusBased_trigger_whenEnter": "Trigger when entering",
   "location_addAlarm_radiusBased_trigger_whenLeave": "Trigger when leaving",
   "location_addAlarm_radiusBased_name_description": "Please enter a name for this region",
-  "location_addAlarm_actionLabel": "Add Alarm"
+  "location_addAlarm_actionLabel": "Add Alarm",
+  "permissions_location_askPermission_title": "Grant access to your location",
+  "permissions_location_askPermission_message_always": "Locus needs to access your location in the background. We will first ask for your permission while you use the app. Please make sure to tap on \"Allow while using the App\". Do not tap on \"Allow once\". After that, we will ask you to grant us permission to access your location in the background. Please make sure to tap on \"Always Allow\".",
+  "permissions_location_askPermission_message_whileInUse": "Locus needs to access your location. Please grant the permission in the next step.",
+  "permissions_location_askPermission_action_grant_label": "Grant permission",
+  "permissions_location_permissionDenied_message": "You have denied Locus access to your location. You can grant the permission in the settings.",
+  "permissions_location_permissionDenied_action_openSettings_label": "Open settings",
+  "permissions_location_permissionDenied_settingsNotOpened_title": "Permission denied",
+  "permissions_location_permissionDenied_settingsNotOpened_message": "We could not open the settings. Please open the settings manually and grant Locus access to your location."
 }
