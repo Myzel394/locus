@@ -188,23 +188,28 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
       appBar: PlatformAppBar(
         title: Text(l10n.viewDetails_title),
         trailingActions: <Widget>[
-          if (widget.view.alarms.isNotEmpty)
-            PlatformTextButton(
-              cupertino: (_, __) => CupertinoTextButtonData(
-                padding: EdgeInsets.zero,
-              ),
-              onPressed: () {
-                setState(() {
-                  showAlarms = !showAlarms;
-                });
-              },
-              child: PlatformFlavorWidget(
-                material: (_, __) => showAlarms
-                    ? const Icon(Icons.alarm_rounded)
-                    : const Icon(Icons.alarm_off_rounded),
-                cupertino: (_, __) => showAlarms
-                    ? const Icon(CupertinoIcons.alarm)
-                    : const Icon(Icons.alarm_off_rounded),
+          if (widget.view.alarms.isNotEmpty && _controller.locations.isNotEmpty)
+            Tooltip(
+              message: showAlarms
+                  ? l10n.viewDetails_actions_showAlarms_hide
+                  : l10n.viewDetails_actions_showAlarms_show,
+              child: PlatformTextButton(
+                cupertino: (_, __) => CupertinoTextButtonData(
+                  padding: EdgeInsets.zero,
+                ),
+                onPressed: () {
+                  setState(() {
+                    showAlarms = !showAlarms;
+                  });
+                },
+                child: PlatformFlavorWidget(
+                  material: (_, __) => showAlarms
+                      ? const Icon(Icons.alarm_rounded)
+                      : const Icon(Icons.alarm_off_rounded),
+                  cupertino: (_, __) => showAlarms
+                      ? const Icon(CupertinoIcons.alarm)
+                      : const Icon(Icons.alarm_off_rounded),
+                ),
               ),
             ),
           Padding(
