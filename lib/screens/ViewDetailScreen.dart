@@ -46,16 +46,15 @@ class LineSliderTickMarkShape extends SliderTickMarkShape {
   }
 
   @override
-  void paint(
-    PaintingContext context,
-    Offset center, {
-    required RenderBox parentBox,
-    required SliderThemeData sliderTheme,
-    required Animation<double> enableAnimation,
-    required Offset thumbCenter,
-    required bool isEnabled,
-    required TextDirection textDirection,
-  }) {
+  void paint(PaintingContext context,
+      Offset center, {
+        required RenderBox parentBox,
+        required SliderThemeData sliderTheme,
+        required Animation<double> enableAnimation,
+        required Offset thumbCenter,
+        required bool isEnabled,
+        required TextDirection textDirection,
+      }) {
     // This block is just copied from `slider_theme`
     final bool isTickMarkRightOfThumb = center.dx > thumbCenter.dx;
     final begin = isTickMarkRightOfThumb
@@ -117,7 +116,7 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
         EasyThrottle.throttle(
           "${widget.view.id}:location-fetch",
           DEBOUNCE_DURATION,
-          () {
+              () {
             if (!mounted) {
               return;
             }
@@ -132,12 +131,20 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
         setState(() {});
       },
     );
+
+    // Update UI when for example alarms are added or removed
+    widget.view.addListener(updateView);
+  }
+
+  void updateView() {
+    setState(() {});
   }
 
   @override
   void dispose() {
     _locationFetcher.dispose();
     _controller.dispose();
+    widget.view.removeListener(updateView);
 
     super.dispose();
   }
@@ -155,20 +162,24 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
     };
   }
 
-  Widget buildDateSelectButton(
-    final List<LocationPointService> locations,
-    final int hour,
-    final int maxLocations,
-  ) {
+  Widget buildDateSelectButton(final List<LocationPointService> locations,
+      final int hour,
+      final int maxLocations,) {
     final shades = getPrimaryColorShades(context);
 
     return FillUpPaint(
       color: shades[0]!,
       fillPercentage:
-          maxLocations == 0 ? 0 : (locations.length.toDouble() / maxLocations),
+      maxLocations == 0 ? 0 : (locations.length.toDouble() / maxLocations),
       size: Size(
-        MediaQuery.of(context).size.width / 24,
-        MediaQuery.of(context).size.height * (1 / 12),
+        MediaQuery
+            .of(context)
+            .size
+            .width / 24,
+        MediaQuery
+            .of(context)
+            .size
+            .height * (1 / 12),
       ),
     );
   }
@@ -180,9 +191,9 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
     final maxLocations = locationsPerHour.values.isEmpty
         ? 0
         : locationsPerHour.values.fold(
-            0,
+        0,
             (value, element) =>
-                value > element.length ? value : element.length);
+        value > element.length ? value : element.length);
 
     return PlatformScaffold(
       appBar: PlatformAppBar(
@@ -194,19 +205,22 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
                   ? l10n.viewDetails_actions_showAlarms_hide
                   : l10n.viewDetails_actions_showAlarms_show,
               child: PlatformTextButton(
-                cupertino: (_, __) => CupertinoTextButtonData(
-                  padding: EdgeInsets.zero,
-                ),
+                cupertino: (_, __) =>
+                    CupertinoTextButtonData(
+                      padding: EdgeInsets.zero,
+                    ),
                 onPressed: () {
                   setState(() {
                     showAlarms = !showAlarms;
                   });
                 },
                 child: PlatformFlavorWidget(
-                  material: (_, __) => showAlarms
+                  material: (_, __) =>
+                  showAlarms
                       ? const Icon(Icons.alarm_rounded)
                       : const Icon(Icons.alarm_off_rounded),
-                  cupertino: (_, __) => showAlarms
+                  cupertino: (_, __) =>
+                  showAlarms
                       ? const Icon(CupertinoIcons.alarm)
                       : const Icon(Icons.alarm_off_rounded),
                 ),
@@ -252,16 +266,20 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
                       trailing: const SizedBox.shrink(),
                       title: Text(l10n.viewDetails_actions_openLatestLocation),
                     ),
-                    onPressed: () => showPlatformModalSheet(
-                      context: context,
-                      material: MaterialModalSheetData(),
-                      builder: (context) => OpenInMaps(
-                        destination: Coords(
-                          _locationFetcher.controller.locations.last.latitude,
-                          _locationFetcher.controller.locations.last.longitude,
+                    onPressed: () =>
+                        showPlatformModalSheet(
+                          context: context,
+                          material: MaterialModalSheetData(),
+                          builder: (context) =>
+                              OpenInMaps(
+                                destination: Coords(
+                                  _locationFetcher.controller.locations.last
+                                      .latitude,
+                                  _locationFetcher.controller.locations.last
+                                      .longitude,
+                                ),
+                              ),
                         ),
-                      ),
-                    ),
                   ),
                 if (_locationFetcher.controller.locations.isNotEmpty)
                   PlatformPopupMenuItem(
@@ -269,7 +287,7 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
                       leading: PlatformFlavorWidget(
                         material: (_, __) => const Icon(Icons.list_rounded),
                         cupertino: (_, __) =>
-                            const Icon(CupertinoIcons.list_bullet),
+                        const Icon(CupertinoIcons.list_bullet),
                       ),
                       trailing: const SizedBox.shrink(),
                       title: Text(l10n.viewDetails_actions_showLocationList),
@@ -279,9 +297,10 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
                         context,
                         NativePageRoute(
                           context: context,
-                          builder: (context) => ViewLocationPointsScreen(
-                            locationFetcher: _locationFetcher,
-                          ),
+                          builder: (context) =>
+                              ViewLocationPointsScreen(
+                                locationFetcher: _locationFetcher,
+                              ),
                         ),
                       );
                     },
@@ -290,12 +309,14 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
             ),
           ),
         ],
-        material: (_, __) => MaterialAppBarData(
-          centerTitle: true,
-        ),
-        cupertino: (_, __) => CupertinoNavigationBarData(
-          backgroundColor: getCupertinoAppBarColorForMapScreen(context),
-        ),
+        material: (_, __) =>
+            MaterialAppBarData(
+              centerTitle: true,
+            ),
+        cupertino: (_, __) =>
+            CupertinoNavigationBarData(
+              backgroundColor: getCupertinoAppBarColorForMapScreen(context),
+            ),
       ),
       body: (() {
         if (_isError) {
@@ -317,15 +338,16 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
                             showCircles: showAlarms,
                             circles: List<LocationsMapCircle>.from(
                               List<RadiusBasedRegionLocationAlarm>.from(
-                                      widget.view.alarms)
+                                  widget.view.alarms)
                                   .map(
-                                (final alarm) => LocationsMapCircle(
-                                  id: alarm.id,
-                                  center: alarm.center,
-                                  radius: alarm.radius,
-                                  color: Colors.red.withOpacity(.3),
-                                  strokeColor: Colors.red,
-                                ),
+                                    (final alarm) =>
+                                    LocationsMapCircle(
+                                      id: alarm.id,
+                                      center: alarm.center,
+                                      radius: alarm.radius,
+                                      color: Colors.red.withOpacity(.3),
+                                      strokeColor: Colors.red,
+                                    ),
                               ),
                             )),
                         if (_locationFetcher.isLoading)
@@ -338,11 +360,11 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children:
-                          List.generate(24, (index) => 23 - index).map((hour) {
+                      List.generate(24, (index) => 23 - index).map((hour) {
                         final date =
-                            DateTime.now().subtract(Duration(hours: hour));
+                        DateTime.now().subtract(Duration(hours: hour));
                         final normalizedDate =
-                            LocationsMapController.normalizeDateTime(date);
+                        LocationsMapController.normalizeDateTime(date);
                         final locations =
                             locationsPerHour[normalizedDate] ?? [];
                         final child = buildDateSelectButton(
@@ -352,14 +374,16 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
                         );
 
                         return PlatformWidget(
-                          material: (_, __) => InkWell(
-                            onTap: handleTapOnDate(locations),
-                            child: child,
-                          ),
-                          cupertino: (_, __) => GestureDetector(
-                            onTap: handleTapOnDate(locations),
-                            child: child,
-                          ),
+                          material: (_, __) =>
+                              InkWell(
+                                onTap: handleTapOnDate(locations),
+                                child: child,
+                              ),
+                          cupertino: (_, __) =>
+                              GestureDetector(
+                                onTap: handleTapOnDate(locations),
+                                child: child,
+                              ),
                         );
                       }).toList(),
                     ),
