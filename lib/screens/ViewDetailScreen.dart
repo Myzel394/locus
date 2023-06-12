@@ -6,6 +6,7 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart'
     hide PlatformListTile;
 import 'package:locus/screens/view_alarm_screen_widgets/ViewAlarmScreen.dart';
 import 'package:locus/screens/view_details_screen_widgets/ViewLocationPointsScreen.dart';
+import 'package:locus/services/location_alarm_service.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:locus/utils/PageRoute.dart';
 import 'package:locus/utils/bunny.dart';
@@ -308,6 +309,21 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
                       children: <Widget>[
                         LocationsMap(
                           controller: _controller,
+                          circles: showAlarms
+                              ? List<LocationsMapCircle>.from(
+                                  List<RadiusBasedRegionLocationAlarm>.from(
+                                          widget.view.alarms)
+                                      .map(
+                                    (final alarm) => LocationsMapCircle(
+                                      id: alarm.id,
+                                      center: alarm.center,
+                                      radius: alarm.radius,
+                                      color: Colors.red.withOpacity(.3),
+                                      strokeColor: Colors.red,
+                                    ),
+                                  ),
+                                )
+                              : [],
                         ),
                         if (_locationFetcher.isLoading)
                           const LocationStillFetchingBanner(),
