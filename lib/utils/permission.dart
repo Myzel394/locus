@@ -50,3 +50,19 @@ Future<bool> hasGrantedAlwaysLocationPermission() async {
 
   return permissionStatus == LocationPermission.always;
 }
+
+Future<bool> hasGrantedLocationPermission() async {
+  final permissionStatus = await Geolocator.checkPermission();
+
+  return permissionStatus == LocationPermission.always || permissionStatus == LocationPermission.whileInUse;
+}
+
+Future<bool> requestBasicLocationPermission() async {
+  if (await hasGrantedLocationPermission()) {
+    return true;
+  }
+
+  final permissionStatus = await Geolocator.requestPermission();
+
+  return permissionStatus == LocationPermission.always || permissionStatus == LocationPermission.whileInUse;
+}
