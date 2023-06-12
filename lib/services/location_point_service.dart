@@ -57,9 +57,11 @@ class LocationPointService {
       heading: json["heading"],
       headingAccuracy: json["headingAccuracy"],
       batteryLevel: json["batteryLevel"],
-      batteryState: BatteryState.values.firstWhere(
-        (value) => value.name == json["batteryState"],
-      ),
+      batteryState: json["batteryState"] == null
+          ? null
+          : BatteryState.values.firstWhere(
+              (value) => value.name == json["batteryState"],
+            ),
     );
   }
 
