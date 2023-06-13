@@ -75,36 +75,25 @@ class _ViewAlarmSelectRadiusRegionScreenState extends State<ViewAlarmSelectRadiu
         children: <Widget>[
           Text(l10n.location_addAlarm_radiusBased_help_description),
           const SizedBox(height: MEDIUM_SPACE),
-          if (isMaterial(context))
-            ListTile(
-              title: Text(l10n.location_addAlarm_radiusBased_help_tapDescription),
-              leading: const Icon(Icons.touch_app_rounded),
-            )
-          else
-            Row(
-              children: <Widget>[
-                const Icon(Icons.touch_app_rounded),
-                const SizedBox(width: MEDIUM_SPACE),
-                Flexible(
-                  child: Text(l10n.location_addAlarm_radiusBased_help_tapDescription),
-                ),
-              ],
-            ),
-          if (isMaterial(context))
-            ListTile(
-              title: Text(l10n.location_addAlarm_radiusBased_help_pinchDescription),
-              leading: const Icon(Icons.pinch_rounded),
-            )
-          else
-            Row(
-              children: <Widget>[
-                const Icon(Icons.pinch_rounded),
-                const SizedBox(width: MEDIUM_SPACE),
-                Flexible(
-                  child: Text(l10n.location_addAlarm_radiusBased_help_pinchDescription),
-                ),
-              ],
-            ),
+          Row(
+            children: <Widget>[
+              const Icon(Icons.touch_app_rounded),
+              const SizedBox(width: MEDIUM_SPACE),
+              Flexible(
+                child: Text(l10n.location_addAlarm_radiusBased_help_tapDescription),
+              ),
+            ],
+          ),
+          const SizedBox(height: MEDIUM_SPACE),
+          Row(
+            children: <Widget>[
+              const Icon(Icons.pinch_rounded),
+              const SizedBox(width: MEDIUM_SPACE),
+              Flexible(
+                child: Text(l10n.location_addAlarm_radiusBased_help_pinchDescription),
+              ),
+            ],
+          ),
         ],
       ),
       title: l10n.location_addAlarm_radiusBased_help_title,
