@@ -356,6 +356,15 @@
   "viewDetails_actions_showLocationList": "Show Location List",
   "viewDetails_actions_showAlarms_show": "Show Alarms",
   "viewDetails_actions_showAlarms_hide": "Hide Alarms",
+  "viewDetails_distanceToLatestLocation_label": "{distance} meters away",
+  "@viewDetails_distanceToLatestLocation_label": {
+    "placeholders": {
+      "distance": {
+        "type": "int",
+        "format": "compactLong"
+      }
+    }
+  },
   "loadingLocationsTitle": "Loading locations: {count}",
   "@loadingLocationsTitle": {
     "placeholders": {
