@@ -33,6 +33,11 @@ enum AndroidTheme {
   miui,
 }
 
+enum HelperSheet {
+  radiusBasedAlarms,
+  taskShare,
+}
+
 // Selects a random provider from the list of available providers, not including
 // the system provider.
 GeocoderProvider selectRandomProvider() {
@@ -57,7 +62,7 @@ class SettingsService extends ChangeNotifier {
   // Apple
   MapProvider mapProvider;
 
-  bool helpers_hasSeen_radiusBasedAlarms = false;
+  Set<String> _seenHelperSheets;
 
   SettingsService({
     required this.automaticallyLookupAddresses,
@@ -66,11 +71,13 @@ class SettingsService extends ChangeNotifier {
     required this.showHints,
     required this.geocoderProvider,
     required this.androidTheme,
-    required this.helpers_hasSeen_radiusBasedAlarms,
     required this.localeName,
     required this.userHasSeenWelcomeScreen,
+    Set<String>? seenHelperSheets,
     List<String>? relays,
-  }) : _relays = relays ?? [];
+  })
+      : _relays = relays ?? [],
+        _seenHelperSheets = seenHelperSheets ?? {};
 
   static Future<SettingsService> createDefault() async {
     return SettingsService(
@@ -80,9 +87,9 @@ class SettingsService extends ChangeNotifier {
       mapProvider: isPlatformApple() ? MapProvider.apple : MapProvider.openStreetMap,
       showHints: true,
       geocoderProvider: isSystemGeocoderAvailable() ? GeocoderProvider.system : selectRandomProvider(),
-      helpers_hasSeen_radiusBasedAlarms: false,
       localeName: "en",
       userHasSeenWelcomeScreen: false,
+      seenHelperSheets: {},
     );
   }
 
@@ -97,9 +104,9 @@ class SettingsService extends ChangeNotifier {
       showHints: data['showHints'],
       geocoderProvider: GeocoderProvider.values[data['geocoderProvider']],
       androidTheme: AndroidTheme.values[data['androidTheme']],
-      helpers_hasSeen_radiusBasedAlarms: data['helpers_hasSeen_radiusBasedAlarms'],
       localeName: data['localeName'],
       userHasSeenWelcomeScreen: data['userHasSeenWelcomeScreen'],
+      seenHelperSheets: Set<String>.from(data['seenHelperSheets'] ?? {}),
     );
   }
 
@@ -131,16 +138,14 @@ class SettingsService extends ChangeNotifier {
       "showHints": showHints,
       "geocoderProvider": geocoderProvider.index,
       "androidTheme": androidTheme.index,
-      "helpers_hasSeen_radiusBasedAlarms": helpers_hasSeen_radiusBasedAlarms,
       "localeName": localeName,
       "userHasSeenWelcomeScreen": userHasSeenWelcomeScreen,
+      "seenHelperSheets": _seenHelperSheets.toList(),
     };
   }
 
-  Future<String> getAddress(
-    final double latitude,
-    final double longitude,
-  ) async {
+  Future<String> getAddress(final double latitude,
+      final double longitude,) async {
     final providers = [
       getGeocoderProvider(),
       ...GeocoderProvider.values.where((element) => element != getGeocoderProvider())
@@ -170,7 +175,8 @@ class SettingsService extends ChangeNotifier {
     throw Exception("Failed to get address from any provider");
   }
 
-  Future<void> save() => storage.write(
+  Future<void> save() =>
+      storage.write(
         key: STORAGE_KEY,
         value: jsonEncode(toJSON()),
       );
@@ -191,9 +197,13 @@ class SettingsService extends ChangeNotifier {
 
     // Return system default
     if (isCupertino(context)) {
-      return CupertinoTheme.of(context).primaryColor;
+      return CupertinoTheme
+          .of(context)
+          .primaryColor;
     } else {
-      return Theme.of(context).primaryColor;
+      return Theme
+          .of(context)
+          .primaryColor;
     }
   }
 
@@ -253,4 +263,12 @@ class SettingsService extends ChangeNotifier {
   }
 
   bool isMIUI() => androidTheme == AndroidTheme.miui;
+
+  bool hasSeenHelperSheet(final HelperSheet sheet) => _seenHelperSheets.contains(sheet.name);
+
+  Future<void> markHelperSheetAsSeen(final HelperSheet sheet) async {
+    _seenHelperSheets.add(sheet.name);
+    notifyListeners();
+    await save();
+  }
 }
