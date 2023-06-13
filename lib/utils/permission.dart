@@ -36,6 +36,7 @@ Future<bool> hasOSBluetoothPermission() async {
 }
 
 Future<bool> hasGrantedNotificationPermission() async {
+  // TODO: Check this again once https://github.com/flutter/flutter/issues/128691 is fixed
   if (!(await hasOSNotificationPermission())) {
     return true;
   }

@@ -1,26 +1,24 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:locus/utils/permission.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:locus/services/settings_service.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
+import '../services/settings_service.dart';
 import '../utils/theme.dart';
 
-mixin RequestLocationPermissionMixin {
+mixin RequestNotificationPermissionMixin {
   BuildContext get context;
 
   bool get mounted;
 
-  Future<bool> showLocationPermissionDialog({
-    final bool askForAlways = false,
-  }) async {
-    final settings = context.read<SettingsService>();
-    final permissionStatus = await Geolocator.checkPermission();
-
-    if ((permissionStatus == LocationPermission.always) ||
-        (permissionStatus == LocationPermission.whileInUse && !askForAlways)) {
+  Future<bool> showNotificationPermissionDialog() async {
+    if (await hasGrantedNotificationPermission()) {
       return true;
     }
 
@@ -28,6 +26,8 @@ mixin RequestLocationPermissionMixin {
       return false;
     }
 
+    final notificationsPlugins = FlutterLocalNotificationsPlugin();
+    final settings = context.read<SettingsService>();
     final l10n = AppLocalizations.of(context);
 
     // Ask for permission
@@ -35,15 +35,11 @@ mixin RequestLocationPermissionMixin {
       context: context,
       barrierDismissible: true,
       builder: (context) => PlatformAlertDialog(
-        title: Text(l10n.permissions_location_askPermission_title),
+        title: Text(l10n.permissions_notification_askPermission_title),
         material: (_, __) => MaterialAlertDialogData(
-          icon: settings.isMIUI() ? const Icon(CupertinoIcons.location_fill) : const Icon(Icons.location_on_rounded),
+          icon: settings.isMIUI() ? const Icon(CupertinoIcons.bell_fill) : const Icon(Icons.notifications_rounded),
         ),
-        content: Text(
-          askForAlways
-              ? l10n.permissions_location_askPermission_message_always
-              : l10n.permissions_location_askPermission_message_whileInUse,
-        ),
+        content: Text(l10n.permissions_notification_askPermission_message),
         actions: createCancellableDialogActions(
           context,
           [
@@ -53,36 +49,33 @@ mixin RequestLocationPermissionMixin {
               ),
               child: Text(l10n.permissions_location_askPermission_action_grant_label),
               onPressed: () async {
-                final newPermission = await Geolocator.requestPermission();
+                late final bool? success;
+
+                if (Platform.isAndroid) {
+                  success = await notificationsPlugins
+                      .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+                      ?.requestPermission();
+                } else {
+                  success = await notificationsPlugins
+                      .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>()
+                      ?.requestPermissions(
+                        alert: true,
+                        badge: true,
+                        sound: true,
+                      );
+                }
 
                 if (!context.mounted) {
                   return;
                 }
 
-                if ((newPermission == LocationPermission.always) ||
-                    (newPermission == LocationPermission.whileInUse && !askForAlways)) {
+                if (success == true) {
                   Navigator.of(context).pop(true);
                   return;
-                }
-
-                if (newPermission == LocationPermission.denied) {
-                  // Like the user cancelled
-                  Navigator.of(context).pop("");
+                } else {
+                  Navigator.of(context).pop(false);
                   return;
                 }
-
-                final alwaysPermission = await Geolocator.requestPermission();
-
-                if (!context.mounted) {
-                  return;
-                }
-
-                if (alwaysPermission == LocationPermission.always) {
-                  Navigator.of(context).pop(true);
-                  return;
-                }
-
-                Navigator.of(context).pop(false);
               },
             )
           ],
@@ -114,7 +107,7 @@ mixin RequestLocationPermissionMixin {
               : const Icon(Icons.warning_rounded),
         ),
         title: Text(l10n.permissions_openSettings_failed_title),
-        content: Text(l10n.permissions_location_permissionDenied_message),
+        content: Text(l10n.permissions_notification_permissionDenied_message),
         actions: createCancellableDialogActions(
           context,
           [
@@ -124,7 +117,7 @@ mixin RequestLocationPermissionMixin {
               ),
               child: Text(l10n.permissions_openSettings_label),
               onPressed: () async {
-                final openedSettingsSuccessfully = await Geolocator.openAppSettings();
+                final openedSettingsSuccessfully = await openAppSettings();
 
                 if (!context.mounted) {
                   return;
@@ -153,7 +146,7 @@ mixin RequestLocationPermissionMixin {
         context: context,
         builder: (context) => PlatformAlertDialog(
           title: Text(l10n.permissions_openSettings_failed_title),
-          content: Text(l10n.permissions_location_permissionDenied_settingsNotOpened_message),
+          content: Text(l10n.permissions_notification_permissionDenied_settingsNotOpened_message),
           actions: [
             PlatformDialogAction(
               child: Text(l10n.closeNeutralAction),
@@ -164,13 +157,6 @@ mixin RequestLocationPermissionMixin {
       );
     }
 
-    final newPermission = await Geolocator.checkPermission();
-
-    if (newPermission == LocationPermission.always ||
-        (newPermission == LocationPermission.whileInUse && !askForAlways)) {
-      return true;
-    }
-
-    return false;
+    return hasGrantedNotificationPermission();
   }
 }

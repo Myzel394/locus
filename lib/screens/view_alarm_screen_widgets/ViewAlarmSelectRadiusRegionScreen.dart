@@ -15,6 +15,7 @@ import 'package:locus/services/settings_service.dart';
 import 'package:locus/utils/helper_sheet.dart';
 import 'package:locus/utils/permission.dart';
 import 'package:locus/utils/theme.dart';
+import 'package:locus/widgets/RequestNotificationPermissionMixin.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
@@ -31,7 +32,8 @@ class ViewAlarmSelectRadiusRegionScreen extends StatefulWidget {
   State<ViewAlarmSelectRadiusRegionScreen> createState() => _ViewAlarmSelectRadiusRegionScreenState();
 }
 
-class _ViewAlarmSelectRadiusRegionScreenState extends State<ViewAlarmSelectRadiusRegionScreen> {
+class _ViewAlarmSelectRadiusRegionScreenState extends State<ViewAlarmSelectRadiusRegionScreen>
+    with RequestNotificationPermissionMixin {
   MapController? flutterMapController;
   AppleMaps.AppleMapController? appleMapController;
   LatLng? alarmCenter;
@@ -70,32 +72,33 @@ class _ViewAlarmSelectRadiusRegionScreenState extends State<ViewAlarmSelectRadiu
 
     showHelperSheet(
       context: context,
-      builder: (context) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Text(l10n.location_addAlarm_radiusBased_help_description),
-          const SizedBox(height: MEDIUM_SPACE),
-          Row(
+      builder: (context) =>
+          Column(
+            mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              const Icon(Icons.touch_app_rounded),
-              const SizedBox(width: MEDIUM_SPACE),
-              Flexible(
-                child: Text(l10n.location_addAlarm_radiusBased_help_tapDescription),
+              Text(l10n.location_addAlarm_radiusBased_help_description),
+              const SizedBox(height: MEDIUM_SPACE),
+              Row(
+                children: <Widget>[
+                  const Icon(Icons.touch_app_rounded),
+                  const SizedBox(width: MEDIUM_SPACE),
+                  Flexible(
+                    child: Text(l10n.location_addAlarm_radiusBased_help_tapDescription),
+                  ),
+                ],
+              ),
+              const SizedBox(height: MEDIUM_SPACE),
+              Row(
+                children: <Widget>[
+                  const Icon(Icons.pinch_rounded),
+                  const SizedBox(width: MEDIUM_SPACE),
+                  Flexible(
+                    child: Text(l10n.location_addAlarm_radiusBased_help_pinchDescription),
+                  ),
+                ],
               ),
             ],
           ),
-          const SizedBox(height: MEDIUM_SPACE),
-          Row(
-            children: <Widget>[
-              const Icon(Icons.pinch_rounded),
-              const SizedBox(width: MEDIUM_SPACE),
-              Flexible(
-                child: Text(l10n.location_addAlarm_radiusBased_help_pinchDescription),
-              ),
-            ],
-          ),
-        ],
-      ),
       title: l10n.location_addAlarm_radiusBased_help_title,
       sheetName: HelperSheet.radiusBasedAlarms,
     );
@@ -145,7 +148,8 @@ class _ViewAlarmSelectRadiusRegionScreenState extends State<ViewAlarmSelectRadiu
     super.dispose();
   }
 
-  CircleLayer getFlutterMapCircleLayer() => CircleLayer(
+  CircleLayer getFlutterMapCircleLayer() =>
+      CircleLayer(
         circles: [
           CircleMarker(
             point: alarmCenter!,
@@ -166,11 +170,18 @@ class _ViewAlarmSelectRadiusRegionScreenState extends State<ViewAlarmSelectRadiu
         isDismissible: true,
         isScrollControlled: true,
       ),
-      builder: (_) => RadiusRegionMetaDataSheet(
-        center: alarmCenter!,
-        radius: radius,
-      ),
+      builder: (_) =>
+          RadiusRegionMetaDataSheet(
+            center: alarmCenter!,
+            radius: radius,
+          ),
     );
+
+    final hasGrantedNotificationAccess = await showNotificationPermissionDialog();
+
+    if (!hasGrantedNotificationAccess) {
+      return;
+    }
 
     if (!mounted) {
       return;
@@ -302,16 +313,18 @@ class _ViewAlarmSelectRadiusRegionScreenState extends State<ViewAlarmSelectRadiu
     final l10n = AppLocalizations.of(context);
 
     return PlatformScaffold(
-      material: (_, __) => MaterialScaffoldData(
-        resizeToAvoidBottomInset: false,
-      ),
+      material: (_, __) =>
+          MaterialScaffoldData(
+            resizeToAvoidBottomInset: false,
+          ),
       appBar: PlatformAppBar(
         title: Text(l10n.location_addAlarm_radiusBased_title),
         trailingActions: [
           PlatformIconButton(
-            cupertino: (_, __) => CupertinoIconButtonData(
-              padding: EdgeInsets.zero,
-            ),
+            cupertino: (_, __) =>
+                CupertinoIconButtonData(
+                  padding: EdgeInsets.zero,
+                ),
             icon: const Icon(Icons.my_location_rounded),
             onPressed: () async {
               final hasGrantedLocation = await requestBasicLocationPermission();
@@ -322,26 +335,28 @@ class _ViewAlarmSelectRadiusRegionScreenState extends State<ViewAlarmSelectRadiu
             },
           ),
           PlatformIconButton(
-            cupertino: (_, __) => CupertinoIconButtonData(
-              padding: EdgeInsets.zero,
-            ),
+            cupertino: (_, __) =>
+                CupertinoIconButtonData(
+                  padding: EdgeInsets.zero,
+                ),
             icon: Icon(context.platformIcons.help),
             onPressed: showHelp,
           ),
         ],
-        cupertino: (_, __) => CupertinoNavigationBarData(
-          backgroundColor: isInScaleMode ? null : getCupertinoAppBarColorForMapScreen(context),
-        ),
+        cupertino: (_, __) =>
+            CupertinoNavigationBarData(
+              backgroundColor: isInScaleMode ? null : getCupertinoAppBarColorForMapScreen(context),
+            ),
       ),
       body: GestureDetector(
         onScaleUpdate: isInScaleMode ? updateZoom : null,
         onTap: isInScaleMode
             ? () {
-                Vibration.vibrate(duration: 50);
-                setState(() {
-                  isInScaleMode = false;
-                });
-              }
+          Vibration.vibrate(duration: 50);
+          setState(() {
+            isInScaleMode = false;
+          });
+        }
             : null,
         // We need a `Stack` to disable the map, but also need to show a container to detect the long press again
         child: Column(
