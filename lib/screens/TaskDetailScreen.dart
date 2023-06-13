@@ -1,4 +1,5 @@
 import 'package:easy_debounce/easy_throttle.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
@@ -12,8 +13,12 @@ import 'package:locus/widgets/LocationStillFetchingBanner.dart';
 import 'package:locus/widgets/LocationsLoadingScreen.dart';
 import 'package:locus/widgets/LocationsMap.dart';
 import 'package:map_launcher/map_launcher.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:provider/provider.dart';
 
 import '../constants/spacing.dart';
+import '../services/settings_service.dart';
+import '../utils/helper_sheet.dart';
 import '../utils/permission.dart';
 import '../utils/theme.dart';
 import '../widgets/LocationFetchEmpty.dart';
@@ -81,6 +86,64 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
         });
       }
     });
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final settings = context.read<SettingsService>();
+
+      if (!settings.hasSeenHelperSheet(HelperSheet.taskShare)) {
+        await Future.delayed(const Duration(seconds: 1));
+
+        if (!mounted) {
+          return;
+        }
+
+        showHelp();
+      }
+    });
+  }
+
+  void showHelp() {
+    final l10n = AppLocalizations.of(context);
+
+    showHelperSheet(
+      context: context,
+      builder: (context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              Icon(context.platformIcons.share),
+              const SizedBox(width: MEDIUM_SPACE),
+              Flexible(
+                child: Text(l10n.taskDetails_share_help_shareDescription),
+              ),
+            ],
+          ),
+          const SizedBox(height: MEDIUM_SPACE),
+          Row(
+            children: <Widget>[
+              const Icon(Icons.install_mobile_rounded),
+              const SizedBox(width: MEDIUM_SPACE),
+              Flexible(
+                child: Text(l10n.taskDetails_share_help_appDescription),
+              ),
+            ],
+          ),
+          const SizedBox(height: MEDIUM_SPACE),
+          Row(
+            children: <Widget>[
+              const Icon(MdiIcons.web),
+              const SizedBox(width: MEDIUM_SPACE),
+              Flexible(
+                child: Text(l10n.taskDetails_share_help_webDescription),
+              ),
+            ],
+          ),
+        ],
+      ),
+      title: l10n.taskDetails_share_help_title,
+      sheetName: HelperSheet.taskShare,
+    );
   }
 
   @override
@@ -119,6 +182,13 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                 _locationFetcher.controller.goToUserLocation();
               },
             ),
+          PlatformIconButton(
+            cupertino: (_, __) => CupertinoIconButtonData(
+              padding: EdgeInsets.zero,
+            ),
+            icon: Icon(context.platformIcons.help),
+            onPressed: showHelp,
+          ),
           Padding(
             padding: isMaterial(context) ? const EdgeInsets.all(SMALL_SPACE) : EdgeInsets.zero,
             child: PlatformPopup<String>(
