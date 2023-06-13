@@ -391,8 +391,7 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
                             left: 0,
                             right: 0,
                             child: Padding(
-                              padding:
-                                  const EdgeInsets.only(bottom: MEDIUM_SPACE),
+                              padding: const EdgeInsets.only(bottom: 8),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -402,10 +401,12 @@ class _ViewDetailScreenState extends State<ViewDetailScreen> {
                                       distanceToLatestLocation!.round(),
                                     ),
                                     style: TextStyle(
-                                      color: isCupertino(context)
-                                          ? CupertinoColors.secondaryLabel
-                                          : Colors.white,
-                                      fontSize: 20,
+                                      color: getIsDarkMode(context)
+                                          ? Colors.white
+                                          : isCupertino(context)
+                                              ? CupertinoColors.secondaryLabel
+                                              : Colors.black87,
+                                      fontSize: 14,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
