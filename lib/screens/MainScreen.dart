@@ -556,6 +556,12 @@ class _MainScreenState extends State<MainScreen> {
                 duration: 500.ms, delay: 1.seconds, curve: Curves.bounceOut)
             : null,
       ),
+      cupertino: (_, __) => CupertinoPageScaffoldData(
+        backgroundColor: getIsDarkMode(context)
+            ? null
+            : CupertinoColors.tertiarySystemGroupedBackground
+                .resolveFrom(context),
+      ),
       // Settings bottomNavBar via cupertino data class does not work
       bottomNavBar: getBottomNavBar(),
       appBar: getAppBar(true),
