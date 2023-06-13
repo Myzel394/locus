@@ -10,6 +10,7 @@ import 'package:locus/services/task_service.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/MIUISelectField.dart';
 import 'package:locus/widgets/RelaySelectSheet.dart';
+import 'package:locus/widgets/RequestBatteryOptimizationsDisabledMixin.dart';
 import 'package:locus/widgets/RequestLocationPermissionMixin.dart';
 import 'package:locus/widgets/TimerWidget.dart';
 import 'package:locus/widgets/TimerWidgetSheet.dart';
@@ -36,7 +37,8 @@ class CreateTaskScreen extends StatefulWidget {
   State<CreateTaskScreen> createState() => _CreateTaskScreenState();
 }
 
-class _CreateTaskScreenState extends State<CreateTaskScreen> with RequestLocationPermissionMixin {
+class _CreateTaskScreenState extends State<CreateTaskScreen>
+    with RequestLocationPermissionMixin, RequestBatteryOptimizationsDisabledMixin {
   final TextEditingController _nameController = TextEditingController();
   final TimerController _timersController = TimerController();
   final RelayController _relaysController = RelayController();
@@ -91,8 +93,9 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> with RequestLocatio
 
   Future<void> createTask() async {
     final hasGrantedLocationPermission = await showLocationPermissionDialog(askForAlways: true);
+    final hasDisabledBatteryOptimizations = await showDisableBatteryOptimizationsDialog();
 
-    if (!hasGrantedLocationPermission) {
+    if (!hasGrantedLocationPermission || !hasDisabledBatteryOptimizations) {
       return;
     }
 
@@ -140,32 +143,28 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> with RequestLocatio
     }
   }
 
-  Future<void> showRelaysSheet() =>
-      showPlatformModalSheet(
+  Future<void> showRelaysSheet() => showPlatformModalSheet(
         context: context,
         material: MaterialModalSheetData(
           backgroundColor: Colors.transparent,
           isScrollControlled: true,
           isDismissible: true,
         ),
-        builder: (_) =>
-            RelaySelectSheet(
-              controller: _relaysController,
-            ),
+        builder: (_) => RelaySelectSheet(
+          controller: _relaysController,
+        ),
       );
 
-  Future<void> showTimersSheet() =>
-      showPlatformModalSheet(
+  Future<void> showTimersSheet() => showPlatformModalSheet(
         context: context,
         material: MaterialModalSheetData(
           backgroundColor: Colors.transparent,
           isScrollControlled: true,
           isDismissible: true,
         ),
-        builder: (_) =>
-            TimerWidgetSheet(
-              controller: _timersController,
-            ),
+        builder: (_) => TimerWidgetSheet(
+          controller: _timersController,
+        ),
       );
 
   Widget getScheduleNowWidget() {
@@ -184,23 +183,21 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> with RequestLocatio
       onPressed: () {
         showPlatformDialog(
           context: context,
-          builder: (context) =>
-              PlatformAlertDialog(
-                title: Text(l10n.mainScreen_createTask_scheduleNow_help_title),
-                material: (_, __) =>
-                    MaterialAlertDialogData(
-                      icon: Icon(context.platformIcons.help),
-                    ),
-                content: Text(l10n.mainScreen_createTask_scheduleNow_help_description),
-                actions: [
-                  PlatformDialogAction(
-                    child: PlatformText(l10n.closeNeutralAction),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                ],
+          builder: (context) => PlatformAlertDialog(
+            title: Text(l10n.mainScreen_createTask_scheduleNow_help_title),
+            material: (_, __) => MaterialAlertDialogData(
+              icon: Icon(context.platformIcons.help),
+            ),
+            content: Text(l10n.mainScreen_createTask_scheduleNow_help_description),
+            actions: [
+              PlatformDialogAction(
+                child: PlatformText(l10n.closeNeutralAction),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
               ),
+            ],
+          ),
         );
       },
     );
@@ -213,15 +210,15 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> with RequestLocatio
         .animate()
         .then(delay: IN_DELAY * 6)
         .slide(
-      duration: IN_DURATION,
-      curve: Curves.easeOut,
-      begin: const Offset(0, 0.2),
-    )
+          duration: IN_DURATION,
+          curve: Curves.easeOut,
+          begin: const Offset(0, 0.2),
+        )
         .fadeIn(
-      delay: IN_DELAY,
-      duration: IN_DURATION,
-      curve: Curves.easeOut,
-    );
+          delay: IN_DELAY,
+          duration: IN_DURATION,
+          curve: Curves.easeOut,
+        );
   }
 
   @override
@@ -232,17 +229,13 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> with RequestLocatio
     return PlatformScaffold(
       appBar: PlatformAppBar(
         title: Text(l10n.mainScreen_createTask),
-        material: (_, __) =>
-            MaterialAppBarData(
-              centerTitle: true,
-            ),
+        material: (_, __) => MaterialAppBarData(
+          centerTitle: true,
+        ),
       ),
-      material: (_, __) =>
-          MaterialScaffoldData(
-            backgroundColor: Theme
-                .of(context)
-                .scaffoldBackgroundColor,
-          ),
+      material: (_, __) => MaterialScaffoldData(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(MEDIUM_SPACE),
@@ -294,30 +287,28 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> with RequestLocatio
                                 },
                                 keyboardType: TextInputType.name,
                                 autofillHints: const [AutofillHints.name],
-                                material: (_, __) =>
-                                    MaterialTextFormFieldData(
-                                      decoration: InputDecoration(
-                                        labelText: l10n.createTask_fields_name_label,
-                                        prefixIcon: Icon(context.platformIcons.tag),
-                                      ),
-                                    ),
-                                cupertino: (_, __) =>
-                                    CupertinoTextFormFieldData(
-                                      placeholder: l10n.createTask_fields_name_label,
-                                      prefix: Icon(context.platformIcons.tag),
-                                    ),
+                                material: (_, __) => MaterialTextFormFieldData(
+                                  decoration: InputDecoration(
+                                    labelText: l10n.createTask_fields_name_label,
+                                    prefixIcon: Icon(context.platformIcons.tag),
+                                  ),
+                                ),
+                                cupertino: (_, __) => CupertinoTextFormFieldData(
+                                  placeholder: l10n.createTask_fields_name_label,
+                                  prefix: Icon(context.platformIcons.tag),
+                                ),
                               )
                                   .animate()
                                   .slide(
-                                duration: IN_DURATION,
-                                curve: Curves.easeOut,
-                                begin: const Offset(0, 0.2),
-                              )
+                                    duration: IN_DURATION,
+                                    curve: Curves.easeOut,
+                                    begin: const Offset(0, 0.2),
+                                  )
                                   .fadeIn(
-                                delay: IN_DELAY,
-                                duration: IN_DURATION,
-                                curve: Curves.easeOut,
-                              ),
+                                    delay: IN_DELAY,
+                                    duration: IN_DURATION,
+                                    curve: Curves.easeOut,
+                                  ),
                             ),
                             if (showExamples)
                               ExampleTasksRoulette(
@@ -346,10 +337,10 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> with RequestLocatio
                                 icon: const Icon(Icons.dns_rounded),
                                 onPressed: showRelaysSheet,
                               ).animate().then(delay: IN_DELAY * 4).fadeIn(
-                                delay: IN_DELAY,
-                                duration: IN_DURATION,
-                                curve: Curves.easeOut,
-                              ),
+                                    delay: IN_DELAY,
+                                    duration: IN_DURATION,
+                                    curve: Curves.easeOut,
+                                  ),
                               MIUISelectField(
                                 label: l10n.createTask_fields_timers_label,
                                 actionText: l10n.createTask_fields_timers_selectLabel(
@@ -358,10 +349,10 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> with RequestLocatio
                                 icon: const Icon(Icons.timer_rounded),
                                 onPressed: showTimersSheet,
                               ).animate().then(delay: IN_DELAY * 4).fadeIn(
-                                delay: IN_DELAY,
-                                duration: IN_DURATION,
-                                curve: Curves.easeOut,
-                              ),
+                                    delay: IN_DELAY,
+                                    duration: IN_DURATION,
+                                    curve: Curves.easeOut,
+                                  ),
                             ] else
                               Wrap(
                                 alignment: WrapAlignment.spaceEvenly,
@@ -370,17 +361,15 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> with RequestLocatio
                                 direction: Axis.horizontal,
                                 children: <Widget>[
                                   PlatformElevatedButton(
-                                    material: (_, __) =>
-                                        MaterialElevatedButtonData(
-                                          icon: PlatformWidget(
-                                            material: (_, __) => const Icon(Icons.dns_rounded),
-                                            cupertino: (_, __) => const Icon(CupertinoIcons.list_bullet),
-                                          ),
-                                        ),
-                                    cupertino: (_, __) =>
-                                        CupertinoElevatedButtonData(
-                                          padding: getSmallButtonPadding(context),
-                                        ),
+                                    material: (_, __) => MaterialElevatedButtonData(
+                                      icon: PlatformWidget(
+                                        material: (_, __) => const Icon(Icons.dns_rounded),
+                                        cupertino: (_, __) => const Icon(CupertinoIcons.list_bullet),
+                                      ),
+                                    ),
+                                    cupertino: (_, __) => CupertinoElevatedButtonData(
+                                      padding: getSmallButtonPadding(context),
+                                    ),
                                     onPressed: showRelaysSheet,
                                     child: Text(
                                       l10n.createTask_fields_relays_selectLabel(
@@ -391,24 +380,22 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> with RequestLocatio
                                       .animate()
                                       .then(delay: IN_DELAY * 4)
                                       .slide(
-                                    duration: IN_DURATION,
-                                    curve: Curves.easeOut,
-                                    begin: const Offset(0.2, 0),
-                                  )
+                                        duration: IN_DURATION,
+                                        curve: Curves.easeOut,
+                                        begin: const Offset(0.2, 0),
+                                      )
                                       .fadeIn(
-                                    delay: IN_DELAY,
-                                    duration: IN_DURATION,
-                                    curve: Curves.easeOut,
-                                  ),
+                                        delay: IN_DELAY,
+                                        duration: IN_DURATION,
+                                        curve: Curves.easeOut,
+                                      ),
                                   PlatformElevatedButton(
-                                    material: (_, __) =>
-                                        MaterialElevatedButtonData(
-                                          icon: const Icon(Icons.timer_rounded),
-                                        ),
-                                    cupertino: (_, __) =>
-                                        CupertinoElevatedButtonData(
-                                          padding: getSmallButtonPadding(context),
-                                        ),
+                                    material: (_, __) => MaterialElevatedButtonData(
+                                      icon: const Icon(Icons.timer_rounded),
+                                    ),
+                                    cupertino: (_, __) => CupertinoElevatedButtonData(
+                                      padding: getSmallButtonPadding(context),
+                                    ),
                                     onPressed: showTimersSheet,
                                     child: Text(
                                       l10n.createTask_fields_timers_selectLabel(
@@ -419,15 +406,15 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> with RequestLocatio
                                       .animate()
                                       .then(delay: IN_DELAY * 5)
                                       .slide(
-                                    duration: IN_DURATION,
-                                    curve: Curves.easeOut,
-                                    begin: const Offset(-0.2, 0),
-                                  )
+                                        duration: IN_DURATION,
+                                        curve: Curves.easeOut,
+                                        begin: const Offset(-0.2, 0),
+                                      )
                                       .fadeIn(
-                                    delay: IN_DELAY,
-                                    duration: IN_DURATION,
-                                    curve: Curves.easeOut,
-                                  ),
+                                        delay: IN_DELAY,
+                                        duration: IN_DURATION,
+                                        curve: Curves.easeOut,
+                                      ),
                                 ],
                               ),
                             const SizedBox(height: MEDIUM_SPACE),
@@ -481,14 +468,14 @@ class _CreateTaskScreenState extends State<CreateTaskScreen> with RequestLocatio
                       .animate()
                       .then(delay: IN_DELAY * 8)
                       .slide(
-                    duration: 500.ms,
-                    curve: Curves.easeOut,
-                    begin: const Offset(0, 1.3),
-                  )
+                        duration: 500.ms,
+                        curve: Curves.easeOut,
+                        begin: const Offset(0, 1.3),
+                      )
                       .fadeIn(
-                    duration: 500.ms,
-                    curve: Curves.easeOut,
-                  ),
+                        duration: 500.ms,
+                        curve: Curves.easeOut,
+                      ),
                 ],
               ),
             ),
