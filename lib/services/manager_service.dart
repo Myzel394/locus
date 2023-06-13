@@ -4,8 +4,6 @@ import 'package:background_fetch/background_fetch.dart';
 import 'package:basic_utils/basic_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:locus/App.dart';
-import 'package:locus/api/get-locations.dart';
 import 'package:locus/constants/notifications.dart';
 import 'package:locus/constants/values.dart';
 import 'package:locus/services/location_alarm_service.dart';

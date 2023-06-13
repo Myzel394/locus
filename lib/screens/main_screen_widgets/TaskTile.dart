@@ -12,7 +12,6 @@ import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../models/log.dart';
-import '../../services/location_point_service.dart';
 import '../../services/log_service.dart';
 import '../../widgets/PlatformDialogActionButton.dart';
 import '../../widgets/PlatformListTile.dart';

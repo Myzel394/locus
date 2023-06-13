@@ -125,8 +125,7 @@ class _MainScreenState extends State<MainScreen> {
         return;
       }
 
-      final locationData =
-          await LocationPointService.createUsingCurrentLocation(position);
+      final locationData = await LocationPointService.createUsingCurrentLocation(position);
 
       for (final task in runningTasks) {
         await task.publishCurrentLocationNow(
@@ -321,9 +320,7 @@ class _MainScreenState extends State<MainScreen> {
     final l10n = AppLocalizations.of(context);
     final appUpdateService = context.read<AppUpdateService>();
 
-    if (appUpdateService.shouldShowDialogue() &&
-        !appUpdateService.hasShownDialogue &&
-        mounted) {
+    if (appUpdateService.shouldShowDialogue() && !appUpdateService.hasShownDialogue && mounted) {
       await showPlatformDialog(
         context: context,
         barrierDismissible: false,
@@ -338,8 +335,7 @@ class _MainScreenState extends State<MainScreen> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
-              material: (context, _) => MaterialDialogActionData(
-                  icon: const Icon(Icons.watch_later_rounded)),
+              material: (context, _) => MaterialDialogActionData(icon: const Icon(Icons.watch_later_rounded)),
               child: Text(l10n.updateAvailable_android_remindLater),
             ),
             PlatformDialogAction(
@@ -348,14 +344,12 @@ class _MainScreenState extends State<MainScreen> {
 
                 Navigator.of(context).pop();
               },
-              material: (context, _) =>
-                  MaterialDialogActionData(icon: const Icon(Icons.block)),
+              material: (context, _) => MaterialDialogActionData(icon: const Icon(Icons.block)),
               child: Text(l10n.updateAvailable_android_ignore),
             ),
             PlatformDialogAction(
               onPressed: appUpdateService.openStoreForUpdate,
-              material: (context, _) =>
-                  MaterialDialogActionData(icon: const Icon(Icons.download)),
+              material: (context, _) => MaterialDialogActionData(icon: const Icon(Icons.download)),
               child: Text(l10n.updateAvailable_android_download),
             ),
           ],
@@ -402,12 +396,8 @@ class _MainScreenState extends State<MainScreen> {
                             _changeTab(0);
                           },
                           child: Icon(
-                            activeTab == 0
-                                ? CupertinoIcons.square_list_fill
-                                : CupertinoIcons.square_list,
-                            color: activeTab == 0
-                                ? primaryColor
-                                : getBodyTextColor(context),
+                            activeTab == 0 ? CupertinoIcons.square_list_fill : CupertinoIcons.square_list,
+                            color: activeTab == 0 ? primaryColor : getBodyTextColor(context),
                           ),
                         ),
                         TextButton(
@@ -415,12 +405,8 @@ class _MainScreenState extends State<MainScreen> {
                             _changeTab(1);
                           },
                           child: Icon(
-                            activeTab == 1
-                                ? CupertinoIcons.time_solid
-                                : CupertinoIcons.time,
-                            color: activeTab == 1
-                                ? primaryColor
-                                : getBodyTextColor(context),
+                            activeTab == 1 ? CupertinoIcons.time_solid : CupertinoIcons.time,
+                            color: activeTab == 1 ? primaryColor : getBodyTextColor(context),
                           ),
                         ),
                       ],
@@ -469,9 +455,7 @@ class _MainScreenState extends State<MainScreen> {
 
     return PlatformNavBar(
       material: (_, __) => MaterialNavBarData(
-          backgroundColor: Theme.of(context).dialogBackgroundColor,
-          elevation: 0,
-          padding: const EdgeInsets.all(0)),
+          backgroundColor: Theme.of(context).dialogBackgroundColor, elevation: 0, padding: const EdgeInsets.all(0)),
       itemChanged: _changeTab,
       currentIndex: activeTab,
       items: isCupertino(context)
@@ -505,13 +489,11 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
     final taskService = context.watch<TaskService>();
     final viewService = context.watch<ViewService>();
     final settings = context.watch<SettingsService>();
 
-    final showEmptyScreen =
-        taskService.tasks.isEmpty && viewService.views.isEmpty;
+    final showEmptyScreen = taskService.tasks.isEmpty && viewService.views.isEmpty;
 
     if (showEmptyScreen) {
       return PlatformScaffold(
@@ -536,9 +518,7 @@ class _MainScreenState extends State<MainScreen> {
                   width: FAB_DIMENSION,
                   child: Center(
                     child: Icon(
-                      settings.isMIUI() || isCupertino(context)
-                          ? CupertinoIcons.plus
-                          : Icons.add,
+                      settings.isMIUI() || isCupertino(context) ? CupertinoIcons.plus : Icons.add,
                       color: Theme.of(context).colorScheme.onPrimary,
                       size: settings.isMIUI() ? 34 : null,
                     ),
@@ -552,15 +532,12 @@ class _MainScreenState extends State<MainScreen> {
                 ),
                 openColor: Theme.of(context).scaffoldBackgroundColor,
                 closedColor: Theme.of(context).colorScheme.primary,
-              ).animate().scale(
-                duration: 500.ms, delay: 1.seconds, curve: Curves.bounceOut)
+              ).animate().scale(duration: 500.ms, delay: 1.seconds, curve: Curves.bounceOut)
             : null,
       ),
       cupertino: (_, __) => CupertinoPageScaffoldData(
-        backgroundColor: getIsDarkMode(context)
-            ? null
-            : CupertinoColors.tertiarySystemGroupedBackground
-                .resolveFrom(context),
+        backgroundColor:
+            getIsDarkMode(context) ? null : CupertinoColors.tertiarySystemGroupedBackground.resolveFrom(context),
       ),
       // Settings bottomNavBar via cupertino data class does not work
       bottomNavBar: getBottomNavBar(),

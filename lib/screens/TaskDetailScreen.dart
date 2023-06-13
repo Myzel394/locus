@@ -1,5 +1,4 @@
 import 'package:easy_debounce/easy_throttle.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
@@ -19,7 +18,6 @@ import 'package:provider/provider.dart';
 import '../constants/spacing.dart';
 import '../services/settings_service.dart';
 import '../utils/helper_sheet.dart';
-import '../utils/permission.dart';
 import '../utils/theme.dart';
 import '../widgets/LocationFetchEmpty.dart';
 import '../widgets/OpenInMaps.dart';
