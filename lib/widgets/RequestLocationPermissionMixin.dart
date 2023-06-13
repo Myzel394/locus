@@ -38,9 +38,7 @@ mixin RequestLocationPermissionMixin {
       builder: (context) => PlatformAlertDialog(
         title: Text(l10n.permissions_location_askPermission_title),
         material: (_, __) => MaterialAlertDialogData(
-          icon: settings.getAndroidTheme() == AndroidTheme.miui
-              ? const Icon(CupertinoIcons.location_fill)
-              : const Icon(Icons.location_on_rounded),
+          icon: settings.isMIUI() ? const Icon(CupertinoIcons.location_fill) : const Icon(Icons.location_on_rounded),
         ),
         content: Text(
           askForAlways
@@ -52,9 +50,7 @@ mixin RequestLocationPermissionMixin {
           [
             PlatformDialogAction(
               material: (_, __) => MaterialDialogActionData(
-                icon: settings.getAndroidTheme() == AndroidTheme.miui
-                    ? const Icon(CupertinoIcons.check_mark_circled)
-                    : const Icon(Icons.check_circle_outline_rounded),
+                icon: settings.isMIUI() ? null : const Icon(Icons.check_circle_outline_rounded),
               ),
               child: Text(l10n.permissions_location_askPermission_action_grant_label),
               onPressed: () async {
@@ -125,9 +121,7 @@ mixin RequestLocationPermissionMixin {
           [
             PlatformDialogAction(
               material: (_, __) => MaterialDialogActionData(
-                icon: settings.getAndroidTheme() == AndroidTheme.miui
-                    ? const Icon(MdiIcons.nut)
-                    : const Icon(Icons.settings),
+                icon: settings.isMIUI() ? null : const Icon(Icons.settings),
               ),
               child: Text(l10n.permissions_openSettings_label),
               onPressed: () async {

@@ -42,9 +42,7 @@ mixin RequestBatteryOptimizationsDisabledMixin {
           [
             PlatformDialogAction(
               material: (_, __) => MaterialDialogActionData(
-                icon: settings.getAndroidTheme() == AndroidTheme.miui
-                    ? const Icon(CupertinoIcons.check_mark_circled)
-                    : const Icon(Icons.check_circle_outline_rounded),
+                icon: settings.isMIUI() ? null : const Icon(Icons.check_circle_outline_rounded),
               ),
               onPressed: () async {
                 await DisableBatteryOptimization.showDisableBatteryOptimizationSettings();
