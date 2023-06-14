@@ -662,5 +662,8 @@
   "taskDetails_share_help_title": "Share your location with your friends",
   "taskDetails_share_help_shareDescription": "You can share this location with your friends. They will be able to see your location until you delete this task.",
   "taskDetails_share_help_appDescription": "Ask your friends to install Locus. Go to the task details and generate a link you can send, or share the view key file. When your friends open Locus and scroll down on the overview screen, they can import your location.",
-  "taskDetails_share_help_webDescription": "Alternatively, other people can open the link in their browser. They will be able to see your location on a map. We discourage this method though, as it is less secure."
+  "taskDetails_share_help_webDescription": "Alternatively, other people can open the link in their browser. They will be able to see your location on a map. We discourage this method though, as it is less secure.",
+  "biometricsAuthentication_title": "Biometrics Authentication",
+  "biometricsAuthentication_description": "Please authenticate to open Locus",
+  "biometricsAuthentication_action": "Authenticate"
 }
