@@ -63,6 +63,8 @@ PODS:
     - Flutter
   - geolocator_apple (1.2.0):
     - Flutter
+  - local_auth_ios (0.0.1):
+    - Flutter
   - map_launcher (0.0.1):
     - Flutter
   - path_provider_foundation (0.0.1):
@@ -103,6 +105,7 @@ DEPENDENCIES:
   - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
   - geocoding_ios (from `.symlinks/plugins/geocoding_ios/ios`)
   - geolocator_apple (from `.symlinks/plugins/geolocator_apple/ios`)
+  - local_auth_ios (from `.symlinks/plugins/local_auth_ios/ios`)
   - map_launcher (from `.symlinks/plugins/map_launcher/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
@@ -152,6 +155,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/geocoding_ios/ios"
   geolocator_apple:
     :path: ".symlinks/plugins/geolocator_apple/ios"
+  local_auth_ios:
+    :path: ".symlinks/plugins/local_auth_ios/ios"
   map_launcher:
     :path: ".symlinks/plugins/map_launcher/ios"
   path_provider_foundation:
@@ -187,6 +192,7 @@ SPEC CHECKSUMS:
   flutter_secure_storage: 23fc622d89d073675f2eaa109381aefbcf5a49be
   geocoding_ios: a389ea40f6f548de6e63006a2e31bf66ff80769a
   geolocator_apple: cc556e6844d508c95df1e87e3ea6fa4e58c50401
+  local_auth_ios: c6cf091ded637a88f24f86a8875d8b0f526e2605
   map_launcher: e325db1261d029ff33e08e03baccffe09593ffea
   path_provider_foundation: eaf5b3e458fc0e5fbb9940fb09980e853fe058b8
   permission_handler_apple: 44366e37eaf29454a1e7b1b7d736c2cceaeb17ce
