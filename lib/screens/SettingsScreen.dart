@@ -113,7 +113,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
       }
     });
 
-    settings.hasBiometricsAvailable().then((value) {
+    settings.hasBiometricsAvailable().then((value) async {
+      if (!value) {
+        return;
+      }
+
       setState(() {
         hasBiometricsAvailable = value;
       });
@@ -301,6 +305,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               await auth.authenticate(
                                 localizedReason: l10n
                                     .settingsScreen_setting_requireBiometricAuth_requireNowReason,
+                                options: const AuthenticationOptions(
+                                  stickyAuth: true,
+                                  biometricOnly: true,
+                                ),
                               );
 
                               settings.setRequireBiometricAuthenticationOnStart(
@@ -319,7 +327,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
                               showMessage(
                                 context,
-                                l10n.biometricsFailed,
+                                l10n.unknownError,
                                 type: MessageType.error,
                               );
                             }
