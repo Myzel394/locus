@@ -7,6 +7,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:local_auth/local_auth.dart';
 import 'package:locus/constants/app.dart';
 
 import '../api/get-address.dart';
@@ -41,7 +42,9 @@ enum HelperSheet {
 // Selects a random provider from the list of available providers, not including
 // the system provider.
 GeocoderProvider selectRandomProvider() {
-  final providers = GeocoderProvider.values.where((element) => element != GeocoderProvider.system).toList();
+  final providers = GeocoderProvider.values
+      .where((element) => element != GeocoderProvider.system)
+      .toList();
 
   return providers[Random().nextInt(providers.length)];
 }
@@ -51,6 +54,7 @@ class SettingsService extends ChangeNotifier {
   bool automaticallyLookupAddresses;
   bool showHints;
   bool userHasSeenWelcomeScreen = false;
+  bool requireBiometricAuthenticationOnStart = false;
   List<String> _relays;
   AndroidTheme androidTheme;
 
@@ -73,32 +77,39 @@ class SettingsService extends ChangeNotifier {
     required this.androidTheme,
     required this.localeName,
     required this.userHasSeenWelcomeScreen,
+    required this.requireBiometricAuthenticationOnStart,
     Set<String>? seenHelperSheets,
     List<String>? relays,
-  })
-      : _relays = relays ?? [],
+  })  : _relays = relays ?? [],
         _seenHelperSheets = seenHelperSheets ?? {};
 
   static Future<SettingsService> createDefault() async {
     return SettingsService(
       automaticallyLookupAddresses: true,
       primaryColor: null,
-      androidTheme: await fetchIsMIUI() ? AndroidTheme.miui : AndroidTheme.materialYou,
-      mapProvider: isPlatformApple() ? MapProvider.apple : MapProvider.openStreetMap,
+      androidTheme:
+          await fetchIsMIUI() ? AndroidTheme.miui : AndroidTheme.materialYou,
+      mapProvider:
+          isPlatformApple() ? MapProvider.apple : MapProvider.openStreetMap,
       showHints: true,
-      geocoderProvider: isSystemGeocoderAvailable() ? GeocoderProvider.system : selectRandomProvider(),
+      geocoderProvider: isSystemGeocoderAvailable()
+          ? GeocoderProvider.system
+          : selectRandomProvider(),
       localeName: "en",
       userHasSeenWelcomeScreen: false,
       seenHelperSheets: {},
+      requireBiometricAuthenticationOnStart: false,
     );
   }
 
-  static bool isSystemGeocoderAvailable() => isPlatformApple() || (Platform.isAndroid && isGMSFlavor);
+  static bool isSystemGeocoderAvailable() =>
+      isPlatformApple() || (Platform.isAndroid && isGMSFlavor);
 
   static SettingsService fromJSON(final Map<String, dynamic> data) {
     return SettingsService(
       automaticallyLookupAddresses: data['automaticallyLoadLocation'],
-      primaryColor: data['primaryColor'] != null ? Color(data['primaryColor']) : null,
+      primaryColor:
+          data['primaryColor'] != null ? Color(data['primaryColor']) : null,
       mapProvider: MapProvider.values[data['mapProvider']],
       relays: List<String>.from(data['relays'] ?? []),
       showHints: data['showHints'],
@@ -107,6 +118,8 @@ class SettingsService extends ChangeNotifier {
       localeName: data['localeName'],
       userHasSeenWelcomeScreen: data['userHasSeenWelcomeScreen'],
       seenHelperSheets: Set<String>.from(data['seenHelperSheets'] ?? {}),
+      requireBiometricAuthenticationOnStart:
+          data['requireBiometricAuthenticationOnStart'],
     );
   }
 
@@ -141,19 +154,25 @@ class SettingsService extends ChangeNotifier {
       "localeName": localeName,
       "userHasSeenWelcomeScreen": userHasSeenWelcomeScreen,
       "seenHelperSheets": _seenHelperSheets.toList(),
+      "requireBiometricAuthenticationOnStart":
+          requireBiometricAuthenticationOnStart,
     };
   }
 
-  Future<String> getAddress(final double latitude,
-      final double longitude,) async {
+  Future<String> getAddress(
+    final double latitude,
+    final double longitude,
+  ) async {
     final providers = [
       getGeocoderProvider(),
-      ...GeocoderProvider.values.where((element) => element != getGeocoderProvider())
+      ...GeocoderProvider.values
+          .where((element) => element != getGeocoderProvider())
     ];
     // If the user does not want to use the system provider,
     // we will not use it, even if it is the only one
     // available (for better privacy)
-    if (!isSystemGeocoderAvailable() || getGeocoderProvider() != GeocoderProvider.system) {
+    if (!isSystemGeocoderAvailable() ||
+        getGeocoderProvider() != GeocoderProvider.system) {
       providers.remove(GeocoderProvider.system);
     }
 
@@ -175,8 +194,7 @@ class SettingsService extends ChangeNotifier {
     throw Exception("Failed to get address from any provider");
   }
 
-  Future<void> save() =>
-      storage.write(
+  Future<void> save() => storage.write(
         key: STORAGE_KEY,
         value: jsonEncode(toJSON()),
       );
@@ -197,13 +215,9 @@ class SettingsService extends ChangeNotifier {
 
     // Return system default
     if (isCupertino(context)) {
-      return CupertinoTheme
-          .of(context)
-          .primaryColor;
+      return CupertinoTheme.of(context).primaryColor;
     } else {
-      return Theme
-          .of(context)
-          .primaryColor;
+      return Theme.of(context).primaryColor;
     }
   }
 
@@ -262,9 +276,24 @@ class SettingsService extends ChangeNotifier {
     await save();
   }
 
+  bool getRequireBiometricAuthenticationOnStart() =>
+      requireBiometricAuthenticationOnStart;
+
+  void setRequireBiometricAuthenticationOnStart(final bool value) {
+    requireBiometricAuthenticationOnStart = value;
+    notifyListeners();
+  }
+
+  Future<bool> hasBiometricsAvailable() {
+    final auth = LocalAuthentication();
+
+    return auth.canCheckBiometrics;
+  }
+
   bool isMIUI() => androidTheme == AndroidTheme.miui;
 
-  bool hasSeenHelperSheet(final HelperSheet sheet) => _seenHelperSheets.contains(sheet.name);
+  bool hasSeenHelperSheet(final HelperSheet sheet) =>
+      _seenHelperSheets.contains(sheet.name);
 
   Future<void> markHelperSheetAsSeen(final HelperSheet sheet) async {
     _seenHelperSheets.add(sheet.name);

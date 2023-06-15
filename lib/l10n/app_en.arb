@@ -4,6 +4,7 @@
   "unknownValue": "Unknown",
   "resetLabel": "Reset",
   "cancelLabel": "Cancel",
+  "biometricsFailed": "You could not be authenticated",
   "addLabel": "Add",
   "addNewValueLabel": "Add \"{value}\"",
   "@addNewValueLabel": {
@@ -444,6 +445,9 @@
   "settingsScreen_exportLogs": "Export Logs",
   "settingsScreen_exportLogs_shareText": "Here are my Locus logs",
   "settingsScreen_exportLogs_error": "There was an error exporting the logs",
+  "settingsScreen_setting_requireBiometricAuth_label": "Require Biometric Authentication",
+  "settingsScreen_setting_requireBiometricAuth_description": "If enabled, Locus will require you to authenticate with your biometric data (fingerprint, face, etc.) before opening the app.",
+  "settingsScreen_setting_requireBiometricAuth_requireNowReason": "Confirm your biometric data to change this setting",
   "support_title": "Support Locus",
   "support_description": "Locus is a free open source project. This means that I don't make any money from it. If you like the app and want to support me, you can do so by multiple ways. Thank you very much! :)",
   "support_options_develop": "Help developing Locus",
@@ -658,5 +662,8 @@
   "taskDetails_share_help_title": "Share your location with your friends",
   "taskDetails_share_help_shareDescription": "You can share this location with your friends. They will be able to see your location until you delete this task.",
   "taskDetails_share_help_appDescription": "Ask your friends to install Locus. Go to the task details and generate a link you can send, or share the view key file. When your friends open Locus and scroll down on the overview screen, they can import your location.",
-  "taskDetails_share_help_webDescription": "Alternatively, other people can open the link in their browser. They will be able to see your location on a map. We discourage this method though, as it is less secure."
+  "taskDetails_share_help_webDescription": "Alternatively, other people can open the link in their browser. They will be able to see your location on a map. We discourage this method though, as it is less secure.",
+  "biometricsAuthentication_title": "Biometrics Authentication",
+  "biometricsAuthentication_description": "Please authenticate to open Locus",
+  "biometricsAuthentication_action": "Authenticate"
 }
