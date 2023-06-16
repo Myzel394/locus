@@ -8,8 +8,10 @@ import 'package:flutter_svg/svg.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/init_quick_actions.dart';
 import 'package:locus/screens/welcome_screen_widgets/SimpleContinuePage.dart';
+import 'package:locus/services/settings_service.dart';
 import 'package:locus/utils/PageRoute.dart';
 import 'package:lottie/lottie.dart';
+import 'package:provider/provider.dart';
 
 import '../utils/theme.dart';
 import 'MainScreen.dart';
@@ -52,13 +54,17 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
   }
 
   void _onDone() {
+    final settings = context.read<SettingsService>();
+
+    settings.setHasSeenWelcomeScreen();
+
     Navigator.pushAndRemoveUntil(
       context,
       NativePageRoute(
         context: context,
         builder: (context) => const MainScreen(),
       ),
-      (route) => false,
+          (route) => false,
     );
   }
 
@@ -85,10 +91,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   width: 150,
                   height: 150,
                 ).animate().scale(
-                      begin: const Offset(0, 0),
-                      end: const Offset(1, 1),
-                      duration: FADE_IN_DURATION,
-                    ),
+                  begin: const Offset(0, 0),
+                  end: const Offset(1, 1),
+                  duration: FADE_IN_DURATION,
+                ),
                 onContinue: () {
                   _nextScreen(1);
                 },
@@ -114,7 +120,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       // Background
                       ValueDelegate.color(
                         const ["unlock Konturen", "Kreis", "Fläche 1"],
-                        value: getIsDarkMode(context) ? shades[900] : shades[200],
+                        value: getIsDarkMode(context)
+                            ? shades[900]
+                            : shades[200],
                       ),
                     ],
                   ),
