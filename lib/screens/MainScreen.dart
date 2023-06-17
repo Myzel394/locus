@@ -19,7 +19,6 @@ import 'package:locus/screens/main_screen_widgets/screens/EmptyScreen.dart';
 import 'package:locus/services/manager_service.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/services/view_service.dart';
-import 'package:locus/utils/PageRoute.dart';
 import 'package:locus/utils/navigation.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
@@ -33,6 +32,7 @@ import '../services/app_update_service.dart';
 import '../services/location_point_service.dart';
 import '../services/log_service.dart';
 import '../services/settings_service.dart';
+import '../utils/PageRoute.dart';
 import '../utils/platform.dart';
 import 'CreateTaskScreen.dart';
 import 'ImportTaskSheet.dart';
@@ -272,7 +272,8 @@ class _MainScreenState extends State<MainScreen> {
             final viewService = context.read<ViewService>();
 
             Navigator.of(context).push(
-              MaterialPageRoute(
+              NativePageRoute(
+                context: context,
                 builder: (_) => ViewDetailScreen(
                   view: viewService.getViewById(data["taskViewID"]),
                 ),
