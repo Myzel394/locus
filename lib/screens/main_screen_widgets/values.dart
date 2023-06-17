@@ -1,0 +1,1 @@
+const FAB_DIMENSION = 100.0;
