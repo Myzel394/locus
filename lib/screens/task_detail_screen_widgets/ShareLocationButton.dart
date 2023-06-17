@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+import 'package:locus/constants/app.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/constants/values.dart';
 import 'package:locus/screens/task_detail_screen_widgets/SendViewByBluetooth.dart';
@@ -70,7 +71,7 @@ class _ShareLocationButtonState extends State<ShareLocationButton> {
             ),
             onPressed: () => Navigator.of(context).pop("share"),
           ),
-          if (Platform.isAndroid)
+          if (Platform.isAndroid && isGMSFlavor)
             PlatformDialogAction(
               material: (_, __) => MaterialDialogActionData(
                 icon: const Icon(Icons.bluetooth_audio_rounded),
