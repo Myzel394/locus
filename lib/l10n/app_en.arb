@@ -447,7 +447,7 @@
   "settingsScreen_exportLogs_error": "There was an error exporting the logs",
   "settingsScreen_setting_requireBiometricAuth_label": "Require Biometric Authentication",
   "settingsScreen_setting_requireBiometricAuth_description": "If enabled, Locus will require you to authenticate with your biometric data (fingerprint, face, etc.) before opening the app.",
-  "settingsScreen_setting_requireBiometricAuth_requireNowReason": "Confirm your biometric data to change this setting",
+  "settingsScreen_setting_requireBiometricAuth_requireNowReason": "Confirm your identity to change this setting",
   "support_title": "Support Locus",
   "support_description": "Locus is a free open source project. This means that I don't make any money from it. If you like the app and want to support me, you can do so by multiple ways. Thank you very much! :)",
   "support_options_develop": "Help developing Locus",
