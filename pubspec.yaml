@@ -102,6 +102,8 @@ dependencies:
 #f      url: https://github.com/Zverik/flutter-geolocator.git
 #f      ref: floss
 #f      path: geolocator_android
+#f  nearby_connections:
+#f    path: dependency_overrides/nearby_connections
 
 
 flutter_launcher_icons:
