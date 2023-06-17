@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+import 'package:locus/constants/app.dart';
 
 import '../../constants/spacing.dart';
 import '../../utils/theme.dart';
@@ -76,7 +77,7 @@ class _ImportSelectionState extends State<ImportSelection> {
               },
               child: Text(l10n.mainScreen_importTask_action_importMethod_file),
             ),
-            if (Platform.isAndroid)
+            if (Platform.isAndroid && isGMSFlavor)
               PlatformElevatedButton(
                 padding: const EdgeInsets.all(MEDIUM_SPACE),
                 material: (_, __) => MaterialElevatedButtonData(
