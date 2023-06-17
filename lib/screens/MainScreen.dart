@@ -272,8 +272,7 @@ class _MainScreenState extends State<MainScreen> {
             final viewService = context.read<ViewService>();
 
             Navigator.of(context).push(
-              NativePageRoute(
-                context: context,
+              MaterialPageRoute(
                 builder: (_) => ViewDetailScreen(
                   view: viewService.getViewById(data["taskViewID"]),
                 ),
