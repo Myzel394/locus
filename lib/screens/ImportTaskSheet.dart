@@ -121,6 +121,7 @@ class _ImportTaskSheetState extends State<ImportTaskSheet> with TickerProviderSt
 
     try {
       final errorMessage = await taskView.validate(
+        l10n,
         taskService: taskService,
         viewService: viewService,
       );
@@ -128,6 +129,7 @@ class _ImportTaskSheetState extends State<ImportTaskSheet> with TickerProviderSt
       if (errorMessage != null) {
         setState(() {
           this.errorMessage = errorMessage;
+          _screen = ImportScreen.error;
         });
 
         return;
@@ -137,7 +139,14 @@ class _ImportTaskSheetState extends State<ImportTaskSheet> with TickerProviderSt
           _screen = ImportScreen.present;
         });
       }
-    } catch (_) {
+    } catch (error) {
+      FlutterLogs.logErrorTrace(
+        LOG_TAG,
+        "Import Task",
+        "Error validating task view.",
+        error as Error,
+      );
+
       setState(() {
         errorMessage = l10n.unknownError;
         _screen = ImportScreen.error;
@@ -226,7 +235,7 @@ class _ImportTaskSheetState extends State<ImportTaskSheet> with TickerProviderSt
       });
 
       final parameters = TaskView.parseLink(url);
-      final taskView = await TaskView.fetchFromNostr(parameters);
+      final taskView = await TaskView.fetchFromNostr(l10n, parameters);
 
       parseViewData(taskView);
     } catch (error) {
@@ -323,6 +332,8 @@ class _ImportTaskSheetState extends State<ImportTaskSheet> with TickerProviderSt
                   ViewImportOverview(
                     view: _taskView!,
                     onImport: () {
+                      _nameController.text = _taskView!.name;
+
                       setState(() {
                         _screen = ImportScreen.askName;
                       });

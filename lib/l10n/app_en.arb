@@ -4,6 +4,7 @@
   "unknownValue": "Unknown",
   "resetLabel": "Reset",
   "cancelLabel": "Cancel",
+  "biometricsFailed": "You could not be authenticated",
   "addLabel": "Add",
   "addNewValueLabel": "Add \"{value}\"",
   "@addNewValueLabel": {
@@ -14,6 +15,33 @@
     }
   },
   "taskImportError": "An error occurred while importing the task",
+  "taskImport_error_no_relays": "No relays are present in the task.",
+  "taskImport_error_sameTask": "This is a task from you (name: {name}).",
+  "@taskImport_error_sameTask": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "taskImport_error_sameView": "This is a view from you (name: {name}).",
+  "@taskImport_error_sameView": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "longFormattedDate": "{date}",
+  "@longFormattedDate": {
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "MMMM d, yyyy HH:mm",
+        "isCustomDateFormat": "true"
+      }
+    }
+  },
   "locationsLoadingError": "An error occurred while loading locations",
   "locationFetchError": "There was an error fetching the locations. Please try again later.",
   "locationFetchEmptyError": "No locations found. Maybe there hasn't been shared a location yet or they expired.",
@@ -164,22 +192,10 @@
   "welcomeScreen_title": "Welcome to Locus",
   "welcomeScreen_description": "Share your location with your friends and family fully privately and securely.",
   "welcomeScreen_getStarted": "Get Started",
-  "welcomeScreen_locationPermission_title": "Allow access to your location",
-  "welcomeScreen_locationPermission_description": "We need the permission to access your location in the background in order to store your location history. You will first be asked to grant location access while the app is in use. After that, we will ask you to grant location access in the background. This is necessary to share your location when you don't have the app constantly opened.",
-  "welcomeScreen_permissions_allow": "Allow",
-  "welcomeScreen_notificationPermission_title": "We need your permission to send you notifications",
-  "welcomeScreen_notificationPermission_description": "We need your permission to send you notifications while the app is in the foreground to update your location in real-time. We will only send you notifications when you are sharing your location with someone.",
-  "welcomeScreen_battery_title": "Battery optimization",
-  "welcomeScreen_battery_description": "In order to share your location in the background, we need to disable battery optimization for this app.",
-  "welcomeScreen_battery_openSettings": "Open Settings",
-  "welcomeScreen_battery_disableManufacturerOptimization_title": "You have additional battery optimization enabled",
-  "welcomeScreen_battery_disableManufacturerOptimization_description": "Follow these steps to disable additional battery optimization for Locus. You may need to restart the app after following the steps.",
   "welcomeScreen_explanation_title": "Your data. You decide.",
   "welcomeScreen_explanation_description": "Your data is fully end-to-end encrypted to people you share your location with. We can not see your location. Your encrypted data is stored only on the servers of your choice.",
   "welcomeScreen_explanation_understood": "Understood",
-  "welcomeScreen_usesWrongAppFlavor_title": "You are using the wrong app variant",
-  "welcomeScreen_usesWrongAppFlavor_description_isAvailable": "Locus is available in two variants. You are using the FLOSS variant. This variant contains only free and open-source software. It does not contain any propietary code, such as Google Play Services. You, however, have Google Play Services installed. Unfortunately, the FLOSS variant does not work with Google Play Services. Please install the \"GMS\" variant of Locus.",
-  "welcomeScreen_usesWrongAppFlavor_description_isNotAvailable": "Locus is available in two variants. You are using the \"GMS\" variant. This variant contains Google Play Services. You, however, do not have Google Play Services installed. Unfortunately, the \"GMS\" variant does not work without Google Play Services. Please install the FLOSS variant of Locus.",
+  "welcomeScreen_startLabel": "Start Locus",
   "transferScreen_receive_awaiting_label": "Make sure you have Bluetooth enabled. Waiting for transfer, open Locus on your old device and go to settings, then tap \"Transfer Locus to a new Phone\"",
   "transferScreen_send_awaiting_label": "Make sure you have Bluetooth enabled. Searching for nearby devices...",
   "transferScreen_send_pin_description": "This is your PIN:",
@@ -339,6 +355,17 @@
   "viewDetails_title": "View Details",
   "viewDetails_actions_openLatestLocation": "Open Maps to latest location",
   "viewDetails_actions_showLocationList": "Show Location List",
+  "viewDetails_actions_showAlarms_show": "Show Alarms",
+  "viewDetails_actions_showAlarms_hide": "Hide Alarms",
+  "viewDetails_distanceToLatestLocation_label": "{distance} meters away",
+  "@viewDetails_distanceToLatestLocation_label": {
+    "placeholders": {
+      "distance": {
+        "type": "int",
+        "format": "compactLong"
+      }
+    }
+  },
   "loadingLocationsTitle": "Loading locations: {count}",
   "@loadingLocationsTitle": {
     "placeholders": {
@@ -418,6 +445,9 @@
   "settingsScreen_exportLogs": "Export Logs",
   "settingsScreen_exportLogs_shareText": "Here are my Locus logs",
   "settingsScreen_exportLogs_error": "There was an error exporting the logs",
+  "settingsScreen_setting_requireBiometricAuth_label": "Require Biometric Authentication",
+  "settingsScreen_setting_requireBiometricAuth_description": "If enabled, Locus will require you to authenticate with your biometric data (fingerprint, face, etc.) before opening the app.",
+  "settingsScreen_setting_requireBiometricAuth_requireNowReason": "Confirm your identity to change this setting",
   "support_title": "Support Locus",
   "support_description": "Locus is a free open source project. This means that I don't make any money from it. If you like the app and want to support me, you can do so by multiple ways. Thank you very much! :)",
   "support_options_develop": "Help developing Locus",
@@ -486,6 +516,8 @@
   "logs_values_taskDeleted": "Task deleted",
   "logs_values_taskStatusChanged": "Task status changed",
   "logs_values_updatedLocation": "Location updated",
+  "logs_values_alarmCreated": "Alarm added",
+  "logs_values_alarmDeleted": "Alarm removed",
   "log_title_taskCreated": "<{name}> created",
   "@log_title_taskCreated": {
     "placeholders": {
@@ -520,11 +552,118 @@
       }
     }
   },
+  "log_title_alarmCreated": "Alarm added for {viewName}",
+  "@log_title_alarmCreated": {
+    "placeholders": {
+      "viewName": {
+        "type": "String"
+      }
+    }
+  },
+  "log_title_alarmDeleted": "Alarm removed from {viewName}",
+  "@log_title_alarmDeleted": {
+    "placeholders": {
+      "viewName": {
+        "type": "String"
+      }
+    }
+  },
   "logs_system_initiator_description": "This log was created by the system",
   "logs_task_creationContext_description": "{context, select, inApp{Task created inside the App} quickAction{Task created via Quick Action} other{Unknown error occurred}}",
   "logs_title": "Locus automatically creates logs",
   "logs_description": "Logs are kept for 7 days and are automatically deleted afterwards.",
   "locationPointsScreen_title": "Location Points",
   "bunny_unavailable": "Sorry, but it seems as if your friend is as lost as this song.",
-  "bunny_unavailable_action": "What's this song?"
+  "bunny_unavailable_action": "What's this song?",
+  "locationAlarm_radiusBasedRegion_notificationTitle_whenEnter": "{name} entered zone {zone}",
+  "@locationAlarm_radiusBasedRegion_notificationTitle_whenEnter": {
+    "description": "Notification title when entering a zone; Try to keep this short, will be truncated to 80 characters",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "zone": {
+        "type": "String"
+      }
+    }
+  },
+  "locationAlarm_radiusBasedRegion_notificationTitle_whenLeave": "{name} left zone {zone}",
+  "@locationAlarm_radiusBasedRegion_notificationTitle_whenLeave": {
+    "description": "Notification title when leaving a zone; Try to keep this short, will be truncated to 80 characters",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "zone": {
+        "type": "String"
+      }
+    }
+  },
+  "locationAlarm_radiusBasedRegion_notificationTitle_maybe": "{name} may has entered or left zone {zone}",
+  "@locationAlarm_radiusBasedRegion_notificationTitle_maybe": {
+    "description": "Notification title when it is not clear if the user entered or left a zone; Try to keep this short, will be truncated to 80 characters",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "zone": {
+        "type": "String"
+      }
+    }
+  },
+  "locationAlarm_notification_description": "Tap for more information",
+  "androidNotificationChannel_locationAlarms_name": "Location Alarms",
+  "androidNotificationChannel_locationAlarms_description": "Receive notifications for location alarms",
+  "location_manageAlarms_title": "Manage Alarms",
+  "location_manageAlarms_empty_title": "No Alarms",
+  "location_manageAlarms_empty_description": "Add alarms to be notified when certain conditions are met (e.g. when this person enters a certain area).",
+  "location_manageAlarms_addNewAlarm_actionLabel": "Add Alarm",
+  "location_manageAlarms_lastCheck_description": "Last checked at {date}",
+  "@location_manageAlarms_lastCheck_description": {
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "MMMM d, HH:mm",
+        "isCustomDateFormat": "true"
+      }
+    }
+  },
+  "location_addAlarm_radiusBased_title": "Add radius-based Alarm",
+  "location_addAlarm_radiusBased_isInScaleMode": "You can now scale the radius by pinching and zooming into the map. Tap on the screen to go back to normal mode.",
+  "location_addAlarm_radiusBased_addLabel": "Select region",
+  "location_addAlarm_radiusBased_help_title": "Radius-based Alarms",
+  "location_addAlarm_radiusBased_help_description": "Radius-based alarms are triggered either when leaving or entering a region. After defining your region, you can decide when your alarm should trigger.",
+  "location_addAlarm_radiusBased_help_tapDescription": "Tap on the map to mark the center of your region",
+  "location_addAlarm_radiusBased_help_pinchDescription": "Press and hold to enter into scale mode. You can then change the radius by pinching and zooming into the map.",
+  "location_addAlarm_radiusBased_trigger_title": "When should your alarm trigger?",
+  "location_addAlarm_radiusBased_trigger_whenEnter": "Trigger when entering",
+  "location_addAlarm_radiusBased_trigger_whenLeave": "Trigger when leaving",
+  "location_addAlarm_radiusBased_name_description": "Please enter a name for this region",
+  "location_addAlarm_actionLabel": "Add Alarm",
+  "permissions_openSettings_label": "Open settings",
+  "permissions_openSettings_failed_title": "Settings could not be opened",
+  "permissions_location_askPermission_title": "Grant access to your location",
+  "permissions_location_askPermission_message_always": "Locus needs to access your location in the background. We will first ask for your permission while you use the app. Please make sure to tap on \"Allow while using the App\". Do not tap on \"Allow once\". After that, we will ask you to grant us permission to access your location in the background. Please make sure to tap on \"Always Allow\".",
+  "permissions_location_askPermission_message_whileInUse": "Locus needs to access your location. Please grant the permission in the next step.",
+  "permissions_location_askPermission_action_grant_label": "Grant permission",
+  "permissions_location_permissionDenied_message": "You have denied Locus access to your location. You can grant the permission in the settings.",
+  "permissions_location_permissionDenied_settingsNotOpened_message": "We could not open the settings. Please open the settings manually and grant Locus access to your location.",
+  "permissions_batteryOptimizations_askPermission_title": "Disable battery optimizations",
+  "permissions_batteryOptimizations_askPermission_message": "Locus needs to run in the background to be able to store your location and notify you when you an alarm is set. Please disable battery optimizations for Locus in the next step. You might need to press on \"Create\" again after disabling the optimizations.",
+  "permissions_batteryOptimizations_disableManufacturerOptimization_title": "Your device has additional battery optimizations",
+  "permissions_batteryOptimizations_disableManufacturerOptimization_message": "Your device has additional battery optimizations. Please disable them too based on the instructions below.",
+  "permissions_batteryOptimizations_askPermission_action_label": "Disable battery optimizations",
+  "permissions_autoStart_title": "Enable auto start",
+  "permissions_autoStart_message": "Locus needs to start automatically to ensure your locations are sent. Please enable auto start in the next step.",
+  "permissions_notification_askPermission_title": "Grant access to notifications",
+  "permissions_notification_askPermission_message": "Locus needs to send notifications to notify you when an alarm is triggered. Please grant the permission to send you notifications in the next step.",
+  "permissions_notification_permissionDenied_message": "You have denied Locus access to notifications. Please grant the permission in the settings.",
+  "permissions_notification_permissionDenied_settingsNotOpened_message": "We could not open the settings. Please open the settings manually and allow Locus to send notifications.",
+  "taskDetails_share_help_title": "Share your location with your friends",
+  "taskDetails_share_help_shareDescription": "You can share this location with your friends. They will be able to see your location until you delete this task.",
+  "taskDetails_share_help_appDescription": "Ask your friends to install Locus. Go to the task details and generate a link you can send, or share the view key file. When your friends open Locus and scroll down on the overview screen, they can import your location.",
+  "taskDetails_share_help_webDescription": "Alternatively, other people can open the link in their browser. They will be able to see your location on a map. We discourage this method though, as it is less secure.",
+  "biometricsAuthentication_title": "Biometrics Authentication",
+  "biometricsAuthentication_description": "Please authenticate to open Locus",
+  "biometricsAuthentication_action": "Authenticate"
 }

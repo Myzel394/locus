@@ -6,9 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:locus/constants/values.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 
 import '../../services/app_update_service.dart';
 

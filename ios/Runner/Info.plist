@@ -100,5 +100,7 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>NSFaceIDUsageDescription</key>
+    <string>Locus uses Face ID to lock the app if you enable biometric unlock</string>
 </dict>
 </plist>

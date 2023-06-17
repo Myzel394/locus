@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:latlong2/latlong.dart';
 import 'package:battery_plus/battery_plus.dart';
 import 'package:cryptography/cryptography.dart';
 import 'package:flutter/services.dart';
@@ -44,6 +45,15 @@ class LocationPointService {
         headingAccuracy = headingAccuracy == 0.0 ? null : headingAccuracy,
         batteryLevel = batteryLevel == 0.0 ? null : batteryLevel;
 
+  factory LocationPointService.dummyFromLatLng(final LatLng latLng, {final double accuracy = 10.0}) =>
+      LocationPointService(
+        id: uuid.v4(),
+        createdAt: DateTime.now(),
+        latitude: latLng.latitude,
+        longitude: latLng.longitude,
+        accuracy: accuracy,
+      );
+
   static LocationPointService fromJSON(Map<String, dynamic> json) {
     return LocationPointService(
       id: json["id"],
@@ -57,9 +67,11 @@ class LocationPointService {
       heading: json["heading"],
       headingAccuracy: json["headingAccuracy"],
       batteryLevel: json["batteryLevel"],
-      batteryState: BatteryState.values.firstWhere(
-        (value) => value.name == json["batteryState"],
-      ),
+      batteryState: json["batteryState"] == null
+          ? null
+          : BatteryState.values.firstWhere(
+              (value) => value.name == json["batteryState"],
+            ),
     );
   }
 

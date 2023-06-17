@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:locus/constants/app.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -30,6 +31,7 @@ Future<bool> hasOSBluetoothPermission() async {
 }
 
 Future<bool> hasGrantedNotificationPermission() async {
+  // TODO: Check this again once https://github.com/flutter/flutter/issues/128691 is fixed
   if (!(await hasOSNotificationPermission())) {
     return true;
   }
@@ -37,4 +39,26 @@ Future<bool> hasGrantedNotificationPermission() async {
   final permissionStatus = await Permission.notification.status;
 
   return permissionStatus.isGranted;
+}
+
+Future<bool> hasGrantedAlwaysLocationPermission() async {
+  final permissionStatus = await Geolocator.checkPermission();
+
+  return permissionStatus == LocationPermission.always;
+}
+
+Future<bool> hasGrantedLocationPermission() async {
+  final permissionStatus = await Geolocator.checkPermission();
+
+  return permissionStatus == LocationPermission.always || permissionStatus == LocationPermission.whileInUse;
+}
+
+Future<bool> requestBasicLocationPermission() async {
+  if (await hasGrantedLocationPermission()) {
+    return true;
+  }
+
+  final permissionStatus = await Geolocator.requestPermission();
+
+  return permissionStatus == LocationPermission.always || permissionStatus == LocationPermission.whileInUse;
 }

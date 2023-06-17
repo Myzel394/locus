@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:animations/animations.dart';
@@ -12,7 +13,10 @@ import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:locus/init_quick_actions.dart';
+import 'package:locus/main.dart';
+import 'package:locus/screens/ViewDetailScreen.dart';
 import 'package:locus/screens/main_screen_widgets/screens/EmptyScreen.dart';
+import 'package:locus/services/manager_service.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:locus/utils/navigation.dart';
@@ -21,12 +25,14 @@ import 'package:material_design_icons_flutter/material_design_icons_flutter.dart
 import 'package:provider/provider.dart';
 import 'package:uni_links/uni_links.dart';
 
+import '../constants/notifications.dart';
 import '../constants/values.dart';
 import '../models/log.dart';
 import '../services/app_update_service.dart';
 import '../services/location_point_service.dart';
 import '../services/log_service.dart';
 import '../services/settings_service.dart';
+import '../utils/PageRoute.dart';
 import '../utils/platform.dart';
 import 'CreateTaskScreen.dart';
 import 'ImportTaskSheet.dart';
@@ -51,10 +57,9 @@ class _MainScreenState extends State<MainScreen> {
   int activeTab = 0;
   Stream<Position>? _positionStream;
   StreamSubscription<String?>? _uniLinksStream;
+  Timer? _viewsAlarmCheckerTimer;
 
   void _changeTab(final int newTab) {
-    final settings = context.read<SettingsService>();
-
     setState(() {
       activeTab = newTab;
     });
@@ -66,7 +71,7 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  void initBackground() async {
+  void _initBackground() async {
     BackgroundFetch.start();
   }
 
@@ -163,7 +168,7 @@ class _MainScreenState extends State<MainScreen> {
         builder: (context) => ImportTaskSheet(initialURL: url),
       );
 
-  Future<void> initUniLinks() async {
+  Future<void> _initUniLinks() async {
     final l10n = AppLocalizations.of(context);
 
     FlutterLogs.logInfo(LOG_TAG, "Uni Links", "Initiating uni links...");
@@ -212,21 +217,87 @@ class _MainScreenState extends State<MainScreen> {
 
     final taskService = context.read<TaskService>();
     final appUpdateService = context.read<AppUpdateService>();
+    taskService.addListener(updateView);
+    appUpdateService.addListener(updateView);
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final taskService = context.read<TaskService>();
       final logService = context.read<LogService>();
 
       initQuickActions(context);
-      initUniLinks();
+      _initUniLinks();
+      _updateLocaleToSettings();
 
       taskService.checkup(logService);
     });
 
-    taskService.addListener(updateView);
-    appUpdateService.addListener(updateView);
+    _initBackground();
+    _handleViewAlarmChecker();
+    _handleNotifications();
+  }
 
-    initBackground();
+  void _handleViewAlarmChecker() {
+    _viewsAlarmCheckerTimer = Timer.periodic(
+      const Duration(minutes: 1),
+      (_) {
+        final viewService = context.read<ViewService>();
+        final l10n = AppLocalizations.of(context);
+
+        if (viewService.viewsWithAlarms.isEmpty) {
+          return;
+        }
+
+        checkViewAlarms(
+          l10n: l10n,
+          views: viewService.viewsWithAlarms,
+          viewService: viewService,
+        );
+      },
+    );
+  }
+
+  void _handleNotifications() {
+    selectedNotificationsStream.stream.listen((notification) {
+      FlutterLogs.logInfo(
+        LOG_TAG,
+        "Notification",
+        "Notification received: ${notification.payload}",
+      );
+
+      try {
+        final data = jsonDecode(notification.payload ?? "{}");
+        final type = NotificationActionType.values[data["type"]];
+
+        switch (type) {
+          case NotificationActionType.openTaskView:
+            final viewService = context.read<ViewService>();
+
+            Navigator.of(context).push(
+              NativePageRoute(
+                context: context,
+                builder: (_) => ViewDetailScreen(
+                  view: viewService.getViewById(data["taskViewID"]),
+                ),
+              ),
+            );
+            break;
+        }
+      } catch (error) {
+        FlutterLogs.logErrorTrace(
+          LOG_TAG,
+          "Notification",
+          "Error handling notification.",
+          error as Error,
+        );
+      }
+    });
+  }
+
+  void _updateLocaleToSettings() {
+    final settingsService = context.read<SettingsService>();
+
+    settingsService.localeName = AppLocalizations.of(context).localeName;
+    settingsService.save();
   }
 
   @override
@@ -238,6 +309,7 @@ class _MainScreenState extends State<MainScreen> {
 
     _tabController.dispose();
 
+    _viewsAlarmCheckerTimer?.cancel();
     _uniLinksStream?.cancel();
 
     _removeLiveLocationUpdate();
@@ -433,7 +505,6 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
     final taskService = context.watch<TaskService>();
     final viewService = context.watch<ViewService>();
     final settings = context.watch<SettingsService>();
@@ -483,6 +554,10 @@ class _MainScreenState extends State<MainScreen> {
               ).animate().scale(
                 duration: 500.ms, delay: 1.seconds, curve: Curves.bounceOut)
             : null,
+      ),
+      cupertino: (_, __) => CupertinoPageScaffoldData(
+        backgroundColor:
+            getIsDarkMode(context) ? null : CupertinoColors.tertiarySystemGroupedBackground.resolveFrom(context),
       ),
       // Settings bottomNavBar via cupertino data class does not work
       bottomNavBar: getBottomNavBar(),

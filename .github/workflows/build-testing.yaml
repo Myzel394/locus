@@ -22,7 +22,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          flutter-version: '3.10.0'
+          flutter-version: '3.10.1'
 
       - name: Opt out of telemetry
         run: flutter --disable-telemetry
@@ -32,6 +32,9 @@ jobs:
 
       - name: Generate Localizations 🌐
         run: flutter gen-l10n
+
+      - name: Run Tests 🧪
+        run: flutter test
 
       - name: Build Android App - GMS variant 📱
         run: flutter build apk --dart-define=app.flavor=gms --debug

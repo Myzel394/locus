@@ -8,14 +8,17 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
-
 // Provided by the flutter_map package
 import 'package:latlong2/latlong.dart';
 import 'package:locus/services/settings_service.dart';
+import 'package:locus/utils/permission.dart';
 import 'package:locus/widgets/Paper.dart';
 import 'package:provider/provider.dart';
 
 import '../services/location_point_service.dart';
+
+AppleMaps.LatLng toAppleMapsCoordinates(final LatLng coordinates) =>
+    AppleMaps.LatLng(coordinates.latitude, coordinates.longitude);
 
 class LocationsMapController extends ChangeNotifier {
   // A controller for `LocationsMap`
@@ -25,7 +28,8 @@ class LocationsMapController extends ChangeNotifier {
 
   // To inform our wrappers to update the map, we use a stream.
   // This emits event to which our wrappers listen to.
-  final StreamController<Map<String, dynamic>> _eventEmitter = StreamController.broadcast();
+  final StreamController<Map<String, dynamic>> _eventEmitter =
+      StreamController.broadcast();
 
   LocationsMapController({
     List<LocationPointService>? locations,
@@ -42,7 +46,8 @@ class LocationsMapController extends ChangeNotifier {
 
   bool get useAppleMaps => Platform.isIOS;
 
-  UnmodifiableListView<LocationPointService> get locations => UnmodifiableListView(_locations);
+  UnmodifiableListView<LocationPointService> get locations =>
+      UnmodifiableListView(_locations);
 
   @override
   void dispose() {
@@ -78,7 +83,8 @@ class LocationsMapController extends ChangeNotifier {
   }
 
   // Groups the locations by hour and returns a map of the hour and the number of locations in that hour.
-  Map<DateTime, List<LocationPointService>> getLocationsPerHour() => _locations.fold(
+  Map<DateTime, List<LocationPointService>> getLocationsPerHour() =>
+      _locations.fold(
         {},
         (final Map<DateTime, List<LocationPointService>> value, element) {
           final date = normalizeDateTime(element.createdAt);
@@ -99,6 +105,48 @@ class LocationsMapController extends ChangeNotifier {
       "location": location,
     });
   }
+
+  void goToUserLocation() {
+    _eventEmitter.add({
+      "type": "goToUserLocation",
+    });
+  }
+}
+
+class LocationsMapCircle {
+  final String id;
+  final LatLng center;
+  final double radius;
+  final Color color;
+  final Color strokeColor;
+  final double strokeWidth;
+
+  const LocationsMapCircle({
+    required this.id,
+    required this.center,
+    required this.radius,
+    required this.color,
+    final Color? strokeColor,
+    this.strokeWidth = 5.0,
+  }) : strokeColor = strokeColor ?? color;
+
+  AppleMaps.Circle get asAppleMaps => AppleMaps.Circle(
+        circleId: AppleMaps.CircleId(center.toString()),
+        center: toAppleMapsCoordinates(center),
+        radius: radius,
+        fillColor: color,
+        strokeColor: strokeColor,
+        strokeWidth: strokeWidth.round(),
+      );
+
+  CircleMarker get asFlutterMap => CircleMarker(
+        point: center,
+        color: color,
+        borderColor: strokeColor,
+        borderStrokeWidth: strokeWidth,
+        useRadiusInMeter: true,
+        radius: radius,
+      );
 }
 
 class LocationsMap extends StatefulWidget {
@@ -106,10 +154,15 @@ class LocationsMap extends StatefulWidget {
   final double initialZoomLevel;
   final bool initWithUserPosition;
 
-  LocationsMap({
+  final List<LocationsMapCircle> circles;
+  final bool showCircles;
+
+  const LocationsMap({
     required this.controller,
     this.initialZoomLevel = 16,
     this.initWithUserPosition = false,
+    this.circles = const [],
+    this.showCircles = true,
     Key? key,
   }) : super(key: key);
 
@@ -123,7 +176,8 @@ class _LocationsMapState extends State<LocationsMap> {
   AppleMaps.AppleMapController? appleMapsController;
   MapController? flutterMapController;
 
-  static toAppleCoordinate(final LatLng latLng) => AppleMaps.LatLng(latLng.latitude, latLng.longitude);
+  static toAppleCoordinate(final LatLng latLng) =>
+      AppleMaps.LatLng(latLng.latitude, latLng.longitude);
 
   bool get shouldUseAppleMaps {
     final settings = context.read<SettingsService>();
@@ -134,9 +188,14 @@ class _LocationsMapState extends State<LocationsMap> {
   String get snippetText {
     final location = widget.controller.locations.last;
 
-    final batteryInfo = location.batteryLevel == null ? "" : "Battery at ${(location.batteryLevel! * 100).ceil()}%";
-    final dateInfo = "Date: ${DateFormat.yMd().add_jm().format(location.createdAt)}";
-    final speedInfo = location.speed == null ? "" : "Moving at ${(location.speed!.abs() * 3.6).ceil()} km/h";
+    final batteryInfo = location.batteryLevel == null
+        ? ""
+        : "Battery at ${(location.batteryLevel! * 100).ceil()}%";
+    final dateInfo =
+        "Date: ${DateFormat.yMd().add_jm().format(location.createdAt)}";
+    final speedInfo = location.speed == null
+        ? ""
+        : "Moving at ${(location.speed!.abs() * 3.6).ceil()} km/h";
 
     return [
       batteryInfo,
@@ -149,7 +208,8 @@ class _LocationsMapState extends State<LocationsMap> {
   void initState() {
     super.initState();
 
-    _controllerSubscription = widget.controller.eventListener.listen(eventEmitterListener);
+    _controllerSubscription =
+        widget.controller.eventListener.listen(eventEmitterListener);
 
     if (widget.initWithUserPosition) {
       fetchUserPosition();
@@ -168,7 +228,7 @@ class _LocationsMapState extends State<LocationsMap> {
       );
     }
 
-    return LatLng(0, 0);
+    return LatLng(40, 20);
   }
 
   @override
@@ -194,15 +254,19 @@ class _LocationsMapState extends State<LocationsMap> {
           ),
         );
         break;
+      case "goToUserLocation":
+        await fetchUserPosition();
+        break;
     }
   }
 
   void moveToPosition(final LatLng latLng) async {
     if (shouldUseAppleMaps) {
-      appleMapsController!.moveCamera(
+      appleMapsController!.animateCamera(
         AppleMaps.CameraUpdate.newCameraPosition(
           AppleMaps.CameraPosition(
             target: toAppleCoordinate(latLng),
+            zoom: await appleMapsController!.getZoomLevel() ?? 13,
           ),
         ),
       );
@@ -212,9 +276,22 @@ class _LocationsMapState extends State<LocationsMap> {
   }
 
   Future<void> fetchUserPosition() async {
+    if (!(await hasGrantedLocationPermission())) {
+      return;
+    }
+
+    final lastLocationData = await Geolocator.getLastKnownPosition();
+    if (lastLocationData != null) {
+      moveToPosition(LatLng(
+        lastLocationData.latitude,
+        lastLocationData.longitude,
+      ));
+    }
+
     final locationData = await Geolocator.getCurrentPosition(
       // We want to get the position as fast as possible
       desiredAccuracy: LocationAccuracy.lowest,
+      timeLimit: const Duration(seconds: 5),
     );
 
     moveToPosition(LatLng(
@@ -230,33 +307,36 @@ class _LocationsMapState extends State<LocationsMap> {
     switch (settings.getMapProvider()) {
       case MapProvider.apple:
         return AppleMaps.AppleMap(
-          initialCameraPosition: AppleMaps.CameraPosition(
-            target: toAppleCoordinate(getInitialPosition()),
-            zoom: widget.initialZoomLevel,
-          ),
-          onMapCreated: (controller) {
-            appleMapsController = controller;
-          },
-          myLocationEnabled: true,
-          annotations: widget.controller.locations.isNotEmpty
-              ? {
-                  AppleMaps.Annotation(
-                    annotationId: AppleMaps.AnnotationId(
-                      "annotation_${widget.controller.locations.last.latitude}:${widget.controller.locations.last.longitude}",
+            initialCameraPosition: AppleMaps.CameraPosition(
+              target: toAppleCoordinate(getInitialPosition()),
+              zoom: widget.initialZoomLevel,
+            ),
+            onMapCreated: (controller) {
+              appleMapsController = controller;
+            },
+            myLocationEnabled: true,
+            annotations: widget.controller.locations.isNotEmpty
+                ? {
+                    AppleMaps.Annotation(
+                      annotationId: AppleMaps.AnnotationId(
+                        "annotation_${widget.controller.locations.last.latitude}:${widget.controller.locations.last.longitude}",
+                      ),
+                      position: AppleMaps.LatLng(
+                        widget.controller.locations.last.latitude,
+                        widget.controller.locations.last.longitude,
+                      ),
+                      infoWindow: AppleMaps.InfoWindow(
+                        title: "Last location",
+                        snippet: snippetText,
+                      ),
                     ),
-                    position: AppleMaps.LatLng(
-                      widget.controller.locations.last.latitude,
-                      widget.controller.locations.last.longitude,
-                    ),
-                    infoWindow: AppleMaps.InfoWindow(
-                      title: "Last location",
-                      snippet: snippetText,
-                    ),
-                  ),
-                }
-              : {},
-          circles: widget.controller.locations
-              .map(
+                  }
+                : {},
+            circles: {
+              ...(widget.showCircles
+                  ? widget.circles.map((circle) => circle.asAppleMaps)
+                  : {}),
+              ...widget.controller.locations.map(
                 (location) => AppleMaps.Circle(
                   circleId: AppleMaps.CircleId(
                     "circle_${location.latitude}:${location.longitude}",
@@ -270,9 +350,8 @@ class _LocationsMapState extends State<LocationsMap> {
                   strokeWidth: location.accuracy < 10 ? 1 : 3,
                   radius: location.accuracy,
                 ),
-              )
-              .toSet(),
-        );
+              ),
+            });
       case MapProvider.openStreetMap:
         return FlutterMap(
           options: MapOptions(
@@ -287,6 +366,16 @@ class _LocationsMapState extends State<LocationsMap> {
               subdomains: const ['a', 'b', 'c'],
               userAgentPackageName: "app.myzel394.locus",
             ),
+            if (widget.circles.isNotEmpty)
+              AnimatedOpacity(
+                duration: const Duration(milliseconds: 300),
+                opacity: widget.showCircles ? 1 : 0,
+                child: CircleLayer(
+                  circles: widget.circles
+                      .map((circle) => circle.asFlutterMap)
+                      .toList(),
+                ),
+              ),
             CircleLayer(
               circles: widget.controller.locations
                   .map(

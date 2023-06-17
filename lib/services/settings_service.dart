@@ -1,11 +1,14 @@
 import 'dart:collection';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:local_auth/local_auth.dart';
+import 'package:locus/constants/app.dart';
 
 import '../api/get-address.dart';
 import '../utils/device.dart';
@@ -31,6 +34,11 @@ enum AndroidTheme {
   miui,
 }
 
+enum HelperSheet {
+  radiusBasedAlarms,
+  taskShare,
+}
+
 // Selects a random provider from the list of available providers, not including
 // the system provider.
 GeocoderProvider selectRandomProvider() {
@@ -42,8 +50,11 @@ GeocoderProvider selectRandomProvider() {
 }
 
 class SettingsService extends ChangeNotifier {
+  String localeName;
   bool automaticallyLookupAddresses;
   bool showHints;
+  bool userHasSeenWelcomeScreen = false;
+  bool requireBiometricAuthenticationOnStart = false;
   List<String> _relays;
   AndroidTheme androidTheme;
 
@@ -55,6 +66,8 @@ class SettingsService extends ChangeNotifier {
   // Apple
   MapProvider mapProvider;
 
+  Set<String> _seenHelperSheets;
+
   SettingsService({
     required this.automaticallyLookupAddresses,
     required this.primaryColor,
@@ -62,8 +75,13 @@ class SettingsService extends ChangeNotifier {
     required this.showHints,
     required this.geocoderProvider,
     required this.androidTheme,
+    required this.localeName,
+    required this.userHasSeenWelcomeScreen,
+    required this.requireBiometricAuthenticationOnStart,
+    Set<String>? seenHelperSheets,
     List<String>? relays,
-  }) : _relays = relays ?? [];
+  })  : _relays = relays ?? [],
+        _seenHelperSheets = seenHelperSheets ?? {};
 
   static Future<SettingsService> createDefault() async {
     return SettingsService(
@@ -77,10 +95,15 @@ class SettingsService extends ChangeNotifier {
       geocoderProvider: isSystemGeocoderAvailable()
           ? GeocoderProvider.system
           : selectRandomProvider(),
+      localeName: "en",
+      userHasSeenWelcomeScreen: false,
+      seenHelperSheets: {},
+      requireBiometricAuthenticationOnStart: false,
     );
   }
 
-  static bool isSystemGeocoderAvailable() => false;
+  static bool isSystemGeocoderAvailable() =>
+      isPlatformApple() || (Platform.isAndroid && isGMSFlavor);
 
   static SettingsService fromJSON(final Map<String, dynamic> data) {
     return SettingsService(
@@ -92,6 +115,11 @@ class SettingsService extends ChangeNotifier {
       showHints: data['showHints'],
       geocoderProvider: GeocoderProvider.values[data['geocoderProvider']],
       androidTheme: AndroidTheme.values[data['androidTheme']],
+      localeName: data['localeName'],
+      userHasSeenWelcomeScreen: data['userHasSeenWelcomeScreen'],
+      seenHelperSheets: Set<String>.from(data['seenHelperSheets'] ?? {}),
+      requireBiometricAuthenticationOnStart:
+          data['requireBiometricAuthenticationOnStart'],
     );
   }
 
@@ -123,6 +151,11 @@ class SettingsService extends ChangeNotifier {
       "showHints": showHints,
       "geocoderProvider": geocoderProvider.index,
       "androidTheme": androidTheme.index,
+      "localeName": localeName,
+      "userHasSeenWelcomeScreen": userHasSeenWelcomeScreen,
+      "seenHelperSheets": _seenHelperSheets.toList(),
+      "requireBiometricAuthenticationOnStart":
+          requireBiometricAuthenticationOnStart,
     };
   }
 
@@ -237,5 +270,34 @@ class SettingsService extends ChangeNotifier {
 
   AndroidTheme getAndroidTheme() => androidTheme;
 
+  Future<void> setHasSeenWelcomeScreen() async {
+    userHasSeenWelcomeScreen = true;
+    notifyListeners();
+    await save();
+  }
+
+  bool getRequireBiometricAuthenticationOnStart() =>
+      requireBiometricAuthenticationOnStart;
+
+  void setRequireBiometricAuthenticationOnStart(final bool value) {
+    requireBiometricAuthenticationOnStart = value;
+    notifyListeners();
+  }
+
+  Future<bool> hasBiometricsAvailable() {
+    final auth = LocalAuthentication();
+
+    return auth.canCheckBiometrics;
+  }
+
   bool isMIUI() => androidTheme == AndroidTheme.miui;
+
+  bool hasSeenHelperSheet(final HelperSheet sheet) =>
+      _seenHelperSheets.contains(sheet.name);
+
+  Future<void> markHelperSheetAsSeen(final HelperSheet sheet) async {
+    _seenHelperSheets.add(sheet.name);
+    notifyListeners();
+    await save();
+  }
 }

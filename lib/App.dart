@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/colors.dart';
+import 'package:locus/screens/BiometricsRequiredStartupScreen.dart';
 import 'package:locus/screens/MainScreen.dart';
 import 'package:locus/screens/WelcomeScreen.dart';
 import 'package:locus/services/settings_service.dart';
+import 'package:locus/utils/PageRoute.dart';
 import 'package:locus/utils/color.dart';
 import 'package:locus/widgets/DismissKeyboard.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
@@ -36,14 +38,7 @@ ColorScheme createColorScheme(
 }
 
 class App extends StatelessWidget {
-  final bool hasLocationAlwaysGranted;
-  final bool hasNotificationGranted;
-  final bool isIgnoringBatteryOptimizations;
-
   const App({
-    required this.hasLocationAlwaysGranted,
-    required this.hasNotificationGranted,
-    required this.isIgnoringBatteryOptimizations,
     super.key,
   });
 
@@ -189,21 +184,29 @@ class App extends StatelessWidget {
           ),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          onGenerateRoute: (settings) {
-            final screen = hasLocationAlwaysGranted &&
-                    isIgnoringBatteryOptimizations &&
-                    hasNotificationGranted
-                ? const MainScreen()
-                : WelcomeScreen(
-                    hasLocationAlwaysGranted: hasLocationAlwaysGranted,
-                    hasNotificationGranted: hasNotificationGranted,
-                    isIgnoringBatteryOptimizations:
-                        isIgnoringBatteryOptimizations,
-                  );
+          onGenerateRoute: (routeSettings) {
+            final screen = (() {
+              if (settings.getRequireBiometricAuthenticationOnStart()) {
+                return const BiometricsRequiredStartupScreen();
+              }
 
-            return MaterialWithModalsPageRoute(
-              builder: (context) => screen,
-              settings: settings,
+              if (!settings.userHasSeenWelcomeScreen) {
+                return const WelcomeScreen();
+              }
+
+              return const MainScreen();
+            })();
+
+            if (isCupertino(context)) {
+              return MaterialWithModalsPageRoute(
+                builder: (_) => screen,
+                settings: routeSettings,
+              );
+            }
+
+            return NativePageRoute(
+              builder: (_) => screen,
+              context: context,
             );
           },
         ),
