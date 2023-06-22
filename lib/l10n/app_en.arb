@@ -688,5 +688,13 @@
   "checkLocation_permissionDeniedMessage": "Please grant permission to your location",
   "@checkLocation_permissionDeniedMessage": {
       "description": "Keep this short"
-  }
+  },
+  "checkLocation_errorMessage": "We are sorry, but Locus could not access your location. You can try it again later or find more information in the help section.",
+  "checkLocation_openHelp": "Open help",
+  "help_location_title": "Location Help",
+  "help_location_preamble": "We are very sorry if Locus can not access your location. There are many reasons why this might happen. Please try the following steps to fix the issue:",
+  "help_location_goOutside": "Go outside. It is possible that your device can not get proper signal inside.",
+  "help_location_enableGoogleLocationServices": "Enable Google Location Services. Google Location Services massively improve the accuracy of your location. You can enable it in your device settings. Note that this will very likely tell Google your location.",
+  "help_location_enableScanning": "Enable Wi-Fi and Bluetooth scanning. You can enable them in your device settings. Note that this could drain your battery faster.",
+  "help_location_useGMSVersion": "Use the GMS version of Locus. The GMS version uses Google Location Services to get your location. You can download it from GitHub. You will be notified about updates inside the app."
 }
