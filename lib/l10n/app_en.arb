@@ -679,8 +679,8 @@
   "checkLocation_start_label": "Start check",
   "checkLocation_values_usingBestLocation": "Checking using best accuracy",
   "checkLocation_values_usingWorstLocation": "Checking using worst accuracy",
-  "checkLocation_values_usingAndroidLocationManagerBestLocation": "Checking using Android's Location Manager with best accuracy",
-    "checkLocation_values_usingAndroidLocationManagerWorstLocation": "Checking using Android's Location Manager with worst accuracy",
+  "checkLocation_values_usingAndroidLocationManagerBest": "Checking using Android's Location Manager with best accuracy",
+  "checkLocation_values_usingAndroidLocationManagerWorst": "Checking using Android's Location Manager with worst accuracy",
   "checkLocation_successMessage": "Congratulations! Locus can access your location!",
   "checkLocation_gpsDisabledMessage": "Please enable GPS to continue",
   "@checkLocation_gpsDisabledMessage": {
