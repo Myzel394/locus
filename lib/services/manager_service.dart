@@ -12,6 +12,7 @@ import 'package:locus/services/settings_service.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:locus/utils/location.dart';
 
 import '../models/log.dart';
 import 'log_service.dart';
@@ -27,10 +28,13 @@ Future<void> updateLocation() async {
     return;
   }
 
-  final locationData = await LocationPointService.createUsingCurrentLocation();
+  final position = await getCurrentPosition();
+  final locationData = await LocationPointService.fromPosition(
+    position,
+  );
 
   for (final task in runningTasks) {
-    await task.publishCurrentLocationNow(locationData.copyWithDifferentId());
+    await task.publishLocation(locationData.copyWithDifferentId());
   }
 
   await logService.addLog(
@@ -41,10 +45,11 @@ Future<void> updateLocation() async {
       accuracy: locationData.accuracy,
       tasks: List<UpdatedTaskData>.from(
         runningTasks.map(
-          (task) => UpdatedTaskData(
-            id: task.id,
-            name: task.name,
-          ),
+              (task) =>
+              UpdatedTaskData(
+                id: task.id,
+                name: task.name,
+              ),
         ),
       ),
     ),
@@ -60,10 +65,13 @@ Future<void> checkViewAlarms({
     await view.checkAlarm(
       onTrigger: (alarm, location, __) async {
         if (alarm is RadiusBasedRegionLocationAlarm) {
-          final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+          final flutterLocalNotificationsPlugin =
+          FlutterLocalNotificationsPlugin();
 
           flutterLocalNotificationsPlugin.show(
-            int.parse("${location.createdAt.millisecond}${location.createdAt.microsecond}"),
+            int.parse(
+                "${location.createdAt.millisecond}${location.createdAt
+                    .microsecond}"),
             StringUtils.truncate(
               l10n.locationAlarm_radiusBasedRegion_notificationTitle_whenEnter(
                 view.name,
@@ -76,7 +84,8 @@ Future<void> checkViewAlarms({
               android: AndroidNotificationDetails(
                 AndroidChannelIDs.locationAlarms.name,
                 l10n.androidNotificationChannel_locationAlarms_name,
-                channelDescription: l10n.androidNotificationChannel_locationAlarms_description,
+                channelDescription:
+                l10n.androidNotificationChannel_locationAlarms_description,
                 importance: Importance.max,
                 priority: Priority.max,
               ),
@@ -90,15 +99,22 @@ Future<void> checkViewAlarms({
       },
       onMaybeTrigger: (alarm, _, __) async {
         if (view.lastMaybeTrigger != null &&
-            view.lastMaybeTrigger!.difference(DateTime.now()).abs() < MAYBE_TRIGGER_MINIMUM_TIME_BETWEEN) {
+            view.lastMaybeTrigger!.difference(DateTime.now()).abs() <
+                MAYBE_TRIGGER_MINIMUM_TIME_BETWEEN) {
           return;
         }
 
         if (alarm is RadiusBasedRegionLocationAlarm) {
-          final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+          final flutterLocalNotificationsPlugin =
+          FlutterLocalNotificationsPlugin();
 
           flutterLocalNotificationsPlugin.show(
-            int.parse("${DateTime.now().millisecond}${DateTime.now().microsecond}"),
+            int.parse(
+                "${DateTime
+                    .now()
+                    .millisecond}${DateTime
+                    .now()
+                    .microsecond}"),
             StringUtils.truncate(
               l10n.locationAlarm_radiusBasedRegion_notificationTitle_whenEnter(
                 view.name,
@@ -114,7 +130,8 @@ Future<void> checkViewAlarms({
                   view.name,
                   alarm.zoneName,
                 ),
-                channelDescription: l10n.androidNotificationChannel_locationAlarms_description,
+                channelDescription:
+                l10n.androidNotificationChannel_locationAlarms_description,
                 importance: Importance.max,
                 priority: Priority.max,
               ),
@@ -183,14 +200,14 @@ void configureBackgroundFetch() {
       startOnBoot: true,
       stopOnTerminate: false,
     ),
-    (taskId) async {
+        (taskId) async {
       // We only use one taskId to update the location for all tasks,
       // so we don't need to check the taskId.
       await updateLocation();
 
       BackgroundFetch.finish(taskId);
     },
-    (taskId) {
+        (taskId) {
       // Timeout, we need to finish immediately.
       BackgroundFetch.finish(taskId);
     },

@@ -12,6 +12,7 @@ import 'package:locus/constants/values.dart';
 import 'package:locus/services/settings_service.dart';
 import 'package:locus/utils/helper_sheet.dart';
 import 'package:locus/utils/load_status.dart';
+import 'package:locus/utils/location.dart';
 import 'package:locus/utils/show_message.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/RequestLocationPermissionMixin.dart';
@@ -25,12 +26,6 @@ import 'package:wakelock/wakelock.dart';
 
 import '../widgets/PlatformFlavorWidget.dart';
 
-enum CheckMethod {
-  usingBestLocation,
-  usingWorstLocation,
-  usingAndroidLocationManager,
-}
-
 const TIMEOUT_DURATION = Duration(minutes: 1);
 
 class CheckLocationScreen extends StatefulWidget {
@@ -43,40 +38,7 @@ class CheckLocationScreen extends StatefulWidget {
 class _CheckLocationScreenState extends State<CheckLocationScreen>
     with RequestLocationPermissionMixin {
   LoadStatus status = LoadStatus.idle;
-  CheckMethod? method;
-
-  Future<Position?> _getLocation(final CheckMethod method) async {
-    setState(() {
-      this.method = method;
-    });
-
-    try {
-      switch (method) {
-        case CheckMethod.usingBestLocation:
-          final result = await Geolocator.getCurrentPosition(
-            desiredAccuracy: LocationAccuracy.best,
-            forceAndroidLocationManager: false,
-            timeLimit: TIMEOUT_DURATION,
-          );
-          return result;
-        case CheckMethod.usingWorstLocation:
-          final result = await Geolocator.getCurrentPosition(
-            desiredAccuracy: LocationAccuracy.lowest,
-            forceAndroidLocationManager: false,
-            timeLimit: TIMEOUT_DURATION,
-          );
-          return result;
-        case CheckMethod.usingAndroidLocationManager:
-          final result = await Geolocator.getCurrentPosition(
-            forceAndroidLocationManager: true,
-            timeLimit: TIMEOUT_DURATION,
-          );
-          return result;
-      }
-    } catch (_) {
-      return null;
-    }
-  }
+  LocationMethod? method;
 
   Future<void> _showSuccessDialog(final Position location) async {
     final l10n = AppLocalizations.of(context);
@@ -213,32 +175,24 @@ class _CheckLocationScreenState extends State<CheckLocationScreen>
       );
     }
 
-    final location = await (() async {
-      final bestLocation = await _getLocation(CheckMethod.usingBestLocation);
+    try {
+      final location = await getCurrentPosition(
+        onMethodCheck: (method) {
+          setState(() {
+            this.method = method;
+          });
+        },
+      );
 
-      if (bestLocation != null) {
-        return bestLocation;
+      if (!mounted) {
+        return;
       }
 
-      final worstLocation = await _getLocation(CheckMethod.usingWorstLocation);
-
-      if (worstLocation != null) {
-        return worstLocation;
-      }
-
-      return await _getLocation(CheckMethod.usingAndroidLocationManager);
-    })();
-
-    if (location == null) {
+      _showSuccessDialog(location);
+    } catch (_) {
       failCheck();
       return;
     }
-
-    if (!mounted) {
-      return;
-    }
-
-    _showSuccessDialog(location);
   }
 
   void failCheck() async {
@@ -277,16 +231,16 @@ class _CheckLocationScreenState extends State<CheckLocationScreen>
     );
   }
 
-  Map<CheckMethod, String> getNamesForCheckMethodMap() {
+  Map<LocationMethod, String> getNamesForCheckMethodMap() {
     final l10n = AppLocalizations.of(context);
 
     return {
-      CheckMethod.usingBestLocation:
-          l10n.checkLocation_values_usingBestLocation,
-      CheckMethod.usingWorstLocation:
-          l10n.checkLocation_values_usingWorstLocation,
-      CheckMethod.usingAndroidLocationManager:
-          l10n.checkLocation_values_usingAndroidLocationManager,
+      LocationMethod.best: l10n.checkLocation_values_usingBestLocation,
+      LocationMethod.worst: l10n.checkLocation_values_usingWorstLocation,
+      LocationMethod.androidLocationManagerBest:
+          l10n.checkLocation_values_usingAndroidLocationManagerBest,
+      LocationMethod.androidLocationManagerWorst:
+          l10n.checkLocation_values_usingAndroidLocationManagerWorst,
     };
   }
 
@@ -410,7 +364,8 @@ class _CheckLocationScreenState extends State<CheckLocationScreen>
                     const SizedBox(height: LARGE_SPACE),
                     Text(
                       l10n.checkLocation_description(
-                        CheckMethod.values.length * TIMEOUT_DURATION.inMinutes,
+                        LocationMethod.values.length *
+                            TIMEOUT_DURATION.inMinutes,
                       ),
                       style: getBodyTextTextStyle(context),
                     ),
@@ -446,7 +401,7 @@ class _CheckLocationScreenState extends State<CheckLocationScreen>
                       if (method != null) ...[
                         const SizedBox(height: MEDIUM_SPACE),
                         Text(
-                          "${method!.index + 1} / ${CheckMethod.values.length}",
+                          "${method!.index + 1} / ${LocationMethod.values.length}",
                           style: getCaptionTextStyle(context),
                         ),
                       ]

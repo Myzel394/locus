@@ -6,6 +6,8 @@ import 'package:cryptography/cryptography.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:locus/api/nostr-events.dart';
 import 'package:locus/constants/app.dart';
 import 'package:locus/constants/values.dart';
@@ -13,6 +15,7 @@ import 'package:locus/models/log.dart';
 import 'package:locus/services/location_base.dart';
 import 'package:locus/services/log_service.dart';
 import 'package:locus/utils/cryptography.dart';
+import 'package:locus/utils/location.dart';
 import 'package:nostr/nostr.dart';
 import 'package:uuid/uuid.dart';
 
@@ -394,17 +397,24 @@ class Task extends ChangeNotifier with LocationBase {
     return uri.toString();
   }
 
-  Future<void> publishCurrentLocationNow([
-    final LocationPointService? location,
-  ]) async {
+  Future<void> publishLocation(
+    final LocationPointService locationPoint,
+  ) async {
     final eventManager = NostrEventsManager.fromTask(this);
-    final locationPoint =
-        location ?? await LocationPointService.createUsingCurrentLocation();
 
     final rawMessage = jsonEncode(locationPoint.toJSON());
     final message = await encryptUsingAES(rawMessage, _encryptionPassword);
 
     await eventManager.publishMessage(message);
+  }
+
+  Future<LocationPointService> publishCurrentPosition() async {
+    final position = await getCurrentPosition();
+    final locationPoint = await LocationPointService.fromPosition(position);
+
+    await publishLocation(locationPoint);
+
+    return locationPoint;
   }
 
   VoidCallback getLocations({

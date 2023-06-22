@@ -6,6 +6,7 @@ import 'package:locus/constants/spacing.dart';
 import 'package:locus/init_quick_actions.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/services/timers_service.dart';
+import 'package:locus/utils/location.dart';
 import 'package:locus/utils/platform.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
@@ -74,16 +75,15 @@ class _ShortcutScreenState extends State<ShortcutScreen> {
           );
 
           await task.startSchedule(startNowIfNextRunIsUnknown: true);
-          final locationData =
-              await LocationPointService.createUsingCurrentLocation();
-          await task.publishCurrentLocationNow(locationData);
+
+          final locationPoint = await task.publishCurrentPosition();
 
           await logService.addLog(
             Log.updateLocation(
               initiator: LogInitiator.user,
-              latitude: locationData.latitude,
-              longitude: locationData.longitude,
-              accuracy: locationData.accuracy,
+              latitude: locationPoint.latitude,
+              longitude: locationPoint.longitude,
+              accuracy: locationPoint.accuracy,
               tasks: [task] as List<UpdatedTaskData>,
             ),
           );
@@ -96,28 +96,32 @@ class _ShortcutScreenState extends State<ShortcutScreen> {
             return;
           }
 
-          final locationData =
-              await LocationPointService.createUsingCurrentLocation();
+          final position = await getCurrentPosition();
+          final locationPoint = await LocationPointService.fromPosition(
+            position,
+          );
           await Future.wait(
             tasks.map(
-              (task) => task.publishCurrentLocationNow(
-                locationData.copyWithDifferentId(),
-              ),
+                  (task) =>
+                  task.publishLocation(
+                    locationPoint.copyWithDifferentId(),
+                  ),
             ),
           );
 
           await logService.addLog(
             Log.updateLocation(
               initiator: LogInitiator.user,
-              latitude: locationData.latitude,
-              longitude: locationData.longitude,
-              accuracy: locationData.accuracy,
+              latitude: locationPoint.latitude,
+              longitude: locationPoint.longitude,
+              accuracy: locationPoint.accuracy,
               tasks: List<UpdatedTaskData>.from(
                 tasks.map(
-                  (task) => UpdatedTaskData(
-                    id: task.id,
-                    name: task.name,
-                  ),
+                      (task) =>
+                      UpdatedTaskData(
+                        id: task.id,
+                        name: task.name,
+                      ),
                 ),
               ),
             ),
