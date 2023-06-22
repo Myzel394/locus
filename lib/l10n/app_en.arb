@@ -667,5 +667,19 @@
   "biometricsAuthentication_description": "Please authenticate to open Locus",
   "biometricsAuthentication_action": "Authenticate",
   "checkLocation_title": "Verify location access",
-  "checkLocation_shortDescription": "Verify Locus can access your location"
+  "checkLocation_shortDescription": "Verify Locus can access your location",
+  "checkLocation_description": "Tap to check if Locus can access your location. Note that this might take up to {minutes} minutes. Make sure you have GPS enabled. Do not close the app or turn off your screen while the check is running.",
+  "@checkLocation_description": {
+      "placeholders": {
+          "minutes": {
+              "type": "int"
+          }
+      }
+  },
+  "checkLocation_start_label": "Start check",
+  "checkLocation_values_usingBestLocation": "Checking using best accuracy",
+  "checkLocation_values_usingWorstLocation": "Checking using worst accuracy",
+  "checkLocation_values_usingAndroidLocationManager": "Checking using Android Location Manager",
+  "checkLocation_successMessage": "Congratulations! Locus can access your location!",
+  "checkLocation_gpsDisabledMessage": "Please enable GPS to continue"
 }

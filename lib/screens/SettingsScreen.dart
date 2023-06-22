@@ -13,6 +13,7 @@ import 'package:local_auth/local_auth.dart';
 import 'package:locus/constants/app.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/constants/values.dart';
+import 'package:locus/screens/CheckLocationScreen.dart';
 import 'package:locus/screens/settings_screen_widgets/ImportSheet.dart';
 import 'package:locus/screens/settings_screen_widgets/MentionTile.dart';
 import 'package:locus/screens/settings_screen_widgets/TransferSenderScreen.dart';
@@ -380,159 +381,170 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ],
                     ),
                     SettingsSection(
-                        title: Text(l10n.settingsScreen_sections_misc),
-                        tiles: [
-                          SettingsTile.switchTile(
-                            initialValue: settings.showHints,
-                            onToggle: (newValue) {
-                              settings.setShowHints(newValue);
-                              settings.save();
-                            },
-                            title: Text(
-                                l10n.settingsScreen_settings_showHints_label),
-                            description: Text(l10n
-                                .settingsScreen_settings_showHints_description),
-                            leading: Icon(context.platformIcons.info),
+                      title: Text(l10n.settingsScreen_sections_misc),
+                      tiles: [
+                        SettingsTile.switchTile(
+                          initialValue: settings.showHints,
+                          onToggle: (newValue) {
+                            settings.setShowHints(newValue);
+                            settings.save();
+                          },
+                          title: Text(
+                              l10n.settingsScreen_settings_showHints_label),
+                          description: Text(l10n
+                              .settingsScreen_settings_showHints_description),
+                          leading: Icon(context.platformIcons.info),
+                        ),
+                        SettingsTile.navigation(
+                          title: Text(l10n
+                              .settingsScreen_settings_importExport_exportFile),
+                          leading: PlatformWidget(
+                            material: (_, __) => const Icon(Icons.file_open),
+                            cupertino: (_, __) =>
+                                const Icon(CupertinoIcons.doc),
                           ),
-                          SettingsTile.navigation(
-                            title: Text(l10n
-                                .settingsScreen_settings_importExport_exportFile),
-                            leading: PlatformWidget(
-                              material: (_, __) => const Icon(Icons.file_open),
-                              cupertino: (_, __) =>
-                                  const Icon(CupertinoIcons.doc),
-                            ),
-                            trailing: const SettingsCaretIcon(),
-                            onPressed: (_) async {
-                              final taskService = context.read<TaskService>();
-                              final viewService = context.read<ViewService>();
-                              final settings = context.read<SettingsService>();
+                          trailing: const SettingsCaretIcon(),
+                          onPressed: (_) async {
+                            final taskService = context.read<TaskService>();
+                            final viewService = context.read<ViewService>();
+                            final settings = context.read<SettingsService>();
 
-                              final shouldSave = await showPlatformDialog(
-                                context: context,
-                                builder: (context) => PlatformAlertDialog(
-                                  title: Text(l10n
-                                      .settingsScreen_settings_importExport_exportFile),
-                                  content: Text(l10n
-                                      .settingsScreen_settings_importExport_exportFile_description),
-                                  actions: createCancellableDialogActions(
-                                    context,
-                                    [
-                                      PlatformDialogAction(
-                                        material: (_, __) =>
-                                            MaterialDialogActionData(
-                                          icon: const Icon(Icons.save),
-                                        ),
-                                        onPressed: () {
-                                          Navigator.pop(context, true);
-                                        },
-                                        child: Text(l10n
-                                            .settingsScreen_settings_importExport_exportFile_save),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-
-                              if (shouldSave) {
-                                final rawData = jsonEncode(
-                                  await exportToJSON(
-                                      taskService, viewService, settings),
-                                );
-
-                                final file = XFile(
-                                  (await createTempFile(
-                                    const Utf8Encoder().convert(rawData),
-                                    name: "export.locus.json",
-                                  ))
-                                      .path,
-                                );
-
-                                await Share.shareXFiles(
-                                  [file],
-                                  text: "Locus view key",
-                                  subject:
-                                      l10n.shareLocation_actions_shareFile_text,
-                                );
-                              }
-                            },
-                          ),
-                          if (Platform.isAndroid && isGMSFlavor)
-                            SettingsTile.navigation(
-                              title: Text(l10n
-                                  .settingsScreen_settings_importExport_transfer),
-                              leading: PlatformWidget(
-                                material: (_, __) =>
-                                    const Icon(Icons.phonelink_setup_rounded),
-                                cupertino: (_, __) => const Icon(
-                                    CupertinoIcons.device_phone_portrait),
-                              ),
-                              trailing: const SettingsCaretIcon(),
-                              onPressed: (_) {
-                                Navigator.push(
+                            final shouldSave = await showPlatformDialog(
+                              context: context,
+                              builder: (context) => PlatformAlertDialog(
+                                title: Text(l10n
+                                    .settingsScreen_settings_importExport_exportFile),
+                                content: Text(l10n
+                                    .settingsScreen_settings_importExport_exportFile_description),
+                                actions: createCancellableDialogActions(
                                   context,
-                                  NativePageRoute(
-                                    context: context,
-                                    builder: (context) =>
-                                        const TransferSenderScreen(),
-                                  ),
-                                );
-                              },
-                            ),
-                          SettingsTile.navigation(
-                            title: Text(l10n
-                                .settingsScreen_settings_importExport_importLabel),
-                            leading: PlatformWidget(
-                              material: (_, __) =>
-                                  const Icon(Icons.file_download),
-                              cupertino: (_, __) => const Icon(
-                                  CupertinoIcons.tray_arrow_down_fill),
-                            ),
-                            trailing: const SettingsCaretIcon(),
-                            onPressed: (_) async {
-                              final shouldPopContext =
-                                  await showPlatformModalSheet(
-                                context: context,
-                                material: MaterialModalSheetData(
-                                  backgroundColor: Colors.transparent,
+                                  [
+                                    PlatformDialogAction(
+                                      material: (_, __) =>
+                                          MaterialDialogActionData(
+                                        icon: const Icon(Icons.save),
+                                      ),
+                                      onPressed: () {
+                                        Navigator.pop(context, true);
+                                      },
+                                      child: Text(l10n
+                                          .settingsScreen_settings_importExport_exportFile_save),
+                                    ),
+                                  ],
                                 ),
-                                builder: (context) => ImportSheet(
-                                  onImport: (
-                                    final taskService,
-                                    final viewService,
-                                    final settings,
-                                  ) async {
-                                    await Future.wait([
-                                      taskService.save(),
-                                      viewService.save(),
-                                      settings.save(),
-                                    ]);
+                              ),
+                            );
 
-                                    if (context.mounted) {
-                                      Navigator.pop(context, true);
-                                    }
-                                  },
-                                ),
+                            if (shouldSave) {
+                              final rawData = jsonEncode(
+                                await exportToJSON(
+                                    taskService, viewService, settings),
                               );
 
-                              if (shouldPopContext && mounted) {
-                                Navigator.pop(context);
-                              }
+                              final file = XFile(
+                                (await createTempFile(
+                                  const Utf8Encoder().convert(rawData),
+                                  name: "export.locus.json",
+                                ))
+                                    .path,
+                              );
+
+                              await Share.shareXFiles(
+                                [file],
+                                text: "Locus view key",
+                                subject:
+                                    l10n.shareLocation_actions_shareFile_text,
+                              );
+                            }
+                          },
+                        ),
+                        if (Platform.isAndroid && isGMSFlavor)
+                          SettingsTile.navigation(
+                            title: Text(l10n
+                                .settingsScreen_settings_importExport_transfer),
+                            leading: PlatformWidget(
+                              material: (_, __) =>
+                                  const Icon(Icons.phonelink_setup_rounded),
+                              cupertino: (_, __) => const Icon(
+                                  CupertinoIcons.device_phone_portrait),
+                            ),
+                            trailing: const SettingsCaretIcon(),
+                            onPressed: (_) {
+                              Navigator.push(
+                                context,
+                                NativePageRoute(
+                                  context: context,
+                                  builder: (context) =>
+                                      const TransferSenderScreen(),
+                                ),
+                              );
                             },
                           ),
-                          SettingsTile.navigation(
-                            title: Text(l10n.checkLocation_title),
-                            description:
-                                Text(l10n.checkLocation_shortDescription),
-                            trailing: const SettingsCaretIcon(),
-                            leading: PlatformFlavorWidget(
-                              material: (_, __) =>
-                                  const Icon(Icons.edit_location_alt),
-                              cupertino: (_, __) =>
-                                  const Icon(CupertinoIcons.location_fill),
-                            ),
-                          )
-                        ]),
+                        SettingsTile.navigation(
+                          title: Text(l10n
+                              .settingsScreen_settings_importExport_importLabel),
+                          leading: PlatformWidget(
+                            material: (_, __) =>
+                                const Icon(Icons.file_download),
+                            cupertino: (_, __) =>
+                                const Icon(CupertinoIcons.tray_arrow_down_fill),
+                          ),
+                          trailing: const SettingsCaretIcon(),
+                          onPressed: (_) async {
+                            final shouldPopContext =
+                                await showPlatformModalSheet(
+                              context: context,
+                              material: MaterialModalSheetData(
+                                backgroundColor: Colors.transparent,
+                              ),
+                              builder: (context) => ImportSheet(
+                                onImport: (
+                                  final taskService,
+                                  final viewService,
+                                  final settings,
+                                ) async {
+                                  await Future.wait([
+                                    taskService.save(),
+                                    viewService.save(),
+                                    settings.save(),
+                                  ]);
+
+                                  if (context.mounted) {
+                                    Navigator.pop(context, true);
+                                  }
+                                },
+                              ),
+                            );
+
+                            if (shouldPopContext && mounted) {
+                              Navigator.pop(context);
+                            }
+                          },
+                        ),
+                        SettingsTile.navigation(
+                          title: Text(l10n.checkLocation_title),
+                          description:
+                              Text(l10n.checkLocation_shortDescription),
+                          trailing: const SettingsCaretIcon(),
+                          leading: PlatformFlavorWidget(
+                            material: (_, __) =>
+                                const Icon(Icons.edit_location_alt),
+                            cupertino: (_, __) =>
+                                const Icon(CupertinoIcons.location_fill),
+                          ),
+                          onPressed: (_) {
+                            Navigator.push(
+                              context,
+                              NativePageRoute(
+                                context: context,
+                                builder: (context) =>
+                                    const CheckLocationScreen(),
+                              ),
+                            );
+                          },
+                        )
+                      ],
+                    ),
                     if (kDebugMode)
                       SettingsSection(
                         title: Text("Debug"),
