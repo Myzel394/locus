@@ -22,9 +22,9 @@ class LocationsLoadingScreen extends StatefulWidget {
   State<LocationsLoadingScreen> createState() => _LocationsLoadingScreenState();
 }
 
-class _LocationsLoadingScreenState extends State<LocationsLoadingScreen> with SingleTickerProviderStateMixin {
+class _LocationsLoadingScreenState extends State<LocationsLoadingScreen>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<double> _progressAnimation;
   late Animation<double> _opacityAnimation;
 
   @override
@@ -32,7 +32,6 @@ class _LocationsLoadingScreenState extends State<LocationsLoadingScreen> with Si
     super.initState();
 
     _controller = AnimationController(vsync: this, duration: TIMEOUT_DURATION);
-    _progressAnimation = Tween<double>(begin: 1, end: 0).animate(_controller);
     _opacityAnimation = Tween<double>(
       begin: 0,
       end: 1,
@@ -137,7 +136,8 @@ class _LocationsLoadingScreenState extends State<LocationsLoadingScreen> with Si
               begin: 1,
               end: 0,
             ),
-            builder: (context, value, _) => LinearProgressIndicator(value: value),
+            builder: (context, value, _) =>
+                LinearProgressIndicator(value: value),
           ),
         ),
       ],

@@ -710,13 +710,14 @@ packages:
     source: hosted
     version: "9.0.2"
   geolocator_android:
-    dependency: transitive
+    dependency: "direct overridden"
     description:
-      name: geolocator_android
-      sha256: "6cd3c622df085a79fd61f5c14fa024c3ba593aa6b1df2ee809ac59f45e6a9861"
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.1.8"
+      path: geolocator_android
+      ref: floss
+      resolved-ref: "156b6b19dd6191c7c19c80e6858dc89a6a4298be"
+      url: "https://github.com/Zverik/flutter-geolocator.git"
+    source: git
+    version: "4.1.3"
   geolocator_apple:
     dependency: transitive
     description:
@@ -1016,11 +1017,10 @@ packages:
   nearby_connections:
     dependency: "direct main"
     description:
-      name: nearby_connections
-      sha256: e80c7ad09230da3663de0ed424887c559d3a90241f27b6e0bac6e56334a6c238
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.3.0"
+      path: "dependency_overrides/nearby_connections"
+      relative: true
+    source: path
+    version: "0.0.1"
   nested:
     dependency: transitive
     description:
@@ -1634,6 +1634,38 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.4.0+2"
+  wakelock:
+    dependency: "direct main"
+    description:
+      name: wakelock
+      sha256: "78bad4822be81d37e7bc34b6990da7dface2a445255cd37c6f053b51a4ccdb3b"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.4.0"
+  wakelock_macos:
+    dependency: transitive
+    description:
+      name: wakelock_macos
+      sha256: "73581e5d9ed2dd1ba951375c30e63f0eb8c58d7d6286ae9ddf927b88f2aea8d9"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.0+3"
+  wakelock_platform_interface:
+    dependency: transitive
+    description:
+      name: wakelock_platform_interface
+      sha256: d0a8a1c02af68077db5df1e0f5e2b745f7b1f2cdcc48e3e0b6f8f4dcc349050e
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.1+3"
+  wakelock_web:
+    dependency: transitive
+    description:
+      name: wakelock_web
+      sha256: "06b0033d5421712138e7fa482ff5c6280fe12e0a41c40c3fe8fda2c007eb4348"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.0+3"
   watcher:
     dependency: transitive
     description:
