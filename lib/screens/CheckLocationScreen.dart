@@ -75,11 +75,15 @@ class _CheckLocationScreenState extends State<CheckLocationScreen>
     final l10n = AppLocalizations.of(context);
     final settings = context.read<SettingsService>();
 
+    setState(() {
+      status = LoadStatus.idle;
+    });
+
     String address = "";
 
     try {
       address =
-      await settings.getAddress(location.latitude, location.longitude);
+          await settings.getAddress(location.latitude, location.longitude);
     } catch (error) {
       FlutterLogs.logError(
         LOG_TAG,
@@ -94,38 +98,37 @@ class _CheckLocationScreenState extends State<CheckLocationScreen>
 
     await showPlatformDialog(
       context: context,
-      builder: (innerContext) =>
-          PlatformAlertDialog(
-            title: Text(l10n.checkLocation_title),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Lottie.asset(
-                  "assets/lotties/success.json",
-                  frameRate: FrameRate.max,
-                  repeat: false,
-                ),
-                const SizedBox(height: MEDIUM_SPACE),
-                Text(
-                  l10n.checkLocation_successMessage,
-                ),
-                const SizedBox(height: MEDIUM_SPACE),
-                Text(
-                  address,
-                  style: getCaptionTextStyle(context),
-                ),
-              ],
+      builder: (innerContext) => PlatformAlertDialog(
+        title: Text(l10n.checkLocation_title),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Lottie.asset(
+              "assets/lotties/success.json",
+              frameRate: FrameRate.max,
+              repeat: false,
             ),
-            actions: [
-              PlatformDialogAction(
-                onPressed: () {
-                  Navigator.of(innerContext).pop();
-                  Navigator.of(context).pop();
-                },
-                child: Text(l10n.closeNeutralAction),
-              )
-            ],
-          ),
+            const SizedBox(height: MEDIUM_SPACE),
+            Text(
+              l10n.checkLocation_successMessage,
+            ),
+            const SizedBox(height: MEDIUM_SPACE),
+            Text(
+              address,
+              style: getCaptionTextStyle(context),
+            ),
+          ],
+        ),
+        actions: [
+          PlatformDialogAction(
+            onPressed: () {
+              Navigator.of(innerContext).pop();
+              Navigator.of(context).pop();
+            },
+            child: Text(l10n.closeNeutralAction),
+          )
+        ],
+      ),
     );
   }
 
@@ -200,11 +203,11 @@ class _CheckLocationScreenState extends State<CheckLocationScreen>
 
     return {
       CheckMethod.usingBestLocation:
-      l10n.checkLocation_values_usingBestLocation,
+          l10n.checkLocation_values_usingBestLocation,
       CheckMethod.usingWorstLocation:
-      l10n.checkLocation_values_usingWorstLocation,
+          l10n.checkLocation_values_usingWorstLocation,
       CheckMethod.usingAndroidLocationManager:
-      l10n.checkLocation_values_usingAndroidLocationManager,
+          l10n.checkLocation_values_usingAndroidLocationManager,
     };
   }
 
@@ -230,9 +233,9 @@ class _CheckLocationScreenState extends State<CheckLocationScreen>
                   children: <Widget>[
                     PlatformFlavorWidget(
                       material: (_, __) =>
-                      const Icon(Icons.location_on, size: 100),
+                          const Icon(Icons.location_on, size: 100),
                       cupertino: (_, __) =>
-                      const Icon(CupertinoIcons.location_fill, size: 100),
+                          const Icon(CupertinoIcons.location_fill, size: 100),
                     ),
                     const SizedBox(height: LARGE_SPACE),
                     Text(
@@ -246,15 +249,17 @@ class _CheckLocationScreenState extends State<CheckLocationScreen>
                 if (status == LoadStatus.loading)
                   Column(
                     children: <Widget>[
-                      if (method != null)
+                      if (method != null) ...[
                         Text(
                           namesForCheckMethodMap[method]!,
                           style: getCaptionTextStyle(context),
                         ),
-                      const SizedBox(height: MEDIUM_SPACE),
+                        const SizedBox(height: MEDIUM_SPACE),
+                      ],
                       TweenAnimationBuilder<double>(
-                        key: ValueKey(status),
-                        duration: TIMEOUT_DURATION,
+                        key: ValueKey(method),
+                        duration:
+                            Duration(seconds: TIMEOUT_DURATION.inSeconds + 5),
                         curve: Curves.easeInOut,
                         onEnd: () {
                           if (status == LoadStatus.loading) {
@@ -270,14 +275,20 @@ class _CheckLocationScreenState extends State<CheckLocationScreen>
                         builder: (context, value, _) =>
                             LinearProgressIndicator(value: value),
                       ),
+                      if (method != null) ...[
+                        const SizedBox(height: MEDIUM_SPACE),
+                        Text(
+                          "${method!.index + 1} / ${CheckMethod.values.length}",
+                          style: getCaptionTextStyle(context),
+                        ),
+                      ]
                     ],
                   ),
                 PlatformElevatedButton(
                   padding: const EdgeInsets.all(MEDIUM_SPACE),
-                  material: (_, __) =>
-                      MaterialElevatedButtonData(
-                        icon: const Icon(Icons.check),
-                      ),
+                  material: (_, __) => MaterialElevatedButtonData(
+                    icon: const Icon(Icons.check),
+                  ),
                   onPressed: status == LoadStatus.loading ? null : doCheck,
                   child: Text(l10n.checkLocation_start_label),
                 )

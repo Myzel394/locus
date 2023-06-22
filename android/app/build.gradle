@@ -92,6 +92,6 @@ dependencies {
 }
 
 // Remove this for FLOSS version
-//f configurations.all {
-//f    exclude group: 'com.google.android.gms'
-//f }
+configurations.all {
+    exclude group: 'com.google.android.gms'
+}
