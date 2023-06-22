@@ -15,6 +15,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:locus/widgets/WarningText.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
+import 'package:wakelock/wakelock.dart';
 
 import '../widgets/PlatformFlavorWidget.dart';
 
@@ -83,7 +84,7 @@ class _CheckLocationScreenState extends State<CheckLocationScreen>
 
     try {
       address =
-          await settings.getAddress(location.latitude, location.longitude);
+      await settings.getAddress(location.latitude, location.longitude);
     } catch (error) {
       FlutterLogs.logError(
         LOG_TAG,
@@ -98,41 +99,50 @@ class _CheckLocationScreenState extends State<CheckLocationScreen>
 
     await showPlatformDialog(
       context: context,
-      builder: (innerContext) => PlatformAlertDialog(
-        title: Text(l10n.checkLocation_title),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Lottie.asset(
-              "assets/lotties/success.json",
-              frameRate: FrameRate.max,
-              repeat: false,
+      builder: (innerContext) =>
+          PlatformAlertDialog(
+            title: Text(l10n.checkLocation_title),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Lottie.asset(
+                  "assets/lotties/success.json",
+                  frameRate: FrameRate.max,
+                  repeat: false,
+                ),
+                const SizedBox(height: MEDIUM_SPACE),
+                Text(
+                  l10n.checkLocation_successMessage,
+                ),
+                const SizedBox(height: MEDIUM_SPACE),
+                Text(
+                  address,
+                  style: getCaptionTextStyle(context),
+                ),
+              ],
             ),
-            const SizedBox(height: MEDIUM_SPACE),
-            Text(
-              l10n.checkLocation_successMessage,
-            ),
-            const SizedBox(height: MEDIUM_SPACE),
-            Text(
-              address,
-              style: getCaptionTextStyle(context),
-            ),
-          ],
-        ),
-        actions: [
-          PlatformDialogAction(
-            onPressed: () {
-              Navigator.of(innerContext).pop();
-              Navigator.of(context).pop();
-            },
-            child: Text(l10n.closeNeutralAction),
-          )
-        ],
-      ),
+            actions: [
+              PlatformDialogAction(
+                onPressed: () {
+                  Navigator.of(innerContext).pop();
+                  Navigator.of(context).pop();
+                },
+                child: Text(l10n.closeNeutralAction),
+              )
+            ],
+          ),
     );
   }
 
   Future<void> doCheck() async {
+    final l10n = AppLocalizations.of(context);
+
+    FlutterLogs.logInfo(
+      LOG_TAG,
+      "CheckLocationScreen",
+      "Running location check now.",
+    );
+
     setState(() {
       status = LoadStatus.loading;
       method = null;
@@ -140,10 +150,26 @@ class _CheckLocationScreenState extends State<CheckLocationScreen>
 
     final hasGrantedPermissions = await showLocationPermissionDialog();
 
+    if (!mounted) {
+      return;
+    }
+
     if (!hasGrantedPermissions) {
+      FlutterLogs.logInfo(
+        LOG_TAG,
+        "CheckLocationScreen",
+        "Location permission was not granted.",
+      );
+
       setState(() {
-        status = LoadStatus.error;
+        status = LoadStatus.idle;
       });
+
+      await showMessage(
+        context,
+        l10n.checkLocation_permissionDeniedMessage,
+        type: MessageType.error,
+      );
       return;
     }
 
@@ -153,9 +179,13 @@ class _CheckLocationScreenState extends State<CheckLocationScreen>
       return;
     }
 
-    final l10n = AppLocalizations.of(context);
-
     if (!hasEnabledGPS) {
+      FlutterLogs.logInfo(
+        LOG_TAG,
+        "CheckLocationScreen",
+        "GPS was not enabled.",
+      );
+
       setState(() {
         status = LoadStatus.idle;
       });
@@ -166,6 +196,16 @@ class _CheckLocationScreenState extends State<CheckLocationScreen>
         type: MessageType.error,
       );
       return;
+    }
+
+    try {
+      Wakelock.enable();
+    } catch (error) {
+      FlutterLogs.logError(
+        LOG_TAG,
+        "CheckLocationScreen",
+        "Error while enabling wakelock: $error",
+      );
     }
 
     final location = await (() async {
@@ -185,9 +225,7 @@ class _CheckLocationScreenState extends State<CheckLocationScreen>
     })();
 
     if (location == null) {
-      setState(() {
-        status = LoadStatus.error;
-      });
+      failCheck();
       return;
     }
 
@@ -198,16 +236,32 @@ class _CheckLocationScreenState extends State<CheckLocationScreen>
     _showSuccessDialog(location);
   }
 
+  void failCheck() {
+    try {
+      Wakelock.disable();
+    } catch (error) {
+      FlutterLogs.logError(
+        LOG_TAG,
+        "CheckLocationScreen",
+        "Error while disabling wakelock: $error",
+      );
+    }
+
+    setState(() {
+      status = LoadStatus.error;
+    });
+  }
+
   Map<CheckMethod, String> getNamesForCheckMethodMap() {
     final l10n = AppLocalizations.of(context);
 
     return {
       CheckMethod.usingBestLocation:
-          l10n.checkLocation_values_usingBestLocation,
+      l10n.checkLocation_values_usingBestLocation,
       CheckMethod.usingWorstLocation:
-          l10n.checkLocation_values_usingWorstLocation,
+      l10n.checkLocation_values_usingWorstLocation,
       CheckMethod.usingAndroidLocationManager:
-          l10n.checkLocation_values_usingAndroidLocationManager,
+      l10n.checkLocation_values_usingAndroidLocationManager,
     };
   }
 
@@ -233,9 +287,9 @@ class _CheckLocationScreenState extends State<CheckLocationScreen>
                   children: <Widget>[
                     PlatformFlavorWidget(
                       material: (_, __) =>
-                          const Icon(Icons.location_on, size: 100),
+                      const Icon(Icons.location_on, size: 100),
                       cupertino: (_, __) =>
-                          const Icon(CupertinoIcons.location_fill, size: 100),
+                      const Icon(CupertinoIcons.location_fill, size: 100),
                     ),
                     const SizedBox(height: LARGE_SPACE),
                     Text(
@@ -259,13 +313,11 @@ class _CheckLocationScreenState extends State<CheckLocationScreen>
                       TweenAnimationBuilder<double>(
                         key: ValueKey(method),
                         duration:
-                            Duration(seconds: TIMEOUT_DURATION.inSeconds + 5),
+                        Duration(seconds: TIMEOUT_DURATION.inSeconds + 5),
                         curve: Curves.easeInOut,
                         onEnd: () {
                           if (status == LoadStatus.loading) {
-                            setState(() {
-                              status = LoadStatus.error;
-                            });
+                            failCheck();
                           }
                         },
                         tween: Tween<double>(
@@ -286,9 +338,10 @@ class _CheckLocationScreenState extends State<CheckLocationScreen>
                   ),
                 PlatformElevatedButton(
                   padding: const EdgeInsets.all(MEDIUM_SPACE),
-                  material: (_, __) => MaterialElevatedButtonData(
-                    icon: const Icon(Icons.check),
-                  ),
+                  material: (_, __) =>
+                      MaterialElevatedButtonData(
+                        icon: const Icon(Icons.check),
+                      ),
                   onPressed: status == LoadStatus.loading ? null : doCheck,
                   child: Text(l10n.checkLocation_start_label),
                 )
