@@ -665,5 +665,7 @@
   "taskDetails_share_help_webDescription": "Alternatively, other people can open the link in their browser. They will be able to see your location on a map. We discourage this method though, as it is less secure.",
   "biometricsAuthentication_title": "Biometrics Authentication",
   "biometricsAuthentication_description": "Please authenticate to open Locus",
-  "biometricsAuthentication_action": "Authenticate"
+  "biometricsAuthentication_action": "Authenticate",
+  "checkLocation_title": "Verify location access",
+  "checkLocation_shortDescription": "Verify Locus can access your location"
 }
