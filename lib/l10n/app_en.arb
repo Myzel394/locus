@@ -712,5 +712,9 @@
   "emergencySetup_addContact_name_hint": "John Doe",
   "emergencySetup_addContact_phone_label": "Phone Number",
   "emergencySetup_addContact_phone_hint": "+1 234 567 890",
-  "emergencySetup_addContact_addLabel": "Add contact"
+  "emergencySetup_addContact_addLabel": "Add contact",
+  "emergencySetup_pickContact_error_contactInvalid": "This contact has no name or phone number. Please pick another contact.",
+  "@emergencySetup_pickContact_error_contactInvalid": {
+      "description": "Keep this short"
+  }
 }
