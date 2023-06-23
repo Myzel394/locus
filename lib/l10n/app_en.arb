@@ -717,5 +717,7 @@
   "emergencySetup_pickContact_error_contactInvalid": "This contact has no name or phone number. Please pick another contact.",
   "@emergencySetup_pickContact_error_contactInvalid": {
       "description": "Keep this short"
-  }
+  },
+  "emergencySetup_deleteContact_title": "Delete contact",
+  "emergencySetup_deleteContact_message": "Do you really want to delete this contact? They will no longer be notified in case you enter emergency mode."
 }
