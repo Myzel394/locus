@@ -217,7 +217,7 @@ Future<void> runHeadlessTask() async {
     FlutterLogs.logInfo(
       LOG_TAG,
       "Headless Task",
-      "Battery saver mode is enabled and the last headless run was less than 15 minutes ago. Skipping headless task.",
+      "Battery saver mode is enabled and the last headless run was too recent. Skipping headless task.",
     );
     return;
   }
@@ -231,8 +231,20 @@ Future<void> runHeadlessTask() async {
   await updateLocation();
   await _checkViewAlarms();
 
+  FlutterLogs.logInfo(
+    LOG_TAG,
+    "Headless Task",
+    "Updating settings' lastRun.",
+  );
+
   settings.lastHeadlessRun = DateTime.now();
   await settings.save();
+
+  FlutterLogs.logInfo(
+    LOG_TAG,
+    "Headless Task",
+    "Finished headless task.",
+  );
 }
 
 void configureBackgroundFetch() {
