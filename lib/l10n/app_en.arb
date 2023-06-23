@@ -14,6 +14,7 @@
       }
     }
   },
+  "alternativeDividerLabel": "or",
   "taskImportError": "An error occurred while importing the task",
   "taskImport_error_no_relays": "No relays are present in the task.",
   "taskImport_error_sameTask": "This is a task from you (name: {name}).",

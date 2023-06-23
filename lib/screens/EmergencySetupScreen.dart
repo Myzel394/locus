@@ -5,6 +5,7 @@ import 'package:locus/constants/spacing.dart';
 import 'package:locus/screens/emergency_setup_screen_widgets/AddContactSheet.dart';
 import 'package:locus/services/SettingsService/settings_service.dart';
 import 'package:locus/utils/show_message.dart';
+import 'package:locus/widgets/Paper.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:locus/services/SettingsService/contacts.dart' as contacts;
@@ -41,9 +42,18 @@ class _EmergencySetupScreenState extends State<EmergencySetupScreen> {
     setState(() {});
   }
 
+  void importContact(final contacts.Contact contact) async {
+    final settings = context.read<SettingsService>();
+
+    settings.addEmergencyContact(contact);
+    settings.save();
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final settings = context.watch<SettingsService>();
+    final emergencyContacts = settings.getEmergencyContacts();
 
     return PlatformScaffold(
       appBar: PlatformAppBar(
@@ -55,81 +65,135 @@ class _EmergencySetupScreenState extends State<EmergencySetupScreen> {
           child: Center(
             child: showHint
                 ? Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                const Icon(
-                  Icons.warning_sharp,
-                  color: Colors.yellow,
-                  size: 120,
-                ),
-                const SizedBox(height: LARGE_SPACE),
-                Text(l10n.emergencySetup_hint),
-                const SizedBox(height: LARGE_SPACE),
-                PlatformTextButton(
-                  onPressed: () {
-                    setState(() {
-                      showHint = false;
-                    });
-                  },
-                  child: Text(l10n.emergencySetup_hint_understoodLabel),
-                )
-              ],
-            )
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      const Icon(
+                        Icons.warning_sharp,
+                        color: Colors.yellow,
+                        size: 120,
+                      ),
+                      const SizedBox(height: LARGE_SPACE),
+                      Text(l10n.emergencySetup_hint),
+                      const SizedBox(height: LARGE_SPACE),
+                      PlatformTextButton(
+                        onPressed: () {
+                          setState(() {
+                            showHint = false;
+                          });
+                        },
+                        child: Text(l10n.emergencySetup_hint_understoodLabel),
+                      )
+                    ],
+                  )
                 : Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                PlatformElevatedButton(
-                  onPressed: () async {
-                    final contacts.Contact? contact =
-                    await showPlatformModalSheet(
-                      context: context,
-                      material: MaterialModalSheetData(
-                        backgroundColor: Colors.transparent,
-                        isScrollControlled: true,
-                        isDismissible: true,
-                      ),
-                      builder: (_) => const AddContactScreen(),
-                    );
-                  },
-                  material: (_, __) =>
-                      MaterialElevatedButtonData(
-                        icon: const Icon(Icons.add_circle_rounded),
-                      ),
-                  child: Text(l10n.emergencySetup_addContact_label),
-                ),
-                const SizedBox(height: MEDIUM_SPACE),
-                PlatformElevatedButton(
-                  onPressed: () async {
-                    final PhoneContact rawContact =
-                    await FlutterContactPicker.pickPhoneContact();
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      if (emergencyContacts.isNotEmpty)
+                        ListView.builder(
+                          itemCount: emergencyContacts.length,
+                          shrinkWrap: true,
+                          itemBuilder: (_, index) {
+                            final contact = emergencyContacts[index];
 
-                    if (!mounted) {
-                      return;
-                    }
+                            return PlatformListTile(
+                              title: Text(contact.name),
+                              subtitle: Text(contact.phoneNumber),
+                              trailing: IconButton(
+                                icon: const Icon(Icons.delete),
+                                onPressed: () {},
+                              ),
+                            );
+                          },
+                        ),
+                      const SizedBox(height: HUGE_SPACE),
+                      Paper(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: MEDIUM_SPACE,
+                            vertical: LARGE_SPACE,
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: <Widget>[
+                              PlatformElevatedButton(
+                                onPressed: () async {
+                                  final contacts.Contact? contact =
+                                      await showPlatformModalSheet(
+                                    context: context,
+                                    material: MaterialModalSheetData(
+                                      backgroundColor: Colors.transparent,
+                                      isScrollControlled: true,
+                                      isDismissible: true,
+                                    ),
+                                    builder: (_) => const AddContactScreen(),
+                                  );
 
-                    if (rawContact.fullName == null ||
-                        rawContact.phoneNumber != null) {
-                      showMessage(
-                        context,
-                        l10n.emergencySetup_pickContact_error_contactInvalid,
-                      );
-                    }
+                                  if (contact == null) {
+                                    return;
+                                  }
 
-                    final contact = contacts.Contact(
-                      name: rawContact.fullName!,
-                      phoneNumber: rawContact.phoneNumber!.number!,
-                    );
-                  },
-                  material: (_, __) =>
-                      MaterialElevatedButtonData(
-                        icon: const Icon(Icons.person),
+                                  importContact(contact);
+                                },
+                                material: (_, __) => MaterialElevatedButtonData(
+                                  icon: const Icon(Icons.add_circle_rounded),
+                                ),
+                                child:
+                                    Text(l10n.emergencySetup_addContact_label),
+                              ),
+                              const SizedBox(height: LARGE_SPACE),
+                              Row(
+                                children: <Widget>[
+                                  const Expanded(child: Divider()),
+                                  const SizedBox(width: MEDIUM_SPACE),
+                                  Text(
+                                    l10n.alternativeDividerLabel.toUpperCase(),
+                                  ),
+                                  const SizedBox(width: MEDIUM_SPACE),
+                                  const Expanded(child: Divider()),
+                                ],
+                              ),
+                              const SizedBox(height: LARGE_SPACE),
+                              PlatformElevatedButton(
+                                onPressed: () async {
+                                  final PhoneContact rawContact =
+                                      await FlutterContactPicker
+                                          .pickPhoneContact();
+
+                                  if (!mounted) {
+                                    return;
+                                  }
+
+                                  if (rawContact.fullName == null ||
+                                      rawContact.phoneNumber != null) {
+                                    showMessage(
+                                      context,
+                                      l10n.emergencySetup_pickContact_error_contactInvalid,
+                                    );
+                                  }
+
+                                  final contact = contacts.Contact(
+                                    name: rawContact.fullName!,
+                                    phoneNumber:
+                                        rawContact.phoneNumber!.number!,
+                                  );
+
+                                  importContact(contact);
+                                },
+                                material: (_, __) => MaterialElevatedButtonData(
+                                  icon: const Icon(Icons.person),
+                                ),
+                                child:
+                                    Text(l10n.emergencySetup_pickContact_label),
+                              )
+                            ],
+                          ),
+                        ),
                       ),
-                  child: Text(l10n.emergencySetup_pickContact_label),
-                )
-              ],
-            ),
+                    ],
+                  ),
           ),
         ),
       ),

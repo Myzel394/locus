@@ -336,6 +336,11 @@ class SettingsService extends ChangeNotifier {
     notifyListeners();
   }
 
+  void addEmergencyContact(final Contact contact) {
+    _emergencyContacts.add(contact);
+    notifyListeners();
+  }
+
   bool isMIUI() => androidTheme == AndroidTheme.miui;
 
   bool hasSeenHelperSheet(final HelperSheet sheet) =>
