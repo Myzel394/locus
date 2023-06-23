@@ -8,7 +8,7 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/screens/main_screen_widgets/values.dart';
 import 'package:locus/services/app_update_service.dart';
-import 'package:locus/services/settings_service.dart';
+import 'package:locus/services/SettingsService/settings_service.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:locus/widgets/AppHint.dart';
@@ -29,7 +29,8 @@ class OverviewScreen extends StatefulWidget {
   State<OverviewScreen> createState() => _OverviewScreenState();
 }
 
-class _OverviewScreenState extends State<OverviewScreen> with AutomaticKeepAliveClientMixin {
+class _OverviewScreenState extends State<OverviewScreen>
+    with AutomaticKeepAliveClientMixin {
   bool get wantKeepAlive => true;
 
   final _hintTypeFuture = getHintTypeForMainScreen();
@@ -48,11 +49,15 @@ class _OverviewScreenState extends State<OverviewScreen> with AutomaticKeepAlive
 
     return SafeArea(
       child: SingleChildScrollView(
-        padding: Platform.isAndroid ? const EdgeInsets.only(bottom: FAB_DIMENSION) : EdgeInsets.zero,
+        padding: Platform.isAndroid
+            ? const EdgeInsets.only(bottom: FAB_DIMENSION)
+            : EdgeInsets.zero,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            appUpdateService.shouldShowBanner() ? const UpdateAvailableBanner() : const SizedBox.shrink(),
+            appUpdateService.shouldShowBanner()
+                ? const UpdateAvailableBanner()
+                : const SizedBox.shrink(),
             FutureBuilder<HintType?>(
               future: _hintTypeFuture,
               builder: (context, snapshot) {
@@ -89,7 +94,8 @@ class _OverviewScreenState extends State<OverviewScreen> with AutomaticKeepAlive
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: MEDIUM_SPACE),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: MEDIUM_SPACE),
                             child: ChipCaption(
                               l10n.mainScreen_tasksSection,
                               icon: Icons.task_rounded,
@@ -141,7 +147,8 @@ class _OverviewScreenState extends State<OverviewScreen> with AutomaticKeepAlive
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: MEDIUM_SPACE),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: MEDIUM_SPACE),
                             child: ChipCaption(
                               l10n.mainScreen_viewsSection,
                               icon: context.platformIcons.eyeSolid,

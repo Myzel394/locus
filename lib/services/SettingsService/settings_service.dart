@@ -10,9 +10,10 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:locus/constants/app.dart';
 
-import '../api/get-address.dart';
-import '../utils/device.dart';
-import '../utils/platform.dart';
+import '../../api/get-address.dart';
+import '../../utils/device.dart';
+import '../../utils/platform.dart';
+import 'contacts.dart';
 
 const STORAGE_KEY = "_app_settings";
 
@@ -56,7 +57,6 @@ class SettingsService extends ChangeNotifier {
   bool userHasSeenWelcomeScreen = false;
   bool requireBiometricAuthenticationOnStart = false;
   bool alwaysUseBatterySaveMode = false;
-  List<String> _relays;
   AndroidTheme androidTheme;
 
   GeocoderProvider geocoderProvider;
@@ -70,6 +70,8 @@ class SettingsService extends ChangeNotifier {
   Set<String> _seenHelperSheets;
 
   DateTime? lastHeadlessRun;
+  final List<String> _relays;
+  final List<Contact> _emergencyContacts;
 
   SettingsService({
     required this.automaticallyLookupAddresses,
@@ -85,17 +87,20 @@ class SettingsService extends ChangeNotifier {
     this.lastHeadlessRun,
     Set<String>? seenHelperSheets,
     List<String>? relays,
-  })  : _relays = relays ?? [],
-        _seenHelperSheets = seenHelperSheets ?? {};
+    List<Contact>? emergencyContacts,
+  })
+      : _relays = relays ?? [],
+        _seenHelperSheets = seenHelperSheets ?? {},
+        _emergencyContacts = emergencyContacts ?? [];
 
   static Future<SettingsService> createDefault() async {
     return SettingsService(
       automaticallyLookupAddresses: true,
       primaryColor: null,
       androidTheme:
-          await fetchIsMIUI() ? AndroidTheme.miui : AndroidTheme.materialYou,
+      await fetchIsMIUI() ? AndroidTheme.miui : AndroidTheme.materialYou,
       mapProvider:
-          isPlatformApple() ? MapProvider.apple : MapProvider.openStreetMap,
+      isPlatformApple() ? MapProvider.apple : MapProvider.openStreetMap,
       showHints: true,
       geocoderProvider: isSystemGeocoderAvailable()
           ? GeocoderProvider.system
@@ -106,6 +111,7 @@ class SettingsService extends ChangeNotifier {
       requireBiometricAuthenticationOnStart: false,
       alwaysUseBatterySaveMode: false,
       lastHeadlessRun: null,
+      emergencyContacts: [],
     );
   }
 
@@ -116,7 +122,7 @@ class SettingsService extends ChangeNotifier {
     return SettingsService(
       automaticallyLookupAddresses: data['automaticallyLoadLocation'],
       primaryColor:
-          data['primaryColor'] != null ? Color(data['primaryColor']) : null,
+      data['primaryColor'] != null ? Color(data['primaryColor']) : null,
       mapProvider: MapProvider.values[data['mapProvider']],
       relays: List<String>.from(data['relays'] ?? []),
       showHints: data['showHints'],
@@ -126,11 +132,15 @@ class SettingsService extends ChangeNotifier {
       userHasSeenWelcomeScreen: data['userHasSeenWelcomeScreen'],
       seenHelperSheets: Set<String>.from(data['seenHelperSheets'] ?? {}),
       requireBiometricAuthenticationOnStart:
-          data['requireBiometricAuthenticationOnStart'],
+      data['requireBiometricAuthenticationOnStart'],
       alwaysUseBatterySaveMode: data['alwaysUseBatterySaveMode'],
       lastHeadlessRun: data['lastHeadlessRun'] != null
           ? DateTime.parse(data['lastHeadlessRun'])
           : null,
+      emergencyContacts: List<Contact>.from(
+        (data['emergencyContacts'] ?? [])
+            .map((e) => Contact.fromJSON(Map<String, dynamic>.from(e))),
+      ),
     );
   }
 
@@ -166,16 +176,16 @@ class SettingsService extends ChangeNotifier {
       "userHasSeenWelcomeScreen": userHasSeenWelcomeScreen,
       "seenHelperSheets": _seenHelperSheets.toList(),
       "requireBiometricAuthenticationOnStart":
-          requireBiometricAuthenticationOnStart,
+      requireBiometricAuthenticationOnStart,
       "alwaysUseBatterySaveMode": alwaysUseBatterySaveMode,
       "lastHeadlessRun": lastHeadlessRun?.toIso8601String(),
+      "emergencyContacts":
+      _emergencyContacts.map((contact) => contact.toJSON()).toList(),
     };
   }
 
-  Future<String> getAddress(
-    final double latitude,
-    final double longitude,
-  ) async {
+  Future<String> getAddress(final double latitude,
+      final double longitude,) async {
     final providers = [
       getGeocoderProvider(),
       ...GeocoderProvider.values
@@ -207,7 +217,8 @@ class SettingsService extends ChangeNotifier {
     throw Exception("Failed to get address from any provider");
   }
 
-  Future<void> save() => storage.write(
+  Future<void> save() =>
+      storage.write(
         key: STORAGE_KEY,
         value: jsonEncode(toJSON()),
       );
@@ -228,9 +239,13 @@ class SettingsService extends ChangeNotifier {
 
     // Return system default
     if (isCupertino(context)) {
-      return CupertinoTheme.of(context).primaryColor;
+      return CupertinoTheme
+          .of(context)
+          .primaryColor;
     } else {
-      return Theme.of(context).primaryColor;
+      return Theme
+          .of(context)
+          .primaryColor;
     }
   }
 
@@ -257,7 +272,9 @@ class SettingsService extends ChangeNotifier {
   }
 
   void setRelays(final List<String> value) {
-    _relays = value;
+    _relays
+      ..clear()
+      ..addAll(value);
     notifyListeners();
   }
 
@@ -308,6 +325,15 @@ class SettingsService extends ChangeNotifier {
     final auth = LocalAuthentication();
 
     return auth.canCheckBiometrics;
+  }
+
+  List<Contact> getEmergencyContacts() => _emergencyContacts;
+
+  void setEmergencyContacts(final List<Contact> value) {
+    _emergencyContacts
+      ..clear()
+      ..addAll(value);
+    notifyListeners();
   }
 
   bool isMIUI() => androidTheme == AndroidTheme.miui;

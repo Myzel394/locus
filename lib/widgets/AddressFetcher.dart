@@ -1,5 +1,5 @@
 import 'package:flutter/widgets.dart';
-import 'package:locus/services/settings_service.dart';
+import 'package:locus/services/SettingsService/settings_service.dart';
 import 'package:provider/provider.dart';
 
 class AddressFetcher extends StatefulWidget {

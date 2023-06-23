@@ -9,7 +9,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
-import '../services/settings_service.dart';
+import '../services/SettingsService/settings_service.dart';
 import '../utils/theme.dart';
 
 mixin RequestNotificationPermissionMixin {
@@ -37,7 +37,9 @@ mixin RequestNotificationPermissionMixin {
       builder: (context) => PlatformAlertDialog(
         title: Text(l10n.permissions_notification_askPermission_title),
         material: (_, __) => MaterialAlertDialogData(
-          icon: settings.isMIUI() ? const Icon(CupertinoIcons.bell_fill) : const Icon(Icons.notifications_rounded),
+          icon: settings.isMIUI()
+              ? const Icon(CupertinoIcons.bell_fill)
+              : const Icon(Icons.notifications_rounded),
         ),
         content: Text(l10n.permissions_notification_askPermission_message),
         actions: createCancellableDialogActions(
@@ -45,19 +47,24 @@ mixin RequestNotificationPermissionMixin {
           [
             PlatformDialogAction(
               material: (_, __) => MaterialDialogActionData(
-                icon: settings.isMIUI() ? null : const Icon(Icons.check_circle_outline_rounded),
+                icon: settings.isMIUI()
+                    ? null
+                    : const Icon(Icons.check_circle_outline_rounded),
               ),
-              child: Text(l10n.permissions_location_askPermission_action_grant_label),
+              child: Text(
+                  l10n.permissions_location_askPermission_action_grant_label),
               onPressed: () async {
                 late final bool? success;
 
                 if (Platform.isAndroid) {
                   success = await notificationsPlugins
-                      .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+                      .resolvePlatformSpecificImplementation<
+                          AndroidFlutterLocalNotificationsPlugin>()
                       ?.requestPermission();
                 } else {
                   success = await notificationsPlugins
-                      .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>()
+                      .resolvePlatformSpecificImplementation<
+                          IOSFlutterLocalNotificationsPlugin>()
                       ?.requestPermissions(
                         alert: true,
                         badge: true,
@@ -146,7 +153,8 @@ mixin RequestNotificationPermissionMixin {
         context: context,
         builder: (context) => PlatformAlertDialog(
           title: Text(l10n.permissions_openSettings_failed_title),
-          content: Text(l10n.permissions_notification_permissionDenied_settingsNotOpened_message),
+          content: Text(l10n
+              .permissions_notification_permissionDenied_settingsNotOpened_message),
           actions: [
             PlatformDialogAction(
               child: Text(l10n.closeNeutralAction),

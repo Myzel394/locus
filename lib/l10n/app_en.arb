@@ -450,6 +450,8 @@
   "settingsScreen_setting_requireBiometricAuth_requireNowReason": "Confirm your identity to change this setting",
   "settingsScreen_settings_alwaysUseBatterySaveMode_label": "Always use battery save mode",
   "settingsScreen_settings_alwaysUseBatterySaveMode_description": "Locus will update your location less frequently in the background if your phone is in battery save mode. Enabling this option will force Locus to always use battery save mode. Note that your location will still be updated in real time if you have the app open.",
+  "settingsScreen_settings_emergencyContacts_label_setup": "Setup Emergency Contacts",
+  "settingsScreen_settings_emergencyContacts_label_edit": "Edit Emergency Contacts",
   "support_title": "Support Locus",
   "support_description": "Locus is a free open source project. This means that I don't make any money from it. If you like the app and want to support me, you can do so by multiple ways. Thank you very much! :)",
   "support_options_develop": "Help developing Locus",

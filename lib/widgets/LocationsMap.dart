@@ -8,9 +8,10 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
+
 // Provided by the flutter_map package
 import 'package:latlong2/latlong.dart';
-import 'package:locus/services/settings_service.dart';
+import 'package:locus/services/SettingsService/settings_service.dart';
 import 'package:locus/utils/permission.dart';
 import 'package:locus/widgets/Paper.dart';
 import 'package:provider/provider.dart';

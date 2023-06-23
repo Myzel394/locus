@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:locus/services/settings_service.dart';
+import 'package:locus/services/SettingsService/settings_service.dart';
 import 'package:provider/provider.dart';
 
 import '../utils/theme.dart';
@@ -37,7 +37,9 @@ mixin RequestLocationPermissionMixin {
       builder: (context) => PlatformAlertDialog(
         title: Text(l10n.permissions_location_askPermission_title),
         material: (_, __) => MaterialAlertDialogData(
-          icon: settings.isMIUI() ? const Icon(CupertinoIcons.location_fill) : const Icon(Icons.location_on_rounded),
+          icon: settings.isMIUI()
+              ? const Icon(CupertinoIcons.location_fill)
+              : const Icon(Icons.location_on_rounded),
         ),
         content: Text(
           askForAlways
@@ -49,9 +51,12 @@ mixin RequestLocationPermissionMixin {
           [
             PlatformDialogAction(
               material: (_, __) => MaterialDialogActionData(
-                icon: settings.isMIUI() ? null : const Icon(Icons.check_circle_outline_rounded),
+                icon: settings.isMIUI()
+                    ? null
+                    : const Icon(Icons.check_circle_outline_rounded),
               ),
-              child: Text(l10n.permissions_location_askPermission_action_grant_label),
+              child: Text(
+                  l10n.permissions_location_askPermission_action_grant_label),
               onPressed: () async {
                 final newPermission = await Geolocator.requestPermission();
 
@@ -60,7 +65,8 @@ mixin RequestLocationPermissionMixin {
                 }
 
                 if ((newPermission == LocationPermission.always) ||
-                    (newPermission == LocationPermission.whileInUse && !askForAlways)) {
+                    (newPermission == LocationPermission.whileInUse &&
+                        !askForAlways)) {
                   Navigator.of(context).pop(true);
                   return;
                 }
@@ -124,7 +130,8 @@ mixin RequestLocationPermissionMixin {
               ),
               child: Text(l10n.permissions_openSettings_label),
               onPressed: () async {
-                final openedSettingsSuccessfully = await Geolocator.openAppSettings();
+                final openedSettingsSuccessfully =
+                    await Geolocator.openAppSettings();
 
                 if (!context.mounted) {
                   return;
@@ -153,7 +160,8 @@ mixin RequestLocationPermissionMixin {
         context: context,
         builder: (context) => PlatformAlertDialog(
           title: Text(l10n.permissions_openSettings_failed_title),
-          content: Text(l10n.permissions_location_permissionDenied_settingsNotOpened_message),
+          content: Text(l10n
+              .permissions_location_permissionDenied_settingsNotOpened_message),
           actions: [
             PlatformDialogAction(
               child: Text(l10n.closeNeutralAction),

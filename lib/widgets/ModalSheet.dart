@@ -4,7 +4,7 @@ import 'package:locus/utils/theme.dart';
 import 'package:provider/provider.dart';
 
 import '../constants/spacing.dart';
-import '../services/settings_service.dart';
+import '../services/SettingsService/settings_service.dart';
 
 class ModalSheet extends StatelessWidget {
   final Widget child;
@@ -26,7 +26,9 @@ class ModalSheet extends StatelessWidget {
       ),
       child: PlatformWidget(
         material: (_, __) => Padding(
-          padding: settings.isMIUI() && !miuiIsGapless ? const EdgeInsets.all(MEDIUM_SPACE) : EdgeInsets.zero,
+          padding: settings.isMIUI() && !miuiIsGapless
+              ? const EdgeInsets.all(MEDIUM_SPACE)
+              : EdgeInsets.zero,
           child: Container(
             width: double.infinity,
             constraints: const BoxConstraints(
@@ -43,7 +45,9 @@ class ModalSheet extends StatelessWidget {
             ),
             child: Padding(
               padding: EdgeInsets.only(
-                top: settings.isMIUI() && !miuiIsGapless ? MEDIUM_SPACE : LARGE_SPACE,
+                top: settings.isMIUI() && !miuiIsGapless
+                    ? MEDIUM_SPACE
+                    : LARGE_SPACE,
                 left: MEDIUM_SPACE,
                 right: MEDIUM_SPACE,
                 bottom: SMALL_SPACE,

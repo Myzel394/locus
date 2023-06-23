@@ -9,7 +9,7 @@ import 'package:locus/constants/notifications.dart';
 import 'package:locus/constants/values.dart';
 import 'package:locus/services/location_alarm_service.dart';
 import 'package:locus/services/location_point_service.dart';
-import 'package:locus/services/settings_service.dart';
+import 'package:locus/services/SettingsService/settings_service.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';

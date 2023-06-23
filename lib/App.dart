@@ -6,7 +6,7 @@ import 'package:locus/constants/colors.dart';
 import 'package:locus/screens/BiometricsRequiredStartupScreen.dart';
 import 'package:locus/screens/MainScreen.dart';
 import 'package:locus/screens/WelcomeScreen.dart';
-import 'package:locus/services/settings_service.dart';
+import 'package:locus/services/SettingsService/settings_service.dart';
 import 'package:locus/utils/PageRoute.dart';
 import 'package:locus/utils/color.dart';
 import 'package:locus/widgets/DismissKeyboard.dart';

@@ -14,7 +14,7 @@ import 'package:provider/provider.dart';
 import '../models/log.dart';
 import '../services/location_point_service.dart';
 import '../services/log_service.dart';
-import '../services/settings_service.dart';
+import '../services/SettingsService/settings_service.dart';
 import '../utils/theme.dart';
 
 class ShortcutScreen extends StatefulWidget {
@@ -102,10 +102,9 @@ class _ShortcutScreenState extends State<ShortcutScreen> {
           );
           await Future.wait(
             tasks.map(
-                  (task) =>
-                  task.publishLocation(
-                    locationPoint.copyWithDifferentId(),
-                  ),
+              (task) => task.publishLocation(
+                locationPoint.copyWithDifferentId(),
+              ),
             ),
           );
 
@@ -117,11 +116,10 @@ class _ShortcutScreenState extends State<ShortcutScreen> {
               accuracy: locationPoint.accuracy,
               tasks: List<UpdatedTaskData>.from(
                 tasks.map(
-                      (task) =>
-                      UpdatedTaskData(
-                        id: task.id,
-                        name: task.name,
-                      ),
+                  (task) => UpdatedTaskData(
+                    id: task.id,
+                    name: task.name,
+                  ),
                 ),
               ),
             ),

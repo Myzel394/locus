@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:provider/provider.dart';
 
-import '../services/settings_service.dart';
+import '../services/SettingsService/settings_service.dart';
 
 /// A widget that displays a caret icon, if required.
 /// For example, on MIUI and iOS, a caret icon is displayed.
