@@ -297,6 +297,13 @@ class SettingsService extends ChangeNotifier {
     notifyListeners();
   }
 
+  bool getAlwaysUseBatterySaveMode() => alwaysUseBatterySaveMode;
+
+  void setAlwaysUseBatterySaveMode(final bool value) {
+    alwaysUseBatterySaveMode = value;
+    notifyListeners();
+  }
+
   Future<bool> hasBiometricsAvailable() {
     final auth = LocalAuthentication();
 
