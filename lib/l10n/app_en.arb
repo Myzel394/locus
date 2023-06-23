@@ -701,5 +701,8 @@
   "help_location_goOutside": "Go outside. It is possible that your device can not get proper signal inside.",
   "help_location_enableGoogleLocationServices": "Enable Google Location Services. Google Location Services massively improve the accuracy of your location. You can enable it in your device settings. Note that this will very likely tell Google your location.",
   "help_location_enableScanning": "Enable Wi-Fi and Bluetooth scanning. You can enable them in your device settings. Note that this could drain your battery faster.",
-  "help_location_useGMSVersion": "Use the GMS version of Locus. The GMS version uses Google Location Services to get your location. You can download it from GitHub. You will be notified about updates inside the app."
+  "help_location_useGMSVersion": "Use the GMS version of Locus. The GMS version uses Google Location Services to get your location. You can download it from GitHub. You will be notified about updates inside the app.",
+  "emergencySetup_title": "Emergency Contacts",
+  "emergencySetup_hint": "Locus does not take any responsibility for your safety. We try to do our best to ensure your safety, but we can not guarantee it. Please make sure to always have a backup plan in case something goes wrong. If you are in real danger, contact your local emergency services. Note that Locus DOES NOT send your location to emergency services. Locus WILL NOT call emergency services for you.",
+  "emergencySetup_hint_understoodLabel": "I understand. I will not rely on Locus in case of an emergency."
 }
