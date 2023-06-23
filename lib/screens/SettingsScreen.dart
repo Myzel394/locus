@@ -390,14 +390,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             settings.save();
                           },
                           title: Text(
-                              l10n.settingsScreen_settings_showHints_label),
-                          description: Text(l10n
-                              .settingsScreen_settings_showHints_description),
+                            l10n.settingsScreen_settings_showHints_label,
+                          ),
+                          description: Text(
+                            l10n.settingsScreen_settings_showHints_description,
+                          ),
                           leading: Icon(context.platformIcons.info),
                         ),
+                        SettingsTile.switchTile(
+                          initialValue: settings.alwaysUseBatterySaveMode,
+                          onToggle: (newValue) {
+                            settings.setAlwaysUseBatterySaveMode(newValue);
+                            settings.save();
+                          },
+                          title: Text(
+                            l10n.settingsScreen_settings_alwaysUseBatterySaveMode_label,
+                          ),
+                          description: Text(
+                            l10n.settingsScreen_settings_alwaysUseBatterySaveMode_description,
+                          ),
+                        ),
                         SettingsTile.navigation(
-                          title: Text(l10n
-                              .settingsScreen_settings_importExport_exportFile),
+                          title: Text(
+                            l10n.settingsScreen_settings_importExport_exportFile,
+                          ),
                           leading: PlatformWidget(
                             material: (_, __) => const Icon(Icons.file_open),
                             cupertino: (_, __) =>
