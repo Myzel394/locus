@@ -19,3 +19,6 @@ const LOG_TAG = "LocusLog";
 
 const HTTP_TIMEOUT = Duration(seconds: 30);
 const MAYBE_TRIGGER_MINIMUM_TIME_BETWEEN = Duration(hours: 4);
+
+const BATTERY_SAVER_ENABLED_MINIMUM_TIME_BETWEEN_HEADLESS_RUNS =
+    Duration(minutes: 60);
