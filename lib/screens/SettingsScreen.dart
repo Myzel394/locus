@@ -33,7 +33,7 @@ import 'package:settings_ui/settings_ui.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../services/settings_service.dart';
+import '../services/SettingsService/settings_service.dart';
 import '../services/view_service.dart';
 import '../utils/file.dart';
 import '../utils/platform.dart';
@@ -377,6 +377,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               );
                             },
                           ),
+                        ),
+                        SettingsTile.navigation(
+                          title: Text(settings.getEmergencyContacts().isEmpty
+                              ? l10n
+                                  .settingsScreen_settings_emergencyContacts_label_setup
+                              : l10n
+                                  .settingsScreen_settings_emergencyContacts_label_edit),
+                          trailing: const Icon(Icons.contact_emergency_rounded),
+                          onPressed: (_) {},
                         ),
                       ],
                     ),
