@@ -5,6 +5,7 @@ import 'package:basic_utils/basic_utils.dart';
 import 'package:battery_plus/battery_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_logs/flutter_logs.dart';
 import 'package:locus/constants/notifications.dart';
 import 'package:locus/constants/values.dart';
 import 'package:locus/services/location_alarm_service.dart';
@@ -46,10 +47,11 @@ Future<void> updateLocation() async {
       accuracy: locationData.accuracy,
       tasks: List<UpdatedTaskData>.from(
         runningTasks.map(
-          (task) => UpdatedTaskData(
-            id: task.id,
-            name: task.name,
-          ),
+              (task) =>
+              UpdatedTaskData(
+                id: task.id,
+                name: task.name,
+              ),
         ),
       ),
     ),
@@ -66,11 +68,12 @@ Future<void> checkViewAlarms({
       onTrigger: (alarm, location, __) async {
         if (alarm is RadiusBasedRegionLocationAlarm) {
           final flutterLocalNotificationsPlugin =
-              FlutterLocalNotificationsPlugin();
+          FlutterLocalNotificationsPlugin();
 
           flutterLocalNotificationsPlugin.show(
             int.parse(
-                "${location.createdAt.millisecond}${location.createdAt.microsecond}"),
+                "${location.createdAt.millisecond}${location.createdAt
+                    .microsecond}"),
             StringUtils.truncate(
               l10n.locationAlarm_radiusBasedRegion_notificationTitle_whenEnter(
                 view.name,
@@ -84,7 +87,7 @@ Future<void> checkViewAlarms({
                 AndroidChannelIDs.locationAlarms.name,
                 l10n.androidNotificationChannel_locationAlarms_name,
                 channelDescription:
-                    l10n.androidNotificationChannel_locationAlarms_description,
+                l10n.androidNotificationChannel_locationAlarms_description,
                 importance: Importance.max,
                 priority: Priority.max,
               ),
@@ -105,11 +108,15 @@ Future<void> checkViewAlarms({
 
         if (alarm is RadiusBasedRegionLocationAlarm) {
           final flutterLocalNotificationsPlugin =
-              FlutterLocalNotificationsPlugin();
+          FlutterLocalNotificationsPlugin();
 
           flutterLocalNotificationsPlugin.show(
             int.parse(
-                "${DateTime.now().millisecond}${DateTime.now().microsecond}"),
+                "${DateTime
+                    .now()
+                    .millisecond}${DateTime
+                    .now()
+                    .microsecond}"),
             StringUtils.truncate(
               l10n.locationAlarm_radiusBasedRegion_notificationTitle_whenEnter(
                 view.name,
@@ -126,7 +133,7 @@ Future<void> checkViewAlarms({
                   alarm.zoneName,
                 ),
                 channelDescription:
-                    l10n.androidNotificationChannel_locationAlarms_description,
+                l10n.androidNotificationChannel_locationAlarms_description,
                 importance: Importance.max,
                 priority: Priority.max,
               ),
@@ -188,22 +195,56 @@ Future<bool> isBatterySaveModeEnabled() async {
 }
 
 Future<void> runHeadlessTask() async {
-  final settings = await SettingsService.restore();
-  final isBatterySaveEnabled = await isBatterySaveModeEnabled();
+  FlutterLogs.logInfo(
+    LOG_TAG,
+    "Headless Task",
+    "Restoring settings.",
+  );
 
-  if (isBatterySaveEnabled &&
+  final settings = await SettingsService.restore();
+  FlutterLogs.logInfo(
+    LOG_TAG,
+    "Headless Task",
+    "Checking battery saver.",
+  );
+  final isDeviceBatterySaverEnabled = await isBatterySaveModeEnabled();
+
+  if ((isDeviceBatterySaverEnabled || settings.alwaysUseBatterySaveMode) &&
       settings.lastHeadlessRun != null &&
       DateTime.now().difference(settings.lastHeadlessRun!).abs() <=
           BATTERY_SAVER_ENABLED_MINIMUM_TIME_BETWEEN_HEADLESS_RUNS) {
     // We don't want to run the headless task too often when the battery saver is enabled.
+    FlutterLogs.logInfo(
+      LOG_TAG,
+      "Headless Task",
+      "Battery saver mode is enabled and the last headless run was too recent. Skipping headless task.",
+    );
     return;
   }
+
+  FlutterLogs.logInfo(
+    LOG_TAG,
+    "Headless Task",
+    "Executing headless task now.",
+  );
 
   await updateLocation();
   await _checkViewAlarms();
 
+  FlutterLogs.logInfo(
+    LOG_TAG,
+    "Headless Task",
+    "Updating settings' lastRun.",
+  );
+
   settings.lastHeadlessRun = DateTime.now();
   await settings.save();
+
+  FlutterLogs.logInfo(
+    LOG_TAG,
+    "Headless Task",
+    "Finished headless task.",
+  );
 }
 
 void configureBackgroundFetch() {
@@ -221,14 +262,14 @@ void configureBackgroundFetch() {
       startOnBoot: true,
       stopOnTerminate: false,
     ),
-    (taskId) async {
+        (taskId) async {
       // We only use one taskId to update the location for all tasks,
       // so we don't need to check the taskId.
       await runHeadlessTask();
 
       BackgroundFetch.finish(taskId);
     },
-    (taskId) {
+        (taskId) {
       // Timeout, we need to finish immediately.
       BackgroundFetch.finish(taskId);
     },
