@@ -6,6 +6,7 @@ import 'package:fluttercontactpicker/fluttercontactpicker.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/screens/emergency_setup_screen_widgets/AddContactSheet.dart';
 import 'package:locus/services/SettingsService/settings_service.dart';
+import 'package:locus/services/emergency_service.dart';
 import 'package:locus/utils/helper_sheet.dart';
 import 'package:locus/utils/show_message.dart';
 import 'package:locus/utils/theme.dart';
@@ -33,7 +34,9 @@ class _EmergencySetupScreenState extends State<EmergencySetupScreen> {
 
     settings.addListener(rebuild);
 
-    showHint = settings.getEmergencyContacts().isEmpty;
+    showHint = settings
+        .getEmergencyContacts()
+        .isEmpty;
   }
 
   @override
@@ -136,9 +139,10 @@ class _EmergencySetupScreenState extends State<EmergencySetupScreen> {
 
               showContactCreationSheet();
             },
-            material: (_, __) => MaterialElevatedButtonData(
-              icon: const Icon(Icons.add_circle_rounded),
-            ),
+            material: (_, __) =>
+                MaterialElevatedButtonData(
+                  icon: const Icon(Icons.add_circle_rounded),
+                ),
             child: Text(l10n.emergencySetup_addContact_label),
           ),
           const SizedBox(height: LARGE_SPACE),
@@ -160,9 +164,10 @@ class _EmergencySetupScreenState extends State<EmergencySetupScreen> {
 
               pickContact();
             },
-            material: (_, __) => MaterialElevatedButtonData(
-              icon: const Icon(Icons.person),
-            ),
+            material: (_, __) =>
+                MaterialElevatedButtonData(
+                  icon: const Icon(Icons.person),
+                ),
             child: Text(l10n.emergencySetup_pickContact_label),
           )
         ],
@@ -178,11 +183,12 @@ class _EmergencySetupScreenState extends State<EmergencySetupScreen> {
         isScrollControlled: true,
         isDismissible: true,
       ),
-      builder: (context) => ModalSheet(
-        child: buildAddContactSelection(onSelected: () {
-          Navigator.of(context).pop();
-        }),
-      ),
+      builder: (context) =>
+          ModalSheet(
+            child: buildAddContactSelection(onSelected: () {
+              Navigator.of(context).pop();
+            }),
+          ),
     );
   }
 
@@ -192,36 +198,37 @@ class _EmergencySetupScreenState extends State<EmergencySetupScreen> {
     showHelperSheet(
       context: context,
       title: l10n.emergencySetup_help_title,
-      builder: (context) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Text(l10n.emergencySetup_help_preamble),
-          const SizedBox(height: MEDIUM_SPACE),
-          Row(
+      builder: (context) =>
+          Column(
+            mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Icon(context.platformIcons.deleteSolid),
-              const SizedBox(width: MEDIUM_SPACE),
-              Flexible(
-                child: Text(l10n.emergencySetup_help_deleteData),
+              Text(l10n.emergencySetup_help_preamble),
+              const SizedBox(height: MEDIUM_SPACE),
+              Row(
+                children: <Widget>[
+                  Icon(context.platformIcons.deleteSolid),
+                  const SizedBox(width: MEDIUM_SPACE),
+                  Flexible(
+                    child: Text(l10n.emergencySetup_help_deleteData),
+                  ),
+                ],
               ),
+              const SizedBox(height: MEDIUM_SPACE),
+              Row(
+                children: <Widget>[
+                  Icon(context.platformIcons.locationSolid),
+                  const SizedBox(width: MEDIUM_SPACE),
+                  Flexible(
+                    child: Text(l10n.emergencySetup_help_shareLocation),
+                  ),
+                ],
+              ),
+              const SizedBox(height: MEDIUM_SPACE),
+              const Icon(Icons.warning_sharp),
+              const SizedBox(height: SMALL_SPACE),
+              Text(l10n.emergencySetup_hint),
             ],
           ),
-          const SizedBox(height: MEDIUM_SPACE),
-          Row(
-            children: <Widget>[
-              Icon(context.platformIcons.locationSolid),
-              const SizedBox(width: MEDIUM_SPACE),
-              Flexible(
-                child: Text(l10n.emergencySetup_help_shareLocation),
-              ),
-            ],
-          ),
-          const SizedBox(height: MEDIUM_SPACE),
-          const Icon(Icons.warning_sharp),
-          const SizedBox(height: SMALL_SPACE),
-          Text(l10n.emergencySetup_hint),
-        ],
-      ),
       sheetName: HelperSheet.emergencySetup,
     );
   }
@@ -242,6 +249,27 @@ class _EmergencySetupScreenState extends State<EmergencySetupScreen> {
     showHelp();
   }
 
+  void _sendTestMessage(final List<contacts.Contact> contacts,) async {
+    final emergencyService = EmergencyService(
+      contacts: contacts,
+      settings: context.read<SettingsService>(),
+      l10n: AppLocalizations.of(context),
+    );
+
+    await emergencyService.sendTestMessage();
+  }
+
+  void showSendTestMessageSheet() {
+    // If we only have one contact, we can skip the selection
+    final settings = context.read<SettingsService>();
+    final contacts = settings.getEmergencyContacts();
+
+    if (contacts.length == 1) {
+      _sendTestMessage([contacts.first]);
+      return;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -253,9 +281,10 @@ class _EmergencySetupScreenState extends State<EmergencySetupScreen> {
         title: Text(l10n.emergencySetup_title),
         trailingActions: [
           PlatformIconButton(
-            cupertino: (_, __) => CupertinoIconButtonData(
-              padding: EdgeInsets.zero,
-            ),
+            cupertino: (_, __) =>
+                CupertinoIconButtonData(
+                  padding: EdgeInsets.zero,
+                ),
             icon: Icon(context.platformIcons.help),
             onPressed: showHelp,
           ),
@@ -294,64 +323,73 @@ class _EmergencySetupScreenState extends State<EmergencySetupScreen> {
               );
             }
 
-            return ListView.builder(
-              itemCount: emergencyContacts.length + 1,
-              shrinkWrap: true,
-              itemBuilder: (_, index) {
-                if (index == emergencyContacts.length) {
-                  return PlatformListTile(
-                    title: Text(
-                      l10n.emergencySetup_addContact_title,
-                    ),
-                    leading: const Icon(Icons.add_circle_rounded),
-                    onTap: showContactChoiceSheet,
-                  );
-                }
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                ListView.builder(
+                  itemCount: emergencyContacts.length,
+                  shrinkWrap: true,
+                  itemBuilder: (_, index) {
+                    final contact = emergencyContacts[index];
 
-                final contact = emergencyContacts[index];
-
-                return PlatformListTile(
-                  title: Text(contact.name),
-                  subtitle: Text(contact.phoneNumber),
-                  trailing: IconButton(
-                    icon: const Icon(Icons.delete),
-                    onPressed: () async {
-                      final confirm = await showPlatformDialog(
-                        context: context,
-                        builder: (_) => PlatformAlertDialog(
-                          material: (_, __) => MaterialAlertDialogData(
-                            icon: const Icon(Icons.delete),
-                          ),
-                          title: Text(
-                            l10n.emergencySetup_deleteContact_title,
-                          ),
-                          content: Text(
-                            l10n.emergencySetup_deleteContact_message,
-                          ),
-                          actions: createCancellableDialogActions(
-                            context,
-                            [
-                              PlatformDialogAction(
-                                child: Text(
-                                  l10n.deleteLabel,
+                    return PlatformListTile(
+                      title: Text(contact.name),
+                      subtitle: Text(contact.phoneNumber),
+                      trailing: IconButton(
+                        icon: const Icon(Icons.delete),
+                        onPressed: () async {
+                          final confirm = await showPlatformDialog(
+                            context: context,
+                            builder: (_) =>
+                                PlatformAlertDialog(
+                                  material: (_, __) =>
+                                      MaterialAlertDialogData(
+                                        icon: const Icon(Icons.delete),
+                                      ),
+                                  title: Text(
+                                    l10n.emergencySetup_deleteContact_title,
+                                  ),
+                                  content: Text(
+                                    l10n.emergencySetup_deleteContact_message,
+                                  ),
+                                  actions: createCancellableDialogActions(
+                                    context,
+                                    [
+                                      PlatformDialogAction(
+                                        child: Text(
+                                          l10n.deleteLabel,
+                                        ),
+                                        onPressed: () {
+                                          Navigator.pop(context, true);
+                                        },
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                                onPressed: () {
-                                  Navigator.pop(context, true);
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
+                          );
 
-                      if (confirm == true) {
-                        settings.removeEmergencyContact(contact);
-                        settings.save();
-                      }
-                    },
+                          if (confirm == true) {
+                            settings.removeEmergencyContact(contact);
+                            settings.save();
+                          }
+                        },
+                      ),
+                    );
+                  },
+                ),
+                PlatformListTile(
+                  title: Text(
+                    l10n.emergencySetup_addContact_title,
                   ),
-                );
-              },
+                  leading: Icon(context.platformIcons.addCircled),
+                  onTap: showContactChoiceSheet,
+                ),
+                PlatformListTile(
+                  title: Text(l10n.emergencySetup_tryItOut_label),
+                  leading: const Icon(Icons.send_rounded),
+                  onTap: showSendTestMessageSheet,
+                ),
+              ],
             );
           })(),
         ),
