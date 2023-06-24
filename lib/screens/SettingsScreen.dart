@@ -28,6 +28,7 @@ import 'package:locus/widgets/PlatformFlavorWidget.dart';
 import 'package:locus/widgets/SettingsCaretIcon.dart';
 import 'package:locus/widgets/SettingsColorPicker.dart';
 import 'package:locus/widgets/SettingsDropdownTile.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:settings_ui/settings_ui.dart';
@@ -145,14 +146,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         settingsSectionBackground: platformThemeData(
           context,
-          material: (data) =>
-          settings.isMIUI()
+          material: (data) => settings.isMIUI()
               ? data.scaffoldBackgroundColor
               : data.dialogBackgroundColor,
-          cupertino: (data) =>
-              HSLColor.fromColor(data.barBackgroundColor)
-                  .withLightness(.2)
-                  .toColor(),
+          cupertino: (data) => HSLColor.fromColor(data.barBackgroundColor)
+              .withLightness(.2)
+              .toColor(),
         ),
         titleTextColor: platformThemeData(
           context,
@@ -165,7 +164,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           cupertino: (data) => data.textTheme.navTitleTextStyle.color,
         ),
         tileDescriptionTextColor:
-        settings.isMIUI() ? const Color(0xFF808080) : null,
+            settings.isMIUI() ? const Color(0xFF808080) : null,
       );
     }
 
@@ -206,9 +205,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           value: settings.primaryColor,
                           leading: PlatformWidget(
                             material: (_, __) =>
-                            const Icon(Icons.color_lens_rounded),
+                                const Icon(Icons.color_lens_rounded),
                             cupertino: (_, __) =>
-                            const Icon(CupertinoIcons.color_filter),
+                                const Icon(CupertinoIcons.color_filter),
                           ),
                           onUpdate: (value) {
                             settings.setPrimaryColor(value);
@@ -257,9 +256,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           values: SettingsService.isSystemGeocoderAvailable()
                               ? GeocoderProvider.values
                               : GeocoderProvider.values
-                              .where((element) =>
-                          element != GeocoderProvider.system)
-                              .toList(),
+                                  .where((element) =>
+                                      element != GeocoderProvider.system)
+                                  .toList(),
                           textMapping: {
                             GeocoderProvider.system: l10n
                                 .settingsScreen_settings_geocoderProvider_system,
@@ -289,9 +288,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             },
                             leading: PlatformFlavorWidget(
                               material: (_, __) =>
-                              const Icon(Icons.map_rounded),
+                                  const Icon(Icons.map_rounded),
                               cupertino: (_, __) =>
-                              const Icon(CupertinoIcons.map),
+                                  const Icon(CupertinoIcons.map),
                             ),
                             value: settings.mapProvider,
                             onUpdate: (newValue) {
@@ -302,7 +301,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         if (hasBiometricsAvailable)
                           SettingsTile.switchTile(
                             initialValue:
-                            settings.requireBiometricAuthenticationOnStart,
+                                settings.requireBiometricAuthenticationOnStart,
                             onToggle: (newValue) async {
                               final auth = LocalAuthentication();
 
@@ -318,7 +317,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
                                 settings
                                     .setRequireBiometricAuthenticationOnStart(
-                                    newValue);
+                                        newValue);
                                 await settings.save();
                               } catch (error) {
                                 FlutterLogs.logInfo(
@@ -344,9 +343,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 .settingsScreen_setting_requireBiometricAuth_description),
                             leading: PlatformFlavorWidget(
                               material: (_, __) =>
-                              const Icon(Icons.fingerprint_rounded),
-                              cupertino: (_, __) =>
-                              const Icon(
+                                  const Icon(Icons.fingerprint_rounded),
+                              cupertino: (_, __) => const Icon(
                                   CupertinoIcons.shield_lefthalf_fill),
                             ),
                           )
@@ -357,17 +355,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       tiles: [
                         SettingsTile(
                           title:
-                          Text(l10n.settingsScreen_settings_relays_label),
+                              Text(l10n.settingsScreen_settings_relays_label),
                           trailing: PlatformTextButton(
                             child: Text(
                               l10n.settingsScreen_settings_relays_selectLabel(
                                 _relayController.relays.length,
                               ),
                             ),
-                            material: (_, __) =>
-                                MaterialTextButtonData(
-                                  icon: const Icon(Icons.dns_rounded),
-                                ),
+                            material: (_, __) => MaterialTextButtonData(
+                              icon: const Icon(Icons.dns_rounded),
+                            ),
                             onPressed: () async {
                               await showPlatformModalSheet(
                                 context: context,
@@ -376,30 +373,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   isDismissible: true,
                                   backgroundColor: Colors.transparent,
                                 ),
-                                builder: (_) =>
-                                    RelaySelectSheet(
-                                      controller: _relayController,
-                                    ),
+                                builder: (_) => RelaySelectSheet(
+                                  controller: _relayController,
+                                ),
                               );
                             },
                           ),
                         ),
                         SettingsTile.navigation(
-                          title: Text(settings
-                              .getEmergencyContacts()
-                              .isEmpty
+                          title: Text(settings.getEmergencyContacts().isEmpty
                               ? l10n
-                              .settingsScreen_settings_emergencyContacts_label_setup
+                                  .settingsScreen_settings_emergencyContacts_label_setup
                               : l10n
-                              .settingsScreen_settings_emergencyContacts_label_edit),
+                                  .settingsScreen_settings_emergencyContacts_label_edit),
                           trailing: const Icon(Icons.contact_emergency_rounded),
                           onPressed: (_) {
-                            Navigator.of(context).push(
-                              NativePageRoute(
-                                context: context,
-                                builder: (_) => const EmergencySetupScreen(),
-                              ),
-                            );
+                            if (isCupertino(context)) {
+                              Navigator.of(context).push(
+                                MaterialWithModalsPageRoute(
+                                  builder: (_) => const EmergencySetupScreen(),
+                                ),
+                              );
+                            } else {
+                              Navigator.of(context).push(
+                                NativePageRoute(
+                                  context: context,
+                                  builder: (_) => const EmergencySetupScreen(),
+                                ),
+                              );
+                            }
                           },
                         ),
                       ],
@@ -428,23 +430,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             settings.save();
                           },
                           title: Text(
-                            l10n
-                                .settingsScreen_settings_alwaysUseBatterySaveMode_label,
+                            l10n.settingsScreen_settings_alwaysUseBatterySaveMode_label,
                           ),
                           description: Text(
-                            l10n
-                                .settingsScreen_settings_alwaysUseBatterySaveMode_description,
+                            l10n.settingsScreen_settings_alwaysUseBatterySaveMode_description,
                           ),
                         ),
                         SettingsTile.navigation(
                           title: Text(
-                            l10n
-                                .settingsScreen_settings_importExport_exportFile,
+                            l10n.settingsScreen_settings_importExport_exportFile,
                           ),
                           leading: PlatformWidget(
                             material: (_, __) => const Icon(Icons.file_open),
                             cupertino: (_, __) =>
-                            const Icon(CupertinoIcons.doc),
+                                const Icon(CupertinoIcons.doc),
                           ),
                           trailing: const SettingsCaretIcon(),
                           onPressed: (_) async {
@@ -454,29 +453,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
                             final shouldSave = await showPlatformDialog(
                               context: context,
-                              builder: (context) =>
-                                  PlatformAlertDialog(
-                                    title: Text(l10n
-                                        .settingsScreen_settings_importExport_exportFile),
-                                    content: Text(l10n
-                                        .settingsScreen_settings_importExport_exportFile_description),
-                                    actions: createCancellableDialogActions(
-                                      context,
-                                      [
-                                        PlatformDialogAction(
-                                          material: (_, __) =>
-                                              MaterialDialogActionData(
-                                                icon: const Icon(Icons.save),
-                                              ),
-                                          onPressed: () {
-                                            Navigator.pop(context, true);
-                                          },
-                                          child: Text(l10n
-                                              .settingsScreen_settings_importExport_exportFile_save),
-                                        ),
-                                      ],
+                              builder: (context) => PlatformAlertDialog(
+                                title: Text(l10n
+                                    .settingsScreen_settings_importExport_exportFile),
+                                content: Text(l10n
+                                    .settingsScreen_settings_importExport_exportFile_description),
+                                actions: createCancellableDialogActions(
+                                  context,
+                                  [
+                                    PlatformDialogAction(
+                                      material: (_, __) =>
+                                          MaterialDialogActionData(
+                                        icon: const Icon(Icons.save),
+                                      ),
+                                      onPressed: () {
+                                        Navigator.pop(context, true);
+                                      },
+                                      child: Text(l10n
+                                          .settingsScreen_settings_importExport_exportFile_save),
                                     ),
-                                  ),
+                                  ],
+                                ),
+                              ),
                             );
 
                             if (shouldSave) {
@@ -497,7 +495,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 [file],
                                 text: "Locus view key",
                                 subject:
-                                l10n.shareLocation_actions_shareFile_text,
+                                    l10n.shareLocation_actions_shareFile_text,
                               );
                             }
                           },
@@ -508,9 +506,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 .settingsScreen_settings_importExport_transfer),
                             leading: PlatformWidget(
                               material: (_, __) =>
-                              const Icon(Icons.phonelink_setup_rounded),
-                              cupertino: (_, __) =>
-                              const Icon(
+                                  const Icon(Icons.phonelink_setup_rounded),
+                              cupertino: (_, __) => const Icon(
                                   CupertinoIcons.device_phone_portrait),
                             ),
                             trailing: const SettingsCaretIcon(),
@@ -520,7 +517,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 NativePageRoute(
                                   context: context,
                                   builder: (context) =>
-                                  const TransferSenderScreen(),
+                                      const TransferSenderScreen(),
                                 ),
                               );
                             },
@@ -530,34 +527,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               .settingsScreen_settings_importExport_importLabel),
                           leading: PlatformWidget(
                             material: (_, __) =>
-                            const Icon(Icons.file_download),
+                                const Icon(Icons.file_download),
                             cupertino: (_, __) =>
-                            const Icon(CupertinoIcons.tray_arrow_down_fill),
+                                const Icon(CupertinoIcons.tray_arrow_down_fill),
                           ),
                           trailing: const SettingsCaretIcon(),
                           onPressed: (_) async {
                             final shouldPopContext =
-                            await showPlatformModalSheet(
+                                await showPlatformModalSheet(
                               context: context,
                               material: MaterialModalSheetData(
                                 backgroundColor: Colors.transparent,
                               ),
-                              builder: (context) =>
-                                  ImportSheet(
-                                    onImport: (final taskService,
-                                        final viewService,
-                                        final settings,) async {
-                                      await Future.wait([
-                                        taskService.save(),
-                                        viewService.save(),
-                                        settings.save(),
-                                      ]);
+                              builder: (context) => ImportSheet(
+                                onImport: (
+                                  final taskService,
+                                  final viewService,
+                                  final settings,
+                                ) async {
+                                  await Future.wait([
+                                    taskService.save(),
+                                    viewService.save(),
+                                    settings.save(),
+                                  ]);
 
-                                      if (context.mounted) {
-                                        Navigator.pop(context, true);
-                                      }
-                                    },
-                                  ),
+                                  if (context.mounted) {
+                                    Navigator.pop(context, true);
+                                  }
+                                },
+                              ),
                             );
 
                             if (shouldPopContext && mounted) {
@@ -568,13 +566,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         SettingsTile.navigation(
                           title: Text(l10n.checkLocation_title),
                           description:
-                          Text(l10n.checkLocation_shortDescription),
+                              Text(l10n.checkLocation_shortDescription),
                           trailing: const SettingsCaretIcon(),
                           leading: PlatformFlavorWidget(
                             material: (_, __) =>
-                            const Icon(Icons.edit_location_alt),
+                                const Icon(Icons.edit_location_alt),
                             cupertino: (_, __) =>
-                            const Icon(CupertinoIcons.location_fill),
+                                const Icon(CupertinoIcons.location_fill),
                           ),
                           onPressed: (_) {
                             Navigator.push(
@@ -582,7 +580,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               NativePageRoute(
                                 context: context,
                                 builder: (context) =>
-                                const CheckLocationScreen(),
+                                    const CheckLocationScreen(),
                               ),
                             );
                           },
@@ -633,7 +631,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           leading: const Icon(Icons.code),
                           title: Text(l10n.support_options_develop),
                           subtitle:
-                          Text(l10n.support_options_develop_description),
+                              Text(l10n.support_options_develop_description),
                           onTap: () {
                             launchUrl(
                               Uri.parse(REPOSITORY_URL),
@@ -645,7 +643,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           leading: const Icon(Icons.translate_rounded),
                           title: Text(l10n.support_options_translate),
                           subtitle:
-                          Text(l10n.support_options_translate_description),
+                              Text(l10n.support_options_translate_description),
                           onTap: () {
                             launchUrl(
                               Uri.parse(TRANSLATION_HELP_URL),
@@ -656,13 +654,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         PlatformListTile(
                           leading: PlatformWidget(
                             material: (_, __) =>
-                            const Icon(Icons.attach_money_rounded),
+                                const Icon(Icons.attach_money_rounded),
                             cupertino: (_, __) =>
-                            const Icon(CupertinoIcons.money_euro),
+                                const Icon(CupertinoIcons.money_euro),
                           ),
                           title: Text(l10n.support_options_donate),
                           subtitle:
-                          Text(l10n.support_options_donate_description),
+                              Text(l10n.support_options_donate_description),
                           onTap: () {
                             launchUrl(
                               Uri.parse(DONATION_URL),
@@ -722,14 +720,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         MentionTile(
                           title: l10n.honorableMentions_values_session,
                           description:
-                          l10n.honorableMentions_values_session_description,
+                              l10n.honorableMentions_values_session_description,
                           iconName: "session.png",
                           url: "https://getsession.org/",
                         ),
                         MentionTile(
                           title: l10n.honorableMentions_values_odysee,
                           description:
-                          l10n.honorableMentions_values_odysee_description,
+                              l10n.honorableMentions_values_odysee_description,
                           iconName: "odysee.png",
                           url: "https://odysee.com/",
                         ),

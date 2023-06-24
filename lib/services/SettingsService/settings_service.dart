@@ -38,6 +38,7 @@ enum AndroidTheme {
 enum HelperSheet {
   radiusBasedAlarms,
   taskShare,
+  emergencySetup,
 }
 
 // Selects a random provider from the list of available providers, not including

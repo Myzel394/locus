@@ -4,8 +4,8 @@ class Contact {
 
   Contact({
     required this.name,
-    required this.phoneNumber,
-  });
+    required String phoneNumber,
+  }) : phoneNumber = phoneNumber.replaceAll(RegExp(r"\s"), "");
 
   factory Contact.fromJSON(final Map<String, dynamic> data) => Contact(
         name: data["name"],

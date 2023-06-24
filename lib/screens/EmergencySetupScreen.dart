@@ -6,6 +6,7 @@ import 'package:fluttercontactpicker/fluttercontactpicker.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/screens/emergency_setup_screen_widgets/AddContactSheet.dart';
 import 'package:locus/services/SettingsService/settings_service.dart';
+import 'package:locus/utils/helper_sheet.dart';
 import 'package:locus/utils/show_message.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/ModalSheet.dart';
@@ -185,6 +186,62 @@ class _EmergencySetupScreenState extends State<EmergencySetupScreen> {
     );
   }
 
+  void showHelp() {
+    final l10n = AppLocalizations.of(context);
+
+    showHelperSheet(
+      context: context,
+      title: l10n.emergencySetup_help_title,
+      builder: (context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Text(l10n.emergencySetup_help_preamble),
+          const SizedBox(height: MEDIUM_SPACE),
+          Row(
+            children: <Widget>[
+              Icon(context.platformIcons.deleteSolid),
+              const SizedBox(width: MEDIUM_SPACE),
+              Flexible(
+                child: Text(l10n.emergencySetup_help_deleteData),
+              ),
+            ],
+          ),
+          const SizedBox(height: MEDIUM_SPACE),
+          Row(
+            children: <Widget>[
+              Icon(context.platformIcons.locationSolid),
+              const SizedBox(width: MEDIUM_SPACE),
+              Flexible(
+                child: Text(l10n.emergencySetup_help_shareLocation),
+              ),
+            ],
+          ),
+          const SizedBox(height: MEDIUM_SPACE),
+          const Icon(Icons.warning_sharp),
+          const SizedBox(height: SMALL_SPACE),
+          Text(l10n.emergencySetup_hint),
+        ],
+      ),
+      sheetName: HelperSheet.emergencySetup,
+    );
+  }
+
+  void markHintAsRead() async {
+    final settings = context.read<SettingsService>();
+
+    setState(() {
+      showHint = false;
+    });
+
+    if (settings.hasSeenHelperSheet(HelperSheet.emergencySetup)) {
+      return;
+    }
+
+    await Future.delayed(const Duration(seconds: 1));
+
+    showHelp();
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -194,6 +251,15 @@ class _EmergencySetupScreenState extends State<EmergencySetupScreen> {
     return PlatformScaffold(
       appBar: PlatformAppBar(
         title: Text(l10n.emergencySetup_title),
+        trailingActions: [
+          PlatformIconButton(
+            cupertino: (_, __) => CupertinoIconButtonData(
+              padding: EdgeInsets.zero,
+            ),
+            icon: Icon(context.platformIcons.help),
+            onPressed: showHelp,
+          ),
+        ],
       ),
       body: SafeArea(
         child: Padding(
@@ -215,11 +281,7 @@ class _EmergencySetupScreenState extends State<EmergencySetupScreen> {
                   Text(l10n.emergencySetup_hint),
                   const SizedBox(height: LARGE_SPACE),
                   PlatformTextButton(
-                    onPressed: () {
-                      setState(() {
-                        showHint = false;
-                      });
-                    },
+                    onPressed: markHintAsRead,
                     child: Text(l10n.emergencySetup_hint_understoodLabel),
                   )
                 ],
