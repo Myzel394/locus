@@ -11,7 +11,7 @@ import 'package:locus/utils/helper_sheet.dart';
 import 'package:locus/utils/show_message.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/ModalSheet.dart';
-import 'package:locus/widgets/Paper.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:locus/services/SettingsService/contacts.dart' as contacts;
@@ -34,9 +34,7 @@ class _EmergencySetupScreenState extends State<EmergencySetupScreen> {
 
     settings.addListener(rebuild);
 
-    showHint = settings
-        .getEmergencyContacts()
-        .isEmpty;
+    showHint = settings.getEmergencyContacts().isEmpty;
   }
 
   @override
@@ -139,10 +137,9 @@ class _EmergencySetupScreenState extends State<EmergencySetupScreen> {
 
               showContactCreationSheet();
             },
-            material: (_, __) =>
-                MaterialElevatedButtonData(
-                  icon: const Icon(Icons.add_circle_rounded),
-                ),
+            material: (_, __) => MaterialElevatedButtonData(
+              icon: const Icon(Icons.add_circle_rounded),
+            ),
             child: Text(l10n.emergencySetup_addContact_label),
           ),
           const SizedBox(height: LARGE_SPACE),
@@ -164,10 +161,9 @@ class _EmergencySetupScreenState extends State<EmergencySetupScreen> {
 
               pickContact();
             },
-            material: (_, __) =>
-                MaterialElevatedButtonData(
-                  icon: const Icon(Icons.person),
-                ),
+            material: (_, __) => MaterialElevatedButtonData(
+              icon: const Icon(Icons.person),
+            ),
             child: Text(l10n.emergencySetup_pickContact_label),
           )
         ],
@@ -183,12 +179,11 @@ class _EmergencySetupScreenState extends State<EmergencySetupScreen> {
         isScrollControlled: true,
         isDismissible: true,
       ),
-      builder: (context) =>
-          ModalSheet(
-            child: buildAddContactSelection(onSelected: () {
-              Navigator.of(context).pop();
-            }),
-          ),
+      builder: (context) => ModalSheet(
+        child: buildAddContactSelection(onSelected: () {
+          Navigator.of(context).pop();
+        }),
+      ),
     );
   }
 
@@ -198,37 +193,36 @@ class _EmergencySetupScreenState extends State<EmergencySetupScreen> {
     showHelperSheet(
       context: context,
       title: l10n.emergencySetup_help_title,
-      builder: (context) =>
-          Column(
-            mainAxisSize: MainAxisSize.min,
+      builder: (context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Text(l10n.emergencySetup_help_preamble),
+          const SizedBox(height: MEDIUM_SPACE),
+          Row(
             children: <Widget>[
-              Text(l10n.emergencySetup_help_preamble),
-              const SizedBox(height: MEDIUM_SPACE),
-              Row(
-                children: <Widget>[
-                  Icon(context.platformIcons.deleteSolid),
-                  const SizedBox(width: MEDIUM_SPACE),
-                  Flexible(
-                    child: Text(l10n.emergencySetup_help_deleteData),
-                  ),
-                ],
+              Icon(context.platformIcons.deleteSolid),
+              const SizedBox(width: MEDIUM_SPACE),
+              Flexible(
+                child: Text(l10n.emergencySetup_help_deleteData),
               ),
-              const SizedBox(height: MEDIUM_SPACE),
-              Row(
-                children: <Widget>[
-                  Icon(context.platformIcons.locationSolid),
-                  const SizedBox(width: MEDIUM_SPACE),
-                  Flexible(
-                    child: Text(l10n.emergencySetup_help_shareLocation),
-                  ),
-                ],
-              ),
-              const SizedBox(height: MEDIUM_SPACE),
-              const Icon(Icons.warning_sharp),
-              const SizedBox(height: SMALL_SPACE),
-              Text(l10n.emergencySetup_hint),
             ],
           ),
+          const SizedBox(height: MEDIUM_SPACE),
+          Row(
+            children: <Widget>[
+              Icon(context.platformIcons.locationSolid),
+              const SizedBox(width: MEDIUM_SPACE),
+              Flexible(
+                child: Text(l10n.emergencySetup_help_shareLocation),
+              ),
+            ],
+          ),
+          const SizedBox(height: MEDIUM_SPACE),
+          const Icon(Icons.warning_sharp),
+          const SizedBox(height: SMALL_SPACE),
+          Text(l10n.emergencySetup_hint),
+        ],
+      ),
       sheetName: HelperSheet.emergencySetup,
     );
   }
@@ -249,7 +243,19 @@ class _EmergencySetupScreenState extends State<EmergencySetupScreen> {
     showHelp();
   }
 
-  void _sendTestMessage(final List<contacts.Contact> contacts,) async {
+  void _sendTestMessage(
+    final List<contacts.Contact> contacts,
+  ) async {
+    final permissionStatus = await Permission.sms.request();
+
+    if (permissionStatus != PermissionStatus.granted) {
+      return;
+    }
+
+    if (!mounted) {
+      return;
+    }
+
     final emergencyService = EmergencyService(
       contacts: contacts,
       settings: context.read<SettingsService>(),
@@ -281,10 +287,9 @@ class _EmergencySetupScreenState extends State<EmergencySetupScreen> {
         title: Text(l10n.emergencySetup_title),
         trailingActions: [
           PlatformIconButton(
-            cupertino: (_, __) =>
-                CupertinoIconButtonData(
-                  padding: EdgeInsets.zero,
-                ),
+            cupertino: (_, __) => CupertinoIconButtonData(
+              padding: EdgeInsets.zero,
+            ),
             icon: Icon(context.platformIcons.help),
             onPressed: showHelp,
           ),
@@ -340,32 +345,30 @@ class _EmergencySetupScreenState extends State<EmergencySetupScreen> {
                         onPressed: () async {
                           final confirm = await showPlatformDialog(
                             context: context,
-                            builder: (_) =>
-                                PlatformAlertDialog(
-                                  material: (_, __) =>
-                                      MaterialAlertDialogData(
-                                        icon: const Icon(Icons.delete),
-                                      ),
-                                  title: Text(
-                                    l10n.emergencySetup_deleteContact_title,
+                            builder: (_) => PlatformAlertDialog(
+                              material: (_, __) => MaterialAlertDialogData(
+                                icon: const Icon(Icons.delete),
+                              ),
+                              title: Text(
+                                l10n.emergencySetup_deleteContact_title,
+                              ),
+                              content: Text(
+                                l10n.emergencySetup_deleteContact_message,
+                              ),
+                              actions: createCancellableDialogActions(
+                                context,
+                                [
+                                  PlatformDialogAction(
+                                    child: Text(
+                                      l10n.deleteLabel,
+                                    ),
+                                    onPressed: () {
+                                      Navigator.pop(context, true);
+                                    },
                                   ),
-                                  content: Text(
-                                    l10n.emergencySetup_deleteContact_message,
-                                  ),
-                                  actions: createCancellableDialogActions(
-                                    context,
-                                    [
-                                      PlatformDialogAction(
-                                        child: Text(
-                                          l10n.deleteLabel,
-                                        ),
-                                        onPressed: () {
-                                          Navigator.pop(context, true);
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                ),
+                                ],
+                              ),
+                            ),
                           );
 
                           if (confirm == true) {

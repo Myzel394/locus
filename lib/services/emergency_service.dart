@@ -22,6 +22,7 @@ class EmergencyService {
       await sendSMS(
         message: message,
         recipients: [contact.phoneNumber],
+        sendDirect: true,
       );
     }
   }
