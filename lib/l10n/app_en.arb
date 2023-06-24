@@ -727,6 +727,9 @@
   "emergencySetup_tryItOut_label": "Send test message",
   "emergencySetup_permissionsMissing_title": "Permissions required",
   "emergencySetup_permissionsMissing_content": "Please grant permission to send SMS. Otherwise, Locus will not be able to send your location to your emergency contacts.",
+  "emergencyMode_enter_title": "Emergency Mode",
+  "emergencyMode_enter_description": "Do you want to enter emergency mode? You will be asked what action you want to take.",
+  "emergencyMode_enter_action_continue": "Enter emergency mode",
   "emergency_message_test": "This is a test message. If you receive this message, you have been added as an emergency contact to receive my location in case of an emergency.",
   "emergency_permissionsMissing": "Please grant permission to send SMS",
   "@emergency_permissionsMissing": {

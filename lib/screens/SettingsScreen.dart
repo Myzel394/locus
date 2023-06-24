@@ -187,6 +187,36 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return PlatformScaffold(
       appBar: PlatformAppBar(
         title: Text(l10n.settingsScreen_title),
+        trailingActions: [
+          if (settings.getEmergencyContacts().isNotEmpty)
+            // Emergency services are only available on Android, so we can safely use Material widgets
+            IconButton(
+              icon: const Icon(Icons.emergency_rounded),
+              onPressed: () async {
+                final result = await showPlatformDialog(
+                  context: context,
+                  builder: (context) => PlatformAlertDialog(
+                    material: (_, __) => MaterialAlertDialogData(
+                      icon: const Icon(Icons.warning_sharp),
+                    ),
+                    title: Text(l10n.emergencyMode_enter_title),
+                    content: Text(l10n.emergencyMode_enter_description),
+                    actions: createCancellableDialogActions(
+                      context,
+                      [
+                        PlatformDialogAction(
+                          onPressed: () => Navigator.of(context).pop(true),
+                          child: Text(l10n.emergencyMode_enter_action_continue),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+
+                if (result == true) {}
+              },
+            )
+        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
