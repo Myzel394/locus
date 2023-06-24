@@ -1,7 +1,9 @@
+import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter_sms/flutter_sms.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:locus/constants/app.dart';
 import 'package:locus/services/SettingsService/settings_service.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/services/timers_service.dart';
@@ -25,6 +27,8 @@ class EmergencyService {
     required this.l10n,
     required this.contacts,
   });
+
+  static bool supportsEmergency() => Platform.isAndroid && isGMSFlavor;
 
   Future<void> sendTestMessage() async {
     final message = l10n.emergency_message_test;

@@ -18,6 +18,7 @@ import 'package:locus/screens/EmergencySetupScreen.dart';
 import 'package:locus/screens/settings_screen_widgets/ImportSheet.dart';
 import 'package:locus/screens/settings_screen_widgets/MentionTile.dart';
 import 'package:locus/screens/settings_screen_widgets/TransferSenderScreen.dart';
+import 'package:locus/services/emergency_service.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/utils/PageRoute.dart';
 import 'package:locus/utils/import_export_handler.dart';
@@ -380,30 +381,34 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             },
                           ),
                         ),
-                        SettingsTile.navigation(
-                          title: Text(settings.getEmergencyContacts().isEmpty
-                              ? l10n
-                                  .settingsScreen_settings_emergencyContacts_label_setup
-                              : l10n
-                                  .settingsScreen_settings_emergencyContacts_label_edit),
-                          trailing: const Icon(Icons.contact_emergency_rounded),
-                          onPressed: (_) {
-                            if (isCupertino(context)) {
-                              Navigator.of(context).push(
-                                MaterialWithModalsPageRoute(
-                                  builder: (_) => const EmergencySetupScreen(),
-                                ),
-                              );
-                            } else {
-                              Navigator.of(context).push(
-                                NativePageRoute(
-                                  context: context,
-                                  builder: (_) => const EmergencySetupScreen(),
-                                ),
-                              );
-                            }
-                          },
-                        ),
+                        if (EmergencyService.supportsEmergency())
+                          SettingsTile.navigation(
+                            title: Text(settings.getEmergencyContacts().isEmpty
+                                ? l10n
+                                    .settingsScreen_settings_emergencyContacts_label_setup
+                                : l10n
+                                    .settingsScreen_settings_emergencyContacts_label_edit),
+                            trailing:
+                                const Icon(Icons.contact_emergency_rounded),
+                            onPressed: (_) {
+                              if (isCupertino(context)) {
+                                Navigator.of(context).push(
+                                  MaterialWithModalsPageRoute(
+                                    builder: (_) =>
+                                        const EmergencySetupScreen(),
+                                  ),
+                                );
+                              } else {
+                                Navigator.of(context).push(
+                                  NativePageRoute(
+                                    context: context,
+                                    builder: (_) =>
+                                        const EmergencySetupScreen(),
+                                  ),
+                                );
+                              }
+                            },
+                          ),
                       ],
                     ),
                     SettingsSection(

@@ -725,6 +725,8 @@
   "emergencySetup_help_deleteData": "The first option is to delete all your data. This will delete all your locations and tasks. This might be useful if you have the location of a person, whose data needs to be kept private and you quickly need to delete it.",
   "emergencySetup_help_shareLocation": "The second option is to share your location with your emergency contacts. This will automatically create a task and share it with your emergency contacts. Locus will send a SMS or iMessage to your emergency contacts with a link to your location. Your emergency contacts will be able to see your location for 14 days, or until you delete the task.",
   "emergencySetup_tryItOut_label": "Send test message",
+  "emergencySetup_permissionsMissing_title": "Permissions required",
+  "emergencySetup_permissionsMissing_content": "Please grant permission to send SMS. Otherwise, Locus will not be able to send your location to your emergency contacts.",
   "emergency_message_test": "This is a test message. If you receive this message, you have been added as an emergency contact to receive my location in case of an emergency.",
   "emergency_permissionsMissing": "Please grant permission to send SMS",
   "@emergency_permissionsMissing": {

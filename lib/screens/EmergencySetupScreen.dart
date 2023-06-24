@@ -30,23 +30,22 @@ class EmergencySetupScreen extends StatefulWidget {
 
 class _EmergencySetupScreenState extends State<EmergencySetupScreen> {
   bool showHint = true;
+  late final SettingsService _settings;
 
   @override
   void initState() {
     super.initState();
 
-    final settings = context.read<SettingsService>();
+    _settings = context.read<SettingsService>();
 
-    settings.addListener(rebuild);
+    _settings.addListener(rebuild);
 
-    showHint = settings.getEmergencyContacts().isEmpty;
+    showHint = _settings.getEmergencyContacts().isEmpty;
   }
 
   @override
   void dispose() {
-    final settings = context.read<SettingsService>();
-
-    settings.removeListener(rebuild);
+    _settings.removeListener(rebuild);
 
     super.dispose();
   }
@@ -259,33 +258,31 @@ class _EmergencySetupScreenState extends State<EmergencySetupScreen> {
 
     final l10n = AppLocalizations.of(context);
 
-    if (Platform.isAndroid) {
-      final permissionStatus = await Permission.sms.request();
+    final permissionStatus = await Permission.sms.request();
 
+    FlutterLogs.logInfo(
+      LOG_TAG,
+      "EmergencySetupScreen",
+      "SMS permission status: $permissionStatus",
+    );
+
+    if (!mounted) {
+      return;
+    }
+
+    if (permissionStatus != PermissionStatus.granted) {
       FlutterLogs.logInfo(
         LOG_TAG,
         "EmergencySetupScreen",
-        "SMS permission status: $permissionStatus",
+        "SMS permission not granted",
       );
 
-      if (!mounted) {
-        return;
-      }
-
-      if (permissionStatus != PermissionStatus.granted) {
-        FlutterLogs.logInfo(
-          LOG_TAG,
-          "EmergencySetupScreen",
-          "SMS permission not granted",
-        );
-
-        showMessage(
-          context,
-          l10n.emergency_permissionsMissing,
-          type: MessageType.error,
-        );
-        return;
-      }
+      showMessage(
+        context,
+        l10n.emergency_permissionsMissing,
+        type: MessageType.error,
+      );
+      return;
     }
 
     if (!mounted) {
@@ -353,119 +350,159 @@ class _EmergencySetupScreenState extends State<EmergencySetupScreen> {
     final settings = context.watch<SettingsService>();
     final emergencyContacts = settings.getEmergencyContacts();
 
-    return PlatformScaffold(
-      appBar: PlatformAppBar(
-        title: Text(l10n.emergencySetup_title),
-        trailingActions: [
-          PlatformIconButton(
-            cupertino: (_, __) => CupertinoIconButtonData(
-              padding: EdgeInsets.zero,
-            ),
-            icon: Icon(context.platformIcons.help),
-            onPressed: showHelp,
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(MEDIUM_SPACE),
-          child: (() {
-            if (showHint) {
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  Icon(
-                    Icons.warning_sharp,
-                    color: isCupertino(context)
-                        ? CupertinoColors.systemYellow
-                        : Colors.yellow,
-                    size: 120,
-                  ),
-                  const SizedBox(height: LARGE_SPACE),
-                  Text(l10n.emergencySetup_hint),
-                  const SizedBox(height: LARGE_SPACE),
-                  PlatformTextButton(
-                    onPressed: markHintAsRead,
-                    child: Text(l10n.emergencySetup_hint_understoodLabel),
-                  )
-                ],
-              );
-            }
+    return WillPopScope(
+      onWillPop: () async {
+        if (!(await Permission.sms.isGranted)) {
+          if (!mounted) {
+            return true;
+          }
 
-            if (emergencyContacts.isEmpty) {
-              return Center(
-                child: buildAddContactSelection(),
-              );
-            }
+          final isGranted = await showPlatformDialog(
+            context: context,
+            builder: (_) => PlatformAlertDialog(
+              title: Text(l10n.emergencySetup_permissionsMissing_title),
+              content: Text(l10n.emergencySetup_permissionsMissing_content),
+              actions: <Widget>[
+                PlatformDialogAction(
+                  child: PlatformText(l10n.closeNeutralAction),
+                  onPressed: () async {
+                    final status = await Permission.sms.request();
 
-            return Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                ListView.builder(
-                  itemCount: emergencyContacts.length,
-                  shrinkWrap: true,
-                  itemBuilder: (_, index) {
-                    final contact = emergencyContacts[index];
+                    if (!mounted) {
+                      return;
+                    }
 
-                    return PlatformListTile(
-                      title: Text(contact.name),
-                      subtitle: Text(contact.phoneNumber),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.delete),
-                        onPressed: () async {
-                          final confirm = await showPlatformDialog(
-                            context: context,
-                            builder: (_) => PlatformAlertDialog(
-                              material: (_, __) => MaterialAlertDialogData(
-                                icon: const Icon(Icons.delete),
-                              ),
-                              title: Text(
-                                l10n.emergencySetup_deleteContact_title,
-                              ),
-                              content: Text(
-                                l10n.emergencySetup_deleteContact_message,
-                              ),
-                              actions: createCancellableDialogActions(
-                                context,
-                                [
-                                  PlatformDialogAction(
-                                    child: Text(
-                                      l10n.deleteLabel,
-                                    ),
-                                    onPressed: () {
-                                      Navigator.pop(context, true);
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-
-                          if (confirm == true) {
-                            settings.removeEmergencyContact(contact);
-                            settings.save();
-                          }
-                        },
-                      ),
-                    );
+                    Navigator.of(context)
+                        .pop(status == PermissionStatus.granted);
                   },
                 ),
-                PlatformListTile(
-                  title: Text(
-                    l10n.emergencySetup_addContact_title,
-                  ),
-                  leading: Icon(context.platformIcons.addCircled),
-                  onTap: showContactChoiceSheet,
-                ),
-                PlatformListTile(
-                  title: Text(l10n.emergencySetup_tryItOut_label),
-                  leading: const Icon(Icons.send_rounded),
-                  onTap: showSendTestMessageSheet,
-                ),
               ],
-            );
-          })(),
+            ),
+          );
+
+          if (isGranted == true) {
+            return true;
+          }
+
+          return false;
+        }
+
+        return true;
+      },
+      child: PlatformScaffold(
+        appBar: PlatformAppBar(
+          title: Text(l10n.emergencySetup_title),
+          trailingActions: [
+            PlatformIconButton(
+              cupertino: (_, __) => CupertinoIconButtonData(
+                padding: EdgeInsets.zero,
+              ),
+              icon: Icon(context.platformIcons.help),
+              onPressed: showHelp,
+            ),
+          ],
+        ),
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(MEDIUM_SPACE),
+            child: (() {
+              if (showHint) {
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    Icon(
+                      Icons.warning_sharp,
+                      color: isCupertino(context)
+                          ? CupertinoColors.systemYellow
+                          : Colors.yellow,
+                      size: 120,
+                    ),
+                    const SizedBox(height: LARGE_SPACE),
+                    Text(l10n.emergencySetup_hint),
+                    const SizedBox(height: LARGE_SPACE),
+                    PlatformTextButton(
+                      onPressed: markHintAsRead,
+                      child: Text(l10n.emergencySetup_hint_understoodLabel),
+                    )
+                  ],
+                );
+              }
+
+              if (emergencyContacts.isEmpty) {
+                return Center(
+                  child: buildAddContactSelection(),
+                );
+              }
+
+              return Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  ListView.builder(
+                    itemCount: emergencyContacts.length,
+                    shrinkWrap: true,
+                    itemBuilder: (_, index) {
+                      final contact = emergencyContacts[index];
+
+                      return PlatformListTile(
+                        title: Text(contact.name),
+                        subtitle: Text(contact.phoneNumber),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.delete),
+                          onPressed: () async {
+                            final confirm = await showPlatformDialog(
+                              context: context,
+                              builder: (_) => PlatformAlertDialog(
+                                material: (_, __) => MaterialAlertDialogData(
+                                  icon: const Icon(Icons.delete),
+                                ),
+                                title: Text(
+                                  l10n.emergencySetup_deleteContact_title,
+                                ),
+                                content: Text(
+                                  l10n.emergencySetup_deleteContact_message,
+                                ),
+                                actions: createCancellableDialogActions(
+                                  context,
+                                  [
+                                    PlatformDialogAction(
+                                      child: Text(
+                                        l10n.deleteLabel,
+                                      ),
+                                      onPressed: () {
+                                        Navigator.pop(context, true);
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+
+                            if (confirm == true) {
+                              settings.removeEmergencyContact(contact);
+                              settings.save();
+                            }
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                  PlatformListTile(
+                    title: Text(
+                      l10n.emergencySetup_addContact_title,
+                    ),
+                    leading: Icon(context.platformIcons.addCircled),
+                    onTap: showContactChoiceSheet,
+                  ),
+                  PlatformListTile(
+                    title: Text(l10n.emergencySetup_tryItOut_label),
+                    leading: const Icon(Icons.send_rounded),
+                    onTap: showSendTestMessageSheet,
+                  ),
+                ],
+              );
+            })(),
+          ),
         ),
       ),
     );
