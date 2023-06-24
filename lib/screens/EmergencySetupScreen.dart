@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
@@ -203,9 +204,11 @@ class _EmergencySetupScreenState extends State<EmergencySetupScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  const Icon(
+                  Icon(
                     Icons.warning_sharp,
-                    color: Colors.yellow,
+                    color: isCupertino(context)
+                        ? CupertinoColors.systemYellow
+                        : Colors.yellow,
                     size: 120,
                   ),
                   const SizedBox(height: LARGE_SPACE),
