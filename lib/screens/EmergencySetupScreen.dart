@@ -294,7 +294,6 @@ class _EmergencySetupScreenState extends State<EmergencySetupScreen> {
 
     final emergencyService = EmergencyService(
       contacts: contacts,
-      settings: context.read<SettingsService>(),
       l10n: l10n,
     );
 
