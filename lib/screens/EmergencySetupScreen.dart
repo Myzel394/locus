@@ -1,10 +1,15 @@
+import 'dart:ffi';
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:fluttercontactpicker/fluttercontactpicker.dart';
 import 'package:locus/constants/spacing.dart';
+import 'package:locus/constants/values.dart';
 import 'package:locus/screens/emergency_setup_screen_widgets/AddContactSheet.dart';
+import 'package:locus/screens/emergency_setup_screen_widgets/ContactSelectSheet.dart';
 import 'package:locus/services/SettingsService/settings_service.dart';
 import 'package:locus/services/emergency_service.dart';
 import 'package:locus/utils/helper_sheet.dart';
@@ -246,10 +251,41 @@ class _EmergencySetupScreenState extends State<EmergencySetupScreen> {
   void _sendTestMessage(
     final List<contacts.Contact> contacts,
   ) async {
-    final permissionStatus = await Permission.sms.request();
+    FlutterLogs.logInfo(
+      LOG_TAG,
+      "EmergencySetupScreen",
+      "Sending test message",
+    );
 
-    if (permissionStatus != PermissionStatus.granted) {
-      return;
+    final l10n = AppLocalizations.of(context);
+
+    if (Platform.isAndroid) {
+      final permissionStatus = await Permission.sms.request();
+
+      FlutterLogs.logInfo(
+        LOG_TAG,
+        "EmergencySetupScreen",
+        "SMS permission status: $permissionStatus",
+      );
+
+      if (!mounted) {
+        return;
+      }
+
+      if (permissionStatus != PermissionStatus.granted) {
+        FlutterLogs.logInfo(
+          LOG_TAG,
+          "EmergencySetupScreen",
+          "SMS permission not granted",
+        );
+
+        showMessage(
+          context,
+          l10n.emergency_permissionsMissing,
+          type: MessageType.error,
+        );
+        return;
+      }
     }
 
     if (!mounted) {
@@ -259,20 +295,56 @@ class _EmergencySetupScreenState extends State<EmergencySetupScreen> {
     final emergencyService = EmergencyService(
       contacts: contacts,
       settings: context.read<SettingsService>(),
-      l10n: AppLocalizations.of(context),
+      l10n: l10n,
+    );
+
+    FlutterLogs.logInfo(
+      LOG_TAG,
+      "EmergencySetupScreen",
+      "Sending test message now.",
     );
 
     await emergencyService.sendTestMessage();
+
+    FlutterLogs.logInfo(
+      LOG_TAG,
+      "EmergencySetupScreen",
+      "Test message sent.",
+    );
+
+    if (!mounted) {
+      return;
+    }
+
+    showMessage(
+      context,
+      l10n.emergency_message_test_successMessage,
+      type: MessageType.success,
+    );
   }
 
-  void showSendTestMessageSheet() {
+  void showSendTestMessageSheet() async {
     // If we only have one contact, we can skip the selection
     final settings = context.read<SettingsService>();
-    final contacts = settings.getEmergencyContacts();
+    final emergencyContacts = settings.getEmergencyContacts();
 
-    if (contacts.length == 1) {
-      _sendTestMessage([contacts.first]);
+    if (emergencyContacts.length == 1) {
+      _sendTestMessage([emergencyContacts.first]);
       return;
+    }
+
+    final selectedContacts = await showPlatformModalSheet(
+      context: context,
+      material: MaterialModalSheetData(
+        backgroundColor: Colors.transparent,
+        isScrollControlled: true,
+        isDismissible: true,
+      ),
+      builder: (context) => ContactSelectSheet(contacts: emergencyContacts),
+    );
+
+    if (selectedContacts is List<contacts.Contact>) {
+      _sendTestMessage(selectedContacts);
     }
   }
 
