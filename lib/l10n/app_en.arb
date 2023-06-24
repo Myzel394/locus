@@ -675,11 +675,11 @@
   "checkLocation_shortDescription": "Verify Locus can access your location",
   "checkLocation_description": "Tap to check if Locus can access your location. Note that this might take up to {minutes} minutes. Make sure you have GPS enabled. Do not close the app or turn off your screen while the check is running.",
   "@checkLocation_description": {
-      "placeholders": {
-          "minutes": {
-              "type": "int"
-          }
+    "placeholders": {
+      "minutes": {
+        "type": "int"
       }
+    }
   },
   "checkLocation_start_label": "Start check",
   "checkLocation_values_usingBestLocation": "Checking using best accuracy",
@@ -689,11 +689,11 @@
   "checkLocation_successMessage": "Congratulations! Locus can access your location!",
   "checkLocation_gpsDisabledMessage": "Please enable GPS to continue",
   "@checkLocation_gpsDisabledMessage": {
-      "description": "Keep this short"
+    "description": "Keep this short"
   },
   "checkLocation_permissionDeniedMessage": "Please grant permission to your location",
   "@checkLocation_permissionDeniedMessage": {
-      "description": "Keep this short"
+    "description": "Keep this short"
   },
   "checkLocation_errorMessage": "We are sorry, but Locus could not access your location. You can try it again later or find more information in the help section.",
   "checkLocation_openHelp": "Open help",
@@ -716,7 +716,7 @@
   "emergencySetup_addContact_addLabel": "Add contact",
   "emergencySetup_pickContact_error_contactInvalid": "This contact has no name or phone number. Please pick another contact.",
   "@emergencySetup_pickContact_error_contactInvalid": {
-      "description": "Keep this short"
+    "description": "Keep this short"
   },
   "emergencySetup_deleteContact_title": "Delete contact",
   "emergencySetup_deleteContact_message": "Do you really want to delete this contact? They will no longer be notified in case you enter emergency mode.",
@@ -727,20 +727,20 @@
   "emergencySetup_tryItOut_label": "Send test message",
   "emergency_message_test": "This is a test message. If you receive this message, you have been added as an emergency contact to receive my location in case of an emergency.",
   "emergency_permissionsMissing": "Please grant permission to send SMS",
-    "@emergency_permissionsMissing": {
-        "description": "Keep this short"
-    },
-    "emergency_message_test_select_title": "Select contacts",
-    "emergency_message_test_select_message": "Please select the contacts you want to send the test message to.",
-    "emergency_message_test_successMessage": "Test message sent successfully!",
-    "emergency_task_name": "Emergency from {date}",
-    "@emergency_task_name": {
-        "placeholders": {
-            "date": {
-                "type": "DateTime",
-                "format": "YYYY-MM-DD HH:mm:ss",
-                "isCustomDateFormat": "true"
-            }
-        }
+  "@emergency_permissionsMissing": {
+    "description": "Keep this short"
+  },
+  "emergency_message_test_select_title": "Select contacts",
+  "emergency_message_test_select_message": "Please select the contacts you want to send the test message to.",
+  "emergency_message_test_successMessage": "Test message sent successfully!",
+  "emergency_task_name": "Emergency from {date}",
+  "@emergency_task_name": {
+    "placeholders": {
+      "date": {
+        "type": "DateTime",
+        "format": "YYYY-MM-DD HH:mm:ss",
+        "isCustomDateFormat": "true"
+      }
     }
+  }
 }
