@@ -168,7 +168,8 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
           backgroundColor: getCupertinoAppBarColorForMapScreen(context),
         ),
         trailingActions: [
-          if (_locationFetcher.controller.locations.isNotEmpty)
+          if (_locationFetcher.controller.locations.isNotEmpty &&
+              !_isShowingDetails)
             PlatformIconButton(
               cupertino: (_, __) => CupertinoIconButtonData(
                 padding: EdgeInsets.zero,
@@ -188,7 +189,9 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
             onPressed: showHelp,
           ),
           Padding(
-            padding: isMaterial(context) ? const EdgeInsets.all(SMALL_SPACE) : EdgeInsets.zero,
+            padding: isMaterial(context)
+                ? const EdgeInsets.all(SMALL_SPACE)
+                : EdgeInsets.zero,
             child: PlatformPopup<String>(
               type: PlatformPopupType.tap,
               items: [
@@ -252,7 +255,8 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                               LocationsMap(
                                 controller: _locationFetcher.controller,
                               ),
-                              if (_locationFetcher.isLoading) const LocationStillFetchingBanner(),
+                              if (_locationFetcher.isLoading)
+                                const LocationStillFetchingBanner(),
                             ],
                           );
                         }
@@ -262,7 +266,8 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                             child: Padding(
                               padding: const EdgeInsets.all(MEDIUM_SPACE),
                               child: LocationsLoadingScreen(
-                                locations: _locationFetcher.controller.locations,
+                                locations:
+                                    _locationFetcher.controller.locations,
                                 onTimeout: () {
                                   setState(() {
                                     _isError = true;
