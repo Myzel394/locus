@@ -102,12 +102,11 @@ class Task extends ChangeNotifier with LocationBase {
     };
   }
 
-  static Future<Task> create(
-    final String name,
-    final List<String> relays, {
-    List<TaskRuntimeTimer> timers = const [],
-    bool deleteAfterRun = false,
-  }) async {
+  static Future<Task> create(final String name,
+      final List<String> relays, {
+        List<TaskRuntimeTimer> timers = const [],
+        bool deleteAfterRun = false,
+      }) async {
     FlutterLogs.logInfo(
       LOG_TAG,
       "Task",
@@ -120,7 +119,9 @@ class Task extends ChangeNotifier with LocationBase {
       id: uuid.v4(),
       name: name,
       encryptionPassword: secretKey,
-      nostrPrivateKey: Keychain.generate().private,
+      nostrPrivateKey: Keychain
+          .generate()
+          .private,
       relays: relays,
       createdAt: DateTime.now(),
       timers: timers,
@@ -175,7 +176,7 @@ class Task extends ChangeNotifier with LocationBase {
   Future<bool> shouldRunNow() async {
     final executionStatus = await getExecutionStatus();
     final shouldRunNowBasedOnTimers =
-        timers.any((timer) => timer.shouldRun(DateTime.now()));
+    timers.any((timer) => timer.shouldRun(DateTime.now()));
 
     if (shouldRunNowBasedOnTimers) {
       return true;
@@ -243,7 +244,7 @@ class Task extends ChangeNotifier with LocationBase {
   Future<DateTime?> startScheduleTomorrow() {
     final tomorrow = DateTime.now().add(const Duration(days: 1));
     final nextDate =
-        DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 6, 0, 0);
+    DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 6, 0, 0);
 
     return startSchedule(startDate: nextDate);
   }
@@ -398,8 +399,7 @@ class Task extends ChangeNotifier with LocationBase {
   }
 
   Future<void> publishLocation(
-    final LocationPointService locationPoint,
-  ) async {
+      final LocationPointService locationPoint,) async {
     final eventManager = NostrEventsManager.fromTask(this);
 
     final rawMessage = jsonEncode(locationPoint.toJSON());
@@ -480,7 +480,7 @@ class TaskService extends ChangeNotifier {
     // await all `toJson` functions
     final data = await Future.wait<Map<String, dynamic>>(
       _tasks.map(
-        (task) => task.toJSON(),
+            (task) => task.toJSON(),
       ),
     );
 
@@ -561,6 +561,8 @@ class TaskService extends ChangeNotifier {
       }
     }
   }
+
+  Future<void> emergencyDelete() => storage.delete(key: KEY);
 }
 
 class TaskExample {
@@ -598,14 +600,18 @@ DateTime? findNextEndDate(final List<TaskRuntimeTimer> timers,
   final now = startDate ?? DateTime.now();
   final nextDates = List<DateTime>.from(
     timers.map((timer) => timer.nextEndDate(now)).where((date) => date != null),
-  )..sort();
+  )
+    ..sort();
 
   DateTime endDate = nextDates.first;
 
   for (final date in nextDates.sublist(1)) {
     final nextStartDate = findNextStartDate(timers, startDate: date);
     if (nextStartDate == null ||
-        nextStartDate.difference(date).inMinutes.abs() > 15) {
+        nextStartDate
+            .difference(date)
+            .inMinutes
+            .abs() > 15) {
       // No next start date found or the difference is more than 15 minutes, so this is the last date
       break;
     }

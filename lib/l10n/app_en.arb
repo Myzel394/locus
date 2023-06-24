@@ -733,4 +733,13 @@
     "emergency_message_test_select_title": "Select contacts",
     "emergency_message_test_select_message": "Please select the contacts you want to send the test message to.",
     "emergency_message_test_successMessage": "Test message sent successfully!"
+    "emergency_task_name": "Emergency from {date}",
+    "@emergency_task_name": {
+        "placeholders": {
+            "date": {
+                "type": "date",
+                "format": "YYYY-MM-DD HH:mm:ss"
+            }
+        }
+    }
 }

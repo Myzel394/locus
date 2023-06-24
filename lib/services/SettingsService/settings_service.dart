@@ -353,4 +353,6 @@ class SettingsService extends ChangeNotifier {
     _emergencyContacts.remove(contact);
     notifyListeners();
   }
+
+  Future<void> emergencyDelete() => storage.delete(key: STORAGE_KEY);
 }
