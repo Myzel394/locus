@@ -11,9 +11,11 @@ import 'package:locus/constants/values.dart';
 import 'package:locus/screens/task_detail_screen_widgets/SendViewByBluetooth.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/widgets/SingularElementDialog.dart';
+import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../services/settings_service.dart';
 import '../../utils/file.dart';
 import '../../utils/theme.dart';
 
@@ -41,6 +43,7 @@ class _ShareLocationButtonState extends State<ShareLocationButton> {
 
   void openShareLocationDialog() async {
     final l10n = AppLocalizations.of(context);
+    final settings = context.read<SettingsService>();
 
     FlutterLogs.logInfo(
       LOG_TAG,
@@ -110,7 +113,8 @@ class _ShareLocationButtonState extends State<ShareLocationButton> {
     try {
       switch (shouldShare) {
         case "qr":
-          final url = await widget.task.generateLink();
+          final url =
+              await widget.task.generateLink(settings.getServerHostname());
 
           if (!mounted) {
             return;
@@ -128,7 +132,9 @@ class _ShareLocationButtonState extends State<ShareLocationButton> {
                     style: getTitle2TextStyle(context),
                     textAlign: TextAlign.center,
                   ),
-                  isMaterial(context) ? const SizedBox(height: LARGE_SPACE) : null,
+                  isMaterial(context)
+                      ? const SizedBox(height: LARGE_SPACE)
+                      : null,
                   QrImageView(
                     data: url,
                     errorCorrectionLevel: QrErrorCorrectLevel.H,
@@ -150,7 +156,8 @@ class _ShareLocationButtonState extends State<ShareLocationButton> {
           );
           break;
         case "link":
-          final url = await widget.task.generateLink();
+          final url =
+              await widget.task.generateLink(settings.getServerHostname());
 
           await Share.share(
             url,

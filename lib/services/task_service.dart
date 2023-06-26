@@ -348,7 +348,8 @@ class Task extends ChangeNotifier with LocationBase {
   // 2. Encrypt the task with the password
   // 3. Publish the encrypted task to a random Nostr relay
   // 4. Generate a link that contains the password and the Nostr relay ID
-  Future<String> generateLink({
+  Future<String> generateLink(
+    final String host, {
     final void Function(TaskLinkPublishProgress progress)? onProgress,
   }) async {
     onProgress?.call(TaskLinkPublishProgress.startsSoon);
@@ -385,7 +386,7 @@ class Task extends ChangeNotifier with LocationBase {
     final fragment = base64Url.encode(jsonEncode(parameters).codeUnits);
     final uri = Uri(
       scheme: "https",
-      host: APP_URL_DOMAIN,
+      host: host,
       path: "/",
       fragment: fragment,
     );

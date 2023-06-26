@@ -386,7 +386,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           description: Text(
                             l10n.settingsScreen_settings_serverHostName_description,
                           ),
-                          trailing: Text(settings.serverHostName),
+                          trailing: Text(settings.serverHostname),
                           onPressed: (_) async {
                             final newHostName = await showPlatformModalSheet(
                               context: context,
@@ -399,7 +399,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             );
 
                             if (newHostName != null) {
-                              settings.setServerHostName(newHostName);
+                              settings.setServerHostname(newHostName);
                               settings.save();
                             }
                           },
