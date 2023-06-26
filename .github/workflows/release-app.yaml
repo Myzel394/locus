@@ -79,7 +79,7 @@ jobs:
         run: sed -i -e 's/^\/\/f //' android/app/build.gradle
 
       - name: Update android/app7src/main/AndroidManifest.xml for FLOSS variant 📝
-        run: sed '/<!-- GMS -->/{N;d;}' android/app/src/main/AndroidManifest.xml
+        run: sed -i -e '/<!-- GMS -->/{N;d;}' android/app/src/main/AndroidManifest.xml
 
       - name: Install dependencies 📦
         run: flutter pub get
