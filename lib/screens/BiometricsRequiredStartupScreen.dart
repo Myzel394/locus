@@ -49,13 +49,13 @@ class _BiometricsRequiredStartupScreenState
       Navigator.of(context).pushAndRemoveUntil(
         isCupertino(context)
             ? MaterialWithModalsPageRoute(
-          builder: (_) => screen,
-        )
+                builder: (_) => screen,
+              )
             : NativePageRoute(
-          builder: (_) => screen,
-          context: context,
-        ),
-            (route) => false,
+                builder: (_) => screen,
+                context: context,
+              ),
+        (route) => false,
       );
     } catch (error) {
       FlutterLogs.logInfo(
@@ -92,13 +92,11 @@ class _BiometricsRequiredStartupScreenState
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 PlatformFlavorWidget(
-                  material: (_, __) =>
-                  const Icon(
-                    Icons.fingerprint_rounded,
+                  material: (_, __) => const Icon(
+                    Icons.lock,
                     size: 120,
                   ),
-                  cupertino: (_, __) =>
-                  const Icon(
+                  cupertino: (_, __) => const Icon(
                     CupertinoIcons.shield_lefthalf_fill,
                     size: 120,
                   ),
