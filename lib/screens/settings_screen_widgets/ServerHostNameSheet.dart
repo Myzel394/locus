@@ -34,10 +34,12 @@ class _ServerHostNameSheetState extends State<ServerHostNameSheet> {
       child: ModalSheet(
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             Text(
               l10n.settingsScreen_settings_serverHostName_label,
               style: getTitle2TextStyle(context),
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: MEDIUM_SPACE),
             Text(
@@ -47,6 +49,18 @@ class _ServerHostNameSheetState extends State<ServerHostNameSheet> {
             const SizedBox(height: LARGE_SPACE),
             PlatformTextFormField(
               controller: nameController,
+              material: (_, __) => MaterialTextFormFieldData(
+                decoration: InputDecoration(
+                  labelText: l10n.settingsScreen_settings_serverHostName_label,
+                  hintText: l10n.settingsScreen_settings_serverHostName_hint,
+                  prefixText: "https://",
+                ),
+              ),
+              cupertino: (_, __) => CupertinoTextFormFieldData(
+                placeholder: l10n.settingsScreen_settings_serverHostName_hint,
+                prefix: const Text("https://"),
+              ),
+              textCapitalization: TextCapitalization.none,
               keyboardType: TextInputType.text,
               textInputAction: TextInputAction.done,
               autofillHints: const [AutofillHints.url],
@@ -69,11 +83,13 @@ class _ServerHostNameSheetState extends State<ServerHostNameSheet> {
               material: (_, __) => MaterialElevatedButtonData(
                 icon: const Icon(Icons.check_rounded),
               ),
+              padding: const EdgeInsets.symmetric(vertical: MEDIUM_SPACE),
               onPressed: () {
-                if (formKey.currentState!.validate()) {
-                  final uri = Uri.parse(nameController.text);
-                  Navigator.pop(context, uri.host);
+                if (!formKey.currentState!.validate()) {
+                  return;
                 }
+
+                Navigator.pop(context, "https://" + nameController.text);
               },
               child: Text(l10n.closePositiveSheetAction),
             ),

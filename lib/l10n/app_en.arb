@@ -453,6 +453,7 @@
   "settingsScreen_settings_serverHostName_label": "Server Hostname",
   "settingsScreen_settings_serverHostName_description": "The hostname of the server to connect to. This is only used if you have a custom server. If you don't know what this is, you can ignore this setting.",
   "settingsScreen_settings_serverHostName_error_invalid": "This must be a valid hostname. A hostname consists of a protocol (http:// or https://) and a domain name (e.g. example.com). For example: https://example.com or https://locus.cfd",
+  "settingsScreen_settings_serverHostName_hint": "https://locus.cfd",
   "support_title": "Support Locus",
   "support_description": "Locus is a free open source project. This means that I don't make any money from it. If you like the app and want to support me, you can do so by multiple ways. Thank you very much! :)",
   "support_options_develop": "Help developing Locus",
