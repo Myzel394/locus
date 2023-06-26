@@ -145,6 +145,7 @@ class _ServerOriginSheetState extends State<ServerOriginSheet> {
 
                 return null;
               },
+              onEditingComplete: checkServerOrigin,
             ),
             if (isLoading) ...[
               const SizedBox(height: MEDIUM_SPACE),
@@ -178,13 +179,7 @@ class _ServerOriginSheetState extends State<ServerOriginSheet> {
                 icon: const Icon(Icons.check_rounded),
               ),
               padding: const EdgeInsets.symmetric(vertical: MEDIUM_SPACE),
-              onPressed: () {
-                if (!formKey.currentState!.validate()) {
-                  return;
-                }
-
-                checkServerOrigin();
-              },
+              onPressed: isLoading ? null : checkServerOrigin,
               child: Text(l10n.closePositiveSheetAction),
             ),
           ],
