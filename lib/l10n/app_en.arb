@@ -450,6 +450,9 @@
   "settingsScreen_setting_requireBiometricAuth_requireNowReason": "Confirm your identity to change this setting",
   "settingsScreen_settings_alwaysUseBatterySaveMode_label": "Always use battery save mode",
   "settingsScreen_settings_alwaysUseBatterySaveMode_description": "Locus will update your location less frequently in the background if your phone is in battery save mode. Enabling this option will force Locus to always use battery save mode. Note that your location will still be updated in real time if you have the app open.",
+  "settingsScreen_settings_serverHostName_label": "Server Hostname",
+  "settingsScreen_settings_serverHostName_description": "The hostname of the server to connect to. This is only used if you have a custom server. If you don't know what this is, you can ignore this setting.",
+  "settingsScreen_settings_serverHostName_error_invalid": "This must be a valid hostname. A hostname consists of a protocol (http:// or https://) and a domain name (e.g. example.com). For example: https://example.com or https://locus.cfd",
   "support_title": "Support Locus",
   "support_description": "Locus is a free open source project. This means that I don't make any money from it. If you like the app and want to support me, you can do so by multiple ways. Thank you very much! :)",
   "support_options_develop": "Help developing Locus",
@@ -672,11 +675,11 @@
   "checkLocation_shortDescription": "Verify Locus can access your location",
   "checkLocation_description": "Tap to check if Locus can access your location. Note that this might take up to {minutes} minutes. Make sure you have GPS enabled. Do not close the app or turn off your screen while the check is running.",
   "@checkLocation_description": {
-      "placeholders": {
-          "minutes": {
-              "type": "int"
-          }
+    "placeholders": {
+      "minutes": {
+        "type": "int"
       }
+    }
   },
   "checkLocation_start_label": "Start check",
   "checkLocation_values_usingBestLocation": "Checking using best accuracy",
@@ -686,11 +689,11 @@
   "checkLocation_successMessage": "Congratulations! Locus can access your location!",
   "checkLocation_gpsDisabledMessage": "Please enable GPS to continue",
   "@checkLocation_gpsDisabledMessage": {
-      "description": "Keep this short"
+    "description": "Keep this short"
   },
   "checkLocation_permissionDeniedMessage": "Please grant permission to your location",
   "@checkLocation_permissionDeniedMessage": {
-      "description": "Keep this short"
+    "description": "Keep this short"
   },
   "checkLocation_errorMessage": "We are sorry, but Locus could not access your location. You can try it again later or find more information in the help section.",
   "checkLocation_openHelp": "Open help",

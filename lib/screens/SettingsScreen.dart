@@ -16,6 +16,7 @@ import 'package:locus/constants/values.dart';
 import 'package:locus/screens/CheckLocationScreen.dart';
 import 'package:locus/screens/settings_screen_widgets/ImportSheet.dart';
 import 'package:locus/screens/settings_screen_widgets/MentionTile.dart';
+import 'package:locus/screens/settings_screen_widgets/ServerHostNameSheet.dart';
 import 'package:locus/screens/settings_screen_widgets/TransferSenderScreen.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/utils/PageRoute.dart';
@@ -378,6 +379,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             },
                           ),
                         ),
+                        SettingsTile(
+                          title: Text(
+                            l10n.settingsScreen_settings_serverHostName_label,
+                          ),
+                          description: Text(
+                            l10n.settingsScreen_settings_serverHostName_description,
+                          ),
+                          trailing: Text(settings.serverHostName),
+                          onPressed: (_) async {
+                            final newHostName = await showPlatformModalSheet(
+                              context: context,
+                              material: MaterialModalSheetData(
+                                isScrollControlled: true,
+                                isDismissible: true,
+                                backgroundColor: Colors.transparent,
+                              ),
+                              builder: (_) => const ServerHostNameSheet(),
+                            );
+
+                            if (newHostName != null) {
+                              settings.setServerHostName(newHostName);
+                              settings.save();
+                            }
+                          },
+                        )
                       ],
                     ),
                     SettingsSection(
