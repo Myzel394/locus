@@ -363,9 +363,8 @@ class Task extends ChangeNotifier with LocationBase {
 
     onProgress?.call(TaskLinkPublishProgress.publishing);
 
-    final relay = relays[Random().nextInt(relays.length)];
     final manager = NostrEventsManager(
-      relays: [relay],
+      relays: relays,
       privateKey: nostrPrivateKey,
     );
     final publishedEvent = await manager.publishMessage(cipherText, kind: 1001);
@@ -380,7 +379,7 @@ class Task extends ChangeNotifier with LocationBase {
       // ID
       "i": publishedEvent.id,
       // Relay
-      "r": relay,
+      "r": relays,
     };
 
     final fragment = base64Url.encode(jsonEncode(parameters).codeUnits);
