@@ -53,47 +53,54 @@ class _ShareLocationButtonState extends State<ShareLocationButton> {
 
     final shouldShare = await showPlatformDialog(
       context: context,
-      builder: (context) => PlatformAlertDialog(
-        title: Text(l10n.shareLocation_title),
-        content: Text(l10n.shareLocation_description),
-        material: (_, __) => MaterialAlertDialogData(
-          icon: const Icon(Icons.share_location_rounded),
-        ),
-        actions: createCancellableDialogActions(context, [
-          PlatformDialogAction(
-            child: Text(l10n.shareLocation_actions_createQRCode),
-            material: (_, __) => MaterialDialogActionData(
-              icon: const Icon(Icons.qr_code),
-            ),
-            onPressed: () => Navigator.of(context).pop("qr"),
-          ),
-          PlatformDialogAction(
-            child: Text(l10n.shareLocation_actions_shareFile),
-            material: (_, __) => MaterialDialogActionData(
-              icon: const Icon(Icons.share_rounded),
-            ),
-            onPressed: () => Navigator.of(context).pop("share"),
-          ),
-          if (Platform.isAndroid && isGMSFlavor)
-            PlatformDialogAction(
-              material: (_, __) => MaterialDialogActionData(
-                icon: const Icon(Icons.bluetooth_audio_rounded),
+      builder: (context) =>
+          PlatformAlertDialog(
+            title: Text(l10n.shareLocation_title),
+            content: Text(l10n.shareLocation_description),
+            material: (_, __) =>
+                MaterialAlertDialogData(
+                  icon: const Icon(Icons.share_location_rounded),
+                ),
+            actions: createCancellableDialogActions(context, [
+              PlatformDialogAction(
+                child: Text(l10n.shareLocation_actions_createQRCode),
+                material: (_, __) =>
+                    MaterialDialogActionData(
+                      icon: const Icon(Icons.qr_code),
+                    ),
+                onPressed: () => Navigator.of(context).pop("qr"),
               ),
-              onPressed: () => Navigator.of(context).pop("bluetooth"),
-              child: Text(l10n.shareLocation_actions_shareBluetooth),
-            ),
-          PlatformDialogAction(
-            child: Text(l10n.shareLocation_actions_shareLink),
-            cupertino: (_, __) => CupertinoDialogActionData(
-              isDefaultAction: true,
-            ),
-            material: (_, __) => MaterialDialogActionData(
-              icon: const Icon(Icons.link_rounded),
-            ),
-            onPressed: () => Navigator.of(context).pop("link"),
+              PlatformDialogAction(
+                child: Text(l10n.shareLocation_actions_shareFile),
+                material: (_, __) =>
+                    MaterialDialogActionData(
+                      icon: const Icon(Icons.share_rounded),
+                    ),
+                onPressed: () => Navigator.of(context).pop("share"),
+              ),
+              if (Platform.isAndroid && isGMSFlavor)
+                PlatformDialogAction(
+                  material: (_, __) =>
+                      MaterialDialogActionData(
+                        icon: const Icon(Icons.bluetooth_audio_rounded),
+                      ),
+                  onPressed: () => Navigator.of(context).pop("bluetooth"),
+                  child: Text(l10n.shareLocation_actions_shareBluetooth),
+                ),
+              PlatformDialogAction(
+                child: Text(l10n.shareLocation_actions_shareLink),
+                cupertino: (_, __) =>
+                    CupertinoDialogActionData(
+                      isDefaultAction: true,
+                    ),
+                material: (_, __) =>
+                    MaterialDialogActionData(
+                      icon: const Icon(Icons.link_rounded),
+                    ),
+                onPressed: () => Navigator.of(context).pop("link"),
+              ),
+            ]),
           ),
-        ]),
-      ),
     );
 
     if (!mounted) {
@@ -114,7 +121,7 @@ class _ShareLocationButtonState extends State<ShareLocationButton> {
       switch (shouldShare) {
         case "qr":
           final url =
-              await widget.task.generateLink(settings.getServerHostname());
+          await widget.task.generateLink(settings.getServerOrigin());
 
           if (!mounted) {
             return;
@@ -122,28 +129,29 @@ class _ShareLocationButtonState extends State<ShareLocationButton> {
 
           await showSingularElementDialog(
             context: context,
-            builder: (context) => Column(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: List<Widget>.from(
-                [
-                  Text(
-                    l10n.shareLocation_scanToImport(widget.task.name),
-                    style: getTitle2TextStyle(context),
-                    textAlign: TextAlign.center,
+            builder: (context) =>
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: List<Widget>.from(
+                    [
+                      Text(
+                        l10n.shareLocation_scanToImport(widget.task.name),
+                        style: getTitle2TextStyle(context),
+                        textAlign: TextAlign.center,
+                      ),
+                      isMaterial(context)
+                          ? const SizedBox(height: LARGE_SPACE)
+                          : null,
+                      QrImageView(
+                        data: url,
+                        errorCorrectionLevel: QrErrorCorrectLevel.H,
+                        gapless: false,
+                        backgroundColor: Colors.white,
+                      ),
+                    ].where((element) => element != null),
                   ),
-                  isMaterial(context)
-                      ? const SizedBox(height: LARGE_SPACE)
-                      : null,
-                  QrImageView(
-                    data: url,
-                    errorCorrectionLevel: QrErrorCorrectLevel.H,
-                    gapless: false,
-                    backgroundColor: Colors.white,
-                  ),
-                ].where((element) => element != null),
-              ),
-            ),
+                ),
           );
           break;
         case "share":
@@ -157,7 +165,7 @@ class _ShareLocationButtonState extends State<ShareLocationButton> {
           break;
         case "link":
           final url =
-              await widget.task.generateLink(settings.getServerHostname());
+          await widget.task.generateLink(settings.getServerOrigin());
 
           await Share.share(
             url,
@@ -175,9 +183,10 @@ class _ShareLocationButtonState extends State<ShareLocationButton> {
                 isDismissible: true,
                 backgroundColor: Colors.transparent,
               ),
-              builder: (_) => SendViewByBluetooth(
-                data: data,
-              ),
+              builder: (_) =>
+                  SendViewByBluetooth(
+                    data: data,
+                  ),
             );
           }
           break;
@@ -200,9 +209,10 @@ class _ShareLocationButtonState extends State<ShareLocationButton> {
     final l10n = AppLocalizations.of(context);
 
     return PlatformElevatedButton(
-      material: (_, __) => MaterialElevatedButtonData(
-        icon: const Icon(Icons.share_location_rounded),
-      ),
+      material: (_, __) =>
+          MaterialElevatedButtonData(
+            icon: const Icon(Icons.share_location_rounded),
+          ),
       onPressed: isLoading ? null : openShareLocationDialog,
       child: Text(l10n.shareLocation_title),
     );

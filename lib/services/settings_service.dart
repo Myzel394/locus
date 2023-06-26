@@ -56,7 +56,7 @@ class SettingsService extends ChangeNotifier {
   bool userHasSeenWelcomeScreen = false;
   bool requireBiometricAuthenticationOnStart = false;
   bool alwaysUseBatterySaveMode = false;
-  String serverHostname;
+  String serverOrigin;
   List<String> _relays;
   AndroidTheme androidTheme;
 
@@ -83,12 +83,11 @@ class SettingsService extends ChangeNotifier {
     required this.userHasSeenWelcomeScreen,
     required this.requireBiometricAuthenticationOnStart,
     required this.alwaysUseBatterySaveMode,
-    required this.serverHostname,
+    required this.serverOrigin,
     this.lastHeadlessRun,
     Set<String>? seenHelperSheets,
     List<String>? relays,
-  })
-      : _relays = relays ?? [],
+  })  : _relays = relays ?? [],
         _seenHelperSheets = seenHelperSheets ?? {};
 
   static Future<SettingsService> createDefault() async {
@@ -96,9 +95,9 @@ class SettingsService extends ChangeNotifier {
       automaticallyLookupAddresses: true,
       primaryColor: null,
       androidTheme:
-      await fetchIsMIUI() ? AndroidTheme.miui : AndroidTheme.materialYou,
+          await fetchIsMIUI() ? AndroidTheme.miui : AndroidTheme.materialYou,
       mapProvider:
-      isPlatformApple() ? MapProvider.apple : MapProvider.openStreetMap,
+          isPlatformApple() ? MapProvider.apple : MapProvider.openStreetMap,
       showHints: true,
       geocoderProvider: isSystemGeocoderAvailable()
           ? GeocoderProvider.system
@@ -109,7 +108,7 @@ class SettingsService extends ChangeNotifier {
       requireBiometricAuthenticationOnStart: false,
       alwaysUseBatterySaveMode: false,
       lastHeadlessRun: null,
-      serverHostname: "https://locus.cfd",
+      serverOrigin: "https://locus.cfd",
     );
   }
 
@@ -120,7 +119,7 @@ class SettingsService extends ChangeNotifier {
     return SettingsService(
       automaticallyLookupAddresses: data['automaticallyLoadLocation'],
       primaryColor:
-      data['primaryColor'] != null ? Color(data['primaryColor']) : null,
+          data['primaryColor'] != null ? Color(data['primaryColor']) : null,
       mapProvider: MapProvider.values[data['mapProvider']],
       relays: List<String>.from(data['relays'] ?? []),
       showHints: data['showHints'],
@@ -130,12 +129,12 @@ class SettingsService extends ChangeNotifier {
       userHasSeenWelcomeScreen: data['userHasSeenWelcomeScreen'],
       seenHelperSheets: Set<String>.from(data['seenHelperSheets'] ?? {}),
       requireBiometricAuthenticationOnStart:
-      data['requireBiometricAuthenticationOnStart'],
+          data['requireBiometricAuthenticationOnStart'],
       alwaysUseBatterySaveMode: data['alwaysUseBatterySaveMode'],
       lastHeadlessRun: data['lastHeadlessRun'] != null
           ? DateTime.parse(data['lastHeadlessRun'])
           : null,
-      serverHostname: data['serverHostname'],
+      serverOrigin: data['serverOrigin'],
     );
   }
 
@@ -171,15 +170,17 @@ class SettingsService extends ChangeNotifier {
       "userHasSeenWelcomeScreen": userHasSeenWelcomeScreen,
       "seenHelperSheets": _seenHelperSheets.toList(),
       "requireBiometricAuthenticationOnStart":
-      requireBiometricAuthenticationOnStart,
+          requireBiometricAuthenticationOnStart,
       "alwaysUseBatterySaveMode": alwaysUseBatterySaveMode,
       "lastHeadlessRun": lastHeadlessRun?.toIso8601String(),
-      "serverHostname": serverHostname,
+      "serverOrigin": serverOrigin,
     };
   }
 
-  Future<String> getAddress(final double latitude,
-      final double longitude,) async {
+  Future<String> getAddress(
+    final double latitude,
+    final double longitude,
+  ) async {
     final providers = [
       getGeocoderProvider(),
       ...GeocoderProvider.values
@@ -211,8 +212,7 @@ class SettingsService extends ChangeNotifier {
     throw Exception("Failed to get address from any provider");
   }
 
-  Future<void> save() =>
-      storage.write(
+  Future<void> save() => storage.write(
         key: STORAGE_KEY,
         value: jsonEncode(toJSON()),
       );
@@ -233,13 +233,9 @@ class SettingsService extends ChangeNotifier {
 
     // Return system default
     if (isCupertino(context)) {
-      return CupertinoTheme
-          .of(context)
-          .primaryColor;
+      return CupertinoTheme.of(context).primaryColor;
     } else {
-      return Theme
-          .of(context)
-          .primaryColor;
+      return Theme.of(context).primaryColor;
     }
   }
 
@@ -330,10 +326,10 @@ class SettingsService extends ChangeNotifier {
     await save();
   }
 
-  String getServerHostname() => serverHostname;
+  String getServerOrigin() => serverOrigin;
 
-  void setServerHostname(final String value) {
-    serverHostname = value;
+  void serverServerOrigin(final String value) {
+    serverOrigin = value;
     notifyListeners();
   }
 }

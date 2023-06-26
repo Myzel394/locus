@@ -44,11 +44,11 @@ class _TaskTileState extends State<TaskTile> {
 
     return {
       TaskLinkPublishProgress.encrypting:
-          l10n.taskAction_generateLink_process_encrypting,
+      l10n.taskAction_generateLink_process_encrypting,
       TaskLinkPublishProgress.publishing:
-          l10n.taskAction_generateLink_process_publishing,
+      l10n.taskAction_generateLink_process_publishing,
       TaskLinkPublishProgress.creatingURI:
-          l10n.taskAction_generateLink_process_creatingURI,
+      l10n.taskAction_generateLink_process_creatingURI,
     };
   }
 
@@ -69,104 +69,106 @@ class _TaskTileState extends State<TaskTile> {
               onChanged: widget.disabled || isLoading
                   ? null
                   : (value) async {
-                      setState(() {
-                        isLoading = true;
-                      });
+                setState(() {
+                  isLoading = true;
+                });
 
-                      final logService = context.read<LogService>();
+                final logService = context.read<LogService>();
 
-                      try {
-                        if (value) {
-                          await widget.task.startExecutionImmediately();
-                          taskService.update(widget.task);
-                          await logService.addLog(
-                            Log.taskStatusChanged(
-                              initiator: LogInitiator.user,
-                              taskId: widget.task.id,
-                              taskName: widget.task.name,
-                              active: true,
-                            ),
-                          );
-                          final nextEndDate = widget.task.nextEndDate();
+                try {
+                  if (value) {
+                    await widget.task.startExecutionImmediately();
+                    taskService.update(widget.task);
+                    await logService.addLog(
+                      Log.taskStatusChanged(
+                        initiator: LogInitiator.user,
+                        taskId: widget.task.id,
+                        taskName: widget.task.name,
+                        active: true,
+                      ),
+                    );
+                    final nextEndDate = widget.task.nextEndDate();
 
-                          widget.task.publishCurrentPosition();
+                    widget.task.publishCurrentPosition();
 
-                          if (!mounted) {
-                            return;
-                          }
+                    if (!mounted) {
+                      return;
+                    }
 
-                          if (nextEndDate == null) {
-                            return;
-                          }
+                    if (nextEndDate == null) {
+                      return;
+                    }
 
-                          showPlatformDialog(
-                            context: context,
-                            builder: (_) => PlatformAlertDialog(
-                              title: Text(l10n.taskAction_started_title),
-                              content: Text(l10n
-                                  .taskAction_started_runsUntil(nextEndDate)),
-                              actions: <Widget>[
-                                PlatformDialogActionButton(
-                                  child: Text(l10n.closeNeutralAction),
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                )
-                              ],
-                            ),
-                          );
-                        } else {
-                          await widget.task.stopExecutionImmediately();
-                          await logService.addLog(
-                            Log.taskStatusChanged(
-                              initiator: LogInitiator.user,
-                              taskId: widget.task.id,
-                              taskName: widget.task.name,
-                              active: false,
-                            ),
-                          );
-                          final nextStartDate =
-                              await widget.task.startScheduleTomorrow();
+                    showPlatformDialog(
+                      context: context,
+                      builder: (_) =>
+                          PlatformAlertDialog(
+                            title: Text(l10n.taskAction_started_title),
+                            content: Text(l10n
+                                .taskAction_started_runsUntil(nextEndDate)),
+                            actions: <Widget>[
+                              PlatformDialogActionButton(
+                                child: Text(l10n.closeNeutralAction),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                              )
+                            ],
+                          ),
+                    );
+                  } else {
+                    await widget.task.stopExecutionImmediately();
+                    await logService.addLog(
+                      Log.taskStatusChanged(
+                        initiator: LogInitiator.user,
+                        taskId: widget.task.id,
+                        taskName: widget.task.name,
+                        active: false,
+                      ),
+                    );
+                    final nextStartDate =
+                    await widget.task.startScheduleTomorrow();
 
-                          taskService.update(widget.task);
+                    taskService.update(widget.task);
 
-                          if (!mounted) {
-                            return;
-                          }
+                    if (!mounted) {
+                      return;
+                    }
 
-                          if (nextStartDate == null) {
-                            return;
-                          }
+                    if (nextStartDate == null) {
+                      return;
+                    }
 
-                          showPlatformDialog(
-                            context: context,
-                            builder: (_) => PlatformAlertDialog(
-                              title: Text(l10n.taskAction_stopped_title),
-                              content: Text(l10n.taskAction_stopped_startsAgain(
-                                  nextStartDate)),
-                              actions: <Widget>[
-                                PlatformDialogActionButton(
-                                  child: Text(l10n.closeNeutralAction),
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                )
-                              ],
-                            ),
-                          );
-                        }
-                      } catch (error) {
-                        FlutterLogs.logError(
-                          LOG_TAG,
-                          "Task Tile",
-                          "Error while starting/stopping task: $error",
-                        );
-                      } finally {
-                        setState(() {
-                          isLoading = false;
-                        });
-                      }
-                    },
+                    showPlatformDialog(
+                      context: context,
+                      builder: (_) =>
+                          PlatformAlertDialog(
+                            title: Text(l10n.taskAction_stopped_title),
+                            content: Text(l10n.taskAction_stopped_startsAgain(
+                                nextStartDate)),
+                            actions: <Widget>[
+                              PlatformDialogActionButton(
+                                child: Text(l10n.closeNeutralAction),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                              )
+                            ],
+                          ),
+                    );
+                  }
+                } catch (error) {
+                  FlutterLogs.logError(
+                    LOG_TAG,
+                    "Task Tile",
+                    "Error while starting/stopping task: $error",
+                  );
+                } finally {
+                  setState(() {
+                    isLoading = false;
+                  });
+                }
+              },
             );
           }
 
@@ -184,7 +186,7 @@ class _TaskTileState extends State<TaskTile> {
               ),
               onPressed: () async {
                 final url = await widget.task.generateLink(
-                  settings.getServerHostname(),
+                  settings.getServerOrigin(),
                   onProgress: (progress) {
                     if (snackBar != null) {
                       try {
@@ -235,9 +237,10 @@ class _TaskTileState extends State<TaskTile> {
         Navigator.of(context).push(
           NativePageRoute(
             context: context,
-            builder: (context) => TaskDetailScreen(
-              task: widget.task,
-            ),
+            builder: (context) =>
+                TaskDetailScreen(
+                  task: widget.task,
+                ),
           ),
         );
       },

@@ -1,4 +1,3 @@
-import 'package:basic_utils/basic_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
@@ -7,14 +6,14 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../widgets/ModalSheet.dart';
 
-class ServerHostNameSheet extends StatefulWidget {
-  const ServerHostNameSheet({super.key});
+class ServerOriginSheet extends StatefulWidget {
+  const ServerOriginSheet({super.key});
 
   @override
-  State<ServerHostNameSheet> createState() => _ServerHostNameSheetState();
+  State<ServerOriginSheet> createState() => _ServerOriginSheetState();
 }
 
-class _ServerHostNameSheetState extends State<ServerHostNameSheet> {
+class _ServerOriginSheetState extends State<ServerOriginSheet> {
   final formKey = GlobalKey<FormState>();
   final nameController = TextEditingController();
 
@@ -37,13 +36,13 @@ class _ServerHostNameSheetState extends State<ServerHostNameSheet> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             Text(
-              l10n.settingsScreen_settings_serverHostName_label,
+              l10n.settingsScreen_settings_serverOrigin_label,
               style: getTitle2TextStyle(context),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: MEDIUM_SPACE),
             Text(
-              l10n.settingsScreen_settings_serverHostName_description,
+              l10n.settingsScreen_settings_serverOrigin_description,
               style: getBodyTextTextStyle(context),
             ),
             const SizedBox(height: LARGE_SPACE),
@@ -51,13 +50,13 @@ class _ServerHostNameSheetState extends State<ServerHostNameSheet> {
               controller: nameController,
               material: (_, __) => MaterialTextFormFieldData(
                 decoration: InputDecoration(
-                  labelText: l10n.settingsScreen_settings_serverHostName_label,
-                  hintText: l10n.settingsScreen_settings_serverHostName_hint,
+                  labelText: l10n.settingsScreen_settings_serverOrigin_label,
+                  hintText: l10n.settingsScreen_settings_serverOrigin_hint,
                   prefixText: "https://",
                 ),
               ),
               cupertino: (_, __) => CupertinoTextFormFieldData(
-                placeholder: l10n.settingsScreen_settings_serverHostName_hint,
+                placeholder: l10n.settingsScreen_settings_serverOrigin_hint,
                 prefix: const Text("https://"),
               ),
               textCapitalization: TextCapitalization.none,
@@ -72,7 +71,7 @@ class _ServerHostNameSheetState extends State<ServerHostNameSheet> {
 
                 if (Uri.tryParse(value) == null) {
                   return l10n
-                      .settingsScreen_settings_serverHostName_error_invalid;
+                      .settingsScreen_settings_serverOrigin_error_invalid;
                 }
 
                 return null;
