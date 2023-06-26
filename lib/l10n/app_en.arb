@@ -454,6 +454,7 @@
   "settingsScreen_settings_serverOrigin_description": "The origin of the server to connect to. This is only used if you have a custom server. If you don't know what this is, you can ignore this setting.",
   "settingsScreen_settings_serverOrigin_error_invalid": "This must be a valid origin. An origin consists of a protocol (http:// or https://) and a domain name (e.g. example.com). For example: https://example.com or https://locus.cfd",
   "settingsScreen_settings_serverOrigin_hint": "locus.cfd",
+  "settingsScreen_settings_serverOrigin_error_serverInvalid": "This is not a Locus server",
   "support_title": "Support Locus",
   "support_description": "Locus is a free open source project. This means that I don't make any money from it. If you like the app and want to support me, you can do so by multiple ways. Thank you very much! :)",
   "support_options_develop": "Help developing Locus",
