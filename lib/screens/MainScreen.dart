@@ -37,7 +37,7 @@ import '../utils/platform.dart';
 import 'CreateTaskScreen.dart';
 import 'ImportTaskSheet.dart';
 import 'LogsScreen.dart';
-import 'main_screen_widgets/screens/OverviewScreen.dart';
+import 'main_screen_widgets/screens/TasksOverviewScreen.dart';
 import 'main_screen_widgets/values.dart';
 
 class MainScreen extends StatefulWidget {
@@ -574,7 +574,7 @@ class _MainScreenState extends State<MainScreen> {
         controller: _tabController,
         physics: const NeverScrollableScrollPhysics(),
         children: <Widget>[
-          const OverviewScreen(),
+          const TasksOverviewScreen(),
           const LogsScreen(),
           if (isCupertino(context))
             CreateTaskScreen(

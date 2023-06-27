@@ -22,14 +22,15 @@ import '../TaskTile.dart';
 import '../UpdateAvailableBanner.dart';
 import '../ViewTile.dart';
 
-class OverviewScreen extends StatefulWidget {
-  const OverviewScreen({Key? key}) : super(key: key);
+class TasksOverviewScreen extends StatefulWidget {
+  const TasksOverviewScreen({Key? key}) : super(key: key);
 
   @override
-  State<OverviewScreen> createState() => _OverviewScreenState();
+  State<TasksOverviewScreen> createState() => _TasksOverviewScreenState();
 }
 
-class _OverviewScreenState extends State<OverviewScreen> with AutomaticKeepAliveClientMixin {
+class _TasksOverviewScreenState extends State<TasksOverviewScreen>
+    with AutomaticKeepAliveClientMixin {
   bool get wantKeepAlive => true;
 
   final _hintTypeFuture = getHintTypeForMainScreen();
@@ -48,11 +49,15 @@ class _OverviewScreenState extends State<OverviewScreen> with AutomaticKeepAlive
 
     return SafeArea(
       child: SingleChildScrollView(
-        padding: Platform.isAndroid ? const EdgeInsets.only(bottom: FAB_DIMENSION) : EdgeInsets.zero,
+        padding: Platform.isAndroid
+            ? const EdgeInsets.only(bottom: FAB_DIMENSION)
+            : EdgeInsets.zero,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            appUpdateService.shouldShowBanner() ? const UpdateAvailableBanner() : const SizedBox.shrink(),
+            appUpdateService.shouldShowBanner()
+                ? const UpdateAvailableBanner()
+                : const SizedBox.shrink(),
             FutureBuilder<HintType?>(
               future: _hintTypeFuture,
               builder: (context, snapshot) {
@@ -89,7 +94,8 @@ class _OverviewScreenState extends State<OverviewScreen> with AutomaticKeepAlive
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: MEDIUM_SPACE),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: MEDIUM_SPACE),
                             child: ChipCaption(
                               l10n.mainScreen_tasksSection,
                               icon: Icons.task_rounded,
@@ -141,7 +147,8 @@ class _OverviewScreenState extends State<OverviewScreen> with AutomaticKeepAlive
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: MEDIUM_SPACE),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: MEDIUM_SPACE),
                             child: ChipCaption(
                               l10n.mainScreen_viewsSection,
                               icon: context.platformIcons.eyeSolid,
