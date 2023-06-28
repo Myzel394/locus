@@ -240,6 +240,7 @@
   "mainScreen_importTask_importOverview_lastPosition": "Last Position:",
   "mainScreen_importTask_successMessage": "The task was successfully imported!",
   "mainScreen_importTask_importLabel": "Import",
+  "locationsOverview_viewSelection_all": "Show all locations",
   "createTask_title": "Define a name for your task",
   "createTask_fields_name_label": "Name",
   "createTask_sameTaskNameAlreadyExists": "A task with this name already exists. You can create the task, but you will have two tasks with the same name.",

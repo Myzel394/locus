@@ -9,12 +9,14 @@ class Paper extends StatelessWidget {
   final BoxConstraints? constraints;
   final BoxDecoration decoration;
   final double? width;
+  final EdgeInsets? padding;
 
   const Paper({
     required this.child,
     double? roundness,
     BoxDecoration? decoration,
     this.width = double.infinity,
+    this.padding = const EdgeInsets.all(MEDIUM_SPACE),
     this.constraints,
     Key? key,
   })  : roundness = roundness ?? MEDIUM_SPACE,
@@ -24,7 +26,7 @@ class Paper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(MEDIUM_SPACE),
+      padding: padding,
       constraints: constraints,
       width: width,
       decoration: decoration.copyWith(

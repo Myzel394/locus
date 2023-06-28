@@ -3,10 +3,14 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:locus/api/nostr-fetch.dart';
+import 'package:locus/constants/spacing.dart';
 import 'package:locus/services/view_service.dart';
+import 'package:locus/utils/theme.dart';
+import 'package:locus/widgets/Paper.dart';
 import 'package:nostr/nostr.dart';
 import 'package:provider/provider.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../services/location_point_service.dart';
 import '../../../services/task_service.dart';
@@ -61,6 +65,9 @@ class LocationsOverviewScreen extends StatefulWidget {
 class _LocationsOverviewScreenState extends State<LocationsOverviewScreen> {
   late final LocationFetcher _fetchers;
   final MapController flutterMapController = MapController();
+
+  // Null = all views
+  String? selectedViewID;
 
   @override
   void initState() {
@@ -122,8 +129,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen> {
   Widget buildMap() {
     final viewService = context.read<ViewService>();
 
-    print(_fetchers.locations);
-
     return FlutterMap(
       mapController: flutterMapController,
       options: MapOptions(
@@ -161,11 +166,56 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final viewService = context.watch<ViewService>();
+
     return PlatformScaffold(
-      appBar: PlatformAppBar(
-        title: Text('Locations'),
+      body: Stack(
+        children: <Widget>[
+          buildMap(),
+          Positioned(
+            left: MEDIUM_SPACE,
+            right: MEDIUM_SPACE,
+            top: MEDIUM_SPACE,
+            child: SafeArea(
+              bottom: false,
+              child: Center(
+                child: Paper(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: MEDIUM_SPACE,
+                    vertical: SMALL_SPACE,
+                  ),
+                  child: DropdownButton<String?>(
+                    onChanged: (_) {},
+                    underline: Container(),
+                    alignment: Alignment.center,
+                    isExpanded: true,
+                    items: [
+                      DropdownMenuItem(
+                        value: null,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: <Widget>[
+                            const Icon(Icons.location_on_rounded),
+                            const SizedBox(width: SMALL_SPACE),
+                            Text(l10n.locationsOverview_viewSelection_all),
+                          ],
+                        ),
+                      ),
+                      for (final view in viewService.views) ...[
+                        DropdownMenuItem(
+                          value: view.id,
+                          child: Text(view.name),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          )
+        ],
       ),
-      body: buildMap(),
     );
   }
 }
