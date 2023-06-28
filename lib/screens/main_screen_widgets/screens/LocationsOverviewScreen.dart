@@ -33,6 +33,7 @@ class LocationFetcher extends ChangeNotifier {
 
     for (final view in views) {
       view.getLocations(
+        from: DateTime.now().subtract(Duration(days: 1)),
         onLocationFetched: (location) {
           _locations[view] = List<LocationPointService>.from(
             [..._locations[view] ?? [], location],
@@ -143,6 +144,8 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen> {
         ),
         CircleLayer(
           circles: viewService.views
+              .where(
+                  (view) => selectedViewID == null || view.id == selectedViewID)
               .map(
                 (view) => (_fetchers.locations[view] ?? [])
                     .map(
@@ -161,6 +164,23 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen> {
               .toList(),
         ),
       ],
+    );
+  }
+
+  void showViewLocations(final TaskView view) async {
+    setState(() {
+      selectedViewID = view.id;
+    });
+
+    final latestLocation = _fetchers.locations[view]?.last;
+
+    if (latestLocation == null) {
+      return;
+    }
+
+    flutterMapController.move(
+      LatLng(latestLocation.latitude, latestLocation.longitude),
+      flutterMapController.zoom,
     );
   }
 
@@ -186,7 +206,21 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen> {
                     vertical: SMALL_SPACE,
                   ),
                   child: DropdownButton<String?>(
-                    onChanged: (_) {},
+                    value: selectedViewID,
+                    onChanged: (selection) {
+                      if (selection == null) {
+                        setState(() {
+                          selectedViewID = null;
+                        });
+                        return;
+                      }
+
+                      final view = viewService.views.firstWhere(
+                        (view) => view.id == selection,
+                      );
+
+                      showViewLocations(view);
+                    },
                     underline: Container(),
                     alignment: Alignment.center,
                     isExpanded: true,
@@ -196,7 +230,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: <Widget>[
-                            const Icon(Icons.location_on_rounded),
+                            const Icon(Icons.location_on_rounded, size: 20),
                             const SizedBox(width: SMALL_SPACE),
                             Text(l10n.locationsOverview_viewSelection_all),
                           ],
