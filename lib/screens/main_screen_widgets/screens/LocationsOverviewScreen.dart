@@ -28,6 +28,8 @@ class LocationFetcher extends ChangeNotifier {
 
   LocationFetcher(this.views);
 
+  bool get hasMultipleLocationViews => _locations.keys.length > 1;
+
   void fetchLocations() {
     _setIsLoading(true);
 
@@ -184,6 +186,77 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen> {
     );
   }
 
+  Widget buildLocationSelectionBar() {
+    final l10n = AppLocalizations.of(context);
+    final viewService = context.watch<ViewService>();
+
+    return Positioned(
+      left: MEDIUM_SPACE,
+      right: MEDIUM_SPACE,
+      top: MEDIUM_SPACE,
+      child: SafeArea(
+        bottom: false,
+        child: Center(
+          child: Paper(
+            padding: const EdgeInsets.symmetric(
+              horizontal: MEDIUM_SPACE,
+              vertical: SMALL_SPACE,
+            ),
+            child: DropdownButton<String?>(
+              value: selectedViewID,
+              onChanged: (selection) {
+                if (selection == null) {
+                  setState(() {
+                    selectedViewID = null;
+                  });
+                  return;
+                }
+
+                final view = viewService.views.firstWhere(
+                  (view) => view.id == selection,
+                );
+
+                showViewLocations(view);
+              },
+              underline: Container(),
+              alignment: Alignment.center,
+              isExpanded: true,
+              items: [
+                DropdownMenuItem(
+                  value: null,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: <Widget>[
+                      const Icon(Icons.location_on_rounded, size: 20),
+                      const SizedBox(width: SMALL_SPACE),
+                      Text(l10n.locationsOverview_viewSelection_all),
+                    ],
+                  ),
+                ),
+                for (final view in viewService.views) ...[
+                  DropdownMenuItem(
+                    value: view.id,
+                    child: Row(
+                      children: <Widget>[
+                        Icon(
+                          Icons.circle_rounded,
+                          size: 20,
+                          color: view.color,
+                        ),
+                        const SizedBox(width: SMALL_SPACE),
+                        Text(view.name),
+                      ],
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -193,71 +266,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen> {
       body: Stack(
         children: <Widget>[
           buildMap(),
-          Positioned(
-            left: MEDIUM_SPACE,
-            right: MEDIUM_SPACE,
-            top: MEDIUM_SPACE,
-            child: SafeArea(
-              bottom: false,
-              child: Center(
-                child: Paper(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: MEDIUM_SPACE,
-                    vertical: SMALL_SPACE,
-                  ),
-                  child: DropdownButton<String?>(
-                    value: selectedViewID,
-                    onChanged: (selection) {
-                      if (selection == null) {
-                        setState(() {
-                          selectedViewID = null;
-                        });
-                        return;
-                      }
-
-                      final view = viewService.views.firstWhere(
-                        (view) => view.id == selection,
-                      );
-
-                      showViewLocations(view);
-                    },
-                    underline: Container(),
-                    alignment: Alignment.center,
-                    isExpanded: true,
-                    items: [
-                      DropdownMenuItem(
-                        value: null,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          children: <Widget>[
-                            const Icon(Icons.location_on_rounded, size: 20),
-                            const SizedBox(width: SMALL_SPACE),
-                            Text(l10n.locationsOverview_viewSelection_all),
-                          ],
-                        ),
-                      ),
-                      for (final view in viewService.views) ...[
-                        DropdownMenuItem(
-                          value: view.id,
-                          child: Row(
-                            children: <Widget>[
-                              Icon(
-                                Icons.circle_rounded,
-                                size: 20,
-                                color: view.color,
-                              ),
-                              const SizedBox(width: SMALL_SPACE),
-                              Text(view.name),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          )
+          if (_fetchers.hasMultipleLocationViews) buildLocationSelectionBar(),
         ],
       ),
     );
