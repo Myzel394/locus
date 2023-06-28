@@ -19,6 +19,9 @@ import '../../../utils/permission.dart';
 class LocationFetcher extends ChangeNotifier {
   final Iterable<TaskView> views;
   final Map<TaskView, List<LocationPointService>> _locations = {};
+  final List<VoidCallback> _getLocationsUnsubscribers = [];
+
+  bool _mounted = true;
 
   Map<TaskView, List<LocationPointService>> get locations => _locations;
 
@@ -33,27 +36,48 @@ class LocationFetcher extends ChangeNotifier {
   void fetchLocations() {
     _setIsLoading(true);
 
-    for (final view in views) {
-      view.getLocations(
-        from: DateTime.now().subtract(Duration(days: 1)),
-        onLocationFetched: (location) {
-          _locations[view] = List<LocationPointService>.from(
-            [..._locations[view] ?? [], location],
-          );
-        },
-        onEnd: () {
-          _locations[view] = _locations[view]!
-            ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+    _getLocationsUnsubscribers.addAll(
+      views.map(
+            (view) =>
+            view.getLocations(
+              from: DateTime.now().subtract(Duration(days: 1)),
+              onLocationFetched: (location) {
+                if (!_mounted) {
+                  return;
+                }
 
-          _setIsLoading(_locations.keys.length == views.length);
-        },
-      );
-    }
+                _locations[view] = List<LocationPointService>.from(
+                  [..._locations[view] ?? [], location],
+                );
+              },
+              onEnd: () {
+                if (!_mounted) {
+                  return;
+                }
+
+                _locations[view] = _locations[view]!
+                  ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+
+                _setIsLoading(_locations.keys.length == views.length);
+              },
+            ),
+      ),
+    );
   }
 
   void _setIsLoading(final bool isLoading) {
     _isLoading = isLoading;
     notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    for (final unsubscribe in _getLocationsUnsubscribers) {
+      unsubscribe();
+    }
+
+    _mounted = false;
+    super.dispose();
   }
 }
 
@@ -95,10 +119,15 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen> {
   void _createLocationFetcher() {
     final viewService = context.read<ViewService>();
 
-    _fetchers = LocationFetcher(viewService.views)..fetchLocations();
+    _fetchers = LocationFetcher(viewService.views)
+      ..fetchLocations();
   }
 
   void _rebuild() {
+    if (!mounted) {
+      return;
+    }
+
     setState(() {});
   }
 
@@ -149,18 +178,20 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen> {
               .where(
                   (view) => selectedViewID == null || view.id == selectedViewID)
               .map(
-                (view) => (_fetchers.locations[view] ?? [])
+                (view) =>
+                (_fetchers.locations[view] ?? [])
                     .map(
-                      (location) => CircleMarker(
+                      (location) =>
+                      CircleMarker(
                         radius: location.accuracy,
                         useRadiusInMeter: true,
                         point: LatLng(location.latitude, location.longitude),
                         color: view.color.withOpacity(.2),
                         borderColor: view.color,
                       ),
-                    )
+                )
                     .toList(),
-              )
+          )
               .toList()
               .expand((element) => element)
               .toList(),
@@ -213,7 +244,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen> {
                 }
 
                 final view = viewService.views.firstWhere(
-                  (view) => view.id == selection,
+                      (view) => view.id == selection,
                 );
 
                 showViewLocations(view);
