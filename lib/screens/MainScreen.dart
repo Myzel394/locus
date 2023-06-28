@@ -16,6 +16,7 @@ import 'package:locus/init_quick_actions.dart';
 import 'package:locus/main.dart';
 import 'package:locus/screens/ViewDetailScreen.dart';
 import 'package:locus/screens/main_screen_widgets/screens/EmptyScreen.dart';
+import 'package:locus/screens/main_screen_widgets/screens/LocationsOverviewScreen.dart';
 import 'package:locus/services/manager_service.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/services/view_service.dart';
@@ -401,8 +402,8 @@ class _MainScreenState extends State<MainScreen> {
                           },
                           child: Icon(
                             activeTab == 0
-                                ? CupertinoIcons.square_list_fill
-                                : CupertinoIcons.square_list,
+                                ? CupertinoIcons.location_fill
+                                : CupertinoIcons.location,
                             color: activeTab == 0
                                 ? primaryColor
                                 : getBodyTextColor(context),
@@ -414,8 +415,8 @@ class _MainScreenState extends State<MainScreen> {
                           },
                           child: Icon(
                             activeTab == 1
-                                ? CupertinoIcons.time_solid
-                                : CupertinoIcons.time,
+                                ? CupertinoIcons.square_list_fill
+                                : CupertinoIcons.square_list,
                             color: activeTab == 1
                                 ? primaryColor
                                 : getBodyTextColor(context),
@@ -480,7 +481,7 @@ class _MainScreenState extends State<MainScreen> {
               ),
               BottomNavigationBarItem(
                 icon: const Icon(CupertinoIcons.list_bullet),
-                label: l10n.mainScreen_logs,
+                label: l10n.mainScreen_tasks,
               ),
               BottomNavigationBarItem(
                 icon: const Icon(CupertinoIcons.location_fill),
@@ -494,8 +495,8 @@ class _MainScreenState extends State<MainScreen> {
                 backgroundColor: Theme.of(context).dialogBackgroundColor,
               ),
               BottomNavigationBarItem(
-                icon: const Icon(Icons.history),
-                label: l10n.mainScreen_logs,
+                icon: const Icon(Icons.list_rounded),
+                label: l10n.mainScreen_tasks,
               ),
             ],
     );
@@ -519,7 +520,7 @@ class _MainScreenState extends State<MainScreen> {
 
     return PlatformScaffold(
       material: (_, __) => MaterialScaffoldData(
-        floatingActionButton: activeTab == 0
+        floatingActionButton: activeTab == 1
             ? OpenContainer(
                 transitionDuration: const Duration(milliseconds: 500),
                 transitionType: ContainerTransitionType.fadeThrough,
@@ -574,8 +575,8 @@ class _MainScreenState extends State<MainScreen> {
         controller: _tabController,
         physics: const NeverScrollableScrollPhysics(),
         children: <Widget>[
+          const LocationsOverviewScreen(),
           const TasksOverviewScreen(),
-          const LogsScreen(),
           if (isCupertino(context))
             CreateTaskScreen(
               onCreated: () {

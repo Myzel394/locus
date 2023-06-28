@@ -214,7 +214,7 @@
   "importTask_bluetooth_receive_request_accept": "Accept",
   "mainScreen_overview": "Overview",
   "mainScreen_createTask": "Create Task",
-  "mainScreen_logs": "Logs",
+  "mainScreen_tasks": "Shares",
   "mainScreen_createTask_scheduleNow": "Start schedule immediately",
   "mainScreen_createTask_scheduleNow_help_title": "Scheduling",
   "mainScreen_createTask_scheduleNow_help_description": "The task will be scheduled after you create it. This does not necessarily mean that it will start directly. It will start at the next expected time based on your timers. If you disable this, you will have to schedule the task manually.",
