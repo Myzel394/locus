@@ -150,8 +150,8 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen> {
                         radius: location.accuracy,
                         useRadiusInMeter: true,
                         point: LatLng(location.latitude, location.longitude),
-                        color: Colors.blue,
-                        borderColor: Colors.black,
+                        color: view.color.withOpacity(.2),
+                        borderColor: view.color,
                       ),
                     )
                     .toList(),
@@ -205,7 +205,17 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen> {
                       for (final view in viewService.views) ...[
                         DropdownMenuItem(
                           value: view.id,
-                          child: Text(view.name),
+                          child: Row(
+                            children: <Widget>[
+                              Icon(
+                                Icons.circle_rounded,
+                                size: 20,
+                                color: view.color,
+                              ),
+                              const SizedBox(width: SMALL_SPACE),
+                              Text(view.name),
+                            ],
+                          ),
                         ),
                       ],
                     ],
