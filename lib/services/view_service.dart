@@ -6,6 +6,7 @@ import 'package:collection/collection.dart';
 import 'package:cryptography/cryptography.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:locus/api/nostr-fetch.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/utils/cryptography.dart';
 import 'package:nostr/nostr.dart';
@@ -24,13 +25,13 @@ class ViewServiceLinkParameters {
   final SecretKey password;
   final String nostrPublicKey;
   final String nostrMessageID;
-  final String relay;
+  final List<String> relays;
 
   const ViewServiceLinkParameters({
     required this.password,
     required this.nostrPublicKey,
     required this.nostrMessageID,
-    required this.relay,
+    required this.relays,
   });
 }
 
@@ -62,19 +63,24 @@ class TaskView extends ChangeNotifier with LocationBase {
     final uri = Uri.parse(url);
     final fragment = uri.fragment;
 
-    final rawParameters = const Utf8Decoder().convert(base64Url.decode(fragment));
+    final rawParameters =
+        const Utf8Decoder().convert(base64Url.decode(fragment));
     final parameters = jsonDecode(rawParameters);
 
     return ViewServiceLinkParameters(
       password: SecretKey(List<int>.from(parameters['p'])),
       nostrPublicKey: parameters['k'],
       nostrMessageID: parameters['i'],
-      relay: parameters['r'],
+      // Add support for old links
+      relays: parameters["r"] is List
+          ? List<String>.from(parameters['r'])
+          : [parameters["r"]],
     );
   }
 
   factory TaskView.fromJSON(final Map<String, dynamic> json) => TaskView(
-        encryptionPassword: SecretKey(List<int>.from(json["encryptionPassword"])),
+        encryptionPassword:
+            SecretKey(List<int>.from(json["encryptionPassword"])),
         nostrPublicKey: json["nostrPublicKey"],
         relays: List<String>.from(json["relays"]),
         name: json["name"] ?? "Unnamed Task",
@@ -82,7 +88,8 @@ class TaskView extends ChangeNotifier with LocationBase {
         id: json["id"] ?? const Uuid().v4(),
         alarms: List<LocationAlarmServiceBase>.from(
           (json["alarms"] ?? []).map((alarm) {
-            final identifier = LocationAlarmType.values.firstWhere((element) => element.name == alarm["_IDENTIFIER"]);
+            final identifier = LocationAlarmType.values
+                .firstWhere((element) => element.name == alarm["_IDENTIFIER"]);
 
             switch (identifier) {
               case LocationAlarmType.radiusBasedRegion:
@@ -90,8 +97,12 @@ class TaskView extends ChangeNotifier with LocationBase {
             }
           }),
         ),
-        lastAlarmCheck: json["lastAlarmCheck"] != null ? DateTime.parse(json["lastAlarmCheck"]) : DateTime.now(),
-        lastMaybeTrigger: json["lastMaybeTrigger"] != null ? DateTime.parse(json["lastMaybeTrigger"]) : null,
+        lastAlarmCheck: json["lastAlarmCheck"] != null
+            ? DateTime.parse(json["lastAlarmCheck"])
+            : DateTime.now(),
+        lastMaybeTrigger: json["lastMaybeTrigger"] != null
+            ? DateTime.parse(json["lastMaybeTrigger"])
+            : null,
       );
 
   static Future<TaskView> fetchFromNostr(
@@ -106,20 +117,13 @@ class TaskView extends ChangeNotifier with LocationBase {
       ),
     ]);
 
-    final socket = await WebSocket.connect(
-      parameters.relay,
+    final nostrFetch = NostrFetch(
+      relays: parameters.relays,
+      request: request,
     );
 
-    bool hasEventReceived = false;
-
-    socket.add(request.serialize());
-
-    socket.listen((rawEvent) async {
-      final event = Message.deserialize(rawEvent);
-
-      switch (event.type) {
-        case "EVENT":
-          hasEventReceived = true;
+    nostrFetch.fetchEvents(
+        onEvent: (event, _) async {
           try {
             final rawMessage = await decryptUsingAES(
               event.message.content,
@@ -146,17 +150,8 @@ class TaskView extends ChangeNotifier with LocationBase {
           } catch (error) {
             completer.completeError(error);
           }
-          break;
-        case "EOSE":
-          socket.close();
-
-          if (!hasEventReceived) {
-            completer.completeError("No event received");
-          }
-
-          break;
-      }
-    });
+        },
+        onEnd: () {});
 
     return completer.future;
   }
@@ -193,13 +188,15 @@ class TaskView extends ChangeNotifier with LocationBase {
       return l10n.taskImport_error_no_relays;
     }
 
-    final sameTask = taskService.tasks.firstWhereOrNull((element) => element.nostrPublicKey == nostrPublicKey);
+    final sameTask = taskService.tasks.firstWhereOrNull(
+        (element) => element.nostrPublicKey == nostrPublicKey);
 
     if (sameTask != null) {
       return l10n.taskImport_error_sameTask(sameTask.name);
     }
 
-    final sameView = viewService.views.firstWhereOrNull((element) => element.nostrPublicKey == nostrPublicKey);
+    final sameView = viewService.views.firstWhereOrNull(
+        (element) => element.nostrPublicKey == nostrPublicKey);
 
     if (sameView != null) {
       return l10n.taskImport_error_sameView(sameView.name);
@@ -245,10 +242,14 @@ class TaskView extends ChangeNotifier with LocationBase {
 
   Future<void> checkAlarm({
     required final void Function(
-            LocationAlarmServiceBase alarm, LocationPointService previousLocation, LocationPointService nextLocation)
+            LocationAlarmServiceBase alarm,
+            LocationPointService previousLocation,
+            LocationPointService nextLocation)
         onTrigger,
     required final void Function(
-            LocationAlarmServiceBase alarm, LocationPointService previousLocation, LocationPointService nextLocation)
+            LocationAlarmServiceBase alarm,
+            LocationPointService previousLocation,
+            LocationPointService nextLocation)
         onMaybeTrigger,
   }) async {
     final locations = await getLocationsAsFuture(
@@ -306,7 +307,8 @@ class ViewService extends ChangeNotifier {
   UnmodifiableListView<TaskView> get viewsWithAlarms =>
       UnmodifiableListView(_views.where((view) => view.alarms.isNotEmpty));
 
-  TaskView getViewById(final String id) => _views.firstWhere((view) => view.id == id);
+  TaskView getViewById(final String id) =>
+      _views.firstWhere((view) => view.id == id);
 
   static Future<ViewService> restore() async {
     final rawViews = await storage.read(key: KEY);

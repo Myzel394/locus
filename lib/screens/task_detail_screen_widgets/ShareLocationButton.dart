@@ -114,8 +114,7 @@ class _ShareLocationButtonState extends State<ShareLocationButton> {
     try {
       switch (shouldShare) {
         case "qr":
-          final url =
-              await widget.task.generateLink(settings.getServerOrigin());
+          final url = await widget.task.generateLink(settings.getServerHost());
 
           if (!mounted) {
             return;
@@ -157,8 +156,7 @@ class _ShareLocationButtonState extends State<ShareLocationButton> {
           );
           break;
         case "link":
-          final url =
-              await widget.task.generateLink(settings.getServerOrigin());
+          final url = await widget.task.generateLink(settings.getServerHost());
 
           await Share.share(
             url,

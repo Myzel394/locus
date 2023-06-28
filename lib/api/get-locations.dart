@@ -8,6 +8,8 @@ import 'package:locus/constants/values.dart';
 import 'package:locus/services/location_point_service.dart';
 import 'package:nostr/nostr.dart';
 
+import 'nostr-fetch.dart';
+
 Future<WebSocket> openSocket({
   required final String url,
   required final Request request,
@@ -85,7 +87,8 @@ Future<WebSocket> openSocket({
 
         hasReceivedEndOfStream = true;
 
-        if ((decryptionProcesses.isEmpty && hasReceivedEvent) || !hasReceivedEvent) {
+        if ((decryptionProcesses.isEmpty && hasReceivedEvent) ||
+            !hasReceivedEvent) {
           onEnd();
         }
         break;
@@ -111,46 +114,27 @@ VoidCallback getLocations({
       authors: [nostrPublicKey],
       limit: limit,
       until:
-      until == null ? null : (until.millisecondsSinceEpoch / 1000).floor(),
+          until == null ? null : (until.millisecondsSinceEpoch / 1000).floor(),
       since: from == null ? null : (from.millisecondsSinceEpoch / 1000).floor(),
     ),
   ]);
 
-  final List<String> existingIDs = [];
-  final List<WebSocket> socketProcesses = [];
-  int doneAmount = 0;
+  final nostrFetch = NostrFetch(
+    relays: relays,
+    request: request,
+  );
 
-  for (final relay in relays) {
-    openSocket(
-      url: relay,
-      request: request,
-      encryptionPassword: encryptionPassword,
-      onLocationFetched: (final LocationPointService location) {
-        if (existingIDs.contains(location.id)) {
-          return;
-        }
+  return nostrFetch.fetchEvents(
+    onEvent: (message, _) async {
+      final location = await LocationPointService.fromEncrypted(
+        message.message.content,
+        encryptionPassword,
+      );
 
-        existingIDs.add(location.id);
-
-        onLocationFetched(location);
-      },
-      onEnd: () {
-        doneAmount++;
-
-        if (doneAmount == relays.length) {
-          onEnd();
-        }
-      },
-    ).then(socketProcesses.add);
-  }
-
-  return () {
-    for (final socketProcess in socketProcesses) {
-      final socket = socketProcess;
-
-      socket.close();
-    }
-  };
+      onLocationFetched(location);
+    },
+    onEnd: onEnd,
+  );
 }
 
 Future<List<LocationPointService>> getLocationsAsFuture({
