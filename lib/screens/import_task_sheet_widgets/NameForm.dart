@@ -12,7 +12,7 @@ import '../../services/view_service.dart';
 import '../../utils/theme.dart';
 
 class NameForm extends StatefulWidget {
-  final void Function() onSubmitted;
+  final void Function(Color color) onSubmitted;
   final TextEditingController controller;
 
   const NameForm({
@@ -152,7 +152,7 @@ class _NameFormState extends State<NameForm> {
                 return;
               }
 
-              widget.onSubmitted();
+              widget.onSubmitted(color);
             },
             material: (_, __) => MaterialElevatedButtonData(
               icon: const Icon(Icons.arrow_forward_rounded),

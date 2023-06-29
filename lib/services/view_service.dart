@@ -45,7 +45,7 @@ class TaskView extends ChangeNotifier with LocationBase {
   final List<String> relays;
   final List<LocationAlarmServiceBase> alarms;
   final String id;
-  final Color color;
+  Color color;
   DateTime lastAlarmCheck;
   DateTime? lastMaybeTrigger;
   String name;
@@ -60,8 +60,7 @@ class TaskView extends ChangeNotifier with LocationBase {
     String? id,
     DateTime? lastAlarmCheck,
     List<LocationAlarmServiceBase>? alarms,
-  })
-      : _encryptionPassword = encryptionPassword,
+  })  : _encryptionPassword = encryptionPassword,
         alarms = alarms ?? [],
         lastAlarmCheck = lastAlarmCheck ?? DateTime.now(),
         id = id ?? const Uuid().v4();
@@ -71,7 +70,7 @@ class TaskView extends ChangeNotifier with LocationBase {
     final fragment = uri.fragment;
 
     final rawParameters =
-    const Utf8Decoder().convert(base64Url.decode(fragment));
+        const Utf8Decoder().convert(base64Url.decode(fragment));
     final parameters = jsonDecode(rawParameters);
 
     return ViewServiceLinkParameters(
@@ -85,37 +84,40 @@ class TaskView extends ChangeNotifier with LocationBase {
     );
   }
 
-  factory TaskView.fromJSON(final Map<String, dynamic> json) =>
-      TaskView(
-          encryptionPassword: SecretKey(
-              List<int>.from(json["encryptionPassword"])),
-          nostrPublicKey: json["nostrPublicKey"],
-          relays: List<String>.from(json["relays"]),
-          name: json["name"] ?? "Unnamed Task",
-          // Required for migration
-          id: json["id"] ?? const Uuid().v4(),
-          alarms: List<LocationAlarmServiceBase>.from(
-            (json["alarms"] ?? []).map((alarm) {
-              final identifier = LocationAlarmType.values
-                  .firstWhere((element) =>
-              element.name == alarm["_IDENTIFIER"]);
+  factory TaskView.fromJSON(final Map<String, dynamic> json) => TaskView(
+        encryptionPassword:
+            SecretKey(List<int>.from(json["encryptionPassword"])),
+        nostrPublicKey: json["nostrPublicKey"],
+        relays: List<String>.from(json["relays"]),
+        name: json["name"] ?? "Unnamed Task",
+        // Required for migration
+        id: json["id"] ?? const Uuid().v4(),
+        alarms: List<LocationAlarmServiceBase>.from(
+          (json["alarms"] ?? []).map((alarm) {
+            final identifier = LocationAlarmType.values
+                .firstWhere((element) => element.name == alarm["_IDENTIFIER"]);
 
-              switch (identifier) {
-                case LocationAlarmType.radiusBasedRegion:
-                  return RadiusBasedRegionLocationAlarm.fromJSON(alarm);
-              }
-            }),
-          ),
-          lastAlarmCheck: json["lastAlarmCheck"] != null
-              ? DateTime.parse(json["lastAlarmCheck"])
-              : DateTime.now(),
-          lastMaybeTrigger: json["lastMaybeTrigger"] != null
-              ? DateTime.parse(json["lastMaybeTrigger"])
-              : null,
-          color: Colors.primaries[Random().nextInt(Colors.primaries.length)]);
+            switch (identifier) {
+              case LocationAlarmType.radiusBasedRegion:
+                return RadiusBasedRegionLocationAlarm.fromJSON(alarm);
+            }
+          }),
+        ),
+        lastAlarmCheck: json["lastAlarmCheck"] != null
+            ? DateTime.parse(json["lastAlarmCheck"])
+            : DateTime.now(),
+        lastMaybeTrigger: json["lastMaybeTrigger"] != null
+            ? DateTime.parse(json["lastMaybeTrigger"])
+            : null,
+        color: json["color"] != null
+            ? Color(json["color"])
+            : Colors.primaries[Random().nextInt(Colors.primaries.length)],
+      );
 
-  static Future<TaskView> fetchFromNostr(final AppLocalizations l10n,
-      final ViewServiceLinkParameters parameters,) async {
+  static Future<TaskView> fetchFromNostr(
+    final AppLocalizations l10n,
+    final ViewServiceLinkParameters parameters,
+  ) async {
     final completer = Completer<TaskView>();
 
     final request = Request(generate64RandomHexChars(), [
@@ -157,7 +159,7 @@ class TaskView extends ChangeNotifier with LocationBase {
                 relays: List<String>.from(data['relays']),
                 name: l10n.longFormattedDate(DateTime.now()),
                 color:
-                Colors.primaries[Random().nextInt(Colors.primaries.length)],
+                    Colors.primaries[Random().nextInt(Colors.primaries.length)],
               ),
             );
           } catch (error) {
@@ -177,9 +179,14 @@ class TaskView extends ChangeNotifier with LocationBase {
 
   void update({
     final String? name,
+    final Color? color,
   }) {
     if (name != null) {
       this.name = name;
+    }
+
+    if (color != null) {
+      this.color = color;
     }
 
     notifyListeners();
@@ -195,10 +202,12 @@ class TaskView extends ChangeNotifier with LocationBase {
       "alarms": alarms.map((alarm) => alarm.toJSON()).toList(),
       "lastAlarmCheck": lastAlarmCheck.toIso8601String(),
       "lastMaybeTrigger": lastMaybeTrigger?.toIso8601String(),
+      "color": color.value,
     };
   }
 
-  Future<String?> validate(final AppLocalizations l10n, {
+  Future<String?> validate(
+    final AppLocalizations l10n, {
     required final TaskService taskService,
     required final ViewService viewService,
   }) async {
@@ -207,14 +216,14 @@ class TaskView extends ChangeNotifier with LocationBase {
     }
 
     final sameTask = taskService.tasks.firstWhereOrNull(
-            (element) => element.nostrPublicKey == nostrPublicKey);
+        (element) => element.nostrPublicKey == nostrPublicKey);
 
     if (sameTask != null) {
       return l10n.taskImport_error_sameTask(sameTask.name);
     }
 
     final sameView = viewService.views.firstWhereOrNull(
-            (element) => element.nostrPublicKey == nostrPublicKey);
+        (element) => element.nostrPublicKey == nostrPublicKey);
 
     if (sameView != null) {
       return l10n.taskImport_error_sameView(sameView.name);
@@ -260,15 +269,15 @@ class TaskView extends ChangeNotifier with LocationBase {
 
   Future<void> checkAlarm({
     required final void Function(
-        LocationAlarmServiceBase alarm,
-        LocationPointService previousLocation,
-        LocationPointService nextLocation)
-    onTrigger,
+            LocationAlarmServiceBase alarm,
+            LocationPointService previousLocation,
+            LocationPointService nextLocation)
+        onTrigger,
     required final void Function(
-        LocationAlarmServiceBase alarm,
-        LocationPointService previousLocation,
-        LocationPointService nextLocation)
-    onMaybeTrigger,
+            LocationAlarmServiceBase alarm,
+            LocationPointService previousLocation,
+            LocationPointService nextLocation)
+        onMaybeTrigger,
   }) async {
     final locations = await getLocationsAsFuture(
       from: lastAlarmCheck,
@@ -353,7 +362,7 @@ class ViewService extends ChangeNotifier {
       List<Map<String, dynamic>>.from(
         await Future.wait(
           _views.map(
-                (view) => view.toJSON(),
+            (view) => view.toJSON(),
           ),
         ),
       ),

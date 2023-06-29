@@ -299,8 +299,8 @@ class _ImportTaskSheetState extends State<ImportTaskSheet>
               else if (_screen == ImportScreen.askName)
                 NameForm(
                   controller: _nameController,
-                  onSubmitted: () {
-                    _taskView!.update(name: _nameController.text);
+                  onSubmitted: (color) {
+                    _taskView!.update(name: _nameController.text, color: color);
 
                     importView();
                   },
