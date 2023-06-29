@@ -58,34 +58,33 @@ class LocationFetcher extends ChangeNotifier {
   void _fetchLast24Hours() {
     _getLocationsUnsubscribers.addAll(
       views.map(
-            (view) =>
-            view.getLocations(
-              from: DateTime.now().subtract(const Duration(days: 1)),
-              onLocationFetched: (location) {
-                if (!_mounted) {
-                  return;
-                }
+        (view) => view.getLocations(
+          from: DateTime.now().subtract(const Duration(days: 1)),
+          onLocationFetched: (location) {
+            if (!_mounted) {
+              return;
+            }
 
-                _locations[view] = List<LocationPointService>.from(
-                  [..._locations[view] ?? [], location],
-                );
-              },
-              onEnd: () {
-                if (!_mounted) {
-                  return;
-                }
+            _locations[view] = List<LocationPointService>.from(
+              [..._locations[view] ?? [], location],
+            );
+          },
+          onEnd: () {
+            if (!_mounted) {
+              return;
+            }
 
-                if (_locations.containsKey(view)) {
-                  _locations[view] = _locations[view]!
-                    ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+            if (_locations.containsKey(view)) {
+              _locations[view] = _locations[view]!
+                ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
 
-                  _setIsLoading(_locations.keys.length == views.length);
-                } else {
-                  // No locations found in the last 24 hours
-                  _fetchLastLocation(view);
-                }
-              },
-            ),
+              _setIsLoading(_locations.keys.length == views.length);
+            } else {
+              // No locations found in the last 24 hours
+              _fetchLastLocation(view);
+            }
+          },
+        ),
       ),
     );
   }
@@ -150,8 +149,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen> {
   void _createLocationFetcher() {
     final viewService = context.read<ViewService>();
 
-    _fetchers = LocationFetcher(viewService.views)
-      ..fetchLocations();
+    _fetchers = LocationFetcher(viewService.views)..fetchLocations();
   }
 
   void _rebuild() {
@@ -162,7 +160,15 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen> {
     setState(() {});
   }
 
-  void goToCurrentPosition() async {
+  void goToCurrentPosition([final bool askPermissions = false]) async {
+    if (askPermissions) {
+      final hasGrantedPermissions = await requestBasicLocationPermission();
+
+      if (!hasGrantedPermissions) {
+        return;
+      }
+    }
+
     if (!(await hasGrantedLocationPermission())) {
       return;
     }
@@ -209,20 +215,18 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen> {
               .where(
                   (view) => selectedViewID == null || view.id == selectedViewID)
               .map(
-                (view) =>
-                (_fetchers.locations[view] ?? [])
+                (view) => (_fetchers.locations[view] ?? [])
                     .map(
-                      (location) =>
-                      CircleMarker(
+                      (location) => CircleMarker(
                         radius: location.accuracy,
                         useRadiusInMeter: true,
                         point: LatLng(location.latitude, location.longitude),
                         color: view.color.withOpacity(.2),
                         borderColor: view.color,
                       ),
-                )
+                    )
                     .toList(),
-          )
+              )
               .toList()
               .expand((element) => element)
               .toList(),
@@ -248,13 +252,9 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen> {
     );
   }
 
-  Widget buildLocationSelectionBar() {
+  Widget buildBar() {
     final l10n = AppLocalizations.of(context);
     final viewService = context.watch<ViewService>();
-
-    if (viewService.views.length <= 1) {
-      return const SizedBox.shrink();
-    }
 
     return Positioned(
       left: MEDIUM_SPACE,
@@ -263,60 +263,87 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen> {
       child: SafeArea(
         bottom: false,
         child: Center(
-          child: Paper(
-            padding: const EdgeInsets.symmetric(
-              horizontal: MEDIUM_SPACE,
-              vertical: SMALL_SPACE,
-            ),
-            child: DropdownButton<String?>(
-              value: selectedViewID,
-              onChanged: (selection) {
-                if (selection == null) {
-                  setState(() {
-                    selectedViewID = null;
-                  });
-                  return;
-                }
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              if (viewService.views.length > 1)
+                Expanded(
+                  flex: 4,
+                  child: Paper(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: MEDIUM_SPACE,
+                      vertical: SMALL_SPACE,
+                    ),
+                    child: DropdownButton<String?>(
+                      value: selectedViewID,
+                      onChanged: (selection) {
+                        if (selection == null) {
+                          setState(() {
+                            selectedViewID = null;
+                          });
+                          return;
+                        }
 
-                final view = viewService.views.firstWhere(
-                      (view) => view.id == selection,
-                );
+                        final view = viewService.views.firstWhere(
+                          (view) => view.id == selection,
+                        );
 
-                showViewLocations(view);
-              },
-              underline: Container(),
-              alignment: Alignment.center,
-              isExpanded: true,
-              items: [
-                DropdownMenuItem(
-                  value: null,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: <Widget>[
-                      const Icon(Icons.location_on_rounded, size: 20),
-                      const SizedBox(width: SMALL_SPACE),
-                      Text(l10n.locationsOverview_viewSelection_all),
-                    ],
-                  ),
-                ),
-                for (final view in viewService.views) ...[
-                  DropdownMenuItem(
-                    value: view.id,
-                    child: Row(
-                      children: <Widget>[
-                        Icon(
-                          Icons.circle_rounded,
-                          size: 20,
-                          color: view.color,
+                        showViewLocations(view);
+                      },
+                      underline: Container(),
+                      alignment: Alignment.center,
+                      isExpanded: true,
+                      items: [
+                        DropdownMenuItem(
+                          value: null,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: <Widget>[
+                              const Icon(Icons.location_on_rounded, size: 20),
+                              const SizedBox(width: SMALL_SPACE),
+                              Text(l10n.locationsOverview_viewSelection_all),
+                            ],
+                          ),
                         ),
-                        const SizedBox(width: SMALL_SPACE),
-                        Text(view.name),
+                        for (final view in viewService.views) ...[
+                          DropdownMenuItem(
+                            value: view.id,
+                            child: Row(
+                              children: <Widget>[
+                                Icon(
+                                  Icons.circle_rounded,
+                                  size: 20,
+                                  color: view.color,
+                                ),
+                                const SizedBox(width: SMALL_SPACE),
+                                Text(view.name),
+                              ],
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),
-                ],
-              ],
-            ),
+                ),
+              Flexible(
+                child: AspectRatio(
+                  aspectRatio: 1,
+                  child: Center(
+                    child: Paper(
+                      width: null,
+                      roundness: HUGE_SPACE,
+                      padding: const EdgeInsets.all(SMALL_SPACE),
+                      child: PlatformIconButton(
+                        icon: const Icon(Icons.my_location),
+                        onPressed: () => goToCurrentPosition(true),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -332,7 +359,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen> {
       body: Stack(
         children: <Widget>[
           buildMap(),
-          buildLocationSelectionBar(),
+          buildBar(),
         ],
       ),
     );
