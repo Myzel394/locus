@@ -33,14 +33,34 @@ class LocationFetcher extends ChangeNotifier {
 
   bool get hasMultipleLocationViews => _locations.keys.length > 1;
 
-  void fetchLocations() {
-    _setIsLoading(true);
+  // If _fetchLast24Hours fails (no location fetched), we want to get the last location
+  void _fetchLastLocation(final TaskView view) {
+    _getLocationsUnsubscribers.add(
+      view.getLocations(
+        onLocationFetched: (location) {
+          if (!_mounted) {
+            return;
+          }
 
+          _locations[view] = [location];
+        },
+        onEnd: () {
+          if (!_mounted) {
+            return;
+          }
+
+          _setIsLoading(_locations.keys.length == views.length);
+        },
+      ),
+    );
+  }
+
+  void _fetchLast24Hours() {
     _getLocationsUnsubscribers.addAll(
       views.map(
             (view) =>
             view.getLocations(
-              from: DateTime.now().subtract(Duration(days: 1)),
+              from: DateTime.now().subtract(const Duration(days: 1)),
               onLocationFetched: (location) {
                 if (!_mounted) {
                   return;
@@ -55,14 +75,25 @@ class LocationFetcher extends ChangeNotifier {
                   return;
                 }
 
-                _locations[view] = _locations[view]!
-                  ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+                if (_locations.containsKey(view)) {
+                  _locations[view] = _locations[view]!
+                    ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
 
-                _setIsLoading(_locations.keys.length == views.length);
+                  _setIsLoading(_locations.keys.length == views.length);
+                } else {
+                  // No locations found in the last 24 hours
+                  _fetchLastLocation(view);
+                }
               },
             ),
       ),
     );
+  }
+
+  void fetchLocations() {
+    _setIsLoading(true);
+
+    _fetchLast24Hours();
   }
 
   void _setIsLoading(final bool isLoading) {
@@ -221,6 +252,10 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen> {
     final l10n = AppLocalizations.of(context);
     final viewService = context.watch<ViewService>();
 
+    if (viewService.views.length <= 1) {
+      return const SizedBox.shrink();
+    }
+
     return Positioned(
       left: MEDIUM_SPACE,
       right: MEDIUM_SPACE,
@@ -297,7 +332,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen> {
       body: Stack(
         children: <Widget>[
           buildMap(),
-          if (_fetchers.hasMultipleLocationViews) buildLocationSelectionBar(),
+          buildLocationSelectionBar(),
         ],
       ),
     );
