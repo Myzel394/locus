@@ -1,10 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:cryptography/cryptography.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:locus/api/nostr-fetch.dart';
 import 'package:locus/services/task_service.dart';
@@ -14,6 +17,7 @@ import 'package:uuid/uuid.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../api/get-locations.dart' as getLocationsAPI;
+import '../constants/values.dart';
 import 'location_alarm_service.dart';
 import 'location_base.dart';
 import 'location_point_service.dart';
@@ -41,6 +45,7 @@ class TaskView extends ChangeNotifier with LocationBase {
   final List<String> relays;
   final List<LocationAlarmServiceBase> alarms;
   final String id;
+  final Color color;
   DateTime lastAlarmCheck;
   DateTime? lastMaybeTrigger;
   String name;
@@ -50,11 +55,13 @@ class TaskView extends ChangeNotifier with LocationBase {
     required this.nostrPublicKey,
     required this.relays,
     required this.name,
+    required this.color,
     this.lastMaybeTrigger,
     String? id,
     DateTime? lastAlarmCheck,
     List<LocationAlarmServiceBase>? alarms,
-  })  : _encryptionPassword = encryptionPassword,
+  })
+      : _encryptionPassword = encryptionPassword,
         alarms = alarms ?? [],
         lastAlarmCheck = lastAlarmCheck ?? DateTime.now(),
         id = id ?? const Uuid().v4();
@@ -64,7 +71,7 @@ class TaskView extends ChangeNotifier with LocationBase {
     final fragment = uri.fragment;
 
     final rawParameters =
-        const Utf8Decoder().convert(base64Url.decode(fragment));
+    const Utf8Decoder().convert(base64Url.decode(fragment));
     final parameters = jsonDecode(rawParameters);
 
     return ViewServiceLinkParameters(
@@ -78,37 +85,37 @@ class TaskView extends ChangeNotifier with LocationBase {
     );
   }
 
-  factory TaskView.fromJSON(final Map<String, dynamic> json) => TaskView(
-        encryptionPassword:
-            SecretKey(List<int>.from(json["encryptionPassword"])),
-        nostrPublicKey: json["nostrPublicKey"],
-        relays: List<String>.from(json["relays"]),
-        name: json["name"] ?? "Unnamed Task",
-        // Required for migration
-        id: json["id"] ?? const Uuid().v4(),
-        alarms: List<LocationAlarmServiceBase>.from(
-          (json["alarms"] ?? []).map((alarm) {
-            final identifier = LocationAlarmType.values
-                .firstWhere((element) => element.name == alarm["_IDENTIFIER"]);
+  factory TaskView.fromJSON(final Map<String, dynamic> json) =>
+      TaskView(
+          encryptionPassword: SecretKey(
+              List<int>.from(json["encryptionPassword"])),
+          nostrPublicKey: json["nostrPublicKey"],
+          relays: List<String>.from(json["relays"]),
+          name: json["name"] ?? "Unnamed Task",
+          // Required for migration
+          id: json["id"] ?? const Uuid().v4(),
+          alarms: List<LocationAlarmServiceBase>.from(
+            (json["alarms"] ?? []).map((alarm) {
+              final identifier = LocationAlarmType.values
+                  .firstWhere((element) =>
+              element.name == alarm["_IDENTIFIER"]);
 
-            switch (identifier) {
-              case LocationAlarmType.radiusBasedRegion:
-                return RadiusBasedRegionLocationAlarm.fromJSON(alarm);
-            }
-          }),
-        ),
-        lastAlarmCheck: json["lastAlarmCheck"] != null
-            ? DateTime.parse(json["lastAlarmCheck"])
-            : DateTime.now(),
-        lastMaybeTrigger: json["lastMaybeTrigger"] != null
-            ? DateTime.parse(json["lastMaybeTrigger"])
-            : null,
-      );
+              switch (identifier) {
+                case LocationAlarmType.radiusBasedRegion:
+                  return RadiusBasedRegionLocationAlarm.fromJSON(alarm);
+              }
+            }),
+          ),
+          lastAlarmCheck: json["lastAlarmCheck"] != null
+              ? DateTime.parse(json["lastAlarmCheck"])
+              : DateTime.now(),
+          lastMaybeTrigger: json["lastMaybeTrigger"] != null
+              ? DateTime.parse(json["lastMaybeTrigger"])
+              : null,
+          color: Colors.primaries[Random().nextInt(Colors.primaries.length)]);
 
-  static Future<TaskView> fetchFromNostr(
-    final AppLocalizations l10n,
-    final ViewServiceLinkParameters parameters,
-  ) async {
+  static Future<TaskView> fetchFromNostr(final AppLocalizations l10n,
+      final ViewServiceLinkParameters parameters,) async {
     final completer = Completer<TaskView>();
 
     final request = Request(generate64RandomHexChars(), [
@@ -137,6 +144,10 @@ class TaskView extends ChangeNotifier with LocationBase {
               return;
             }
 
+            if (completer.isCompleted) {
+              return;
+            }
+
             completer.complete(
               TaskView(
                 encryptionPassword: SecretKey(
@@ -145,9 +156,17 @@ class TaskView extends ChangeNotifier with LocationBase {
                 nostrPublicKey: data['nostrPublicKey'],
                 relays: List<String>.from(data['relays']),
                 name: l10n.longFormattedDate(DateTime.now()),
+                color:
+                Colors.primaries[Random().nextInt(Colors.primaries.length)],
               ),
             );
           } catch (error) {
+            FlutterLogs.logError(
+              LOG_TAG,
+              "Import TaskView",
+              "Error while fetching importing view: $error",
+            );
+
             completer.completeError(error);
           }
         },
@@ -179,8 +198,7 @@ class TaskView extends ChangeNotifier with LocationBase {
     };
   }
 
-  Future<String?> validate(
-    final AppLocalizations l10n, {
+  Future<String?> validate(final AppLocalizations l10n, {
     required final TaskService taskService,
     required final ViewService viewService,
   }) async {
@@ -189,14 +207,14 @@ class TaskView extends ChangeNotifier with LocationBase {
     }
 
     final sameTask = taskService.tasks.firstWhereOrNull(
-        (element) => element.nostrPublicKey == nostrPublicKey);
+            (element) => element.nostrPublicKey == nostrPublicKey);
 
     if (sameTask != null) {
       return l10n.taskImport_error_sameTask(sameTask.name);
     }
 
     final sameView = viewService.views.firstWhereOrNull(
-        (element) => element.nostrPublicKey == nostrPublicKey);
+            (element) => element.nostrPublicKey == nostrPublicKey);
 
     if (sameView != null) {
       return l10n.taskImport_error_sameView(sameView.name);
@@ -242,15 +260,15 @@ class TaskView extends ChangeNotifier with LocationBase {
 
   Future<void> checkAlarm({
     required final void Function(
-            LocationAlarmServiceBase alarm,
-            LocationPointService previousLocation,
-            LocationPointService nextLocation)
-        onTrigger,
+        LocationAlarmServiceBase alarm,
+        LocationPointService previousLocation,
+        LocationPointService nextLocation)
+    onTrigger,
     required final void Function(
-            LocationAlarmServiceBase alarm,
-            LocationPointService previousLocation,
-            LocationPointService nextLocation)
-        onMaybeTrigger,
+        LocationAlarmServiceBase alarm,
+        LocationPointService previousLocation,
+        LocationPointService nextLocation)
+    onMaybeTrigger,
   }) async {
     final locations = await getLocationsAsFuture(
       from: lastAlarmCheck,
@@ -335,7 +353,7 @@ class ViewService extends ChangeNotifier {
       List<Map<String, dynamic>>.from(
         await Future.wait(
           _views.map(
-            (view) => view.toJSON(),
+                (view) => view.toJSON(),
           ),
         ),
       ),

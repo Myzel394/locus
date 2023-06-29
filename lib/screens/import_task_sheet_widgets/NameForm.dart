@@ -1,8 +1,10 @@
 import 'package:basic_utils/basic_utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+import 'package:locus/utils/color.dart';
 import 'package:provider/provider.dart';
 
 import '../../constants/spacing.dart';
@@ -26,6 +28,16 @@ class NameForm extends StatefulWidget {
 class _NameFormState extends State<NameForm> {
   final _formKey = GlobalKey<FormState>();
 
+  Color color = Colors.black;
+  bool showExtendedColorPicker = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    color = pickRandomColor(context, onlyMaterial: true);
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -38,7 +50,8 @@ class _NameFormState extends State<NameForm> {
         children: <Widget>[
           Text(
             l10n.mainScreen_importTask_action_name_title,
-            style: getBodyTextTextStyle(context),
+            style: getTitle2TextStyle(context),
+            textAlign: TextAlign.center,
           ),
           const SizedBox(height: MEDIUM_SPACE),
           PlatformTextFormField(
@@ -73,6 +86,64 @@ class _NameFormState extends State<NameForm> {
               prefix: const Icon(CupertinoIcons.textformat),
             ),
           ),
+          const SizedBox(height: MEDIUM_SPACE),
+          Text(
+            l10n.mainScreen_importTask_action_color_label,
+            style: getBodyTextTextStyle(context),
+          ),
+          const SizedBox(height: SMALL_SPACE),
+          if (showExtendedColorPicker)
+            ColorPicker(
+              pickerColor: color,
+              enableAlpha: false,
+              onColorChanged: (newColor) {
+                setState(() {
+                  color = newColor;
+                });
+              },
+            )
+          else
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: <Widget>[
+                  for (final color in Colors.primaries)
+                    Padding(
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: SMALL_SPACE),
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            this.color = color;
+                          });
+                        },
+                        child: CircleAvatar(
+                          backgroundColor: color,
+                          child: this.color == color
+                              ? const Icon(Icons.check_circle)
+                              : null,
+                        ),
+                      ),
+                    ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: SMALL_SPACE,
+                    ),
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          showExtendedColorPicker = true;
+                        });
+                      },
+                      child: CircleAvatar(
+                        backgroundColor: Colors.transparent,
+                        child: Icon(context.platformIcons.addCircledSolid),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           const SizedBox(height: MEDIUM_SPACE),
           PlatformElevatedButton(
             padding: const EdgeInsets.all(MEDIUM_SPACE),

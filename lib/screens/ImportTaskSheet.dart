@@ -351,8 +351,11 @@ class _ImportTaskSheetState extends State<ImportTaskSheet>
               else if (_screen == ImportScreen.error)
                 Column(
                   children: <Widget>[
-                    Icon(context.platformIcons.error,
-                        size: 64, color: getErrorColor(context)),
+                    Icon(
+                      context.platformIcons.error,
+                      size: 64,
+                      color: getErrorColor(context),
+                    ),
                     const SizedBox(height: MEDIUM_SPACE),
                     Text(
                       l10n.taskImportError,

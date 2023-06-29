@@ -236,6 +236,7 @@
   "mainScreen_importTask_action_name_title": "Enter a name for this view",
   "mainScreen_importTask_action_name_label": "Name",
   "mainScreen_importTask_action_name_errors_sameNameAlreadyExists": "A view with this name already exists",
+  "mainScreen_importTask_action_color_label": "Pick a color",
   "mainScreen_importTask_importOverview_title": "Would you like to import this task view?",
   "mainScreen_importTask_importOverview_lastPosition": "Last Position:",
   "mainScreen_importTask_successMessage": "The task was successfully imported!",
