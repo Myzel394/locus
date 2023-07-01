@@ -8,6 +8,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
+
 // Provided by the flutter_map package
 import 'package:latlong2/latlong.dart';
 import 'package:locus/services/settings_service.dart';
@@ -16,6 +17,7 @@ import 'package:locus/widgets/Paper.dart';
 import 'package:provider/provider.dart';
 
 import '../services/location_point_service.dart';
+import '../utils/location.dart';
 
 AppleMaps.LatLng toAppleMapsCoordinates(final LatLng coordinates) =>
     AppleMaps.LatLng(coordinates.latitude, coordinates.longitude);
@@ -172,6 +174,7 @@ class LocationsMap extends StatefulWidget {
 
 class _LocationsMapState extends State<LocationsMap> {
   late final StreamSubscription _controllerSubscription;
+  Stream<Position>? _positionStream;
 
   AppleMaps.AppleMapController? appleMapsController;
   MapController? flutterMapController;
@@ -234,6 +237,7 @@ class _LocationsMapState extends State<LocationsMap> {
   @override
   dispose() {
     _controllerSubscription.cancel();
+    _positionStream?.drain();
 
     if (flutterMapController != null) {
       flutterMapController!.dispose();
@@ -280,24 +284,13 @@ class _LocationsMapState extends State<LocationsMap> {
       return;
     }
 
-    final lastLocationData = await Geolocator.getLastKnownPosition();
-    if (lastLocationData != null) {
-      moveToPosition(LatLng(
-        lastLocationData.latitude,
-        lastLocationData.longitude,
-      ));
-    }
-
-    final locationData = await Geolocator.getCurrentPosition(
-      // We want to get the position as fast as possible
-      desiredAccuracy: LocationAccuracy.lowest,
-      timeLimit: const Duration(seconds: 5),
-    );
-
-    moveToPosition(LatLng(
-      locationData.latitude,
-      locationData.longitude,
-    ));
+    _positionStream = getLastAndCurrentPosition()
+      ..listen((position) {
+        moveToPosition(LatLng(
+          position.latitude,
+          position.longitude,
+        ));
+      });
   }
 
   @override

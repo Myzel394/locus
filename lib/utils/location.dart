@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:locus/constants/values.dart';
@@ -72,4 +74,32 @@ Future<Position> getCurrentPosition({
   }
 
   throw Exception("Could not get location");
+}
+
+Stream<Position> getLastAndCurrentPosition({
+  final bool updateLocation = false,
+}) {
+  final controller = StreamController<Position>.broadcast();
+
+  Geolocator.getLastKnownPosition().then((position) {
+    if (position != null) {
+      controller.add(position);
+    }
+  });
+
+  getCurrentPosition().then((position) {
+    controller.add(position);
+  });
+
+  if (updateLocation) {
+    final positionStream = Geolocator.getPositionStream().listen((position) {
+      controller.add(position);
+    });
+
+    controller.onCancel = () {
+      positionStream.cancel();
+    };
+  }
+
+  return controller.stream;
 }

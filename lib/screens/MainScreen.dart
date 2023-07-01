@@ -310,6 +310,7 @@ class _MainScreenState extends State<MainScreen> {
 
     _viewsAlarmCheckerTimer?.cancel();
     _uniLinksStream?.cancel();
+    _positionStream?.drain();
 
     _removeLiveLocationUpdate();
 
@@ -570,7 +571,6 @@ class _MainScreenState extends State<MainScreen> {
       ),
       // Settings bottomNavBar via cupertino data class does not work
       bottomNavBar: getBottomNavBar(),
-      appBar: getAppBar(true),
       body: PageView(
         controller: _tabController,
         physics: const NeverScrollableScrollPhysics(),
