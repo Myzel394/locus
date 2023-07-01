@@ -7,6 +7,7 @@ import 'package:locus/constants/spacing.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/Paper.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:nostr/nostr.dart';
 import 'package:provider/provider.dart';
 import 'package:latlong2/latlong.dart';
@@ -125,6 +126,14 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen> {
 
   // Null = all views
   String? selectedViewID;
+
+  TaskView? get selectedView {
+    if (selectedViewID == null) {
+      return null;
+    }
+
+    return context.read<ViewService>().getViewById(selectedViewID!);
+  }
 
   @override
   void initState() {
@@ -252,6 +261,34 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen> {
     );
   }
 
+  Widget buildViewTile(final TaskView? view) {
+    final l10n = AppLocalizations.of(context);
+
+    if (view == null) {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: <Widget>[
+          const Icon(Icons.location_on_rounded, size: 20),
+          const SizedBox(width: SMALL_SPACE),
+          Text(l10n.locationsOverview_viewSelection_all),
+        ],
+      );
+    }
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: <Widget>[
+        Icon(
+          Icons.circle_rounded,
+          size: 20,
+          color: view.color,
+        ),
+        const SizedBox(width: SMALL_SPACE),
+        Text(view.name),
+      ],
+    );
+  }
+
   Widget buildBar() {
     final l10n = AppLocalizations.of(context);
     final viewService = context.watch<ViewService>();
@@ -298,25 +335,14 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen> {
                       items: [
                         DropdownMenuItem(
                           value: null,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: <Widget>[
-                              const Icon(Icons.location_on_rounded, size: 20),
-                              const SizedBox(width: SMALL_SPACE),
-                              Text(l10n.locationsOverview_viewSelection_all),
-                            ],
-                          ),
+                          child: buildViewTile(null),
                         ),
                         for (final view in viewService.views) ...[
                           DropdownMenuItem(
                             value: view.id,
                             child: Row(
                               children: <Widget>[
-                                Icon(
-                                  Icons.circle_rounded,
-                                  size: 20,
-                                  color: view.color,
-                                ),
+                                buildViewTile(view),
                                 const SizedBox(width: SMALL_SPACE),
                                 Text(view.name),
                               ],
@@ -333,7 +359,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen> {
                   child: Center(
                     child: Paper(
                       width: null,
-                      roundness: HUGE_SPACE,
+                      borderRadius: BorderRadius.circular(HUGE_SPACE),
                       padding: const EdgeInsets.all(SMALL_SPACE),
                       child: PlatformIconButton(
                         icon: const Icon(Icons.my_location),
@@ -359,6 +385,22 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen> {
       body: Stack(
         children: <Widget>[
           buildMap(),
+          DraggableScrollableSheet(
+            builder: (context, scrollController) => Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: <Widget>[
+                Paper(
+                  child: Column(
+                    children: <Widget>[
+                      buildViewTile(selectedView),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
           buildBar(),
         ],
       ),

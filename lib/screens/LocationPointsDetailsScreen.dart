@@ -41,7 +41,7 @@ class LocationPointsDetailsScreen extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: Paper(
-          roundness: isPreview ? null : 0,
+          borderRadius: isPreview ? null : BorderRadius.zero,
           constraints: isPreview
               ? const BoxConstraints(
                   maxHeight: 300,

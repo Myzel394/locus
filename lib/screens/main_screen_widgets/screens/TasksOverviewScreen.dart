@@ -193,14 +193,14 @@ class _TasksOverviewScreenState extends State<TasksOverviewScreen>
             ),
             SizedBox(
               height: windowHeight,
-              child: const Padding(
-                padding: EdgeInsets.symmetric(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
                   horizontal: MEDIUM_SPACE,
                   vertical: HUGE_SPACE,
                 ),
                 child: Center(
                   child: Paper(
-                    child: ImportTask(),
+                    child: const ImportTask(),
                   ),
                 ),
               ),
