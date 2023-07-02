@@ -4,19 +4,38 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/services/settings_service.dart';
 import 'package:locus/utils/theme.dart';
+import 'package:locus/widgets/PlatformInkWell.dart';
 import 'package:provider/provider.dart';
 
-class BentoGridElement extends StatelessWidget {
+enum BentoType {
+  primary,
+  secondary,
+  tertiary,
+  disabled,
+}
+
+class BentoGridElement extends StatefulWidget {
   final String title;
   final String description;
   final IconData icon;
+  final BentoType type;
+  final VoidCallback? onTap;
 
   const BentoGridElement({
     required this.title,
     required this.description,
     required this.icon,
+    this.type = BentoType.primary,
+    this.onTap,
     super.key,
   });
+
+  @override
+  State<BentoGridElement> createState() => _BentoGridElementState();
+}
+
+class _BentoGridElementState extends State<BentoGridElement> {
+  bool isPressing = false;
 
   Color getBackgroundColor(final BuildContext context) {
     final settings = context.read<SettingsService>();
@@ -27,7 +46,12 @@ class BentoGridElement extends StatelessWidget {
 
     return platformThemeData(
       context,
-      material: (data) => data.colorScheme.secondaryContainer,
+      material: (data) => {
+        BentoType.primary: data.colorScheme.primaryContainer,
+        BentoType.secondary: data.colorScheme.secondaryContainer,
+        BentoType.tertiary: data.colorScheme.tertiaryContainer,
+        BentoType.disabled: data.disabledColor,
+      }[widget.type]!,
       cupertino: (data) => data.primaryColor,
     );
   }
@@ -55,14 +79,19 @@ class BentoGridElement extends StatelessWidget {
 
     return platformThemeData(
       context,
-      material: (data) => data.colorScheme.onSecondaryContainer,
+      material: (data) => {
+        BentoType.primary: data.textTheme.bodySmall!.color!,
+        BentoType.secondary: data.textTheme.bodySmall!.color!,
+        BentoType.tertiary: data.textTheme.bodySmall!.color!,
+        BentoType.disabled: data.disabledColor,
+      }[widget.type]!,
       cupertino: (data) => data.textTheme.tabLabelTextStyle.color!,
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final child = Container(
       decoration: ShapeDecoration(
         shape: SmoothRectangleBorder(
           borderRadius: SmoothBorderRadius(
@@ -77,12 +106,15 @@ class BentoGridElement extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: <Widget>[
-          Text(
-            title,
-            style: TextStyle(
-              color: getTitleColor(context),
-              fontSize: 42,
-              fontWeight: FontWeight.w900,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              widget.title,
+              style: TextStyle(
+                color: getTitleColor(context),
+                fontSize: 42,
+                fontWeight: FontWeight.w900,
+              ),
             ),
           ),
           Row(
@@ -90,14 +122,14 @@ class BentoGridElement extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               Icon(
-                icon,
+                widget.icon,
                 color: getDescriptionColor(context),
                 size: 16,
               ),
               const SizedBox(width: TINY_SPACE),
               Flexible(
                 child: Text(
-                  description,
+                  widget.description,
                   style: TextStyle(
                     color: getDescriptionColor(context),
                     fontSize: 12,
@@ -109,5 +141,23 @@ class BentoGridElement extends StatelessWidget {
         ],
       ),
     );
+
+    if (widget.onTap != null) {
+      return GestureDetector(
+        onTap: widget.onTap,
+        onTapDown: (_) => setState(() => isPressing = true),
+        onTapUp: (_) => setState(() => isPressing = false),
+        onTapCancel: () => setState(() => isPressing = false),
+        child: AnimatedScale(
+          scale: isPressing ? .93 : 1,
+          duration: isPressing
+              ? const Duration(milliseconds: 60)
+              : const Duration(milliseconds: 200),
+          child: child,
+        ),
+      );
+    }
+
+    return child;
   }
 }

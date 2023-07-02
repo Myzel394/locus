@@ -4,6 +4,7 @@
   "unknownValue": "Unknown",
   "resetLabel": "Reset",
   "cancelLabel": "Cancel",
+  "loading": "Loading...",
   "biometricsFailed": "You could not be authenticated",
   "addLabel": "Add",
   "addNewValueLabel": "Add \"{value}\"",
@@ -706,5 +707,34 @@
   "help_location_goOutside": "Go outside. It is possible that your device can not get proper signal inside.",
   "help_location_enableGoogleLocationServices": "Enable Google Location Services. Google Location Services massively improve the accuracy of your location. You can enable it in your device settings. Note that this will very likely tell Google your location.",
   "help_location_enableScanning": "Enable Wi-Fi and Bluetooth scanning. You can enable them in your device settings. Note that this could drain your battery faster.",
-  "help_location_useGMSVersion": "Use the GMS version of Locus. The GMS version uses Google Location Services to get your location. You can download it from GitHub. You will be notified about updates inside the app."
+  "help_location_useGMSVersion": "Use the GMS version of Locus. The GMS version uses Google Location Services to get your location. You can download it from GitHub. You will be notified about updates inside the app.",
+  "locations_values_battery_description": "Battery",
+  "locations_values_battery_value": "{value}%",
+  "@locations_values_battery_value": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "locations_values_lastLocation_description": "Last location update",
+  "locations_values_distance_description": "Distance",
+  "locations_values_distance_permissionRequired": "Grant permission",
+  "locations_values_distance_km": "{distance, select, 0 {<1 km} 1 {one km} other {{distance} km}}",
+  "@locations_values_distance_km": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
+  "locations_values_speed_description": "Speed",
+  "locations_values_speed_kmh": "{speed} km/h",
+  "@locations_values_speed_kmh": {
+    "placeholders": {
+      "speed": {
+        "type": "int"
+      }
+    }
+  }
 }

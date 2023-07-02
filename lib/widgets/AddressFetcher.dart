@@ -9,13 +9,13 @@ class AddressFetcher extends StatefulWidget {
   final Widget Function(String address) builder;
   final Widget Function(bool isLoading) rawLocationBuilder;
 
-  const AddressFetcher(
-      {required this.latitude,
-      required this.longitude,
-      required this.builder,
-      required this.rawLocationBuilder,
-      Key? key})
-      : super(key: key);
+  const AddressFetcher({
+    required this.latitude,
+    required this.longitude,
+    required this.builder,
+    required this.rawLocationBuilder,
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<AddressFetcher> createState() => _AddressFetcherState();

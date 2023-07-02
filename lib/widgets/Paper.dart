@@ -8,6 +8,7 @@ class Paper extends StatelessWidget {
   final BoxConstraints? constraints;
   final BoxDecoration decoration;
   final double? width;
+  final double? height;
   final EdgeInsets? padding;
   final BorderRadius borderRadius;
 
@@ -15,6 +16,7 @@ class Paper extends StatelessWidget {
     required this.child,
     BorderRadius? borderRadius,
     BoxDecoration? decoration,
+    this.height,
     this.width = double.infinity,
     this.padding = const EdgeInsets.all(MEDIUM_SPACE),
     this.constraints,
@@ -29,6 +31,7 @@ class Paper extends StatelessWidget {
       padding: padding,
       constraints: constraints,
       width: width,
+      height: height,
       decoration: decoration.copyWith(
         color: platformThemeData(
           context,

@@ -46,6 +46,9 @@ class LocationPointService {
         headingAccuracy = headingAccuracy == 0.0 ? null : headingAccuracy,
         batteryLevel = batteryLevel == 0.0 ? null : batteryLevel;
 
+  String formatRawAddress() =>
+      "${latitude.toStringAsFixed(5)}, ${longitude.toStringAsFixed(5)}";
+
   factory LocationPointService.dummyFromLatLng(final LatLng latLng,
       {final double accuracy = 10.0}) =>
       LocationPointService(

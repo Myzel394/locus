@@ -1,12 +1,18 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:get_time_ago/get_time_ago.dart';
 import 'package:locus/api/nostr-fetch.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/services/view_service.dart';
+import 'package:locus/utils/icon.dart';
+import 'package:locus/utils/location.dart';
 import 'package:locus/utils/theme.dart';
+import 'package:locus/widgets/BentoGridElement.dart';
 import 'package:locus/widgets/Paper.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:nostr/nostr.dart';
 import 'package:provider/provider.dart';
@@ -16,6 +22,8 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../../services/location_point_service.dart';
 import '../../../services/task_service.dart';
 import '../../../utils/permission.dart';
+import '../../../widgets/AddressFetcher.dart';
+import '../ViewDetailsSheet.dart';
 
 class LocationFetcher extends ChangeNotifier {
   final Iterable<TaskView> views;
@@ -123,6 +131,7 @@ class LocationsOverviewScreen extends StatefulWidget {
 class _LocationsOverviewScreenState extends State<LocationsOverviewScreen> {
   late final LocationFetcher _fetchers;
   final MapController flutterMapController = MapController();
+  Stream<Position>? _positionStream;
 
   // Null = all views
   String? selectedViewID;
@@ -152,6 +161,8 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen> {
   dispose() {
     flutterMapController.dispose();
     _fetchers.dispose();
+    _positionStream?.drain();
+
     super.dispose();
   }
 
@@ -182,26 +193,13 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen> {
       return;
     }
 
-    Geolocator.getLastKnownPosition().then((location) {
-      if (location == null) {
-        return;
-      }
-
-      flutterMapController?.move(
-        LatLng(location.latitude, location.longitude),
-        13,
-      );
-    });
-
-    Geolocator.getCurrentPosition(
-      // We want to get the position as fast as possible
-      desiredAccuracy: LocationAccuracy.lowest,
-    ).then((location) {
-      flutterMapController?.move(
-        LatLng(location.latitude, location.longitude),
-        13,
-      );
-    });
+    _positionStream = getLastAndCurrentPosition()
+      ..listen((position) {
+        flutterMapController?.move(
+          LatLng(position.latitude, position.longitude),
+          13,
+        );
+      });
   }
 
   Widget buildMap() {
@@ -261,12 +259,16 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen> {
     );
   }
 
-  Widget buildViewTile(final TaskView? view) {
+  Widget buildViewTile(
+    final TaskView? view, {
+    final MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start,
+  }) {
     final l10n = AppLocalizations.of(context);
 
     if (view == null) {
       return Row(
-        mainAxisAlignment: MainAxisAlignment.start,
+        mainAxisAlignment: mainAxisAlignment,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
           const Icon(Icons.location_on_rounded, size: 20),
           const SizedBox(width: SMALL_SPACE),
@@ -276,7 +278,8 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen> {
     }
 
     return Row(
-      mainAxisAlignment: MainAxisAlignment.start,
+      mainAxisAlignment: mainAxisAlignment,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
         Icon(
           Icons.circle_rounded,
@@ -296,7 +299,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen> {
     return Positioned(
       left: MEDIUM_SPACE,
       right: MEDIUM_SPACE,
-      top: MEDIUM_SPACE,
+      top: SMALL_SPACE,
       child: SafeArea(
         bottom: false,
         child: Center(
@@ -314,6 +317,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen> {
                       vertical: SMALL_SPACE,
                     ),
                     child: DropdownButton<String?>(
+                      isDense: true,
                       value: selectedViewID,
                       onChanged: (selection) {
                         if (selection == null) {
@@ -340,13 +344,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen> {
                         for (final view in viewService.views) ...[
                           DropdownMenuItem(
                             value: view.id,
-                            child: Row(
-                              children: <Widget>[
-                                buildViewTile(view),
-                                const SizedBox(width: SMALL_SPACE),
-                                Text(view.name),
-                              ],
-                            ),
+                            child: buildViewTile(view),
                           ),
                         ],
                       ],
@@ -354,13 +352,13 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen> {
                   ),
                 ),
               Flexible(
-                child: AspectRatio(
-                  aspectRatio: 1,
+                child: SizedBox.square(
+                  dimension: 50,
                   child: Center(
                     child: Paper(
                       width: null,
                       borderRadius: BorderRadius.circular(HUGE_SPACE),
-                      padding: const EdgeInsets.all(SMALL_SPACE),
+                      padding: EdgeInsets.zero,
                       child: PlatformIconButton(
                         icon: const Icon(Icons.my_location),
                         onPressed: () => goToCurrentPosition(true),
@@ -376,6 +374,22 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen> {
     );
   }
 
+  LocationPointService? get lastLocation {
+    if (selectedView == null) {
+      return null;
+    }
+
+    if (_fetchers.locations[selectedView!] == null) {
+      return null;
+    }
+
+    if (_fetchers.locations[selectedView!]!.isEmpty) {
+      return null;
+    }
+
+    return _fetchers.locations[selectedView!]!.last;
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -385,23 +399,11 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen> {
       body: Stack(
         children: <Widget>[
           buildMap(),
-          DraggableScrollableSheet(
-            builder: (context, scrollController) => Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: <Widget>[
-                Paper(
-                  child: Column(
-                    children: <Widget>[
-                      buildViewTile(selectedView),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
           buildBar(),
+          ViewDetailsSheet(
+            view: selectedView,
+            lastLocation: lastLocation,
+          )
         ],
       ),
     );
