@@ -1,3 +1,4 @@
+import 'package:animations/animations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
@@ -6,8 +7,10 @@ import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:locus/constants/spacing.dart';
+import 'package:locus/screens/SettingsScreen.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:locus/utils/location.dart';
+import 'package:locus/utils/navigation.dart';
 import 'package:locus/widgets/Paper.dart';
 import 'package:map_launcher/map_launcher.dart';
 import 'package:provider/provider.dart';
@@ -16,6 +19,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../services/location_point_service.dart';
 import '../utils/permission.dart';
+import '../utils/theme.dart';
 import '../widgets/OpenInMaps.dart';
 import 'locations_overview_screen_widgets/ViewDetailsSheet.dart';
 
@@ -479,34 +483,72 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     final l10n = AppLocalizations.of(context);
 
     return PlatformScaffold(
-      material: (_, __) => MaterialScaffoldData(
-        floatingActionButtonLocation: ExpandableFab.location,
-        floatingActionButton: ExpandableFab(
-          overlayStyle: ExpandableFabOverlayStyle(
-            color: Colors.black.withOpacity(0.4),
+      material: (context, __) {
+        // All colors and values here are taken from `floating_action_button.dart`.
+        // Normally they _should_ be defined in the theme, but they aren't.
+        // That's why we resort to the defaults.
+        final theme = Theme.of(context);
+
+        return MaterialScaffoldData(
+          floatingActionButtonLocation: ExpandableFab.location,
+          floatingActionButton: ExpandableFab(
+            overlayStyle: ExpandableFabOverlayStyle(
+              color: Colors.black.withOpacity(0.4),
+            ),
+            expandedFabSize: ExpandableFabSize.regular,
+            distance: HUGE_SPACE,
+            type: ExpandableFabType.up,
+            children: [
+              FloatingActionButton.extended(
+                onPressed: () {},
+                icon: const Icon(Icons.share_location_rounded),
+                label: Text(l10n.shareLocation_title),
+              ),
+              FloatingActionButton.extended(
+                onPressed: () {},
+                icon: const Icon(Icons.list_rounded),
+                label: Text(l10n.sharesOverviewScreen_title),
+              ),
+              OpenContainer(
+                transitionDuration: const Duration(milliseconds: 500),
+                transitionType: ContainerTransitionType.fadeThrough,
+                openBuilder: (_, action) => const SettingsScreen(),
+                closedBuilder: (context, action) => InkWell(
+                  onTap: action,
+                  child: Padding(
+                    // `16.0` is taken from `floating_action_button.dart`.
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
+                      children: <Widget>[
+                        Icon(
+                          Icons.settings_rounded,
+                          color: theme.colorScheme.onPrimaryContainer,
+                        ),
+                        const SizedBox(width: 8.0),
+                        Text(
+                          l10n.settingsScreen_title,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w500,
+                            color: theme.colorScheme.onPrimaryContainer,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                closedElevation: 2.0,
+                closedShape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(16.0),
+                  ),
+                ),
+                openColor: Colors.transparent,
+                closedColor: theme.colorScheme.primaryContainer,
+              ),
+            ],
           ),
-          expandedFabSize: ExpandableFabSize.regular,
-          distance: HUGE_SPACE,
-          type: ExpandableFabType.up,
-          children: [
-            FloatingActionButton.extended(
-              onPressed: () {},
-              icon: const Icon(Icons.share_location_rounded),
-              label: Text(l10n.shareLocation_title),
-            ),
-            FloatingActionButton.extended(
-              onPressed: () {},
-              icon: const Icon(Icons.add_location_alt_outlined),
-              label: Text(l10n.sharesOverviewScreen_title),
-            ),
-            FloatingActionButton.extended(
-              onPressed: () {},
-              icon: Icon(context.platformIcons.settings),
-              label: Text(l10n.settingsScreen_title),
-            )
-          ],
-        ),
-      ),
+        );
+      },
       body: Stack(
         children: <Widget>[
           buildMap(),
