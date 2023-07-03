@@ -1,28 +1,21 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:get_time_ago/get_time_ago.dart';
-import 'package:locus/api/nostr-fetch.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/services/view_service.dart';
-import 'package:locus/utils/icon.dart';
 import 'package:locus/utils/location.dart';
-import 'package:locus/utils/theme.dart';
-import 'package:locus/widgets/BentoGridElement.dart';
 import 'package:locus/widgets/Paper.dart';
-import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
-import 'package:nostr/nostr.dart';
+import 'package:map_launcher/map_launcher.dart';
 import 'package:provider/provider.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../../services/location_point_service.dart';
-import '../../../services/task_service.dart';
 import '../../../utils/permission.dart';
-import '../../../widgets/AddressFetcher.dart';
+import '../../../widgets/OpenInMaps.dart';
 import '../ViewDetailsSheet.dart';
 
 class LocationFetcher extends ChangeNotifier {
@@ -232,7 +225,8 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
                         radius: location.accuracy,
                         useRadiusInMeter: true,
                         point: LatLng(location.latitude, location.longitude),
-                        color: view.color.withOpacity(.2),
+                        borderStrokeWidth: location.accuracy < 10 ? 1 : 3,
+                        color: view.color.withOpacity(.1),
                         borderColor: view.color,
                       ),
                     )
@@ -241,6 +235,91 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
               .toList()
               .expand((element) => element)
               .toList(),
+        ),
+        PopupMarkerLayer(
+          options: PopupMarkerLayerOptions(
+            markerTapBehavior: MarkerTapBehavior.togglePopupAndHideRest(),
+            popupDisplayOptions: PopupDisplayOptions(
+              builder: (context, marker) {
+                final l10n = AppLocalizations.of(context);
+                final view = viewService.views.firstWhere(
+                  (view) => Key(view.id) == marker.key,
+                );
+
+                return Paper(
+                  width: null,
+                  child: Padding(
+                    padding: const EdgeInsets.all(MEDIUM_SPACE),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: <Widget>[
+                            Icon(
+                              Icons.circle_rounded,
+                              size: 20,
+                              color: view.color,
+                            ),
+                            const SizedBox(width: SMALL_SPACE),
+                            Text(view.name),
+                          ],
+                        ),
+                        const SizedBox(height: MEDIUM_SPACE),
+                        PlatformTextButton(
+                          child: Text(l10n.openInMaps),
+                          onPressed: () {
+                            showPlatformModalSheet(
+                              context: context,
+                              material: MaterialModalSheetData(
+                                backgroundColor: Colors.transparent,
+                              ),
+                              builder: (context) => OpenInMaps(
+                                destination: Coords(
+                                  marker.point.latitude,
+                                  marker.point.longitude,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+            markers: viewService.views
+                .where((view) =>
+                    (selectedViewID == null || view.id == selectedViewID) &&
+                    _fetchers.locations[view]?.last != null)
+                .map((view) {
+              final latestLocation = _fetchers.locations[view]!.last;
+
+              return Marker(
+                key: Key(view.id),
+                point: LatLng(
+                  latestLocation.latitude,
+                  latestLocation.longitude,
+                ),
+                anchorPos: AnchorPos.align(AnchorAlign.top),
+                builder: (context) => Icon(
+                  Icons.location_on,
+                  size: 40,
+                  color: view.color,
+                  shadows: const [
+                    Shadow(
+                      blurRadius: 10,
+                      color: Colors.black,
+                      offset: Offset(0, 0),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
         ),
       ],
     );
@@ -407,6 +486,9 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
           ViewDetailsSheet(
             view: selectedView,
             lastLocation: lastLocation,
+            onGoToPosition: (position) {
+              flutterMapController.move(position, flutterMapController.zoom);
+            },
           )
         ],
       ),

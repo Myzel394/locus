@@ -6,6 +6,7 @@
   "cancelLabel": "Cancel",
   "loading": "Loading...",
   "biometricsFailed": "You could not be authenticated",
+  "openInMaps": "Open in Maps",
   "addLabel": "Add",
   "addNewValueLabel": "Add \"{value}\"",
   "@addNewValueLabel": {

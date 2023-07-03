@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/gestures.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
@@ -9,14 +9,11 @@ import 'package:geolocator/geolocator.dart';
 import 'package:get_time_ago/get_time_ago.dart';
 import 'package:locus/screens/ViewDetailScreen.dart';
 import 'package:locus/services/location_point_service.dart';
-import 'package:locus/services/task_service.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:locus/utils/PageRoute.dart';
 import 'package:locus/utils/location.dart';
 import 'package:locus/utils/permission.dart';
-import 'package:locus/widgets/PlatformInkWell.dart';
 import 'package:locus/widgets/RequestLocationPermissionMixin.dart';
-import 'package:map_launcher/map_launcher.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 import '../../constants/spacing.dart';
@@ -24,14 +21,15 @@ import '../../utils/icon.dart';
 import '../../utils/theme.dart';
 import '../../widgets/AddressFetcher.dart';
 import '../../widgets/BentoGridElement.dart';
-import '../../widgets/OpenInMaps.dart';
 import '../../widgets/Paper.dart';
 
 class ViewDetailsSheet extends StatefulWidget {
   final TaskView? view;
   final LocationPointService? lastLocation;
+  final void Function(LatLng position) onGoToPosition;
 
   const ViewDetailsSheet({
+    required this.onGoToPosition,
     this.view,
     this.lastLocation,
     super.key,
@@ -58,7 +56,7 @@ class _ViewDetailsSheetState extends State<ViewDetailsSheet> {
       snapAnimationDuration: const Duration(milliseconds: 100),
       snap: true,
       snapSizes: const [
-        0.15,
+        0.22,
         1,
       ],
       builder: (context, scrollController) => Paper(
@@ -131,6 +129,15 @@ class _ViewDetailsSheetState extends State<ViewDetailsSheet> {
                       view: widget.view!,
                       lastLocation: widget.lastLocation!,
                     ),
+                    DistanceBentoElement(
+                      lastLocation: widget.lastLocation!,
+                      onTap: () => widget.onGoToPosition(
+                        LatLng(
+                          widget.lastLocation!.latitude,
+                          widget.lastLocation!.longitude,
+                        ),
+                      ),
+                    ),
                     BentoGridElement(
                       title: widget.lastLocation!.batteryLevel == null
                           ? l10n.unknownValue
@@ -143,7 +150,7 @@ class _ViewDetailsSheetState extends State<ViewDetailsSheet> {
                         widget.lastLocation!.batteryLevel,
                       ),
                       description: l10n.locations_values_battery_description,
-                      type: BentoType.secondary,
+                      type: BentoType.tertiary,
                     ),
                     BentoGridElement(
                       title: widget.lastLocation!.speed == null
@@ -159,9 +166,6 @@ class _ViewDetailsSheetState extends State<ViewDetailsSheet> {
                       type: BentoType.tertiary,
                       description: l10n.locations_values_speed_description,
                     ),
-                    DistanceBentoElement(
-                      lastLocation: widget.lastLocation!,
-                    ),
                   ],
                 ),
               ],
@@ -175,8 +179,13 @@ class _ViewDetailsSheetState extends State<ViewDetailsSheet> {
 
 class DistanceBentoElement extends StatefulWidget {
   final LocationPointService lastLocation;
+  final VoidCallback onTap;
 
-  const DistanceBentoElement({required this.lastLocation, super.key});
+  const DistanceBentoElement({
+    required this.onTap,
+    required this.lastLocation,
+    super.key,
+  });
 
   @override
   State<DistanceBentoElement> createState() => _DistanceBentoElementState();
@@ -236,20 +245,7 @@ class _DistanceBentoElementState extends State<DistanceBentoElement>
                 });
               }
             }
-          : () {
-              showPlatformModalSheet(
-                context: context,
-                material: MaterialModalSheetData(
-                  backgroundColor: Colors.transparent,
-                ),
-                builder: (context) => OpenInMaps(
-                  destination: Coords(
-                    widget.lastLocation.latitude,
-                    widget.lastLocation.longitude,
-                  ),
-                ),
-              );
-            },
+          : widget.onTap,
       title: (() {
         if (!hasGrantedPermission) {
           return l10n.locations_values_distance_permissionRequired;
