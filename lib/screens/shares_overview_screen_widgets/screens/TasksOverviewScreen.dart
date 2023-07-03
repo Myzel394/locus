@@ -97,7 +97,7 @@ class _TasksOverviewScreenState extends State<TasksOverviewScreen>
                             padding: const EdgeInsets.symmetric(
                                 horizontal: MEDIUM_SPACE),
                             child: ChipCaption(
-                              l10n.mainScreen_tasksSection,
+                              l10n.sharesOverviewScreen_tasksSection,
                               icon: Icons.task_rounded,
                             ),
                           ).animate().fadeIn(duration: 1.seconds),
@@ -130,7 +130,7 @@ class _TasksOverviewScreenState extends State<TasksOverviewScreen>
                       ),
                       cupertino: (context, __) => CupertinoListSection(
                         header: Text(
-                          l10n.mainScreen_tasksSection,
+                          l10n.sharesOverviewScreen_tasksSection,
                         ),
                         children: taskService.tasks
                             .map(
@@ -150,7 +150,7 @@ class _TasksOverviewScreenState extends State<TasksOverviewScreen>
                             padding: const EdgeInsets.symmetric(
                                 horizontal: MEDIUM_SPACE),
                             child: ChipCaption(
-                              l10n.mainScreen_viewsSection,
+                              l10n.sharesOverviewScreen_viewsSection,
                               icon: context.platformIcons.eyeSolid,
                             ),
                           ).animate().fadeIn(duration: 1.seconds),
@@ -178,7 +178,7 @@ class _TasksOverviewScreenState extends State<TasksOverviewScreen>
                         ],
                       ),
                       cupertino: (context, __) => CupertinoListSection(
-                        header: Text(l10n.mainScreen_viewsSection),
+                        header: Text(l10n.sharesOverviewScreen_viewsSection),
                         children: viewService.views
                             .map(
                               (view) => ViewTile(

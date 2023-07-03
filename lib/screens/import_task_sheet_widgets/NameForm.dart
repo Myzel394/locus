@@ -49,7 +49,7 @@ class _NameFormState extends State<NameForm> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           Text(
-            l10n.mainScreen_importTask_action_name_title,
+            l10n.sharesOverviewScreen_importTask_action_name_title,
             style: getTitle2TextStyle(context),
             textAlign: TextAlign.center,
           ),
@@ -70,25 +70,27 @@ class _NameFormState extends State<NameForm> {
               if (viewService.views.any(
                   (element) => element.name?.toLowerCase() == lowerCasedName)) {
                 return l10n
-                    .mainScreen_importTask_action_name_errors_sameNameAlreadyExists;
+                    .sharesOverviewScreen_importTask_action_name_errors_sameNameAlreadyExists;
               }
 
               return null;
             },
             material: (_, __) => MaterialTextFormFieldData(
               decoration: InputDecoration(
-                labelText: l10n.mainScreen_importTask_action_name_label,
+                labelText:
+                    l10n.sharesOverviewScreen_importTask_action_name_label,
                 icon: const Icon(Icons.text_fields_rounded),
               ),
             ),
             cupertino: (_, __) => CupertinoTextFormFieldData(
-              placeholder: l10n.mainScreen_importTask_action_name_label,
+              placeholder:
+                  l10n.sharesOverviewScreen_importTask_action_name_label,
               prefix: const Icon(CupertinoIcons.textformat),
             ),
           ),
           const SizedBox(height: MEDIUM_SPACE),
           Text(
-            l10n.mainScreen_importTask_action_color_label,
+            l10n.sharesOverviewScreen_importTask_action_color_label,
             style: getBodyTextTextStyle(context),
           ),
           const SizedBox(height: SMALL_SPACE),

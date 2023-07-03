@@ -84,12 +84,12 @@ class _CreateTaskState extends State<CreateTask> with TickerProviderStateMixin {
         ),
         const SizedBox(height: MEDIUM_SPACE),
         Text(
-          l10n.mainScreen_createTask_tasksEmpty,
+          l10n.sharesOverviewScreen_createTask_tasksEmpty,
           style: getSubTitleTextStyle(context),
         ),
         const SizedBox(height: SMALL_SPACE),
         Text(
-          l10n.mainScreen_createTask_description,
+          l10n.sharesOverviewScreen_createTask_description,
           style: getCaptionTextStyle(context),
         ),
         const SizedBox(height: LARGE_SPACE),
@@ -129,7 +129,7 @@ class _CreateTaskState extends State<CreateTask> with TickerProviderStateMixin {
                   ),
                   const SizedBox(width: SMALL_SPACE),
                   Text(
-                    l10n.mainScreen_createTask_action_create,
+                    l10n.sharesOverviewScreen_createTask_action_create,
                     style: TextStyle(
                       color: getButtonTextColor(context),
                       fontWeight: FontWeight.w500,

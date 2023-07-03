@@ -36,19 +36,20 @@ class _ImportSelectionState extends State<ImportSelection> {
     return Column(
       children: <Widget>[
         Text(
-          l10n.mainScreen_importTask_title,
+          l10n.sharesOverviewScreen_importTask_title,
           style: getSubTitleTextStyle(context),
         ),
         const SizedBox(height: LARGE_SPACE),
         Text(
-          l10n.mainScreen_importTask_description,
+          l10n.sharesOverviewScreen_importTask_description,
           style: getBodyTextTextStyle(context),
         ),
         const SizedBox(height: MEDIUM_SPACE),
         if (errorMessage != null) ...[
           Text(
             errorMessage!,
-            style: getBodyTextTextStyle(context).copyWith(color: getErrorColor(context)),
+            style: getBodyTextTextStyle(context)
+                .copyWith(color: getErrorColor(context)),
           ),
           const SizedBox(height: MEDIUM_SPACE),
         ],
@@ -65,7 +66,8 @@ class _ImportSelectionState extends State<ImportSelection> {
               material: (_, __) => MaterialElevatedButtonData(
                 icon: const Icon(Icons.link_rounded),
               ),
-              child: Text(l10n.mainScreen_importTask_action_importMethod_url),
+              child: Text(
+                  l10n.sharesOverviewScreen_importTask_action_importMethod_url),
             ),
             PlatformElevatedButton(
               padding: const EdgeInsets.all(MEDIUM_SPACE),
@@ -75,7 +77,8 @@ class _ImportSelectionState extends State<ImportSelection> {
               onPressed: () async {
                 widget.onSelect(ImportSelectionType.file);
               },
-              child: Text(l10n.mainScreen_importTask_action_importMethod_file),
+              child: Text(l10n
+                  .sharesOverviewScreen_importTask_action_importMethod_file),
             ),
             if (Platform.isAndroid && isGMSFlavor)
               PlatformElevatedButton(
@@ -86,7 +89,8 @@ class _ImportSelectionState extends State<ImportSelection> {
                 onPressed: () async {
                   widget.onSelect(ImportSelectionType.bluetooth);
                 },
-                child: Text(l10n.mainScreen_importTask_action_importMethod_bluetooth),
+                child: Text(l10n
+                    .sharesOverviewScreen_importTask_action_importMethod_bluetooth),
               )
           ],
         ),

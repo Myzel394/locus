@@ -49,7 +49,7 @@ class _URLFormState extends State<URLForm> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
           Text(
-            l10n.mainScreen_importTask_action_importMethod_url_title,
+            l10n.sharesOverviewScreen_importTask_action_importMethod_url_title,
             style: getBodyTextTextStyle(context),
           ),
           const SizedBox(height: MEDIUM_SPACE),
@@ -83,14 +83,15 @@ class _URLFormState extends State<URLForm> {
               icon: const Icon(Icons.link_rounded),
             ),
             child: Text(
-              l10n.mainScreen_importTask_action_importMethod_url,
+              l10n.sharesOverviewScreen_importTask_action_importMethod_url,
             ),
           ),
           if (errorMessage != null) ...[
             const SizedBox(height: SMALL_SPACE),
             Text(
               errorMessage!,
-              style: getBodyTextTextStyle(context).copyWith(color: getErrorColor(context)),
+              style: getBodyTextTextStyle(context)
+                  .copyWith(color: getErrorColor(context)),
             ),
           ]
         ],

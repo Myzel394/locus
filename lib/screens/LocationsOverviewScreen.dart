@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
@@ -475,7 +476,37 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
   Widget build(BuildContext context) {
     super.build(context);
 
+    final l10n = AppLocalizations.of(context);
+
     return PlatformScaffold(
+      material: (_, __) => MaterialScaffoldData(
+        floatingActionButtonLocation: ExpandableFab.location,
+        floatingActionButton: ExpandableFab(
+          overlayStyle: ExpandableFabOverlayStyle(
+            color: Colors.black.withOpacity(0.4),
+          ),
+          expandedFabSize: ExpandableFabSize.regular,
+          distance: HUGE_SPACE,
+          type: ExpandableFabType.up,
+          children: [
+            FloatingActionButton.extended(
+              onPressed: () {},
+              icon: const Icon(Icons.share_location_rounded),
+              label: Text(l10n.shareLocation_title),
+            ),
+            FloatingActionButton.extended(
+              onPressed: () {},
+              icon: const Icon(Icons.add_location_alt_outlined),
+              label: Text(l10n.sharesOverviewScreen_title),
+            ),
+            FloatingActionButton.extended(
+              onPressed: () {},
+              icon: Icon(context.platformIcons.settings),
+              label: Text(l10n.settingsScreen_title),
+            )
+          ],
+        ),
+      ),
       body: Stack(
         children: <Widget>[
           buildMap(),

@@ -477,26 +477,26 @@ class _SharesOverviewScreenState extends State<SharesOverviewScreen> {
           ? [
               BottomNavigationBarItem(
                 icon: const Icon(CupertinoIcons.home),
-                label: l10n.mainScreen_overview,
+                label: l10n.sharesOverviewScreen_title,
               ),
               BottomNavigationBarItem(
                 icon: const Icon(CupertinoIcons.list_bullet),
-                label: l10n.mainScreen_tasks,
+                label: l10n.sharesOverviewScreen_tasks,
               ),
               BottomNavigationBarItem(
                 icon: const Icon(CupertinoIcons.location_fill),
-                label: l10n.mainScreen_createTask,
+                label: l10n.sharesOverviewScreen_createTask,
               ),
             ]
           : [
               BottomNavigationBarItem(
                 icon: const Icon(Icons.home),
-                label: l10n.mainScreen_overview,
+                label: l10n.sharesOverviewScreen_title,
                 backgroundColor: Theme.of(context).dialogBackgroundColor,
               ),
               BottomNavigationBarItem(
                 icon: const Icon(Icons.list_rounded),
-                label: l10n.mainScreen_tasks,
+                label: l10n.sharesOverviewScreen_tasks,
               ),
             ],
     );

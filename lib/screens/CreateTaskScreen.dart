@@ -3,7 +3,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutter_platform_widgets/flutter_platform_widgets.dart' hide PlatformListTile;
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart'
+    hide PlatformListTile;
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/screens/create_task_screen_widgets/ExampleTasksRoulette.dart';
 import 'package:locus/services/task_service.dart';
@@ -38,7 +39,9 @@ class CreateTaskScreen extends StatefulWidget {
 }
 
 class _CreateTaskScreenState extends State<CreateTaskScreen>
-    with RequestLocationPermissionMixin, RequestBatteryOptimizationsDisabledMixin {
+    with
+        RequestLocationPermissionMixin,
+        RequestBatteryOptimizationsDisabledMixin {
   final TextEditingController _nameController = TextEditingController();
   final TimerController _timersController = TimerController();
   final RelayController _relaysController = RelayController();
@@ -56,7 +59,8 @@ class _CreateTaskScreenState extends State<CreateTaskScreen>
     _nameController.addListener(() {
       final taskService = context.read<TaskService>();
       final lowerCasedName = _nameController.text.toLowerCase();
-      final alreadyExists = taskService.tasks.any((element) => element.name.toLowerCase() == lowerCasedName);
+      final alreadyExists = taskService.tasks
+          .any((element) => element.name.toLowerCase() == lowerCasedName);
 
       setState(() {
         anotherTaskAlreadyExists = alreadyExists;
@@ -92,8 +96,10 @@ class _CreateTaskScreenState extends State<CreateTaskScreen>
   }
 
   Future<void> createTask() async {
-    final hasGrantedLocationPermission = await showLocationPermissionDialog(askForAlways: true);
-    final hasDisabledBatteryOptimizations = await showDisableBatteryOptimizationsDialog();
+    final hasGrantedLocationPermission =
+        await showLocationPermissionDialog(askForAlways: true);
+    final hasDisabledBatteryOptimizations =
+        await showDisableBatteryOptimizationsDialog();
 
     if (!hasGrantedLocationPermission || !hasDisabledBatteryOptimizations) {
       return;
@@ -184,11 +190,13 @@ class _CreateTaskScreenState extends State<CreateTaskScreen>
         showPlatformDialog(
           context: context,
           builder: (context) => PlatformAlertDialog(
-            title: Text(l10n.mainScreen_createTask_scheduleNow_help_title),
+            title: Text(
+                l10n.sharesOverviewScreen_createTask_scheduleNow_help_title),
             material: (_, __) => MaterialAlertDialogData(
               icon: Icon(context.platformIcons.help),
             ),
-            content: Text(l10n.mainScreen_createTask_scheduleNow_help_description),
+            content: Text(l10n
+                .sharesOverviewScreen_createTask_scheduleNow_help_description),
             actions: [
               PlatformDialogAction(
                 child: PlatformText(l10n.closeNeutralAction),
@@ -203,7 +211,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen>
     );
 
     return PlatformListTile(
-      title: Text(l10n.mainScreen_createTask_scheduleNow),
+      title: Text(l10n.sharesOverviewScreen_createTask_scheduleNow),
       leading: settings.isMIUI() ? explanationWidget : switchWidget,
       trailing: settings.isMIUI() ? switchWidget : explanationWidget,
     )
@@ -228,7 +236,7 @@ class _CreateTaskScreenState extends State<CreateTaskScreen>
 
     return PlatformScaffold(
       appBar: PlatformAppBar(
-        title: Text(l10n.mainScreen_createTask),
+        title: Text(l10n.sharesOverviewScreen_createTask),
         material: (_, __) => MaterialAppBarData(
           centerTitle: true,
         ),
@@ -289,12 +297,15 @@ class _CreateTaskScreenState extends State<CreateTaskScreen>
                                 autofillHints: const [AutofillHints.name],
                                 material: (_, __) => MaterialTextFormFieldData(
                                   decoration: InputDecoration(
-                                    labelText: l10n.createTask_fields_name_label,
+                                    labelText:
+                                        l10n.createTask_fields_name_label,
                                     prefixIcon: Icon(context.platformIcons.tag),
                                   ),
                                 ),
-                                cupertino: (_, __) => CupertinoTextFormFieldData(
-                                  placeholder: l10n.createTask_fields_name_label,
+                                cupertino: (_, __) =>
+                                    CupertinoTextFormFieldData(
+                                  placeholder:
+                                      l10n.createTask_fields_name_label,
                                   prefix: Icon(context.platformIcons.tag),
                                 ),
                               )
@@ -331,7 +342,8 @@ class _CreateTaskScreenState extends State<CreateTaskScreen>
                             if (settings.isMIUI()) ...[
                               MIUISelectField(
                                 label: l10n.createTask_fields_relays_label,
-                                actionText: l10n.createTask_fields_relays_selectLabel(
+                                actionText:
+                                    l10n.createTask_fields_relays_selectLabel(
                                   _relaysController.relays.length,
                                 ),
                                 icon: const Icon(Icons.dns_rounded),
@@ -343,7 +355,8 @@ class _CreateTaskScreenState extends State<CreateTaskScreen>
                                   ),
                               MIUISelectField(
                                 label: l10n.createTask_fields_timers_label,
-                                actionText: l10n.createTask_fields_timers_selectLabel(
+                                actionText:
+                                    l10n.createTask_fields_timers_selectLabel(
                                   _timersController.timers.length,
                                 ),
                                 icon: const Icon(Icons.timer_rounded),
@@ -361,13 +374,17 @@ class _CreateTaskScreenState extends State<CreateTaskScreen>
                                 direction: Axis.horizontal,
                                 children: <Widget>[
                                   PlatformElevatedButton(
-                                    material: (_, __) => MaterialElevatedButtonData(
+                                    material: (_, __) =>
+                                        MaterialElevatedButtonData(
                                       icon: PlatformWidget(
-                                        material: (_, __) => const Icon(Icons.dns_rounded),
-                                        cupertino: (_, __) => const Icon(CupertinoIcons.list_bullet),
+                                        material: (_, __) =>
+                                            const Icon(Icons.dns_rounded),
+                                        cupertino: (_, __) => const Icon(
+                                            CupertinoIcons.list_bullet),
                                       ),
                                     ),
-                                    cupertino: (_, __) => CupertinoElevatedButtonData(
+                                    cupertino: (_, __) =>
+                                        CupertinoElevatedButtonData(
                                       padding: getSmallButtonPadding(context),
                                     ),
                                     onPressed: showRelaysSheet,
@@ -390,10 +407,12 @@ class _CreateTaskScreenState extends State<CreateTaskScreen>
                                         curve: Curves.easeOut,
                                       ),
                                   PlatformElevatedButton(
-                                    material: (_, __) => MaterialElevatedButtonData(
+                                    material: (_, __) =>
+                                        MaterialElevatedButtonData(
                                       icon: const Icon(Icons.timer_rounded),
                                     ),
-                                    cupertino: (_, __) => CupertinoElevatedButtonData(
+                                    cupertino: (_, __) =>
+                                        CupertinoElevatedButtonData(
                                       padding: getSmallButtonPadding(context),
                                     ),
                                     onPressed: showTimersSheet,

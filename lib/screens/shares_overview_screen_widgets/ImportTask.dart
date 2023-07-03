@@ -90,12 +90,12 @@ class _ImportTaskState extends State<ImportTask> with TickerProviderStateMixin {
         ),
         const SizedBox(height: MEDIUM_SPACE),
         Text(
-          l10n.mainScreen_importTask_title,
+          l10n.sharesOverviewScreen_importTask_title,
           style: getSubTitleTextStyle(context),
         ),
         const SizedBox(height: SMALL_SPACE),
         Text(
-          l10n.mainScreen_importTask_description,
+          l10n.sharesOverviewScreen_importTask_description,
           style: getCaptionTextStyle(context),
         ),
         const SizedBox(height: MEDIUM_SPACE),
@@ -110,8 +110,10 @@ class _ImportTaskState extends State<ImportTask> with TickerProviderStateMixin {
                 context: context,
                 barrierDismissible: true,
                 builder: (cupertino) => CupertinoActionSheet(
-                  title: Text(l10n.mainScreen_importTask_action_import),
-                  message: Text(l10n.mainScreen_importTask_action_importMethod),
+                  title:
+                      Text(l10n.sharesOverviewScreen_importTask_action_import),
+                  message: Text(
+                      l10n.sharesOverviewScreen_importTask_action_importMethod),
                   actions: createCancellableDialogActions(
                     context,
                     [
@@ -120,14 +122,16 @@ class _ImportTaskState extends State<ImportTask> with TickerProviderStateMixin {
                         onPressed: () {
                           Navigator.of(context).pop(ImportScreen.askURL);
                         },
-                        child: Text(l10n.mainScreen_importTask_action_importMethod_url),
+                        child: Text(l10n
+                            .sharesOverviewScreen_importTask_action_importMethod_url),
                       ),
                       CupertinoActionSheetAction(
                         isDefaultAction: true,
                         onPressed: () {
                           Navigator.of(context).pop(ImportScreen.importFile);
                         },
-                        child: Text(l10n.mainScreen_importTask_action_importMethod_file),
+                        child: Text(l10n
+                            .sharesOverviewScreen_importTask_action_importMethod_file),
                       ),
                     ],
                   ),
@@ -146,13 +150,14 @@ class _ImportTaskState extends State<ImportTask> with TickerProviderStateMixin {
                 isDismissible: true,
                 backgroundColor: Colors.transparent,
               ),
-              builder: (context) => ImportTaskSheet(initialScreen: initialScreen),
+              builder: (context) =>
+                  ImportTaskSheet(initialScreen: initialScreen),
             );
           },
           material: (_, __) => MaterialElevatedButtonData(
             icon: const Icon(Icons.file_download_outlined),
           ),
-          child: Text(l10n.mainScreen_importTask_action_import),
+          child: Text(l10n.sharesOverviewScreen_importTask_action_import),
         ),
       ],
     );

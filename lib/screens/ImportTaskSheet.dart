@@ -176,8 +176,8 @@ class _ImportTaskSheetState extends State<ImportTaskSheet>
       result = await FilePicker.platform.pickFiles(
         type: FileType.custom,
         allowedExtensions: ["json"],
-        dialogTitle:
-            l10n.mainScreen_importTask_action_importMethod_file_selectFile,
+        dialogTitle: l10n
+            .sharesOverviewScreen_importTask_action_importMethod_file_selectFile,
         withData: true,
       );
     } catch (error) {
@@ -309,7 +309,7 @@ class _ImportTaskSheetState extends State<ImportTaskSheet>
                 Column(
                   children: <Widget>[
                     Text(
-                      l10n.mainScreen_importTask_action_import_isLoading,
+                      l10n.sharesOverviewScreen_importTask_action_import_isLoading,
                       style: getSubTitleTextStyle(context),
                     ),
                     const SizedBox(height: SMALL_SPACE),
