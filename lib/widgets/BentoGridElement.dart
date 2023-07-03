@@ -4,8 +4,6 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/extensions/string.dart';
 import 'package:locus/services/settings_service.dart';
-import 'package:locus/utils/theme.dart';
-import 'package:locus/widgets/PlatformInkWell.dart';
 import 'package:provider/provider.dart';
 
 enum BentoType {
