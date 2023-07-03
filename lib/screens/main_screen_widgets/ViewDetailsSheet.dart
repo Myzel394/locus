@@ -44,6 +44,27 @@ class _ViewDetailsSheetState extends State<ViewDetailsSheet> {
   final DraggableScrollableController controller =
       DraggableScrollableController();
 
+  TaskView? oldView;
+  LocationPointService? oldLastLocation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    controller.addListener(() {
+      // User should not be able to close the sheet when a view is selected.
+      // Dynamically changing the snap sizes doesn't seem to work.
+      // Instead we will simply reopen the sheet if the user tries to close it.
+      if (controller.size == 0.0 && widget.view != null) {
+        controller.animateTo(
+          0.22,
+          duration: const Duration(milliseconds: 750),
+          curve: Curves.bounceOut,
+        );
+      }
+    });
+  }
+
   @override
   void dispose() {
     controller.dispose();
@@ -52,20 +73,44 @@ class _ViewDetailsSheetState extends State<ViewDetailsSheet> {
   }
 
   @override
+  void didUpdateWidget(covariant ViewDetailsSheet oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.view != widget.view) {
+      oldView = oldWidget.view;
+      oldLastLocation = oldWidget.lastLocation;
+
+      if (widget.view == null) {
+        controller.animateTo(
+          0,
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeIn,
+        );
+      } else {
+        controller.animateTo(
+          0.22,
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeIn,
+        );
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
 
-    if (widget.view == null) {
-      return const SizedBox.shrink();
-    }
+    final view = widget.view ?? oldView;
+    final lastLocation = widget.lastLocation ?? oldLastLocation;
 
     return DraggableScrollableSheet(
       controller: controller,
-      minChildSize: 0.15,
-      initialChildSize: 0.22,
+      minChildSize: 0.0,
+      initialChildSize: 0.0,
       snapAnimationDuration: const Duration(milliseconds: 100),
       snap: true,
       snapSizes: const [
+        0.0,
         0.15,
         0.22,
         1,
@@ -83,24 +128,25 @@ class _ViewDetailsSheetState extends State<ViewDetailsSheet> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
               const SizedBox(height: MEDIUM_SPACE),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  Icon(
-                    Icons.circle_rounded,
-                    size: 20,
-                    color: widget.view!.color,
-                  ),
-                  const SizedBox(width: SMALL_SPACE),
-                  Text(widget.view!.name),
-                ],
-              ),
+              if (view != null)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    Icon(
+                      Icons.circle_rounded,
+                      size: 20,
+                      color: view.color,
+                    ),
+                    const SizedBox(width: SMALL_SPACE),
+                    Text(view.name),
+                  ],
+                ),
               const SizedBox(height: LARGE_SPACE),
-              if (widget.lastLocation != null) ...[
+              if (lastLocation != null) ...[
                 AddressFetcher(
-                  latitude: widget.lastLocation!.latitude,
-                  longitude: widget.lastLocation!.longitude,
+                  latitude: lastLocation.latitude,
+                  longitude: lastLocation.longitude,
                   builder: (address) => Text.rich(
                     TextSpan(
                       children: [
@@ -109,7 +155,7 @@ class _ViewDetailsSheetState extends State<ViewDetailsSheet> {
                           style: getBodyTextTextStyle(context),
                         ),
                         TextSpan(
-                          text: " (${widget.lastLocation!.formatRawAddress()})",
+                          text: " (${lastLocation.formatRawAddress()})",
                           style: getCaptionTextStyle(context),
                         ),
                       ],
@@ -137,11 +183,11 @@ class _ViewDetailsSheetState extends State<ViewDetailsSheet> {
                   physics: const NeverScrollableScrollPhysics(),
                   children: [
                     LastLocationBentoElement(
-                      view: widget.view!,
-                      lastLocation: widget.lastLocation!,
+                      view: view!,
+                      lastLocation: lastLocation,
                     ),
                     DistanceBentoElement(
-                      lastLocation: widget.lastLocation!,
+                      lastLocation: lastLocation,
                       onTap: () {
                         controller.animateTo(
                           0.22,
@@ -151,17 +197,17 @@ class _ViewDetailsSheetState extends State<ViewDetailsSheet> {
 
                         widget.onGoToPosition(
                           LatLng(
-                            widget.lastLocation!.latitude,
-                            widget.lastLocation!.longitude,
+                            lastLocation.latitude,
+                            lastLocation.longitude,
                           ),
                         );
                       },
                     ),
                     BentoGridElement(
-                      title: widget.lastLocation!.altitude == null
+                      title: lastLocation.altitude == null
                           ? l10n.unknownValue
                           : l10n.locations_values_altitude_m(
-                              widget.lastLocation!.altitude!.round(),
+                              lastLocation.altitude!.round(),
                             ),
                       icon: platformThemeData(
                         context,
@@ -172,10 +218,10 @@ class _ViewDetailsSheetState extends State<ViewDetailsSheet> {
                       description: l10n.locations_values_altitude_description,
                     ),
                     BentoGridElement(
-                      title: widget.lastLocation!.speed == null
+                      title: lastLocation.speed == null
                           ? l10n.unknownValue
                           : l10n.locations_values_speed_kmh(
-                              (widget.lastLocation!.speed! * 3.6).round(),
+                              (lastLocation.speed! * 3.6).round(),
                             ),
                       icon: platformThemeData(
                         context,
@@ -186,24 +232,23 @@ class _ViewDetailsSheetState extends State<ViewDetailsSheet> {
                       description: l10n.locations_values_speed_description,
                     ),
                     BentoGridElement(
-                      title: widget.lastLocation!.batteryLevel == null
+                      title: lastLocation.batteryLevel == null
                           ? l10n.unknownValue
                           : l10n.locations_values_battery_value(
-                              (widget.lastLocation!.batteryLevel! * 100)
-                                  .round(),
+                              (lastLocation.batteryLevel! * 100).round(),
                             ),
                       icon: getIconDataForBatteryLevel(
                         context,
-                        widget.lastLocation!.batteryLevel,
+                        lastLocation.batteryLevel,
                       ),
                       description: l10n.locations_values_battery_description,
                       type: BentoType.tertiary,
                     ),
                     BentoGridElement(
-                      title: widget.lastLocation!.batteryState == null
+                      title: lastLocation.batteryState == null
                           ? l10n.unknownValue
                           : l10n.locations_values_batteryState_value(
-                              widget.lastLocation!.batteryState!.name,
+                              lastLocation.batteryState!.name,
                             ),
                       icon: Icons.cable_rounded,
                       type: BentoType.tertiary,
