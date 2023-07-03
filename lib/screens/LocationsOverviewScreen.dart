@@ -11,6 +11,7 @@ import 'package:locus/screens/SettingsScreen.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:locus/utils/location.dart';
 import 'package:locus/utils/navigation.dart';
+import 'package:locus/widgets/FABOpenContainer.dart';
 import 'package:locus/widgets/Paper.dart';
 import 'package:map_launcher/map_launcher.dart';
 import 'package:provider/provider.dart';
@@ -484,11 +485,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
 
     return PlatformScaffold(
       material: (context, __) {
-        // All colors and values here are taken from `floating_action_button.dart`.
-        // Normally they _should_ be defined in the theme, but they aren't.
-        // That's why we resort to the defaults.
-        final theme = Theme.of(context);
-
         return MaterialScaffoldData(
           floatingActionButtonLocation: ExpandableFab.location,
           floatingActionButton: ExpandableFab(
@@ -509,42 +505,11 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
                 icon: const Icon(Icons.list_rounded),
                 label: Text(l10n.sharesOverviewScreen_title),
               ),
-              OpenContainer(
-                transitionDuration: const Duration(milliseconds: 500),
-                transitionType: ContainerTransitionType.fadeThrough,
-                openBuilder: (_, action) => const SettingsScreen(),
-                closedBuilder: (context, action) => InkWell(
-                  onTap: action,
-                  child: Padding(
-                    // `16.0` is taken from `floating_action_button.dart`.
-                    padding: const EdgeInsets.all(16.0),
-                    child: Row(
-                      children: <Widget>[
-                        Icon(
-                          Icons.settings_rounded,
-                          color: theme.colorScheme.onPrimaryContainer,
-                        ),
-                        const SizedBox(width: 8.0),
-                        Text(
-                          l10n.settingsScreen_title,
-                          style: TextStyle(
-                            fontWeight: FontWeight.w500,
-                            color: theme.colorScheme.onPrimaryContainer,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                closedElevation: 2.0,
-                closedShape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(16.0),
-                  ),
-                ),
-                openColor: Colors.transparent,
-                closedColor: theme.colorScheme.primaryContainer,
-              ),
+              FABOpenContainer(
+                label: l10n.settingsScreen_title,
+                icon: context.platformIcons.settings,
+                onTap: (context, _) => const SettingsScreen(),
+              )
             ],
           ),
         );
