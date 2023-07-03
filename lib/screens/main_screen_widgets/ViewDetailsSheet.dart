@@ -157,18 +157,18 @@ class _ViewDetailsSheetState extends State<ViewDetailsSheet> {
                       },
                     ),
                     BentoGridElement(
-                      title: widget.lastLocation!.batteryLevel == null
+                      title: widget.lastLocation!.altitude == null
                           ? l10n.unknownValue
-                          : l10n.locations_values_battery_value(
-                              (widget.lastLocation!.batteryLevel! * 100)
-                                  .round(),
+                          : l10n.locations_values_altitude_m(
+                              widget.lastLocation!.altitude!.round(),
                             ),
-                      icon: getIconDataForBatteryLevel(
+                      icon: platformThemeData(
                         context,
-                        widget.lastLocation!.batteryLevel,
+                        material: (_) => Icons.height_rounded,
+                        cupertino: (_) => CupertinoIcons.arrow_up,
                       ),
-                      description: l10n.locations_values_battery_description,
                       type: BentoType.tertiary,
+                      description: l10n.locations_values_altitude_description,
                     ),
                     BentoGridElement(
                       title: widget.lastLocation!.speed == null
@@ -183,6 +183,31 @@ class _ViewDetailsSheetState extends State<ViewDetailsSheet> {
                       ),
                       type: BentoType.tertiary,
                       description: l10n.locations_values_speed_description,
+                    ),
+                    BentoGridElement(
+                      title: widget.lastLocation!.batteryLevel == null
+                          ? l10n.unknownValue
+                          : l10n.locations_values_battery_value(
+                              (widget.lastLocation!.batteryLevel! * 100)
+                                  .round(),
+                            ),
+                      icon: getIconDataForBatteryLevel(
+                        context,
+                        widget.lastLocation!.batteryLevel,
+                      ),
+                      description: l10n.locations_values_battery_description,
+                      type: BentoType.tertiary,
+                    ),
+                    BentoGridElement(
+                      title: widget.lastLocation!.batteryState == null
+                          ? l10n.unknownValue
+                          : l10n.locations_values_batteryState_value(
+                              widget.lastLocation!.batteryState!.name,
+                            ),
+                      icon: Icons.cable_rounded,
+                      type: BentoType.tertiary,
+                      description:
+                          l10n.locations_values_batteryState_description,
                     ),
                   ],
                 ),

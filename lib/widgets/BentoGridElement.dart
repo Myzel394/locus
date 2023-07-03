@@ -2,6 +2,7 @@ import 'package:figma_squircle/figma_squircle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
+import 'package:locus/extensions/string.dart';
 import 'package:locus/services/settings_service.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/PlatformInkWell.dart';
@@ -109,7 +110,9 @@ class _BentoGridElementState extends State<BentoGridElement> {
           FittedBox(
             fit: BoxFit.scaleDown,
             child: Text(
-              widget.title,
+              widget.title.capitalize(),
+              // Uppercase first letter
+              textScaleFactor: 1,
               style: TextStyle(
                 color: getTitleColor(context),
                 fontSize: 42,

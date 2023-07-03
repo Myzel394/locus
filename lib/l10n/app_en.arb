@@ -737,5 +737,16 @@
         "type": "int"
       }
     }
-  }
+  },
+  "locations_values_altitude_description": "Altitude",
+  "locations_values_altitude_m": "{altitude} m",
+  "@locations_values_altitude_m": {
+    "placeholders": {
+      "altitude": {
+        "type": "int"
+      }
+    }
+  },
+  "locations_values_batteryState_description": "Battery state",
+  "locations_values_batteryState_value": "{state, select, full {full} charging {charging} discharging {discharging} other {unknown}}"
 }
