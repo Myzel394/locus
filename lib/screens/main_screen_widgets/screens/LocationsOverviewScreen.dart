@@ -232,7 +232,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
                     )
                     .toList(),
               )
-              .toList()
               .expand((element) => element)
               .toList(),
         ),

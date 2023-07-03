@@ -120,6 +120,12 @@ class NostrFetch {
         onEnd: onEnd,
       ).then((socket) {
         sockets.add(socket);
+      }).catchError((error) {
+        FlutterLogs.logError(
+          LOG_TAG,
+          "Nostr Socket",
+          "Error for socket: $error",
+        );
       });
     }
 

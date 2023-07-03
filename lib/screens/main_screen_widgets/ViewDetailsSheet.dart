@@ -52,6 +52,8 @@ class _ViewDetailsSheetState extends State<ViewDetailsSheet> {
     super.initState();
 
     controller.addListener(() {
+      // I don't know why, but this is required
+      print(controller.size);
       // User should not be able to close the sheet when a view is selected.
       // Dynamically changing the snap sizes doesn't seem to work.
       // Instead we will simply reopen the sheet if the user tries to close it.
@@ -143,7 +145,11 @@ class _ViewDetailsSheetState extends State<ViewDetailsSheet> {
                   ],
                 ),
               const SizedBox(height: LARGE_SPACE),
-              if (lastLocation != null) ...[
+              if (lastLocation == null)
+                Text(
+                  l10n.locationFetchEmptyError,
+                )
+              else ...[
                 AddressFetcher(
                   latitude: lastLocation.latitude,
                   longitude: lastLocation.longitude,
