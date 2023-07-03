@@ -14,7 +14,7 @@ import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 
 import '../utils/theme.dart';
-import 'MainScreen.dart';
+import 'SharesOverviewScreen.dart';
 
 const storage = FlutterSecureStorage();
 
@@ -62,9 +62,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       context,
       NativePageRoute(
         context: context,
-        builder: (context) => const MainScreen(),
+        builder: (context) => const SharesOverviewScreen(),
       ),
-          (route) => false,
+      (route) => false,
     );
   }
 
@@ -91,10 +91,10 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   width: 150,
                   height: 150,
                 ).animate().scale(
-                  begin: const Offset(0, 0),
-                  end: const Offset(1, 1),
-                  duration: FADE_IN_DURATION,
-                ),
+                      begin: const Offset(0, 0),
+                      end: const Offset(1, 1),
+                      duration: FADE_IN_DURATION,
+                    ),
                 onContinue: () {
                   _nextScreen(1);
                 },
@@ -120,9 +120,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       // Background
                       ValueDelegate.color(
                         const ["unlock Konturen", "Kreis", "Fläche 1"],
-                        value: getIsDarkMode(context)
-                            ? shades[900]
-                            : shades[200],
+                        value:
+                            getIsDarkMode(context) ? shades[900] : shades[200],
                       ),
                     ],
                   ),

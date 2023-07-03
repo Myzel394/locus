@@ -13,10 +13,10 @@ import 'package:provider/provider.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../../../services/location_point_service.dart';
-import '../../../utils/permission.dart';
-import '../../../widgets/OpenInMaps.dart';
-import '../ViewDetailsSheet.dart';
+import '../services/location_point_service.dart';
+import '../utils/permission.dart';
+import '../widgets/OpenInMaps.dart';
+import 'locations_overview_screen_widgets/ViewDetailsSheet.dart';
 
 class LocationFetcher extends ChangeNotifier {
   final Iterable<TaskView> views;
@@ -375,7 +375,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
   }
 
   Widget buildBar() {
-    final l10n = AppLocalizations.of(context);
     final viewService = context.watch<ViewService>();
 
     return Positioned(
@@ -474,8 +473,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final viewService = context.watch<ViewService>();
+    super.build(context);
 
     return PlatformScaffold(
       body: Stack(

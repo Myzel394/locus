@@ -6,7 +6,6 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
-import 'package:locus/screens/main_screen_widgets/values.dart';
 import 'package:locus/services/app_update_service.dart';
 import 'package:locus/services/settings_service.dart';
 import 'package:locus/services/task_service.dart';
@@ -21,6 +20,7 @@ import '../ImportTask.dart';
 import '../TaskTile.dart';
 import '../UpdateAvailableBanner.dart';
 import '../ViewTile.dart';
+import '../values.dart';
 
 class TasksOverviewScreen extends StatefulWidget {
   const TasksOverviewScreen({Key? key}) : super(key: key);

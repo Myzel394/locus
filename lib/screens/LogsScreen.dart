@@ -8,6 +8,7 @@ import 'package:locus/constants/spacing.dart';
 import 'package:locus/screens/LogDetailScreen.dart';
 import 'package:locus/screens/log_detail_screen_widgets/LogCreatedAtInfo.dart';
 import 'package:locus/screens/log_detail_screen_widgets/LogTypeInfo.dart';
+import 'package:locus/screens/shares_overview_screen_widgets/values.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/MaybeMaterial.dart';
 import 'package:provider/provider.dart';
@@ -16,7 +17,6 @@ import '../models/log.dart';
 import '../services/log_service.dart';
 import '../widgets/Paper.dart';
 import 'log_detail_screen_widgets/LogIcon.dart';
-import 'main_screen_widgets/values.dart';
 
 class LogsScreen extends StatefulWidget {
   const LogsScreen({Key? key}) : super(key: key);

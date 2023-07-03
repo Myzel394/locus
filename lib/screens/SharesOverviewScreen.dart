@@ -15,8 +15,9 @@ import 'package:geolocator/geolocator.dart';
 import 'package:locus/init_quick_actions.dart';
 import 'package:locus/main.dart';
 import 'package:locus/screens/ViewDetailScreen.dart';
-import 'package:locus/screens/main_screen_widgets/screens/EmptyScreen.dart';
-import 'package:locus/screens/main_screen_widgets/screens/LocationsOverviewScreen.dart';
+import 'package:locus/screens/LocationsOverviewScreen.dart';
+import 'package:locus/screens/shares_overview_screen_widgets/screens/EmptyScreen.dart';
+import 'package:locus/screens/shares_overview_screen_widgets/screens/TasksOverviewScreen.dart';
 import 'package:locus/services/manager_service.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/services/view_service.dart';
@@ -37,20 +38,18 @@ import '../utils/PageRoute.dart';
 import '../utils/platform.dart';
 import 'CreateTaskScreen.dart';
 import 'ImportTaskSheet.dart';
-import 'LogsScreen.dart';
-import 'main_screen_widgets/screens/TasksOverviewScreen.dart';
-import 'main_screen_widgets/values.dart';
+import 'shares_overview_screen_widgets/values.dart';
 
-class MainScreen extends StatefulWidget {
-  const MainScreen({
+class SharesOverviewScreen extends StatefulWidget {
+  const SharesOverviewScreen({
     Key? key,
   }) : super(key: key);
 
   @override
-  State<MainScreen> createState() => _MainScreenState();
+  State<SharesOverviewScreen> createState() => _SharesOverviewScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
+class _SharesOverviewScreenState extends State<SharesOverviewScreen> {
   final listViewKey = GlobalKey();
   final PageController _tabController = PageController();
   late final TaskService taskService;

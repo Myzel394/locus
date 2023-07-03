@@ -6,7 +6,7 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/constants/values.dart';
-import 'package:locus/screens/MainScreen.dart';
+import 'package:locus/screens/SharesOverviewScreen.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/PlatformFlavorWidget.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
@@ -45,7 +45,7 @@ class _BiometricsRequiredStartupScreenState
         return;
       }
 
-      const screen = MainScreen();
+      const screen = SharesOverviewScreen();
       Navigator.of(context).pushAndRemoveUntil(
         isCupertino(context)
             ? MaterialWithModalsPageRoute(
