@@ -41,16 +41,26 @@ class ViewDetailsSheet extends StatefulWidget {
 
 class _ViewDetailsSheetState extends State<ViewDetailsSheet> {
   final containerKey = GlobalKey();
+  final DraggableScrollableController controller =
+      DraggableScrollableController();
+
+  @override
+  void dispose() {
+    controller.dispose();
+
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
 
     if (widget.view == null) {
-      return SizedBox.shrink();
+      return const SizedBox.shrink();
     }
 
     return DraggableScrollableSheet(
+      controller: controller,
       minChildSize: 0.15,
       initialChildSize: 0.15,
       snapAnimationDuration: const Duration(milliseconds: 100),
@@ -131,12 +141,20 @@ class _ViewDetailsSheetState extends State<ViewDetailsSheet> {
                     ),
                     DistanceBentoElement(
                       lastLocation: widget.lastLocation!,
-                      onTap: () => widget.onGoToPosition(
-                        LatLng(
-                          widget.lastLocation!.latitude,
-                          widget.lastLocation!.longitude,
-                        ),
-                      ),
+                      onTap: () {
+                        controller.animateTo(
+                          0.22,
+                          duration: const Duration(milliseconds: 150),
+                          curve: Curves.fastLinearToSlowEaseIn,
+                        );
+
+                        widget.onGoToPosition(
+                          LatLng(
+                            widget.lastLocation!.latitude,
+                            widget.lastLocation!.longitude,
+                          ),
+                        );
+                      },
                     ),
                     BentoGridElement(
                       title: widget.lastLocation!.batteryLevel == null
