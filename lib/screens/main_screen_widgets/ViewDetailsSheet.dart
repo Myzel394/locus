@@ -62,10 +62,11 @@ class _ViewDetailsSheetState extends State<ViewDetailsSheet> {
     return DraggableScrollableSheet(
       controller: controller,
       minChildSize: 0.15,
-      initialChildSize: 0.15,
+      initialChildSize: 0.22,
       snapAnimationDuration: const Duration(milliseconds: 100),
       snap: true,
       snapSizes: const [
+        0.15,
         0.22,
         1,
       ],
