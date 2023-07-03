@@ -8,6 +8,7 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/screens/SettingsScreen.dart';
+import 'package:locus/screens/SharesOverviewScreen.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:locus/utils/location.dart';
 import 'package:locus/utils/navigation.dart';
@@ -500,10 +501,10 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
                 icon: const Icon(Icons.share_location_rounded),
                 label: Text(l10n.shareLocation_title),
               ),
-              FloatingActionButton.extended(
-                onPressed: () {},
-                icon: const Icon(Icons.list_rounded),
-                label: Text(l10n.sharesOverviewScreen_title),
+              FABOpenContainer(
+                label: l10n.sharesOverviewScreen_title,
+                icon: Icons.list_rounded,
+                onTap: (context, _) => const SharesOverviewScreen(),
               ),
               FABOpenContainer(
                 label: l10n.settingsScreen_title,
