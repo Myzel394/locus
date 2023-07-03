@@ -128,7 +128,8 @@ class LocationsOverviewScreen extends StatefulWidget {
       _LocationsOverviewScreenState();
 }
 
-class _LocationsOverviewScreenState extends State<LocationsOverviewScreen> {
+class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
+    with AutomaticKeepAliveClientMixin {
   late final LocationFetcher _fetchers;
   final MapController flutterMapController = MapController();
   Stream<Position>? _positionStream;
@@ -143,6 +144,9 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen> {
 
     return context.read<ViewService>().getViewById(selectedViewID!);
   }
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
