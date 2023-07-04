@@ -1,10 +1,15 @@
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:animations/animations.dart';
+import 'package:background_fetch/background_fetch.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
+import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
@@ -25,13 +30,30 @@ import 'package:map_launcher/map_launcher.dart';
 import 'package:provider/provider.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:uni_links/uni_links.dart';
 
+import '../constants/notifications.dart';
+import '../constants/values.dart';
+import '../init_quick_actions.dart';
+import '../main.dart';
+import '../services/app_update_service.dart';
 import '../services/location_point_service.dart';
+import '../services/log_service.dart';
+import '../services/manager_service.dart';
 import '../services/settings_service.dart';
+import '../utils/PageRoute.dart';
 import '../utils/permission.dart';
+import '../utils/platform.dart';
 import '../utils/theme.dart';
 import '../widgets/OpenInMaps.dart';
+import 'ViewDetailScreen.dart';
 import 'locations_overview_screen_widgets/ViewDetailsSheet.dart';
+
+enum LocationStatus {
+  stale,
+  active,
+  fetching,
+}
 
 class LocationFetcher extends ChangeNotifier {
   final Iterable<TaskView> views;
@@ -142,6 +164,9 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
   final MapController flutterMapController = MapController();
   Stream<Position>? _positionStream;
   Position? lastPosition;
+  StreamSubscription<String?>? _uniLinksStream;
+  Timer? _viewsAlarmCheckerTimer;
+  LocationStatus locationStatus = LocationStatus.stale;
 
   // Null = all views
   String? selectedViewID;
@@ -166,14 +191,29 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     _createLocationFetcher();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final taskService = context.read<TaskService>();
+      final logService = context.read<LogService>();
+      final appUpdateService = context.read<AppUpdateService>();
       _fetchers.addListener(_rebuild);
+      appUpdateService.addListener(_rebuild);
+
+      initQuickActions(context);
+      _initUniLinks();
+      _updateLocaleToSettings();
+      _showUpdateDialogIfRequired();
+
+      taskService.checkup(logService);
     });
 
     hasGrantedLocationPermission().then((hasGranted) {
       if (hasGranted) {
-        registerPositionListener();
+        _initLiveLocationUpdate();
       }
     });
+
+    BackgroundFetch.start();
+    _handleViewAlarmChecker();
+    _handleNotifications();
   }
 
   @override
@@ -181,6 +221,15 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     flutterMapController.dispose();
     _fetchers.dispose();
     _positionStream?.drain();
+
+    _viewsAlarmCheckerTimer?.cancel();
+    _uniLinksStream?.cancel();
+    _positionStream?.drain();
+
+    _removeLiveLocationUpdate();
+
+    final appUpdateService = context.read<AppUpdateService>();
+    appUpdateService.removeListener(_rebuild);
 
     super.dispose();
   }
@@ -199,44 +248,311 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     setState(() {});
   }
 
-  void registerPositionListener({final bool goToPosition = false}) {
-    _positionStream = getLastAndCurrentPosition(updateLocation: true)
-      ..listen((position) {
-        if (!_hasGoneToInitialPosition) {
-          flutterMapController.move(
-            LatLng(position.latitude, position.longitude),
-            flutterMapController.zoom,
-          );
+  LocationSettings _getLocationSettings() {
+    final l10n = AppLocalizations.of(context);
 
-          _hasGoneToInitialPosition = true;
+    if (Platform.isAndroid) {
+      return AndroidSettings(
+        accuracy: LocationAccuracy.best,
+        distanceFilter: BACKGROUND_LOCATION_UPDATES_MINIMUM_DISTANCE_FILTER,
+        intervalDuration: LOCATION_INTERVAL,
+        foregroundNotificationConfig: ForegroundNotificationConfig(
+          notificationText: l10n.backgroundLocationFetch_text,
+          notificationTitle: l10n.backgroundLocationFetch_title,
+        ),
+      );
+    } else if (isPlatformApple()) {
+      return AppleSettings(
+        accuracy: LocationAccuracy.best,
+        timeLimit: LOCATION_FETCH_TIME_LIMIT,
+        distanceFilter: BACKGROUND_LOCATION_UPDATES_MINIMUM_DISTANCE_FILTER,
+        activityType: ActivityType.other,
+        allowBackgroundLocationUpdates: true,
+        showBackgroundLocationIndicator: true,
+        pauseLocationUpdatesAutomatically: true,
+      );
+    }
+
+    return const LocationSettings(
+      distanceFilter: BACKGROUND_LOCATION_UPDATES_MINIMUM_DISTANCE_FILTER,
+      timeLimit: LOCATION_FETCH_TIME_LIMIT,
+      accuracy: LocationAccuracy.best,
+    );
+  }
+
+  void _initLiveLocationUpdate() {
+    if (_positionStream != null) {
+      return;
+    }
+
+    _positionStream = Geolocator.getPositionStream(
+      locationSettings: _getLocationSettings(),
+    );
+
+    _positionStream!.listen((position) async {
+      if (!_hasGoneToInitialPosition) {
+        flutterMapController.move(
+          LatLng(position.latitude, position.longitude),
+          flutterMapController.zoom,
+        );
+        _hasGoneToInitialPosition = true;
+      }
+
+      setState(() {
+        lastPosition = position;
+        locationStatus = LocationStatus.active;
+      });
+
+      final taskService = context.read<TaskService>();
+      final runningTasks = await taskService.getRunningTasks().toList();
+
+      if (runningTasks.isEmpty) {
+        return;
+      }
+
+      final locationData = await LocationPointService.fromPosition(position);
+
+      for (final task in runningTasks) {
+        await task.publishLocation(
+          locationData.copyWithDifferentId(),
+        );
+      }
+    });
+  }
+
+  void _removeLiveLocationUpdate() {
+    _positionStream?.drain();
+    _positionStream = null;
+  }
+
+  Future<void> _importUniLink(final String url) => showPlatformModalSheet(
+        context: context,
+        material: MaterialModalSheetData(
+          isScrollControlled: true,
+          isDismissible: true,
+          backgroundColor: Colors.transparent,
+        ),
+        builder: (context) => ImportTaskSheet(initialURL: url),
+      );
+
+  Future<void> _initUniLinks() async {
+    final l10n = AppLocalizations.of(context);
+
+    FlutterLogs.logInfo(LOG_TAG, "Uni Links", "Initiating uni links...");
+
+    _uniLinksStream = linkStream.listen((final String? link) {
+      if (link != null) {
+        _importUniLink(link);
+      }
+    });
+
+    try {
+      // Only fired when the app was in background
+      final initialLink = await getInitialLink();
+
+      if (initialLink != null) {
+        await _importUniLink(initialLink);
+      }
+    } on PlatformException catch (error) {
+      FlutterLogs.logError(
+        LOG_TAG,
+        "Uni Links",
+        "Error initializing uni links: $error",
+      );
+
+      showPlatformDialog(
+        context: context,
+        builder: (_) => PlatformAlertDialog(
+          title: Text(l10n.uniLinksOpenError),
+          content: Text(error.message ?? l10n.unknownError),
+          actions: [
+            PlatformDialogAction(
+              child: Text(l10n.closeNeutralAction),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
+  void _handleViewAlarmChecker() {
+    _viewsAlarmCheckerTimer = Timer.periodic(
+      const Duration(minutes: 1),
+      (_) {
+        final viewService = context.read<ViewService>();
+        final l10n = AppLocalizations.of(context);
+
+        if (viewService.viewsWithAlarms.isEmpty) {
+          return;
         }
 
-        setState(() {
-          lastPosition = position;
-        });
-      });
+        checkViewAlarms(
+          l10n: l10n,
+          views: viewService.viewsWithAlarms,
+          viewService: viewService,
+        );
+      },
+    );
+  }
+
+  void _handleNotifications() {
+    selectedNotificationsStream.stream.listen((notification) {
+      FlutterLogs.logInfo(
+        LOG_TAG,
+        "Notification",
+        "Notification received: ${notification.payload}",
+      );
+
+      try {
+        final data = jsonDecode(notification.payload ?? "{}");
+        final type = NotificationActionType.values[data["type"]];
+
+        switch (type) {
+          case NotificationActionType.openTaskView:
+            final viewService = context.read<ViewService>();
+
+            Navigator.of(context).push(
+              NativePageRoute(
+                context: context,
+                builder: (_) => ViewDetailScreen(
+                  view: viewService.getViewById(data["taskViewID"]),
+                ),
+              ),
+            );
+            break;
+        }
+      } catch (error) {
+        FlutterLogs.logErrorTrace(
+          LOG_TAG,
+          "Notification",
+          "Error handling notification.",
+          error as Error,
+        );
+      }
+    });
+  }
+
+  void _updateLocaleToSettings() {
+    final settingsService = context.read<SettingsService>();
+
+    settingsService.localeName = AppLocalizations.of(context).localeName;
+    settingsService.save();
+  }
+
+  void _showUpdateDialogIfRequired() async {
+    final l10n = AppLocalizations.of(context);
+    final appUpdateService = context.read<AppUpdateService>();
+
+    if (appUpdateService.shouldShowDialogue() &&
+        !appUpdateService.hasShownDialogue &&
+        mounted) {
+      await showPlatformDialog(
+        context: context,
+        barrierDismissible: false,
+        material: MaterialDialogData(
+          barrierColor: Colors.black,
+        ),
+        builder: (context) => PlatformAlertDialog(
+          title: Text(l10n.updateAvailable_android_title),
+          content: Text(l10n.updateAvailable_android_description),
+          actions: [
+            PlatformDialogAction(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              material: (context, _) => MaterialDialogActionData(
+                  icon: const Icon(Icons.watch_later_rounded)),
+              child: Text(l10n.updateAvailable_android_remindLater),
+            ),
+            PlatformDialogAction(
+              onPressed: () {
+                appUpdateService.doNotShowDialogueAgain();
+
+                Navigator.of(context).pop();
+              },
+              material: (context, _) =>
+                  MaterialDialogActionData(icon: const Icon(Icons.block)),
+              child: Text(l10n.updateAvailable_android_ignore),
+            ),
+            PlatformDialogAction(
+              onPressed: appUpdateService.openStoreForUpdate,
+              material: (context, _) =>
+                  MaterialDialogActionData(icon: const Icon(Icons.download)),
+              child: Text(l10n.updateAvailable_android_download),
+            ),
+          ],
+        ),
+      );
+
+      appUpdateService.setHasShownDialogue();
+    }
   }
 
   void goToCurrentPosition({
     final bool askPermissions = false,
     final bool showErrorMessage = true,
   }) async {
+    final previousValue = locationStatus;
+
+    setState(() {
+      locationStatus = LocationStatus.fetching;
+    });
+
     if (askPermissions) {
       final hasGrantedPermissions = await requestBasicLocationPermission();
 
       if (!hasGrantedPermissions) {
+        setState(() {
+          locationStatus = previousValue;
+        });
         return;
       }
     }
 
     if (!(await hasGrantedLocationPermission())) {
+      setState(() {
+        locationStatus = previousValue;
+      });
       return;
     }
 
-    registerPositionListener();
+    _initLiveLocationUpdate();
 
-    if (lastPosition == null) {
-      if (!mounted || !showErrorMessage) {
+    if (lastPosition != null) {
+      flutterMapController?.move(
+        LatLng(lastPosition!.latitude, lastPosition!.longitude),
+        flutterMapController.zoom,
+      );
+    }
+
+    FlutterLogs.logInfo(
+      LOG_TAG,
+      "LocationOverviewScreen",
+      "Getting current position...",
+    );
+
+    try {
+      final latestPosition = await getCurrentPosition();
+
+      setState(() {
+        lastPosition = latestPosition;
+        locationStatus = LocationStatus.active;
+      });
+    } catch (error) {
+      FlutterLogs.logError(
+        LOG_TAG,
+        "LocationOverviewScreen",
+        "Error getting current position: $error",
+      );
+
+      setState(() {
+        locationStatus = previousValue;
+      });
+
+      if (!mounted) {
         return;
       }
 
@@ -249,10 +565,40 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
       );
       return;
     }
+  }
 
-    flutterMapController?.move(
-      LatLng(lastPosition!.latitude, lastPosition!.longitude),
-      flutterMapController.zoom,
+  CircleLayer _buildUserMarkerLayer() {
+    final settings = context.read<SettingsService>();
+    final color = {
+      LocationStatus.active: settings.primaryColor ??
+          platformThemeData(
+            context,
+            material: (data) => data.colorScheme.primary,
+            cupertino: (data) => data.primaryColor,
+          ),
+      LocationStatus.fetching: Colors.orange,
+      LocationStatus.stale: Colors.grey,
+    }[locationStatus]!;
+
+    return CircleLayer(
+      circles: [
+        CircleMarker(
+          point: LatLng(lastPosition!.latitude, lastPosition!.longitude),
+          radius: lastPosition!.accuracy,
+          useRadiusInMeter: true,
+          color: color.withOpacity(.1),
+        ),
+        CircleMarker(
+          point: LatLng(lastPosition!.latitude, lastPosition!.longitude),
+          radius: min(
+            10,
+            lastPosition!.accuracy,
+          ),
+          borderColor: Colors.white,
+          borderStrokeWidth: 2,
+          color: color,
+        )
+      ],
     );
   }
 
@@ -271,33 +617,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
           subdomains: const ['a', 'b', 'c'],
           userAgentPackageName: "app.myzel394.locus",
         ),
-        if (lastPosition != null)
-          CircleLayer(
-            circles: [
-              CircleMarker(
-                point: LatLng(lastPosition!.latitude, lastPosition!.longitude),
-                radius: lastPosition!.accuracy,
-                useRadiusInMeter: true,
-                color: Colors.blue.withOpacity(.1),
-              ),
-              CircleMarker(
-                point: LatLng(lastPosition!.latitude, lastPosition!.longitude),
-                radius: min(
-                  10,
-                  lastPosition!.accuracy,
-                ),
-                color: Colors.white,
-              ),
-              CircleMarker(
-                point: LatLng(lastPosition!.latitude, lastPosition!.longitude),
-                radius: min(
-                  8,
-                  lastPosition!.accuracy,
-                ),
-                color: Colors.blue,
-              )
-            ],
-          ),
+        if (lastPosition != null) _buildUserMarkerLayer(),
         CircleLayer(
           circles: viewService.views
               .where(

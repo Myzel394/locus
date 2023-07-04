@@ -22,3 +22,5 @@ const MAYBE_TRIGGER_MINIMUM_TIME_BETWEEN = Duration(hours: 4);
 
 const BATTERY_SAVER_ENABLED_MINIMUM_TIME_BETWEEN_HEADLESS_RUNS =
     Duration(minutes: 60);
+
+const LIVE_LOCATION_STALE_DURATION = Duration(minutes: 1);

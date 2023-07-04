@@ -40,7 +40,6 @@ class _TasksOverviewScreenState extends State<TasksOverviewScreen>
   Widget build(BuildContext context) {
     super.build(context);
 
-    final windowHeight = MediaQuery.of(context).size.height - kToolbarHeight;
     final l10n = AppLocalizations.of(context);
     final appUpdateService = context.watch<AppUpdateService>();
     final taskService = context.watch<TaskService>();
