@@ -7,6 +7,7 @@ import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:locus/constants/spacing.dart';
+import 'package:locus/screens/ImportTaskSheet.dart';
 import 'package:locus/screens/SettingsScreen.dart';
 import 'package:locus/screens/SharesOverviewScreen.dart';
 import 'package:locus/services/view_service.dart';
@@ -500,6 +501,16 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
                 onPressed: () {},
                 icon: const Icon(Icons.share_location_rounded),
                 label: Text(l10n.shareLocation_title),
+              ),
+              FloatingActionButton.extended(
+                onPressed: () {
+                  showPlatformModalSheet(
+                    context: context,
+                    builder: (context) => const ImportTaskSheet(),
+                  );
+                },
+                icon: const Icon(Icons.download_rounded),
+                label: Text(l10n.importTask_title),
               ),
               FABOpenContainer(
                 label: l10n.sharesOverviewScreen_title,
