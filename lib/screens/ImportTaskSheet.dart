@@ -312,7 +312,9 @@ class _ImportTaskSheetState extends State<ImportTaskSheet>
                       .sharesOverviewScreen_importTask_action_import_isLoading,
                   children: [
                     if (isLoading)
-                      const CircularProgressIndicator()
+                      const Center(
+                        child: CircularProgressIndicator(),
+                      )
                     else if (errorMessage != null)
                       Text(
                         errorMessage!,

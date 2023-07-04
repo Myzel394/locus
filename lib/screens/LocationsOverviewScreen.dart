@@ -487,6 +487,11 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
   void importLocation() {
     showPlatformModalSheet(
       context: context,
+      material: MaterialModalSheetData(
+        backgroundColor: Colors.transparent,
+        isScrollControlled: true,
+        isDismissible: true,
+      ),
       builder: (context) => const ImportTaskSheet(),
     );
   }

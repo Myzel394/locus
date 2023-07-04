@@ -19,7 +19,6 @@ import 'package:provider/provider.dart';
 
 import '../../services/settings_service.dart';
 import '../../services/task_service.dart';
-import '../../widgets/PlatformListTile.dart';
 
 enum ShareType {
   untilTurnOff,
@@ -81,6 +80,7 @@ class _ShareLocationSheetState extends State<ShareLocationSheet> {
         name,
         relays.toList(),
         timers: timers ?? [],
+        deleteAfterRun: true,
       );
       taskService.add(task);
       await taskService.save();
