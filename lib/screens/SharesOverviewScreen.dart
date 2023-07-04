@@ -378,132 +378,17 @@ class _SharesOverviewScreenState extends State<SharesOverviewScreen> {
     _showUpdateDialogIfRequired();
   }
 
-  PlatformAppBar? getAppBar([final bool hasScreens = true]) {
+  PlatformAppBar? getAppBar() {
     final l10n = AppLocalizations.of(context);
-    final settings = context.read<SettingsService>();
-
-    if (settings.isMIUI()) {
-      final colors = getPrimaryColorShades(context);
-      final primaryColor = colors[0];
-
-      return PlatformAppBar(
-        title: hasScreens
-            ? Row(
-                children: <Widget>[
-                  // We want the same width
-                  const SizedBox(width: 48),
-                  Expanded(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        TextButton(
-                          onPressed: () {
-                            _changeTab(0);
-                          },
-                          child: Icon(
-                            activeTab == 0
-                                ? CupertinoIcons.location_fill
-                                : CupertinoIcons.location,
-                            color: activeTab == 0
-                                ? primaryColor
-                                : getBodyTextColor(context),
-                          ),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            _changeTab(1);
-                          },
-                          child: Icon(
-                            activeTab == 1
-                                ? CupertinoIcons.square_list_fill
-                                : CupertinoIcons.square_list,
-                            color: activeTab == 1
-                                ? primaryColor
-                                : getBodyTextColor(context),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              )
-            : null,
-        trailingActions: <Widget>[
-          IconButton(
-            icon: Transform.rotate(
-              angle: 0,
-              child: const Icon(MdiIcons.nut),
-            ),
-            onPressed: () {
-              showSettings(context);
-            },
-          ),
-        ],
-      );
-    }
 
     return PlatformAppBar(
-      title: Text(l10n.appName),
-      trailingActions: [
-        PlatformIconButton(
-          cupertino: (_, __) => CupertinoIconButtonData(
-            padding: EdgeInsets.zero,
-          ),
-          icon: Icon(context.platformIcons.settings),
-          onPressed: () {
-            showSettings(context);
-          },
-        ),
-      ],
-    );
-  }
-
-  PlatformNavBar? getBottomNavBar() {
-    final l10n = AppLocalizations.of(context);
-    final settings = context.read<SettingsService>();
-
-    if (settings.isMIUI()) {
-      return null;
-    }
-
-    return PlatformNavBar(
-      material: (_, __) => MaterialNavBarData(
-          backgroundColor: Theme.of(context).dialogBackgroundColor,
-          elevation: 0,
-          padding: const EdgeInsets.all(0)),
-      itemChanged: _changeTab,
-      currentIndex: activeTab,
-      items: isCupertino(context)
-          ? [
-              BottomNavigationBarItem(
-                icon: const Icon(CupertinoIcons.home),
-                label: l10n.sharesOverviewScreen_title,
-              ),
-              BottomNavigationBarItem(
-                icon: const Icon(CupertinoIcons.list_bullet),
-                label: l10n.sharesOverviewScreen_tasks,
-              ),
-              BottomNavigationBarItem(
-                icon: const Icon(CupertinoIcons.location_fill),
-                label: l10n.sharesOverviewScreen_createTask,
-              ),
-            ]
-          : [
-              BottomNavigationBarItem(
-                icon: const Icon(Icons.home),
-                label: l10n.sharesOverviewScreen_title,
-                backgroundColor: Theme.of(context).dialogBackgroundColor,
-              ),
-              BottomNavigationBarItem(
-                icon: const Icon(Icons.list_rounded),
-                label: l10n.sharesOverviewScreen_tasks,
-              ),
-            ],
+      title: Text(l10n.sharesOverviewScreen_title),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final taskService = context.watch<TaskService>();
     final viewService = context.watch<ViewService>();
     final settings = context.watch<SettingsService>();
@@ -513,68 +398,84 @@ class _SharesOverviewScreenState extends State<SharesOverviewScreen> {
 
     if (showEmptyScreen) {
       return PlatformScaffold(
-        appBar: getAppBar(false),
+        appBar: getAppBar(),
         body: const EmptyScreen(),
       );
     }
 
     return PlatformScaffold(
       material: (_, __) => MaterialScaffoldData(
-        floatingActionButton: activeTab == 1
-            ? OpenContainer(
-                transitionDuration: const Duration(milliseconds: 500),
-                transitionType: ContainerTransitionType.fadeThrough,
-                openBuilder: (_, action) => CreateTaskScreen(
-                  onCreated: () {
-                    Navigator.pop(context);
-                  },
-                ),
-                closedBuilder: (context, action) => InkWell(
-                  onTap: action,
-                  child: SizedBox(
-                    height: FAB_DIMENSION,
-                    width: FAB_DIMENSION,
-                    child: Center(
-                      child: Icon(
-                        settings.isMIUI() || isCupertino(context)
-                            ? CupertinoIcons.plus
-                            : Icons.add,
-                        color: Theme.of(context).colorScheme.primary,
-                        size: settings.isMIUI() ? 34 : 38,
-                      ),
-                    ),
-                  ),
-                ),
-                closedElevation: 6.0,
-                closedShape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(30),
-                  ),
-                ),
-                openColor: Colors.transparent,
-                closedColor: getIsDarkMode(context)
-                    ? HSLColor.fromColor(Theme.of(context).colorScheme.primary)
-                        .withLightness(.15)
-                        .withSaturation(1)
-                        .toColor()
-                    : Theme.of(context).colorScheme.primary,
-              ).animate().scale(
-                duration: 500.ms, delay: 1.seconds, curve: Curves.bounceOut)
-            : null,
-      ),
+          floatingActionButton: OpenContainer(
+        transitionDuration: const Duration(milliseconds: 500),
+        transitionType: ContainerTransitionType.fadeThrough,
+        openBuilder: (_, action) => CreateTaskScreen(
+          onCreated: () {
+            Navigator.pop(context);
+          },
+        ),
+        closedBuilder: (context, action) => InkWell(
+          onTap: action,
+          child: SizedBox(
+            height: FAB_DIMENSION,
+            width: FAB_DIMENSION,
+            child: Center(
+              child: Icon(
+                settings.isMIUI() || isCupertino(context)
+                    ? CupertinoIcons.plus
+                    : Icons.add,
+                color: Theme.of(context).colorScheme.primary,
+                size: settings.isMIUI() ? 34 : 38,
+              ),
+            ),
+          ),
+        ),
+        closedElevation: 6.0,
+        closedShape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(
+            Radius.circular(30),
+          ),
+        ),
+        openColor: Colors.transparent,
+        closedColor: getIsDarkMode(context)
+            ? HSLColor.fromColor(Theme.of(context).colorScheme.primary)
+                .withLightness(.15)
+                .withSaturation(1)
+                .toColor()
+            : Theme.of(context).colorScheme.primary,
+      ).animate().scale(
+              duration: 500.ms, delay: 1.seconds, curve: Curves.bounceOut)),
       cupertino: (_, __) => CupertinoPageScaffoldData(
         backgroundColor: getIsDarkMode(context)
             ? null
             : CupertinoColors.tertiarySystemGroupedBackground
                 .resolveFrom(context),
       ),
+      appBar: getAppBar(),
       // Settings bottomNavBar via cupertino data class does not work
-      bottomNavBar: getBottomNavBar(),
+      bottomNavBar: isCupertino(context)
+          ? PlatformNavBar(
+              material: (_, __) => MaterialNavBarData(
+                  backgroundColor: Theme.of(context).dialogBackgroundColor,
+                  elevation: 0,
+                  padding: const EdgeInsets.all(0)),
+              itemChanged: _changeTab,
+              currentIndex: activeTab,
+              items: [
+                BottomNavigationBarItem(
+                  icon: const Icon(CupertinoIcons.list_bullet),
+                  label: l10n.sharesOverviewScreen_tasks,
+                ),
+                BottomNavigationBarItem(
+                  icon: const Icon(CupertinoIcons.location_fill),
+                  label: l10n.sharesOverviewScreen_createTask,
+                ),
+              ],
+            )
+          : null,
       body: PageView(
         controller: _tabController,
         physics: const NeverScrollableScrollPhysics(),
         children: <Widget>[
-          const LocationsOverviewScreen(),
           const TasksOverviewScreen(),
           if (isCupertino(context))
             CreateTaskScreen(
