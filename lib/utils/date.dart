@@ -8,3 +8,8 @@ DateTime createDateFromWeekday(final int day) => DateTime(
       0,
       0,
     );
+
+extension DateTimeExtension on DateTime {
+  bool isSameDay(final DateTime other) =>
+      year == other.year && month == other.month && day == other.day;
+}

@@ -5,9 +5,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+import 'package:intl/intl.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/constants/values.dart';
 import 'package:locus/services/timers_service.dart';
+import 'package:locus/utils/date.dart';
 import 'package:locus/utils/show_message.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/ModalSheet.dart';
@@ -124,8 +126,27 @@ class _ShareLocationSheetState extends State<ShareLocationSheet> {
       final newHours = max(1, hours + value);
 
       hoursController.text = newHours.toString();
+
+      // Force UI update so `endDate` is updated
+      setState(() {});
     };
   }
+
+  DateTime? get endDate {
+    final hours = int.tryParse(hoursController.text);
+
+    if (hours == null) {
+      return null;
+    }
+
+    final now = DateTime.now();
+    final endDate = now.add(Duration(hours: hours));
+    return endDate;
+  }
+
+  String formatEndDate(final DateTime date) => date.isSameDay(DateTime.now())
+      ? DateFormat.Hm().format(date)
+      : DateFormat.yMd().add_Hm().format(date);
 
   @override
   Widget build(BuildContext context) {
@@ -183,6 +204,15 @@ class _ShareLocationSheetState extends State<ShareLocationSheet> {
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.end,
               children: <Widget>[
+                Flexible(
+                  child: Opacity(
+                    opacity: type == ShareType.forHours ? 1 : 0.4,
+                    child: Text(
+                      formatEndDate(endDate!),
+                      style: getCaptionTextStyle(context),
+                    ),
+                  ),
+                ),
                 Flexible(
                   child: PlatformIconButton(
                     onPressed: type == ShareType.forHours && !isLoading
