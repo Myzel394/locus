@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:animations/animations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -139,9 +141,12 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
   late final LocationFetcher _fetchers;
   final MapController flutterMapController = MapController();
   Stream<Position>? _positionStream;
+  Position? lastPosition;
 
   // Null = all views
   String? selectedViewID;
+
+  bool _hasGoneToInitialPosition = false;
 
   TaskView? get selectedView {
     if (selectedViewID == null) {
@@ -161,9 +166,13 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     _createLocationFetcher();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      goToCurrentPosition();
-
       _fetchers.addListener(_rebuild);
+    });
+
+    hasGrantedLocationPermission().then((hasGranted) {
+      if (hasGranted) {
+        registerPositionListener();
+      }
     });
   }
 
@@ -190,7 +199,28 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     setState(() {});
   }
 
-  void goToCurrentPosition([final bool askPermissions = false]) async {
+  void registerPositionListener({final bool goToPosition = false}) {
+    _positionStream = getLastAndCurrentPosition(updateLocation: true)
+      ..listen((position) {
+        if (!_hasGoneToInitialPosition) {
+          flutterMapController.move(
+            LatLng(position.latitude, position.longitude),
+            flutterMapController.zoom,
+          );
+
+          _hasGoneToInitialPosition = true;
+        }
+
+        setState(() {
+          lastPosition = position;
+        });
+      });
+  }
+
+  void goToCurrentPosition({
+    final bool askPermissions = false,
+    final bool showErrorMessage = true,
+  }) async {
     if (askPermissions) {
       final hasGrantedPermissions = await requestBasicLocationPermission();
 
@@ -203,13 +233,27 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
       return;
     }
 
-    _positionStream = getLastAndCurrentPosition()
-      ..listen((position) {
-        flutterMapController?.move(
-          LatLng(position.latitude, position.longitude),
-          13,
-        );
-      });
+    registerPositionListener();
+
+    if (lastPosition == null) {
+      if (!mounted || !showErrorMessage) {
+        return;
+      }
+
+      final l10n = AppLocalizations.of(context);
+
+      showMessage(
+        context,
+        l10n.unknownError,
+        type: MessageType.error,
+      );
+      return;
+    }
+
+    flutterMapController?.move(
+      LatLng(lastPosition!.latitude, lastPosition!.longitude),
+      flutterMapController.zoom,
+    );
   }
 
   Widget buildMap() {
@@ -227,6 +271,33 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
           subdomains: const ['a', 'b', 'c'],
           userAgentPackageName: "app.myzel394.locus",
         ),
+        if (lastPosition != null)
+          CircleLayer(
+            circles: [
+              CircleMarker(
+                point: LatLng(lastPosition!.latitude, lastPosition!.longitude),
+                radius: lastPosition!.accuracy,
+                useRadiusInMeter: true,
+                color: Colors.blue.withOpacity(.1),
+              ),
+              CircleMarker(
+                point: LatLng(lastPosition!.latitude, lastPosition!.longitude),
+                radius: min(
+                  10,
+                  lastPosition!.accuracy,
+                ),
+                color: Colors.white,
+              ),
+              CircleMarker(
+                point: LatLng(lastPosition!.latitude, lastPosition!.longitude),
+                radius: min(
+                  8,
+                  lastPosition!.accuracy,
+                ),
+                color: Colors.blue,
+              )
+            ],
+          ),
         CircleLayer(
           circles: viewService.views
               .where(
@@ -455,7 +526,8 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
                       padding: EdgeInsets.zero,
                       child: PlatformIconButton(
                         icon: const Icon(Icons.my_location),
-                        onPressed: () => goToCurrentPosition(true),
+                        onPressed: () =>
+                            goToCurrentPosition(askPermissions: true),
                       ),
                     ),
                   ),
