@@ -159,7 +159,7 @@ class LocationsOverviewScreen extends StatefulWidget {
 }
 
 class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
-    with AutomaticKeepAliveClientMixin {
+    with AutomaticKeepAliveClientMixin, WidgetsBindingObserver {
   late final LocationFetcher _fetchers;
   final MapController flutterMapController = MapController();
   Stream<Position>? _positionStream;
@@ -190,20 +190,22 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
 
     _createLocationFetcher();
 
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final taskService = context.read<TaskService>();
-      final logService = context.read<LogService>();
-      final appUpdateService = context.read<AppUpdateService>();
-      _fetchers.addListener(_rebuild);
-      appUpdateService.addListener(_rebuild);
+    WidgetsBinding.instance
+      ..addObserver(this)
+      ..addPostFrameCallback((_) async {
+        final taskService = context.read<TaskService>();
+        final logService = context.read<LogService>();
+        final appUpdateService = context.read<AppUpdateService>();
+        _fetchers.addListener(_rebuild);
+        appUpdateService.addListener(_rebuild);
 
-      initQuickActions(context);
-      _initUniLinks();
-      _updateLocaleToSettings();
-      _showUpdateDialogIfRequired();
+        initQuickActions(context);
+        _initUniLinks();
+        _updateLocaleToSettings();
+        _showUpdateDialogIfRequired();
 
-      taskService.checkup(logService);
-    });
+        taskService.checkup(logService);
+      });
 
     hasGrantedLocationPermission().then((hasGranted) {
       if (hasGranted) {
@@ -228,10 +230,21 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
 
     _removeLiveLocationUpdate();
 
+    WidgetsBinding.instance.removeObserver(this);
+
     final appUpdateService = context.read<AppUpdateService>();
     appUpdateService.removeListener(_rebuild);
 
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    if (state == AppLifecycleState.resumed) {
+      goToCurrentPosition(showErrorMessage: false);
+    }
   }
 
   void _createLocationFetcher() {
