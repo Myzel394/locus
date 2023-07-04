@@ -12,6 +12,7 @@ import 'package:locus/utils/show_message.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/ModalSheet.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:locus/widgets/ModalSheetContent.dart';
 import 'package:locus/widgets/PlatformFlavorWidget.dart';
 import 'package:locus/widgets/PlatformRadioTile.dart';
 import 'package:provider/provider.dart';
@@ -128,36 +129,34 @@ class _ShareLocationSheetState extends State<ShareLocationSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final settings = context.watch<SettingsService>();
     final l10n = AppLocalizations.of(context);
 
     return ModalSheet(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          Icon(
-            Icons.share_location_rounded,
-            size: 48,
-            color: platformThemeData(
-              context,
-              material: (data) =>
-                  settings.primaryColor ?? data.colorScheme.tertiary,
-              cupertino: (data) => settings.primaryColor ?? data.primaryColor,
-            ),
-          ),
-          const SizedBox(height: MEDIUM_SPACE),
-          Text(
-            l10n.quickLocationShare_title,
-            style: getTitle2TextStyle(context),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: MEDIUM_SPACE),
-          Text(
-            l10n.quickLocationShare_description,
-            style: getCaptionTextStyle(context),
-          ),
-          const SizedBox(height: LARGE_SPACE),
+      child: ModalSheetContent(
+        icon: Icons.share_location_rounded,
+        title: l10n.quickLocationShare_title,
+        description: l10n.quickLocationShare_description,
+        submitLabel: l10n.quickLocationShare_submit_label,
+        onSubmit: isLoading
+            ? null
+            : () async {
+                switch (type) {
+                  case ShareType.untilTurnOff:
+                    createNewTask();
+                    break;
+                  case ShareType.forHours:
+                    if (hoursFormKey.currentState!.validate()) {
+                      final hours = int.parse(hoursController.text);
+                      final timer = DurationTimer(
+                        duration: Duration(hours: hours),
+                      );
+
+                      createNewTask([timer]);
+                    }
+                    break;
+                }
+              },
+        children: [
           PlatformRadioTile<ShareType>(
             title: Text(l10n.quickLocationShare_shareUntilTurnOff),
             groupValue: type,
@@ -234,33 +233,6 @@ class _ShareLocationSheetState extends State<ShareLocationSheet> {
               ],
             ),
           ),
-          const SizedBox(height: MEDIUM_SPACE),
-          PlatformElevatedButton(
-            material: (_, __) => MaterialElevatedButtonData(
-              icon: const Icon(Icons.check_rounded),
-            ),
-            padding: const EdgeInsets.symmetric(vertical: MEDIUM_SPACE),
-            onPressed: isLoading
-                ? null
-                : () async {
-                    switch (type) {
-                      case ShareType.untilTurnOff:
-                        createNewTask();
-                        break;
-                      case ShareType.forHours:
-                        if (hoursFormKey.currentState!.validate()) {
-                          final hours = int.parse(hoursController.text);
-                          final timer = DurationTimer(
-                            duration: Duration(hours: hours),
-                          );
-
-                          createNewTask([timer]);
-                        }
-                        break;
-                    }
-                  },
-            child: Text(l10n.quickLocationShare_submit_label),
-          )
         ],
       ),
     );

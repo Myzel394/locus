@@ -14,6 +14,7 @@ import 'package:locus/screens/import_task_sheet_widgets/URLForm.dart';
 import 'package:locus/screens/import_task_sheet_widgets/ViewImportOverview.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:locus/utils/theme.dart';
+import 'package:locus/widgets/ModalSheetContent.dart';
 import 'package:provider/provider.dart';
 
 import '../services/task_service.dart';
@@ -306,13 +307,10 @@ class _ImportTaskSheetState extends State<ImportTaskSheet>
                   },
                 )
               else if (_screen == ImportScreen.importFile)
-                Column(
-                  children: <Widget>[
-                    Text(
-                      l10n.sharesOverviewScreen_importTask_action_import_isLoading,
-                      style: getSubTitleTextStyle(context),
-                    ),
-                    const SizedBox(height: SMALL_SPACE),
+                ModalSheetContent(
+                  title: l10n
+                      .sharesOverviewScreen_importTask_action_import_isLoading,
+                  children: [
                     if (isLoading)
                       const CircularProgressIndicator()
                     else if (errorMessage != null)

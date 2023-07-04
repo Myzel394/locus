@@ -7,6 +7,7 @@ import 'package:locus/constants/app.dart';
 
 import '../../constants/spacing.dart';
 import '../../utils/theme.dart';
+import '../../widgets/ModalSheetContent.dart';
 
 enum ImportSelectionType {
   url,
@@ -33,18 +34,11 @@ class _ImportSelectionState extends State<ImportSelection> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
 
-    return Column(
-      children: <Widget>[
-        Text(
-          l10n.sharesOverviewScreen_importTask_title,
-          style: getSubTitleTextStyle(context),
-        ),
-        const SizedBox(height: LARGE_SPACE),
-        Text(
-          l10n.sharesOverviewScreen_importTask_description,
-          style: getBodyTextTextStyle(context),
-        ),
-        const SizedBox(height: MEDIUM_SPACE),
+    return ModalSheetContent(
+      icon: Icons.file_download_rounded,
+      title: l10n.sharesOverviewScreen_importTask_title,
+      description: l10n.sharesOverviewScreen_importTask_description,
+      children: [
         if (errorMessage != null) ...[
           Text(
             errorMessage!,

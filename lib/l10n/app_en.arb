@@ -90,6 +90,7 @@
       }
     }
   },
+  "fields_errors_invalidURL": "This field must be a valid URL",
   "openInMaps_title": "Open in Maps",
   "openInMaps_description": "Where do you want to open this location in?",
   "timer_executionStartsImmediately": "Execution will start immediately.",
@@ -230,8 +231,10 @@
   "sharesOverviewScreen_importTask_description": "Import a task from a link or a file you have received",
   "sharesOverviewScreen_importTask_action_import": "Import Task",
   "sharesOverviewScreen_importTask_action_importMethod": "How would you like to import the task?",
-  "sharesOverviewScreen_importTask_action_importMethod_url": "Import URL",
-  "sharesOverviewScreen_importTask_action_importMethod_url_title": "Enter the URL of the task",
+  "sharesOverviewScreen_importTask_action_importMethod_url": "Import Link",
+  "sharesOverviewScreen_importTask_action_importMethod_url_title": "Enter the link of the share",
+  "sharesOverviewScreen_importTask_action_importMethod_url_hint": "https://locus.cfd/#",
+  "sharesOverviewScreen_importTask_action_importMethod_url_label": "Share Link",
   "sharesOverviewScreen_importTask_action_importMethod_file": "Import file",
   "sharesOverviewScreen_importTask_action_importMethod_bluetooth": "Receive via Bluetooth",
   "sharesOverviewScreen_importTask_action_importMethod_file_selectFile": "Select a ViewKey file to import",

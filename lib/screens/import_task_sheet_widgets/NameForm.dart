@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import '../../constants/spacing.dart';
 import '../../services/view_service.dart';
 import '../../utils/theme.dart';
+import '../../widgets/ModalSheetContent.dart';
 
 class NameForm extends StatefulWidget {
   final void Function(Color color) onSubmitted;
@@ -45,15 +46,18 @@ class _NameFormState extends State<NameForm> {
 
     return Form(
       key: _formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          Text(
-            l10n.sharesOverviewScreen_importTask_action_name_title,
-            style: getTitle2TextStyle(context),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: MEDIUM_SPACE),
+      child: ModalSheetContent(
+        title: l10n.sharesOverviewScreen_importTask_action_name_title,
+        submitLabel: l10n.continueLabel,
+        submitIcon: Icons.check,
+        onSubmit: () {
+          if (!_formKey.currentState!.validate()) {
+            return;
+          }
+
+          widget.onSubmitted(color);
+        },
+        children: [
           PlatformTextFormField(
             controller: widget.controller,
             validator: (name) {
@@ -146,21 +150,6 @@ class _NameFormState extends State<NameForm> {
                 ],
               ),
             ),
-          const SizedBox(height: MEDIUM_SPACE),
-          PlatformElevatedButton(
-            padding: const EdgeInsets.all(MEDIUM_SPACE),
-            onPressed: () {
-              if (!_formKey.currentState!.validate()) {
-                return;
-              }
-
-              widget.onSubmitted(color);
-            },
-            material: (_, __) => MaterialElevatedButtonData(
-              icon: const Icon(Icons.arrow_forward_rounded),
-            ),
-            child: Text(l10n.continueLabel),
-          ),
         ],
       ),
     );
