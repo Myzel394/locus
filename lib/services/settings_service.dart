@@ -8,9 +8,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:local_auth/local_auth.dart';
+import 'package:locus/api/nostr-relays.dart';
 import 'package:locus/constants/app.dart';
 
 import '../api/get-address.dart';
+import '../utils/cache.dart';
 import '../utils/device.dart';
 import '../utils/platform.dart';
 
@@ -263,6 +265,19 @@ class SettingsService extends ChangeNotifier {
 
   UnmodifiableListView<String> getRelays() {
     return UnmodifiableListView(_relays);
+  }
+
+  Future<Iterable<String>> getDefaultRelaysOrRandom() async {
+    if (_relays.isNotEmpty) {
+      return _relays;
+    }
+
+    final relaysData = await withCache(getNostrRelays, "relays")();
+    final relays = List<String>.from(relaysData["relays"] as List<dynamic>);
+
+    relays.shuffle();
+
+    return relays.take(5);
   }
 
   void setRelays(final List<String> value) {

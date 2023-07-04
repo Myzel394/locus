@@ -1,6 +1,7 @@
 import 'package:animations/animations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
@@ -10,9 +11,12 @@ import 'package:locus/constants/spacing.dart';
 import 'package:locus/screens/ImportTaskSheet.dart';
 import 'package:locus/screens/SettingsScreen.dart';
 import 'package:locus/screens/SharesOverviewScreen.dart';
+import 'package:locus/screens/locations_overview_screen_widgets/ShareLocationSheet.dart';
+import 'package:locus/services/task_service.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:locus/utils/location.dart';
 import 'package:locus/utils/navigation.dart';
+import 'package:locus/utils/show_message.dart';
 import 'package:locus/widgets/FABOpenContainer.dart';
 import 'package:locus/widgets/Paper.dart';
 import 'package:map_launcher/map_launcher.dart';
@@ -21,6 +25,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../services/location_point_service.dart';
+import '../services/settings_service.dart';
 import '../utils/permission.dart';
 import '../utils/theme.dart';
 import '../widgets/OpenInMaps.dart';
@@ -479,6 +484,47 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     return _fetchers.locations[selectedView!]!.last;
   }
 
+  void importLocation() {
+    showPlatformModalSheet(
+      context: context,
+      builder: (context) => const ImportTaskSheet(),
+    );
+  }
+
+  void createNewQuickLocationShare() async {
+    final l10n = AppLocalizations.of(context);
+
+    final task = await showPlatformModalSheet(
+      context: context,
+      material: MaterialModalSheetData(
+        backgroundColor: Colors.transparent,
+        isScrollControlled: true,
+        isDismissible: true,
+      ),
+      builder: (context) => const ShareLocationSheet(),
+    );
+
+    if (task == null || !mounted) {
+      return;
+    }
+
+    final settings = context.read<SettingsService>();
+    final link = await (task as Task).generateLink(settings.getServerHost());
+
+    // Copy to clipboard
+    await Clipboard.setData(ClipboardData(text: link));
+
+    if (!mounted) {
+      return;
+    }
+
+    showMessage(
+      context,
+      l10n.linkCopiedToClipboard,
+      type: MessageType.success,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -498,17 +544,12 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
             type: ExpandableFabType.up,
             children: [
               FloatingActionButton.extended(
-                onPressed: () {},
+                onPressed: createNewQuickLocationShare,
                 icon: const Icon(Icons.share_location_rounded),
                 label: Text(l10n.shareLocation_title),
               ),
               FloatingActionButton.extended(
-                onPressed: () {
-                  showPlatformModalSheet(
-                    context: context,
-                    builder: (context) => const ImportTaskSheet(),
-                  );
-                },
+                onPressed: importLocation,
                 icon: const Icon(Icons.download_rounded),
                 label: Text(l10n.importTask_title),
               ),
