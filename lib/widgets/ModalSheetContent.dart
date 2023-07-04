@@ -35,7 +35,7 @@ class ModalSheetContent extends StatelessWidget {
 
     return Column(
       children: <Widget>[
-        if (icon != null)
+        if (icon != null) ...[
           Icon(
             icon,
             size: 48,
@@ -46,6 +46,8 @@ class ModalSheetContent extends StatelessWidget {
               cupertino: (data) => settings.primaryColor ?? data.primaryColor,
             ),
           ),
+          const SizedBox(height: MEDIUM_SPACE),
+        ],
         Text(
           title,
           style: getTitle2TextStyle(context),
