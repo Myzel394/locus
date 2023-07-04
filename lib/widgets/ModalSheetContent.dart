@@ -34,6 +34,8 @@ class ModalSheetContent extends StatelessWidget {
     final settings = context.watch<SettingsService>();
 
     return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         if (icon != null) ...[
           Icon(
@@ -62,14 +64,17 @@ class ModalSheetContent extends StatelessWidget {
         ],
         const SizedBox(height: LARGE_SPACE),
         ...children,
-        if (submitLabel != null)
+        if (submitLabel != null) ...[
+          const SizedBox(height: LARGE_SPACE),
           PlatformElevatedButton(
             material: (_, __) => MaterialElevatedButtonData(
               icon: Icon(submitIcon),
             ),
+            padding: const EdgeInsets.all(MEDIUM_SPACE),
             onPressed: onSubmit,
             child: Text(submitLabel!),
-          )
+          ),
+        ],
       ],
     );
   }
