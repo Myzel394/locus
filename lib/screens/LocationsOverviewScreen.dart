@@ -41,6 +41,7 @@ import '../services/log_service.dart';
 import '../services/manager_service.dart';
 import '../services/settings_service.dart';
 import '../utils/PageRoute.dart';
+import '../utils/color.dart';
 import '../utils/permission.dart';
 import '../utils/platform.dart';
 import '../utils/theme.dart';
@@ -948,41 +949,79 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
   Widget build(BuildContext context) {
     super.build(context);
 
+    final settings = context.watch<SettingsService>();
     final l10n = AppLocalizations.of(context);
 
     return PlatformScaffold(
       material: (context, __) {
+        final theme = Theme.of(context);
+
+        final foreground = (() {
+          if (settings.primaryColor != null) {
+            final color = createMaterialColor(settings.primaryColor!);
+            return getIsDarkMode(context) ? color.shade50 : color.shade900;
+          }
+
+          return theme.colorScheme.onPrimaryContainer;
+        })();
+        final background = (() {
+          if (settings.primaryColor != null) {
+            final color = createMaterialColor(settings.primaryColor!);
+            return getIsDarkMode(context) ? color.shade900 : color.shade50;
+          }
+
+          return theme.colorScheme.primaryContainer;
+        })();
+
         return MaterialScaffoldData(
           floatingActionButtonLocation: ExpandableFab.location,
-          floatingActionButton: ExpandableFab(
-            overlayStyle: ExpandableFabOverlayStyle(
-              color: Colors.black.withOpacity(0.4),
+          floatingActionButton: AnimatedScale(
+            scale: selectedViewID == null ? 1 : 0,
+            duration: selectedViewID == null
+                ? const Duration(milliseconds: 900)
+                : const Duration(milliseconds: 200),
+            curve: selectedViewID == null ? Curves.elasticOut : Curves.easeIn,
+            alignment: Alignment(0.8, 0.9),
+            child: ExpandableFab(
+              overlayStyle: ExpandableFabOverlayStyle(
+                color: Colors.black.withOpacity(0.4),
+              ),
+              foregroundColor: foreground,
+              backgroundColor: background,
+              expandedFabSize: ExpandableFabSize.regular,
+              distance: HUGE_SPACE,
+              closeButtonStyle: ExpandableFabCloseButtonStyle(
+                backgroundColor: background,
+                foregroundColor: foreground,
+              ),
+              type: ExpandableFabType.up,
+              children: [
+                FloatingActionButton.extended(
+                  onPressed: createNewQuickLocationShare,
+                  icon: const Icon(Icons.share_location_rounded),
+                  label: Text(l10n.shareLocation_title),
+                  backgroundColor: background,
+                  foregroundColor: foreground,
+                ),
+                FloatingActionButton.extended(
+                  onPressed: importLocation,
+                  icon: const Icon(Icons.download_rounded),
+                  label: Text(l10n.importTask_title),
+                  backgroundColor: background,
+                  foregroundColor: foreground,
+                ),
+                FABOpenContainer(
+                  label: l10n.sharesOverviewScreen_title,
+                  icon: Icons.list_rounded,
+                  onTap: (context, _) => const SharesOverviewScreen(),
+                ),
+                FABOpenContainer(
+                  label: l10n.settingsScreen_title,
+                  icon: context.platformIcons.settings,
+                  onTap: (context, _) => const SettingsScreen(),
+                )
+              ],
             ),
-            expandedFabSize: ExpandableFabSize.regular,
-            distance: HUGE_SPACE,
-            type: ExpandableFabType.up,
-            children: [
-              FloatingActionButton.extended(
-                onPressed: createNewQuickLocationShare,
-                icon: const Icon(Icons.share_location_rounded),
-                label: Text(l10n.shareLocation_title),
-              ),
-              FloatingActionButton.extended(
-                onPressed: importLocation,
-                icon: const Icon(Icons.download_rounded),
-                label: Text(l10n.importTask_title),
-              ),
-              FABOpenContainer(
-                label: l10n.sharesOverviewScreen_title,
-                icon: Icons.list_rounded,
-                onTap: (context, _) => const SharesOverviewScreen(),
-              ),
-              FABOpenContainer(
-                label: l10n.settingsScreen_title,
-                icon: context.platformIcons.settings,
-                onTap: (context, _) => const SettingsScreen(),
-              )
-            ],
           ),
         );
       },
