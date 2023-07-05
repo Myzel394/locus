@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
-import 'package:animations/animations.dart';
 import 'package:background_fetch/background_fetch.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:geolocator/geolocator.dart';
@@ -22,7 +22,6 @@ import 'package:locus/screens/locations_overview_screen_widgets/ShareLocationShe
 import 'package:locus/services/task_service.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:locus/utils/location.dart';
-import 'package:locus/utils/navigation.dart';
 import 'package:locus/utils/show_message.dart';
 import 'package:locus/widgets/FABOpenContainer.dart';
 import 'package:locus/widgets/Paper.dart';
@@ -162,7 +161,16 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     with AutomaticKeepAliveClientMixin, WidgetsBindingObserver {
   late final LocationFetcher _fetchers;
   final MapController flutterMapController = MapController();
+
   Stream<Position>? _positionStream;
+
+  // Since we already listen to the latest position, we will pass it
+  // manually to `current_location_layer` to avoid it also registering
+  // extra listeners.
+  final StreamController<LocationMarkerPosition?>
+      _currentLocationPositionStream =
+      StreamController<LocationMarkerPosition?>.broadcast();
+
   Position? lastPosition;
   StreamSubscription<String?>? _uniLinksStream;
   Timer? _viewsAlarmCheckerTimer;
@@ -303,6 +311,14 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     );
 
     _positionStream!.listen((position) async {
+      _currentLocationPositionStream.add(
+        LocationMarkerPosition(
+          latitude: position.latitude,
+          longitude: position.longitude,
+          accuracy: position.accuracy,
+        ),
+      );
+
       if (!_hasGoneToInitialPosition) {
         flutterMapController.move(
           LatLng(position.latitude, position.longitude),
@@ -537,7 +553,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     if (lastPosition != null) {
       flutterMapController?.move(
         LatLng(lastPosition!.latitude, lastPosition!.longitude),
-        flutterMapController.zoom,
+        13,
       );
     }
 
@@ -580,7 +596,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     }
   }
 
-  CircleLayer _buildUserMarkerLayer() {
+  Widget _buildUserMarkerLayer() {
     final settings = context.read<SettingsService>();
     final color = {
       LocationStatus.active: settings.primaryColor ??
@@ -593,25 +609,16 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
       LocationStatus.stale: Colors.grey,
     }[locationStatus]!;
 
-    return CircleLayer(
-      circles: [
-        CircleMarker(
-          point: LatLng(lastPosition!.latitude, lastPosition!.longitude),
-          radius: lastPosition!.accuracy,
-          useRadiusInMeter: true,
-          color: color.withOpacity(.1),
-        ),
-        CircleMarker(
-          point: LatLng(lastPosition!.latitude, lastPosition!.longitude),
-          radius: min(
-            10,
-            lastPosition!.accuracy,
-          ),
-          borderColor: Colors.white,
-          borderStrokeWidth: 2,
+    return CurrentLocationLayer(
+      positionStream: _currentLocationPositionStream.stream,
+      followOnLocationUpdate: FollowOnLocationUpdate.always,
+      style: LocationMarkerStyle(
+        marker: DefaultLocationMarker(
           color: color,
-        )
-      ],
+        ),
+        accuracyCircleColor: color.withOpacity(0.2),
+        headingSectorColor: color,
+      ),
     );
   }
 

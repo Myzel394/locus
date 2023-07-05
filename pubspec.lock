@@ -494,6 +494,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.3"
+  flutter_compass:
+    dependency: transitive
+    description:
+      name: flutter_compass
+      sha256: "1a0121bff32df95193812b4e0f69e95f45fdec042ebd7a326ba087c0f6ec8304"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.7.0"
   flutter_expandable_fab:
     dependency: "direct main"
     description:
@@ -563,6 +571,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.0"
+  flutter_map_location_marker:
+    dependency: "direct main"
+    description:
+      name: flutter_map_location_marker
+      sha256: "9757dceadda71a53d2d4004cff4d53a29210086083bdfebf44a1c4feb07f8eb1"
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.0.0"
   flutter_map_marker_popup:
     dependency: "direct main"
     description:
