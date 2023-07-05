@@ -201,6 +201,8 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     WidgetsBinding.instance
       ..addObserver(this)
       ..addPostFrameCallback((_) async {
+        _setLocationFromSettings();
+
         final taskService = context.read<TaskService>();
         final logService = context.read<LogService>();
         final appUpdateService = context.read<AppUpdateService>();
@@ -213,13 +215,13 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
         _showUpdateDialogIfRequired();
 
         taskService.checkup(logService);
-      });
 
-    hasGrantedLocationPermission().then((hasGranted) {
-      if (hasGranted) {
-        _initLiveLocationUpdate();
-      }
-    });
+        hasGrantedLocationPermission().then((hasGranted) {
+          if (hasGranted) {
+            _initLiveLocationUpdate();
+          }
+        });
+      });
 
     BackgroundFetch.start();
     _handleViewAlarmChecker();
@@ -253,6 +255,27 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     if (state == AppLifecycleState.resumed) {
       goToCurrentPosition(showErrorMessage: false);
     }
+  }
+
+  void _setLocationFromSettings() async {
+    final settings = context.read<SettingsService>();
+    final position = settings.getLastMapLocation();
+
+    if (position == null) {
+      return;
+    }
+
+    setState(() {
+      locationStatus = LocationStatus.stale;
+    });
+
+    _currentLocationPositionStream.add(
+      LocationMarkerPosition(
+        latitude: position.latitude,
+        longitude: position.longitude,
+        accuracy: position.accuracy,
+      ),
+    );
   }
 
   void _createLocationFetcher() {
@@ -301,6 +324,19 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     );
   }
 
+  void _updateLocationToSettings(final Position position) async {
+    final settings = context.read<SettingsService>();
+
+    settings.setLastMapLocation(
+      SettingsLastMapLocation(
+        latitude: position.latitude,
+        longitude: position.longitude,
+        accuracy: position.accuracy,
+      ),
+    );
+    await settings.save();
+  }
+
   void _initLiveLocationUpdate() {
     if (_positionStream != null) {
       return;
@@ -318,6 +354,8 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
           accuracy: position.accuracy,
         ),
       );
+
+      _updateLocationToSettings(position);
 
       if (!_hasGoneToInitialPosition) {
         flutterMapController.move(
@@ -566,6 +604,14 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     try {
       final latestPosition = await getCurrentPosition();
 
+      _currentLocationPositionStream.add(
+        LocationMarkerPosition(
+          latitude: latestPosition.latitude,
+          longitude: latestPosition.longitude,
+          accuracy: latestPosition.accuracy,
+        ),
+      );
+
       setState(() {
         lastPosition = latestPosition;
         locationStatus = LocationStatus.active;
@@ -639,7 +685,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
           subdomains: const ['a', 'b', 'c'],
           userAgentPackageName: "app.myzel394.locus",
         ),
-        if (lastPosition != null) _buildUserMarkerLayer(),
         CircleLayer(
           circles: viewService.views
               .where(
@@ -661,6 +706,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
               .expand((element) => element)
               .toList(),
         ),
+        _buildUserMarkerLayer(),
         PopupMarkerLayer(
           options: PopupMarkerLayerOptions(
             markerTapBehavior: MarkerTapBehavior.togglePopupAndHideRest(),
