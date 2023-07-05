@@ -536,18 +536,38 @@ class TaskService extends ChangeNotifier {
             taskName: task.name,
           ),
         );
-      } else if (!(await task.shouldRunNow()) && (await task.isRunning())) {
-        FlutterLogs.logInfo(LOG_TAG, "Task Service", "Stopping task.");
-        await task.stopExecutionImmediately();
+      } else if (!(await task.shouldRunNow())) {
+        if (task.deleteAfterRun &&
+            !task.isInfinite() &&
+            task.timers.isNotEmpty) {
+          FlutterLogs.logInfo(
+            LOG_TAG,
+            "Task Service",
+            "Task should be deleted after run. Deleting now.",
+          );
 
-        await logService.addLog(
-          Log.taskStatusChanged(
-            initiator: LogInitiator.system,
-            taskId: task.id,
-            taskName: task.name,
-            active: false,
-          ),
-        );
+          remove(task);
+          await save();
+
+          await logService.addLog(
+            Log.deleteTask(
+              initiator: LogInitiator.system,
+              taskName: task.name,
+            ),
+          );
+        } else {
+          FlutterLogs.logInfo(LOG_TAG, "Task Service", "Stopping task.");
+          await task.stopExecutionImmediately();
+
+          await logService.addLog(
+            Log.taskStatusChanged(
+              initiator: LogInitiator.system,
+              taskId: task.id,
+              taskName: task.name,
+              active: false,
+            ),
+          );
+        }
       }
     }
 
