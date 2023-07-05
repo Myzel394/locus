@@ -628,6 +628,8 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     return FlutterMap(
       mapController: flutterMapController,
       options: MapOptions(
+        maxZoom: 18,
+        minZoom: 2,
         center: LatLng(40, 20),
         zoom: 13.0,
       ),
