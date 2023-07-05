@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -96,6 +98,49 @@ class _ViewDetailsSheetState extends State<ViewDetailsSheet> {
         );
       }
     }
+  }
+
+  Widget buildHeadingMap() {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(LARGE_SPACE),
+      child: SizedBox(
+        height: 200,
+        child: FlutterMap(
+          options: MapOptions(
+            center: LatLng(
+              widget.lastLocation!.latitude,
+              widget.lastLocation!.longitude,
+            ),
+            zoom: 13,
+          ),
+          children: [
+            TileLayer(
+              urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+              subdomains: const ['a', 'b', 'c'],
+              userAgentPackageName: "app.myzel394.locus",
+            ),
+            MarkerLayer(
+              markers: [
+                Marker(
+                  point: LatLng(
+                    widget.lastLocation!.latitude,
+                    widget.lastLocation!.longitude,
+                  ),
+                  builder: (context) => Transform.rotate(
+                    angle: widget.lastLocation!.heading!,
+                    child: Icon(
+                      CupertinoIcons.location_north_fill,
+                      color: getPrimaryColorShades(context)[0],
+                      size: 30,
+                    ),
+                  ),
+                ),
+              ],
+            )
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -263,6 +308,10 @@ class _ViewDetailsSheetState extends State<ViewDetailsSheet> {
                     ),
                   ],
                 ),
+                if (widget.lastLocation?.heading != null) ...[
+                  const SizedBox(height: MEDIUM_SPACE),
+                  buildHeadingMap(),
+                ],
               ],
             ],
           ),
