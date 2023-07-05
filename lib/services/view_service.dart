@@ -235,6 +235,7 @@ class TaskView extends ChangeNotifier with LocationBase {
   VoidCallback getLocations({
     required void Function(LocationPointService) onLocationFetched,
     required void Function() onEnd,
+    final VoidCallback? onEmptyEnd,
     int? limit,
     DateTime? from,
   }) =>
@@ -244,6 +245,7 @@ class TaskView extends ChangeNotifier with LocationBase {
         relays: relays,
         onLocationFetched: onLocationFetched,
         onEnd: onEnd,
+        onEmptyEnd: onEmptyEnd,
         from: from,
         limit: limit,
       );

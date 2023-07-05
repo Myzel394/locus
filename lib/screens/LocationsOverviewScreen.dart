@@ -76,6 +76,7 @@ class LocationFetcher extends ChangeNotifier {
   void _fetchLastLocation(final TaskView view) {
     _getLocationsUnsubscribers.add(
       view.getLocations(
+        limit: 1,
         onLocationFetched: (location) {
           if (!_mounted) {
             return;
@@ -113,15 +114,13 @@ class LocationFetcher extends ChangeNotifier {
               return;
             }
 
-            if (_locations.containsKey(view)) {
-              _locations[view] = _locations[view]!
-                ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+            _locations[view] = _locations[view]!
+              ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
 
-              _setIsLoading(_locations.keys.length == views.length);
-            } else {
-              // No locations found in the last 24 hours
-              _fetchLastLocation(view);
-            }
+            _setIsLoading(_locations.keys.length == views.length);
+          },
+          onEmptyEnd: () {
+            _fetchLastLocation(view);
           },
         ),
       ),
@@ -981,7 +980,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
                 ? const Duration(milliseconds: 900)
                 : const Duration(milliseconds: 200),
             curve: selectedViewID == null ? Curves.elasticOut : Curves.easeIn,
-            alignment: Alignment(0.8, 0.9),
+            alignment: const Alignment(0.8, 0.9),
             child: ExpandableFab(
               overlayStyle: ExpandableFabOverlayStyle(
                 color: Colors.black.withOpacity(0.4),
