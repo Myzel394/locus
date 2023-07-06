@@ -25,12 +25,14 @@ class ActiveSharesSheet extends StatefulWidget {
   final VoidCallback onThresholdReached;
   final VoidCallback onThresholdPassed;
   final bool visible;
+  final VoidCallback onShareLocation;
 
   const ActiveSharesSheet({
     required this.visible,
     required this.triggerThreshold,
     required this.onThresholdReached,
     required this.onThresholdPassed,
+    required this.onShareLocation,
     super.key,
   });
 
@@ -287,9 +289,16 @@ class _ActiveSharesSheetState extends State<ActiveSharesSheet>
                           ),
                           PlatformElevatedButton(
                             material: (_, __) => MaterialElevatedButtonData(
-                              icon: Icon(Icons.share_location_rounded),
+                              icon: const Icon(Icons.share_location_rounded),
                             ),
-                            onPressed: () {},
+                            onPressed: () {
+                              sheetController.animateTo(
+                                MIN_SIZE,
+                                duration: const Duration(milliseconds: 100),
+                                curve: Curves.easeIn,
+                              );
+                              widget.onShareLocation();
+                            },
                             padding: const EdgeInsets.all(MEDIUM_SPACE),
                             child: Text(l10n.shareLocation_title),
                           ),

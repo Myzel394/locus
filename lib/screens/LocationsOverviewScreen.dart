@@ -1106,6 +1106,14 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
                 showFAB = true;
               });
             },
+            onShareLocation: () {
+              setState(() {
+                showFAB = true;
+                selectedViewID = null;
+              });
+
+              createNewQuickLocationShare();
+            },
           ),
         ],
       ),
