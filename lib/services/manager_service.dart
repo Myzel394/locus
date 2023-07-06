@@ -26,18 +26,51 @@ Future<void> updateLocation() async {
   await taskService.checkup(logService);
   final runningTasks = await taskService.getRunningTasks().toList();
 
+  FlutterLogs.logInfo(
+      LOG_TAG,
+      "Headless Task; Update Location",
+      "Everything restored, now checking for running tasks."
+  );
+
   if (runningTasks.isEmpty) {
+    FlutterLogs.logInfo(
+      LOG_TAG,
+      "Headless Task; Update Location",
+      "No tasks to run available",
+    );
     return;
   }
 
+
+  FlutterLogs.logInfo(
+    LOG_TAG,
+    "Headless Task; Update Location",
+    "Fetching position now...",
+  );
   final position = await getCurrentPosition();
+  FlutterLogs.logInfo(
+    LOG_TAG,
+    "Headless Task; Update Location",
+    "Fetching position now... Done!",
+  );
+
   final locationData = await LocationPointService.fromPosition(
     position,
   );
 
+  FlutterLogs.logInfo(
+    LOG_TAG,
+    "Headless Task; Update Location",
+    "Publishing position to ${runningTasks.length} tasks...",
+  );
   for (final task in runningTasks) {
     await task.publishLocation(locationData.copyWithDifferentId());
   }
+  FlutterLogs.logInfo(
+    LOG_TAG,
+    "Headless Task; Update Location",
+    "Publishing position to ${runningTasks.length} tasks... Done!",
+  );
 
   await logService.addLog(
     Log.updateLocation(
@@ -228,8 +261,29 @@ Future<void> runHeadlessTask() async {
     "Executing headless task now.",
   );
 
+  FlutterLogs.logInfo(
+    LOG_TAG,
+    "Headless Task",
+    "Updating Location...",
+  );
   await updateLocation();
+  FlutterLogs.logInfo(
+    LOG_TAG,
+    "Headless Task",
+    "Updating Location... Done!",
+  );
+
+  FlutterLogs.logInfo(
+    LOG_TAG,
+    "Headless Task",
+    "Checking View alarms...",
+  );
   await _checkViewAlarms();
+  FlutterLogs.logInfo(
+    LOG_TAG,
+    "Headless Task",
+    "Checking View alarms... Done!",
+  );
 
   FlutterLogs.logInfo(
     LOG_TAG,
