@@ -165,6 +165,8 @@
   "taskAction_generateLink_process_publishing": "Publishing encrypted data...",
   "taskAction_generateLink_process_creatingURI": "Creating link...",
   "taskAction_generateLink_shareTextSubject": "Here's the link to see my location",
+  "tasks_action_stopAll": "Stop tasks",
+  "tasks_action_startAll": "Start tasks",
   "tasks_examples_weekend": "Weekend Getaway",
   "tasks_examples_school": "School",
   "tasks_example_hourDuration": "{count, plural, =1{One hour} other{{count} hours}}",
