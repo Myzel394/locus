@@ -6,7 +6,6 @@ import 'package:locus/constants/values.dart';
 import 'package:locus/services/location_point_service.dart';
 import 'package:locus/utils/location.dart';
 import 'package:locus/widgets/PlatformFlavorWidget.dart';
-import 'package:locus/widgets/PlatformPopup.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -49,8 +48,10 @@ class _ActiveSharesSheetState extends State<ActiveSharesSheet>
   late Animation<Offset> offsetProgress;
 
   bool isInitializing = true;
-  bool isUpdatingLocation = false;
   bool isLocationPointerVisible = false;
+
+  bool isUpdatingLocation = false;
+  bool isTogglingTasks = false;
 
   bool _hasCalledThreshold = false;
   bool _hasCalledPassed = false;
@@ -144,12 +145,12 @@ class _ActiveSharesSheetState extends State<ActiveSharesSheet>
     final taskService = context.read<TaskService>();
 
     return taskService.tasks
-        .where((task) => task.deleteAfterRun && task.timers.length == 1);
+        .where((task) => task.deleteAfterRun && task.timers.length <= 1);
   }
 
   Future<bool> getAreAllTasksRunning() async {
     final tasksRunning =
-        await Future.wait(quickShareTasks.map((task) => task.isRunning()));
+    await Future.wait(quickShareTasks.map((task) => task.isRunning()));
 
     return tasksRunning.every((isRunning) => isRunning);
   }
@@ -171,9 +172,10 @@ class _ActiveSharesSheetState extends State<ActiveSharesSheet>
 
       await Future.wait(
         quickShareTasks.map(
-          (task) => task.publishLocation(
-            locationData.copyWithDifferentId(),
-          ),
+              (task) =>
+              task.publishLocation(
+                locationData.copyWithDifferentId(),
+              ),
         ),
       );
 
@@ -186,7 +188,8 @@ class _ActiveSharesSheetState extends State<ActiveSharesSheet>
       FlutterLogs.logError(
         LOG_TAG,
         "ActiveSharesSheet",
-        "Error while updating location for ${quickShareTasks.length} tasks: $error",
+        "Error while updating location for ${quickShareTasks
+            .length} tasks: $error",
       );
     } finally {
       setState(() {
@@ -195,276 +198,318 @@ class _ActiveSharesSheetState extends State<ActiveSharesSheet>
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
+  void toggleTasks(final bool start) async {
+    setState(() {
+      isTogglingTasks = true;
+    });
+
+    FlutterLogs.logInfo(
+      LOG_TAG,
+      "ActiveSharesSheet",
+      "Toggling ${quickShareTasks.length} tasks",
+    );
+
+    try {
+      if (start) {
+        for (final task in quickShareTasks) {
+          task.startExecutionImmediately();
+        }
+      } else {
+        for (final task in quickShareTasks) {
+          task.stopExecutionImmediately();
+        }
+      }
+
+      FlutterLogs.logInfo(
+        LOG_TAG,
+        "ActiveSharesSheet",
+        "Toggled ${quickShareTasks.length} tasks successfully!",
+      );
+    } catch (error) {
+      FlutterLogs.logError(
+        LOG_TAG,
+        "ActiveSharesSheet",
+        "Error while toggling ${quickShareTasks.length} tasks: $error",
+      );
+    } finally {
+      setState(() {
+        isTogglingTasks = false;
+      });
+    }
+  }
+
+  Widget buildEmptyState() {
     final l10n = AppLocalizations.of(context);
     final shades = getPrimaryColorShades(context);
 
+    return SizedBox(
+      height: MediaQuery
+          .of(context)
+          .size
+          .height - kToolbarHeight,
+      child: Column(
+        key: wrapperKey,
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            l10n.locationsOverview_activeShares_amount(
+              quickShareTasks.length,
+            ),
+            key: textKey,
+            style: getTitle2TextStyle(context),
+            textAlign: TextAlign.center,
+          ),
+          Column(
+            children: [
+              SizedBox(
+                width: 200,
+                child: VisibilityDetector(
+                  key: const Key("location-pointer"),
+                  onVisibilityChanged: (visibilityInfo) {
+                    setState(() {
+                      isLocationPointerVisible =
+                          visibilityInfo.visibleFraction > 0.0;
+                    });
+                  },
+                  child: Lottie.asset(
+                    "assets/lotties/location-pointer.json",
+                    key: Key(isLocationPointerVisible.toString()),
+                    frameRate: FrameRate.max,
+                    repeat: false,
+                    delegates: LottieDelegates(
+                      values: [
+                        ValueDelegate.color(
+                          const ["Path 3306", "Path 3305", "Fill 1"],
+                          value: shades[0],
+                        ),
+                        ValueDelegate.color(
+                          const ["Path 3305", "Path 3305", "Fill 1"],
+                          value: shades[0],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: MEDIUM_SPACE),
+              Text(
+                l10n.sharesOverviewScreen_createTask_tasksEmpty,
+                style: getTitle2TextStyle(context),
+              ),
+              const SizedBox(height: SMALL_SPACE),
+              Text(
+                l10n.sharesOverviewScreen_createTask_description,
+                style: getCaptionTextStyle(context),
+              ),
+            ],
+          ),
+          PlatformElevatedButton(
+            material: (_, __) =>
+                MaterialElevatedButtonData(
+                  icon: const Icon(Icons.share_location_rounded),
+                ),
+            onPressed: () {
+              sheetController.animateTo(
+                MIN_SIZE,
+                duration: const Duration(milliseconds: 100),
+                curve: Curves.easeIn,
+              );
+              widget.onShareLocation();
+            },
+            padding: const EdgeInsets.all(MEDIUM_SPACE),
+            child: Text(l10n.shareLocation_title),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildToggleTasksStatusButton() {
+    final l10n = AppLocalizations.of(context);
+
+    return FutureBuilder<bool>(
+      future: getAreAllTasksRunning(),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          final isRunning = snapshot.data as bool;
+
+          return ElevatedButton(
+            onPressed: isTogglingTasks ? null : () => toggleTasks(!isRunning),
+            style: ElevatedButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(MEDIUM_SPACE),
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(MEDIUM_SPACE),
+              child: Column(
+                children: (() {
+                  if (isTogglingTasks) {
+                    return <Widget>[
+                      PlatformCircularProgressIndicator(),
+                      const SizedBox(height: MEDIUM_SPACE),
+                      Text(
+                        l10n.tasks_action_stopAll,
+                        textAlign: TextAlign.center,
+                      ),
+                    ];
+                  }
+
+                  if (isRunning) {
+                    return <Widget>[
+                      PlatformFlavorWidget(
+                        material: (_, __) =>
+                        const Icon(
+                          Icons.stop_circle_rounded,
+                          size: 42,
+                        ),
+                        cupertino: (_, __) =>
+                        const Icon(
+                          CupertinoIcons.stop_circle_fill,
+                          size: 42,
+                        ),
+                      ),
+                      const SizedBox(height: MEDIUM_SPACE),
+                      Text(
+                        l10n.tasks_action_stopAll,
+                        textAlign: TextAlign.center,
+                      ),
+                    ];
+                  }
+
+                  return <Widget>[
+                    PlatformFlavorWidget(
+                      material: (_, __) =>
+                      const Icon(
+                        Icons.play_circle_rounded,
+                        size: 42,
+                      ),
+                      cupertino: (_, __) =>
+                      const Icon(
+                        CupertinoIcons.play_circle_fill,
+                        size: 42,
+                      ),
+                    ),
+                    const SizedBox(height: MEDIUM_SPACE),
+                    Text(
+                      l10n.tasks_action_startAll,
+                      textAlign: TextAlign.center,
+                    ),
+                  ];
+                })(),
+              ),
+            ),
+          );
+        }
+
+        return const SizedBox.shrink();
+      },
+    );
+  }
+
+  Widget buildActiveSharesList() {
+    final l10n = AppLocalizations.of(context);
+
+    return Column(
+      key: wrapperKey,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          l10n.locationsOverview_activeShares_amount(
+            quickShareTasks.length,
+          ),
+          key: textKey,
+          style: getTitle2TextStyle(context),
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: MEDIUM_SPACE),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Flexible(
+              child: Padding(
+                padding: const EdgeInsets.all(SMALL_SPACE),
+                child: ElevatedButton(
+                  onPressed: isUpdatingLocation ? null : updateLocation,
+                  style: ElevatedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(MEDIUM_SPACE),
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(MEDIUM_SPACE),
+                    child: Column(
+                      children: [
+                        if (isUpdatingLocation)
+                          PlatformCircularProgressIndicator()
+                        else
+                          Icon(
+                            context.platformIcons.location,
+                            size: 42,
+                          ),
+                        const SizedBox(height: MEDIUM_SPACE),
+                        Text(
+                          l10n.quickActions_shareNow,
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            Flexible(
+              child: Padding(
+                padding: const EdgeInsets.all(SMALL_SPACE),
+                child: _buildToggleTasksStatusButton(),
+              ),
+            ),
+          ],
+        ),
+        ListView.builder(
+          itemCount: quickShareTasks.length,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemBuilder: (context, index) {
+            final task = quickShareTasks.elementAt(index);
+
+            return TaskTile(
+              task: task,
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Opacity(
       opacity: isInitializing ? 0 : 1,
       child: AnimatedBuilder(
         animation: offsetProgress,
-        builder: (context, child) => Transform.translate(
-          offset: offsetProgress.value,
-          child: child,
-        ),
+        builder: (context, child) =>
+            Transform.translate(
+              offset: offsetProgress.value,
+              child: child,
+            ),
         child: DraggableScrollableSheet(
           snap: true,
           snapSizes: const [MIN_SIZE, 1],
           minChildSize: 0.0,
           initialChildSize: MIN_SIZE,
           controller: sheetController,
-          builder: (context, controller) => ModalSheet(
-            child: SingleChildScrollView(
-              controller: controller,
-              child: quickShareTasks.isEmpty
-                  ? SizedBox(
-                      height:
-                          MediaQuery.of(context).size.height - kToolbarHeight,
-                      child: Column(
-                        key: wrapperKey,
-                        mainAxisSize: MainAxisSize.max,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            l10n.locationsOverview_activeShares_amount(
-                              quickShareTasks.length,
-                            ),
-                            key: textKey,
-                            style: getTitle2TextStyle(context),
-                            textAlign: TextAlign.center,
-                          ),
-                          Column(
-                            children: [
-                              SizedBox(
-                                width: 200,
-                                child: VisibilityDetector(
-                                  key: const Key("location-pointer"),
-                                  onVisibilityChanged: (visibilityInfo) {
-                                    setState(() {
-                                      isLocationPointerVisible =
-                                          visibilityInfo.visibleFraction > 0.0;
-                                    });
-                                  },
-                                  child: Lottie.asset(
-                                    "assets/lotties/location-pointer.json",
-                                    key: Key(
-                                        isLocationPointerVisible.toString()),
-                                    frameRate: FrameRate.max,
-                                    repeat: false,
-                                    delegates: LottieDelegates(
-                                      values: [
-                                        ValueDelegate.color(
-                                          const [
-                                            "Path 3306",
-                                            "Path 3305",
-                                            "Fill 1"
-                                          ],
-                                          value: shades[0],
-                                        ),
-                                        ValueDelegate.color(
-                                          const [
-                                            "Path 3305",
-                                            "Path 3305",
-                                            "Fill 1"
-                                          ],
-                                          value: shades[0],
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: MEDIUM_SPACE),
-                              Text(
-                                l10n.sharesOverviewScreen_createTask_tasksEmpty,
-                                style: getTitle2TextStyle(context),
-                              ),
-                              const SizedBox(height: SMALL_SPACE),
-                              Text(
-                                l10n.sharesOverviewScreen_createTask_description,
-                                style: getCaptionTextStyle(context),
-                              ),
-                            ],
-                          ),
-                          PlatformElevatedButton(
-                            material: (_, __) => MaterialElevatedButtonData(
-                              icon: const Icon(Icons.share_location_rounded),
-                            ),
-                            onPressed: () {
-                              sheetController.animateTo(
-                                MIN_SIZE,
-                                duration: const Duration(milliseconds: 100),
-                                curve: Curves.easeIn,
-                              );
-                              widget.onShareLocation();
-                            },
-                            padding: const EdgeInsets.all(MEDIUM_SPACE),
-                            child: Text(l10n.shareLocation_title),
-                          ),
-                        ],
-                      ),
-                    )
-                  : Column(
-                      key: wrapperKey,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          l10n.locationsOverview_activeShares_amount(
-                            quickShareTasks.length,
-                          ),
-                          key: textKey,
-                          style: getTitle2TextStyle(context),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: MEDIUM_SPACE),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: <Widget>[
-                            Flexible(
-                              child: Padding(
-                                padding: const EdgeInsets.all(SMALL_SPACE),
-                                child: ElevatedButton(
-                                  onPressed: isUpdatingLocation
-                                      ? null
-                                      : updateLocation,
-                                  style: ElevatedButton.styleFrom(
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius:
-                                          BorderRadius.circular(MEDIUM_SPACE),
-                                    ),
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(MEDIUM_SPACE),
-                                    child: Column(
-                                      children: [
-                                        if (isUpdatingLocation)
-                                          PlatformCircularProgressIndicator()
-                                        else
-                                          Icon(
-                                            context.platformIcons.location,
-                                            size: 42,
-                                          ),
-                                        const SizedBox(height: MEDIUM_SPACE),
-                                        Text(
-                                          l10n.quickActions_shareNow,
-                                          textAlign: TextAlign.center,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Flexible(
-                              child: Padding(
-                                padding: const EdgeInsets.all(SMALL_SPACE),
-                                child: FutureBuilder<bool>(
-                                  future: getAreAllTasksRunning(),
-                                  builder: (context, snapshot) {
-                                    if (snapshot.hasData) {
-                                      final isRunning = snapshot.data as bool;
-
-                                      return ElevatedButton(
-                                        onPressed: () {
-                                          if (isRunning) {
-                                            for (final task
-                                                in quickShareTasks) {
-                                              task.stopExecutionImmediately();
-                                            }
-                                          } else {
-                                            for (final task
-                                                in quickShareTasks) {
-                                              task.startExecutionImmediately();
-                                            }
-                                          }
-                                        },
-                                        style: ElevatedButton.styleFrom(
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                                MEDIUM_SPACE),
-                                          ),
-                                        ),
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(
-                                              MEDIUM_SPACE),
-                                          child: Column(
-                                            children: isRunning
-                                                ? [
-                                                    PlatformFlavorWidget(
-                                                      material: (_, __) =>
-                                                          const Icon(
-                                                        Icons
-                                                            .stop_circle_rounded,
-                                                        size: 42,
-                                                      ),
-                                                      cupertino: (_, __) =>
-                                                          const Icon(
-                                                        CupertinoIcons
-                                                            .stop_circle_fill,
-                                                        size: 42,
-                                                      ),
-                                                    ),
-                                                    const SizedBox(
-                                                        height: MEDIUM_SPACE),
-                                                    Text(
-                                                      l10n.tasks_action_stopAll,
-                                                      textAlign:
-                                                          TextAlign.center,
-                                                    ),
-                                                  ]
-                                                : [
-                                                    PlatformFlavorWidget(
-                                                      material: (_, __) =>
-                                                          const Icon(
-                                                        Icons
-                                                            .play_circle_rounded,
-                                                        size: 42,
-                                                      ),
-                                                      cupertino: (_, __) =>
-                                                          const Icon(
-                                                        CupertinoIcons
-                                                            .play_circle_fill,
-                                                        size: 42,
-                                                      ),
-                                                    ),
-                                                    const SizedBox(
-                                                        height: MEDIUM_SPACE),
-                                                    Text(
-                                                      l10n.tasks_action_startAll,
-                                                      textAlign:
-                                                          TextAlign.center,
-                                                    ),
-                                                  ],
-                                          ),
-                                        ),
-                                      );
-                                    }
-
-                                    return const SizedBox.shrink();
-                                  },
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        ListView.builder(
-                          itemCount: quickShareTasks.length,
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemBuilder: (context, index) {
-                            final task = quickShareTasks.elementAt(index);
-
-                            return TaskTile(
-                              task: task,
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-            ),
-          ),
+          builder: (context, controller) =>
+              ModalSheet(
+                child: SingleChildScrollView(
+                  controller: controller,
+                  child: quickShareTasks.isEmpty
+                      ? buildEmptyState()
+                      : buildActiveSharesList(),
+                ),
+              ),
         ),
       ),
     );

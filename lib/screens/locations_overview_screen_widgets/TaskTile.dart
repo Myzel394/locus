@@ -71,7 +71,10 @@ class _TaskTileState extends State<TaskTile> with TaskLinkGenerationMixin {
           : PlatformPopup(
               items: [
                 PlatformPopupMenuItem(
-                  label: Text(l10n.taskAction_generateLink),
+                  label: PlatformListTile(
+                    leading: const Icon(Icons.link_rounded),
+                    title: Text(l10n.taskAction_generateLink),
+                  ),
                   onPressed: generateLink,
                 ),
               ],
