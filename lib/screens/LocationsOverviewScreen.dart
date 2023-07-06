@@ -18,12 +18,14 @@ import 'package:locus/constants/spacing.dart';
 import 'package:locus/screens/ImportTaskSheet.dart';
 import 'package:locus/screens/SettingsScreen.dart';
 import 'package:locus/screens/SharesOverviewScreen.dart';
+import 'package:locus/screens/locations_overview_screen_widgets/ActiveSharesSheet.dart';
 import 'package:locus/screens/locations_overview_screen_widgets/ShareLocationSheet.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:locus/utils/location.dart';
 import 'package:locus/utils/show_message.dart';
 import 'package:locus/widgets/FABOpenContainer.dart';
+import 'package:locus/widgets/ModalSheet.dart';
 import 'package:locus/widgets/Paper.dart';
 import 'package:map_launcher/map_launcher.dart';
 import 'package:provider/provider.dart';
@@ -54,6 +56,12 @@ enum LocationStatus {
   active,
   fetching,
 }
+
+// This is the assumed width (plus some margin) of the FAB.
+// When this width is reached, the ActiveSharesSheet should trigger.
+// 56.0 = FAB width
+// 32.0 = Margin
+const FAB_TRIGGER_WIDTH = 56.0 + 80.0;
 
 class LocationFetcher extends ChangeNotifier {
   final Iterable<TaskView> views;
@@ -161,6 +169,8 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     with AutomaticKeepAliveClientMixin, WidgetsBindingObserver {
   late final LocationFetcher _fetchers;
   final MapController flutterMapController = MapController();
+
+  bool showFAB = true;
 
   Stream<Position>? _positionStream;
 
@@ -798,6 +808,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
 
   void showViewLocations(final TaskView view) async {
     setState(() {
+      showFAB = false;
       selectedViewID = view.id;
     });
 
@@ -875,6 +886,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
                       onChanged: (selection) {
                         if (selection == null) {
                           setState(() {
+                            showFAB = true;
                             selectedViewID = null;
                           });
                           return;
@@ -1021,11 +1033,11 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
         return MaterialScaffoldData(
           floatingActionButtonLocation: ExpandableFab.location,
           floatingActionButton: AnimatedScale(
-            scale: selectedViewID == null ? 1 : 0,
-            duration: selectedViewID == null
+            scale: showFAB ? 1 : 0,
+            duration: showFAB == null
                 ? const Duration(milliseconds: 900)
                 : const Duration(milliseconds: 200),
-            curve: selectedViewID == null ? Curves.elasticOut : Curves.easeIn,
+            curve: showFAB == null ? Curves.elasticOut : Curves.easeIn,
             alignment: const Alignment(0.8, 0.9),
             child: ExpandableFab(
               overlayStyle: ExpandableFabOverlayStyle(
@@ -1080,7 +1092,23 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
             onGoToPosition: (position) {
               flutterMapController.move(position, flutterMapController.zoom);
             },
-          )
+          ),
+          ActiveSharesSheet(
+            visible: selectedViewID == null,
+            triggerThreshold:
+                (MediaQuery.of(context).size.width - FAB_TRIGGER_WIDTH) /
+                    MediaQuery.of(context).size.height,
+            onThresholdReached: () {
+              setState(() {
+                showFAB = false;
+              });
+            },
+            onThresholdPassed: () {
+              setState(() {
+                showFAB = true;
+              });
+            },
+          ),
         ],
       ),
     );
