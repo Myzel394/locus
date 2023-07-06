@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+import 'package:locus/widgets/PlatformPopup.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import '../../services/task_service.dart';
 import '../../utils/theme.dart';
 import '../../widgets/ModalSheet.dart';
+import './TaskTile.dart';
 
-const MIN_SIZE = 0.15;
+const MIN_SIZE = 0.1;
 
 class ActiveSharesSheet extends StatefulWidget {
   final double triggerThreshold;
@@ -43,9 +49,10 @@ class _ActiveSharesSheetState extends State<ActiveSharesSheet>
     offsetController =
         AnimationController(vsync: this, duration: Duration.zero);
     // Dummy animation so first render can occur without any problems
-    offsetProgress =
-        Tween<Offset>(begin: const Offset(0, 0), end: const Offset(0, 0))
-            .animate(offsetController);
+    offsetProgress = Tween<Offset>(
+      begin: const Offset(0, 0),
+      end: const Offset(0, 0),
+    ).animate(offsetController);
 
     WidgetsBinding.instance.addPersistentFrameCallback((_) {
       final wrapperWidth = wrapperKey.currentContext!.size!.width;
@@ -55,7 +62,12 @@ class _ActiveSharesSheetState extends State<ActiveSharesSheet>
       offsetProgress = Tween<Offset>(
         begin: Offset(-xOffset, 0),
         end: const Offset(0, 0),
-      ).animate(offsetController);
+      ).animate(
+        CurvedAnimation(
+          curve: Curves.linearToEaseOut,
+          parent: offsetController,
+        ),
+      );
 
       isInitializing = false;
     });
@@ -115,8 +127,17 @@ class _ActiveSharesSheetState extends State<ActiveSharesSheet>
     }
   }
 
+  Iterable<Task> get quickShareTasks {
+    final taskService = context.read<TaskService>();
+
+    return taskService.tasks
+        .where((task) => task.deleteAfterRun && task.timers.length == 1);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Opacity(
       opacity: isInitializing ? 0 : 1,
       child: AnimatedBuilder(
@@ -127,9 +148,9 @@ class _ActiveSharesSheetState extends State<ActiveSharesSheet>
         ),
         child: DraggableScrollableSheet(
           snap: true,
-          snapSizes: const [0.15, 1],
+          snapSizes: const [MIN_SIZE, 1],
           minChildSize: 0.0,
-          initialChildSize: 0.15,
+          initialChildSize: MIN_SIZE,
           controller: sheetController,
           builder: (context, controller) => ModalSheet(
             child: SingleChildScrollView(
@@ -139,10 +160,24 @@ class _ActiveSharesSheetState extends State<ActiveSharesSheet>
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    "5 Shares active",
+                    l10n.locationsOverview_activeShares_amount(
+                      quickShareTasks.length,
+                    ),
                     key: textKey,
                     style: getTitle2TextStyle(context),
                     textAlign: TextAlign.center,
+                  ),
+                  ListView.builder(
+                    itemCount: quickShareTasks.length,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemBuilder: (context, index) {
+                      final task = quickShareTasks.elementAt(index);
+
+                      return TaskTile(
+                        task: task,
+                      );
+                    },
                   ),
                 ],
               ),

@@ -1034,10 +1034,10 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
           floatingActionButtonLocation: ExpandableFab.location,
           floatingActionButton: AnimatedScale(
             scale: showFAB ? 1 : 0,
-            duration: showFAB == null
+            duration: showFAB
                 ? const Duration(milliseconds: 900)
                 : const Duration(milliseconds: 200),
-            curve: showFAB == null ? Curves.elasticOut : Curves.easeIn,
+            curve: showFAB ? Curves.elasticOut : Curves.easeIn,
             alignment: const Alignment(0.8, 0.9),
             child: ExpandableFab(
               overlayStyle: ExpandableFabOverlayStyle(
@@ -1095,9 +1095,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
           ),
           ActiveSharesSheet(
             visible: selectedViewID == null,
-            triggerThreshold:
-                (MediaQuery.of(context).size.width - FAB_TRIGGER_WIDTH) /
-                    MediaQuery.of(context).size.height,
+            triggerThreshold: 0.12,
             onThresholdReached: () {
               setState(() {
                 showFAB = false;
