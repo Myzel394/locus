@@ -9,6 +9,7 @@ import 'package:locus/services/timers_service.dart';
 import 'package:locus/utils/date.dart';
 import 'package:locus/utils/navigation.dart';
 import 'package:locus/utils/task.dart';
+import 'package:provider/provider.dart';
 
 import '../../widgets/PlatformListTile.dart';
 import '../../widgets/PlatformPopup.dart';
@@ -28,6 +29,20 @@ class TaskTile extends StatefulWidget {
 class _TaskTileState extends State<TaskTile> with TaskLinkGenerationMixin {
   bool isLoading = false;
 
+  @override
+  void initState() {
+    super.initState();
+
+    widget.task.addListener(rebuild);
+  }
+
+  @override
+  void dispose() {
+    widget.task.removeListener(rebuild);
+
+    super.dispose();
+  }
+
   void generateLink() async {
     setState(() {
       isLoading = true;
@@ -35,8 +50,7 @@ class _TaskTileState extends State<TaskTile> with TaskLinkGenerationMixin {
 
     try {
       await shareTask(widget.task);
-    } catch (_) {
-    } finally {
+    } catch (_) {} finally {
       setState(() {
         isLoading = false;
       });
@@ -51,6 +65,10 @@ class _TaskTileState extends State<TaskTile> with TaskLinkGenerationMixin {
     }
   }
 
+  void rebuild() {
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -58,48 +76,54 @@ class _TaskTileState extends State<TaskTile> with TaskLinkGenerationMixin {
     return PlatformListTile(
       title: Text(widget.task.name),
       subtitle: widget.task.timers.length == 1 &&
-              widget.task.timers[0] is DurationTimer &&
-              (widget.task.timers[0] as DurationTimer).startDate != null
+          widget.task.timers[0] is DurationTimer &&
+          (widget.task.timers[0] as DurationTimer).startDate != null
           ? Text(
-              formatStartDate(
-                (widget.task.timers[0] as DurationTimer).startDate!,
-              ),
-            )
+        formatStartDate(
+          (widget.task.timers[0] as DurationTimer).startDate!,
+        ),
+      )
           : null,
       trailing: isLoading
           ? const CircularProgressIndicator()
           : PlatformPopup(
-              items: [
-                PlatformPopupMenuItem(
-                  label: PlatformListTile(
-                    leading: const Icon(Icons.link_rounded),
-                    title: Text(l10n.taskAction_generateLink),
-                  ),
-                  onPressed: generateLink,
-                ),
-              ],
+        items: [
+          PlatformPopupMenuItem(
+            label: PlatformListTile(
+              leading: const Icon(Icons.link_rounded),
+              title: Text(l10n.taskAction_generateLink),
             ),
+            onPressed: generateLink,
+          ),
+        ],
+      ),
       leading: FutureBuilder<bool>(
         future: widget.task.isRunning(),
-        builder: (context, snapshot) => PlatformSwitch(
-          value: snapshot.data ?? false,
-          onChanged: snapshot.hasData
-              ? (newValue) {
-                  if (newValue) {
-                    widget.task.startExecutionImmediately();
-                  } else {
-                    widget.task.stopExecutionImmediately();
-                  }
+        builder: (context, snapshot) =>
+            PlatformSwitch(
+              value: snapshot.data ?? false,
+              onChanged: snapshot.hasData
+                  ? (newValue) {
+                final taskService = context.read<TaskService>();
+
+                if (newValue) {
+                  widget.task.startExecutionImmediately();
+                } else {
+                  widget.task.stopExecutionImmediately();
                 }
-              : null,
-        ),
+
+                taskService.notifyListeners();
+              }
+                  : null,
+            ),
       ),
       onTap: () {
         pushRoute(
           context,
-          (context) => TaskDetailScreen(
-            task: widget.task,
-          ),
+              (context) =>
+              TaskDetailScreen(
+                task: widget.task,
+              ),
         );
       },
     );

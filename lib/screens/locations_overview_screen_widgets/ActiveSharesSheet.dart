@@ -110,12 +110,18 @@ class _ActiveSharesSheetState extends State<ActiveSharesSheet>
         _hasCalledPassed = false;
       }
     });
+
+    final taskService = context.read<TaskService>();
+    taskService.addListener(rebuild);
   }
 
   @override
   void dispose() {
     sheetController.dispose();
     offsetController.dispose();
+
+    final taskService = context.read<TaskService>();
+    taskService.removeListener(rebuild);
 
     super.dispose();
   }
@@ -139,6 +145,10 @@ class _ActiveSharesSheetState extends State<ActiveSharesSheet>
         );
       }
     }
+  }
+
+  void rebuild() {
+    setState(() {});
   }
 
   Iterable<Task> get quickShareTasks {
@@ -325,86 +335,125 @@ class _ActiveSharesSheetState extends State<ActiveSharesSheet>
     );
   }
 
-  Widget _buildToggleTasksStatusButton() {
+  Widget _buildToggleTasksStatusButton(final bool allTasksRunning) {
     final l10n = AppLocalizations.of(context);
 
-    return FutureBuilder<bool>(
-      future: getAreAllTasksRunning(),
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          final isRunning = snapshot.data as bool;
+    return ElevatedButton(
+      onPressed: isTogglingTasks ? null : () => toggleTasks(!allTasksRunning),
+      style: ElevatedButton.styleFrom(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(MEDIUM_SPACE),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(MEDIUM_SPACE),
+        child: Column(
+          children: (() {
+            if (isTogglingTasks) {
+              return <Widget>[
+                PlatformCircularProgressIndicator(),
+                const SizedBox(height: MEDIUM_SPACE),
+                Text(
+                  l10n.tasks_action_stopAll,
+                  textAlign: TextAlign.center,
+                ),
+              ];
+            }
 
-          return ElevatedButton(
-            onPressed: isTogglingTasks ? null : () => toggleTasks(!isRunning),
-            style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(MEDIUM_SPACE),
+            if (allTasksRunning) {
+              return <Widget>[
+                PlatformFlavorWidget(
+                  material: (_, __) =>
+                  const Icon(
+                    Icons.stop_circle_rounded,
+                    size: 42,
+                  ),
+                  cupertino: (_, __) =>
+                  const Icon(
+                    CupertinoIcons.stop_circle_fill,
+                    size: 42,
+                  ),
+                ),
+                const SizedBox(height: MEDIUM_SPACE),
+                Text(
+                  l10n.tasks_action_stopAll,
+                  textAlign: TextAlign.center,
+                ),
+              ];
+            }
+
+            return <Widget>[
+              PlatformFlavorWidget(
+                material: (_, __) =>
+                const Icon(
+                  Icons.play_circle_rounded,
+                  size: 42,
+                ),
+                cupertino: (_, __) =>
+                const Icon(
+                  CupertinoIcons.play_circle_fill,
+                  size: 42,
+                ),
               ),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(MEDIUM_SPACE),
-              child: Column(
-                children: (() {
-                  if (isTogglingTasks) {
-                    return <Widget>[
-                      PlatformCircularProgressIndicator(),
-                      const SizedBox(height: MEDIUM_SPACE),
-                      Text(
-                        l10n.tasks_action_stopAll,
-                        textAlign: TextAlign.center,
-                      ),
-                    ];
-                  }
-
-                  if (isRunning) {
-                    return <Widget>[
-                      PlatformFlavorWidget(
-                        material: (_, __) =>
-                        const Icon(
-                          Icons.stop_circle_rounded,
-                          size: 42,
-                        ),
-                        cupertino: (_, __) =>
-                        const Icon(
-                          CupertinoIcons.stop_circle_fill,
-                          size: 42,
-                        ),
-                      ),
-                      const SizedBox(height: MEDIUM_SPACE),
-                      Text(
-                        l10n.tasks_action_stopAll,
-                        textAlign: TextAlign.center,
-                      ),
-                    ];
-                  }
-
-                  return <Widget>[
-                    PlatformFlavorWidget(
-                      material: (_, __) =>
-                      const Icon(
-                        Icons.play_circle_rounded,
-                        size: 42,
-                      ),
-                      cupertino: (_, __) =>
-                      const Icon(
-                        CupertinoIcons.play_circle_fill,
-                        size: 42,
-                      ),
-                    ),
-                    const SizedBox(height: MEDIUM_SPACE),
-                    Text(
-                      l10n.tasks_action_startAll,
-                      textAlign: TextAlign.center,
-                    ),
-                  ];
-                })(),
+              const SizedBox(height: MEDIUM_SPACE),
+              Text(
+                l10n.tasks_action_startAll,
+                textAlign: TextAlign.center,
               ),
-            ),
-          );
-        }
+            ];
+          })(),
+        ),
+      ),
+    );
+  }
 
-        return const SizedBox.shrink();
-      },
+  Widget _buildShareLocationButton(final bool allTasksRunning) {
+    final l10n = AppLocalizations.of(context);
+
+    return ElevatedButton(
+      onPressed: isUpdatingLocation || !allTasksRunning ? null : updateLocation,
+      style: ElevatedButton.styleFrom(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(MEDIUM_SPACE),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(MEDIUM_SPACE),
+        child: Column(
+          children: [
+            (() {
+              if (isUpdatingLocation) {
+                return PlatformCircularProgressIndicator();
+              }
+
+              if (!allTasksRunning) {
+                return PlatformFlavorWidget(
+                  material: (_, __) =>
+                  const Icon(
+                    Icons.location_disabled_rounded,
+                    size: 42,
+                  ),
+                  cupertino: (_, __) =>
+                  const Icon(
+                    CupertinoIcons.location_slash_fill,
+                    size: 42,
+                  ),
+                );
+              }
+
+              return Icon(
+                context.platformIcons.location,
+                size: 42,
+              );
+            })(),
+            const SizedBox(height: MEDIUM_SPACE),
+            Text(
+              l10n.quickActions_shareNow,
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -424,50 +473,34 @@ class _ActiveSharesSheetState extends State<ActiveSharesSheet>
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: MEDIUM_SPACE),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: <Widget>[
-            Flexible(
-              child: Padding(
-                padding: const EdgeInsets.all(SMALL_SPACE),
-                child: ElevatedButton(
-                  onPressed: isUpdatingLocation ? null : updateLocation,
-                  style: ElevatedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(MEDIUM_SPACE),
+        FutureBuilder<bool>(
+            future: getAreAllTasksRunning(),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                final isRunning = snapshot.data as bool;
+
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    Flexible(
+                      child: Padding(
+                        padding: const EdgeInsets.all(SMALL_SPACE),
+                        child: _buildShareLocationButton(isRunning),
+                      ),
                     ),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(MEDIUM_SPACE),
-                    child: Column(
-                      children: [
-                        if (isUpdatingLocation)
-                          PlatformCircularProgressIndicator()
-                        else
-                          Icon(
-                            context.platformIcons.location,
-                            size: 42,
-                          ),
-                        const SizedBox(height: MEDIUM_SPACE),
-                        Text(
-                          l10n.quickActions_shareNow,
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
+                    Flexible(
+                      child: Padding(
+                        padding: const EdgeInsets.all(SMALL_SPACE),
+                        child: _buildToggleTasksStatusButton(isRunning),
+                      ),
                     ),
-                  ),
-                ),
-              ),
-            ),
-            Flexible(
-              child: Padding(
-                padding: const EdgeInsets.all(SMALL_SPACE),
-                child: _buildToggleTasksStatusButton(),
-              ),
-            ),
-          ],
-        ),
+                  ],
+                );
+              }
+
+              return const SizedBox.shrink();
+            }),
         ListView.builder(
           itemCount: quickShareTasks.length,
           shrinkWrap: true,
@@ -475,9 +508,7 @@ class _ActiveSharesSheetState extends State<ActiveSharesSheet>
           itemBuilder: (context, index) {
             final task = quickShareTasks.elementAt(index);
 
-            return TaskTile(
-              task: task,
-            );
+            return TaskTile(task: task);
           },
         ),
       ],
