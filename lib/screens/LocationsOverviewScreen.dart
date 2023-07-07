@@ -1063,7 +1063,8 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
                 FloatingActionButton.extended(
                   onPressed: importLocation,
                   icon: const Icon(Icons.download_rounded),
-                  label: Text(l10n.importTask_title),
+                  label:
+                      Text(l10n.sharesOverviewScreen_importTask_action_import),
                   backgroundColor: background,
                   foregroundColor: foreground,
                 ),

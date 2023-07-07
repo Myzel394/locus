@@ -219,20 +219,20 @@
   "importTask_bluetooth_receive_request_decline": "Decline",
   "importTask_bluetooth_receive_request_accept": "Accept",
   "sharesOverviewScreen_title": "Shares Overview",
-  "sharesOverviewScreen_createTask": "Create Task",
+  "sharesOverviewScreen_createTask": "Create Share",
   "sharesOverviewScreen_tasks": "Shares",
   "sharesOverviewScreen_createTask_scheduleNow": "Start schedule immediately",
   "sharesOverviewScreen_createTask_scheduleNow_help_title": "Scheduling",
   "sharesOverviewScreen_createTask_scheduleNow_help_description": "The task will be scheduled after you create it. This does not necessarily mean that it will start directly. It will start at the next expected time based on your timers. If you disable this, you will have to schedule the task manually.",
   "sharesOverviewScreen_createTask_tasksEmpty": "No tasks yet",
   "sharesOverviewScreen_createTask_description": "Create a task to share your current location",
-  "sharesOverviewScreen_createTask_action_create": "Create Task",
-  "sharesOverviewScreen_tasksSection": "Tasks",
+  "sharesOverviewScreen_createTask_action_create": "Create Share",
+  "sharesOverviewScreen_tasksSection": "Shares",
   "sharesOverviewScreen_viewsSection": "Views",
-  "sharesOverviewScreen_importTask_title": "Import a Task",
+  "sharesOverviewScreen_importTask_title": "Import a Share",
   "sharesOverviewScreen_importTask_description": "Import a task from a link or a file you have received",
-  "sharesOverviewScreen_importTask_action_import": "Import Task",
-  "sharesOverviewScreen_importTask_action_importMethod": "How would you like to import the task?",
+  "sharesOverviewScreen_importTask_action_import": "Import Share",
+  "sharesOverviewScreen_importTask_action_importMethod": "How would you like to import the share?",
   "sharesOverviewScreen_importTask_action_importMethod_url": "Import Link",
   "sharesOverviewScreen_importTask_action_importMethod_url_title": "Enter the link of the share",
   "sharesOverviewScreen_importTask_action_importMethod_url_hint": "https://locus.cfd/#",
@@ -251,9 +251,9 @@
   "sharesOverviewScreen_importTask_importLabel": "Import",
   "locationsOverview_viewSelection_all": "Show all locations",
   "locationsOverview_activeShares_amount": "{count, plural, =0{No active shares} =1{One share active} other{{count} shares active}}",
-  "createTask_title": "Define a name for your task",
+  "createTask_title": "Define a name for your Share",
   "createTask_fields_name_label": "Name",
-  "createTask_sameTaskNameAlreadyExists": "A task with this name already exists. You can create the task, but you will have two tasks with the same name.",
+  "createTask_sameTaskNameAlreadyExists": "A Share with this name already exists. You can create the Share, but you will have two Shares with the same name.",
   "createTask_fields_relays_label": "Relays",
   "createTask_fields_relays_selectLabel": "{count, plural, =0{Select Relays} =1{Selected One Relay} other{Selected {count} Relays}}",
   "@createTask_fields_relays_selectLabel": {
@@ -308,9 +308,9 @@
       }
     }
   },
-  "taskDetails_taskStatus": "Task Status",
-  "taskDetails_deleteTask": "Delete Task",
-  "taskDetails_deleteTask_confirm": "Are you sure you want to delete this task? This means that no more locations will be saved for this task. Existing locations will not be deleted.",
+  "taskDetails_taskStatus": "Share Status",
+  "taskDetails_deleteTask": "Delete Share",
+  "taskDetails_deleteTask_confirm": "Are you sure you want to delete this Share? This means that no more locations will be saved for this Share. Existing locations will not be deleted.",
   "taskDetails_locationDetails_createdAt_label": "Created At",
   "taskDetails_locationDetails_createdAt_value": "{date}",
   "@taskDetails_locationDetails_createdAt_value": {
@@ -503,7 +503,7 @@
   "honorableMentions_values_odysee_description": "Awesome YouTube alternative with better privacy and monetization options.",
   "honorableMentions_values_kleckRelay": "KleckRelay",
   "honorableMentions_values_kleckRelay_description": "An open source email relay service with tracker remover, image preloaders and much more. Created by me :)",
-  "quickActions_createOneHour": "Create One-Hour Task",
+  "quickActions_createOneHour": "Create One-Hour Share",
   "quickActions_createOneHour_labelFromNow": "One-Hour task from {date}",
   "@quickActions_createOneHour_labelFromNow": {
     "placeholders": {
@@ -515,10 +515,10 @@
     }
   },
   "quickActions_shareNow": "Update Location now",
-  "quickActions_stopTasks": "Stop all Tasks",
+  "quickActions_stopTasks": "Stop all Shares",
   "quickActions_generationExplanation": "Hold on, we are working on it!",
   "appHint_quickActions_title": "Check out Quick Actions",
-  "appHint_quickActions_description": "You can quickly create a new task or update your location by long pressing the Locus icon on your home screen.",
+  "appHint_quickActions_description": "You can quickly create a new Share or update your location by long pressing the Locus icon on your home screen.",
   "appHint_defaultRelays_title": "Add default Relays",
   "appHint_defaultRelays_description": "You can add default relays in the settings. This will automatically select them when creating a new task.",
   "appHint_appColor_title": "Change App Colors",
@@ -545,9 +545,9 @@
       }
     }
   },
-  "logs_values_taskCreated": "Task created",
-  "logs_values_taskDeleted": "Task deleted",
-  "logs_values_taskStatusChanged": "Task status changed",
+  "logs_values_taskCreated": "Share created",
+  "logs_values_taskDeleted": "Share deleted",
+  "logs_values_taskStatusChanged": "Share status changed",
   "logs_values_updatedLocation": "Location updated",
   "logs_values_alarmCreated": "Alarm added",
   "logs_values_alarmDeleted": "Alarm removed",
@@ -602,7 +602,7 @@
     }
   },
   "logs_system_initiator_description": "This log was created by the system",
-  "logs_task_creationContext_description": "{context, select, inApp{Task created inside the App} quickAction{Task created via Quick Action} other{Unknown error occurred}}",
+  "logs_task_creationContext_description": "{context, select, inApp{Share created inside the App} quickAction{Share created via Quick Action} other{Unknown error occurred}}",
   "logs_title": "Locus automatically creates logs",
   "logs_description": "Logs are kept for 7 days and are automatically deleted afterwards.",
   "locationPointsScreen_title": "Location Points",
@@ -770,6 +770,5 @@
     }
   },
   "locations_values_batteryState_description": "Battery state",
-  "locations_values_batteryState_value": "{state, select, full {full} charging {charging} discharging {discharging} other {unknown}}",
-  "importTask_title": "Import task"
+  "locations_values_batteryState_value": "{state, select, full {full} charging {charging} discharging {discharging} other {unknown}}"
 }
