@@ -13,7 +13,10 @@ enum LocationMethod {
 
 const TIMEOUT_DURATION = Duration(minutes: 1);
 
-Future<Position?> _getLocationUsingMethod(final LocationMethod method) async {
+Future<Position?> _getLocationUsingMethod(
+  final LocationMethod method, [
+  final Duration timeout = TIMEOUT_DURATION,
+]) async {
   FlutterLogs.logInfo(
     LOG_TAG,
     "Get Location",
@@ -26,28 +29,28 @@ Future<Position?> _getLocationUsingMethod(final LocationMethod method) async {
         final result = await Geolocator.getCurrentPosition(
           desiredAccuracy: LocationAccuracy.best,
           forceAndroidLocationManager: false,
-          timeLimit: TIMEOUT_DURATION,
+          timeLimit: timeout,
         );
         return result;
       case LocationMethod.worst:
         final result = await Geolocator.getCurrentPosition(
           desiredAccuracy: LocationAccuracy.lowest,
           forceAndroidLocationManager: false,
-          timeLimit: TIMEOUT_DURATION,
+          timeLimit: timeout,
         );
         return result;
       case LocationMethod.androidLocationManagerBest:
         final result = await Geolocator.getCurrentPosition(
           desiredAccuracy: LocationAccuracy.best,
           forceAndroidLocationManager: true,
-          timeLimit: TIMEOUT_DURATION,
+          timeLimit: timeout,
         );
         return result;
       case LocationMethod.androidLocationManagerWorst:
         final result = await Geolocator.getCurrentPosition(
           desiredAccuracy: LocationAccuracy.low,
           forceAndroidLocationManager: true,
-          timeLimit: TIMEOUT_DURATION,
+          timeLimit: timeout,
         );
         return result;
     }
@@ -63,13 +66,20 @@ Future<Position?> _getLocationUsingMethod(final LocationMethod method) async {
 
 Future<Position> getCurrentPosition({
   final void Function(LocationMethod)? onMethodCheck,
+  final List<Duration> timeouts = const [
+    Duration(seconds: 5),
+    TIMEOUT_DURATION,
+    Duration(minutes: 3)
+  ],
 }) async {
-  for (final method in LocationMethod.values) {
-    onMethodCheck?.call(method);
+  for (final timeout in timeouts) {
+    for (final method in LocationMethod.values) {
+      onMethodCheck?.call(method);
 
-    final position = await _getLocationUsingMethod(method);
-    if (position != null) {
-      return position;
+      final position = await _getLocationUsingMethod(method, timeout);
+      if (position != null) {
+        return position;
+      }
     }
   }
 
