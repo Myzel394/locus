@@ -20,6 +20,7 @@ import 'package:locus/screens/SettingsScreen.dart';
 import 'package:locus/screens/SharesOverviewScreen.dart';
 import 'package:locus/screens/locations_overview_screen_widgets/ActiveSharesSheet.dart';
 import 'package:locus/screens/locations_overview_screen_widgets/ShareLocationSheet.dart';
+import 'package:locus/screens/shares_overview_screen_widgets/UpdateAvailableBanner.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:locus/utils/location.dart';
