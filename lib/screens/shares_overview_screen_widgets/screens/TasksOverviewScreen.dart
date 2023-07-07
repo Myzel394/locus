@@ -39,7 +39,6 @@ class _TasksOverviewScreenState extends State<TasksOverviewScreen>
     super.build(context);
 
     final l10n = AppLocalizations.of(context);
-    final appUpdateService = context.watch<AppUpdateService>();
     final taskService = context.watch<TaskService>();
     final viewService = context.watch<ViewService>();
     final settings = context.watch<SettingsService>();
@@ -52,9 +51,6 @@ class _TasksOverviewScreenState extends State<TasksOverviewScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            appUpdateService.shouldShowBanner()
-                ? const UpdateAvailableBanner()
-                : const SizedBox.shrink(),
             FutureBuilder<HintType?>(
               future: _hintTypeFuture,
               builder: (context, snapshot) {
