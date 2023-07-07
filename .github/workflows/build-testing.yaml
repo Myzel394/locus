@@ -15,7 +15,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: 'adopt'
-          java-version: "17.x"
+          java-version: "11.x"
           cache: 'gradle'
 
       - name: Setup Flutter 📱
