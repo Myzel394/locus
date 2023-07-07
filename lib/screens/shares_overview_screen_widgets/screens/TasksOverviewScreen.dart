@@ -12,11 +12,9 @@ import 'package:locus/services/task_service.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:locus/widgets/AppHint.dart';
 import 'package:locus/widgets/ChipCaption.dart';
-import 'package:locus/widgets/Paper.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../ImportTask.dart';
 import '../TaskTile.dart';
 import '../UpdateAvailableBanner.dart';
 import '../ViewTile.dart';
