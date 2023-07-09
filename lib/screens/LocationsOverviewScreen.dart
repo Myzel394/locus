@@ -58,11 +58,9 @@ enum LocationStatus {
   fetching,
 }
 
-// This is the assumed width (plus some margin) of the FAB.
-// When this width is reached, the ActiveSharesSheet should trigger.
-// 56.0 = FAB width
-// 32.0 = Margin
-const FAB_TRIGGER_WIDTH = 56.0 + 80.0;
+// Based of https://m3.material.io/components/floating-action-button/specs
+const FAB_SIZE = 56.0;
+const FAB_MARGIN = 16.0;
 
 class LocationFetcher extends ChangeNotifier {
   final Iterable<TaskView> views;
@@ -861,6 +859,10 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
   Widget buildBar() {
     final viewService = context.watch<ViewService>();
 
+    if (viewService.views.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
     return Positioned(
       left: MEDIUM_SPACE,
       right: MEDIUM_SPACE,
@@ -873,64 +875,46 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              if (viewService.views.length > 1)
-                Expanded(
-                  flex: 4,
-                  child: Paper(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: MEDIUM_SPACE,
-                      vertical: SMALL_SPACE,
-                    ),
-                    child: DropdownButton<String?>(
-                      isDense: true,
-                      value: selectedViewID,
-                      onChanged: (selection) {
-                        if (selection == null) {
-                          setState(() {
-                            showFAB = true;
-                            selectedViewID = null;
-                          });
-                          return;
-                        }
-
-                        final view = viewService.views.firstWhere(
-                          (view) => view.id == selection,
-                        );
-
-                        showViewLocations(view);
-                      },
-                      underline: Container(),
-                      alignment: Alignment.center,
-                      isExpanded: true,
-                      items: [
-                        DropdownMenuItem(
-                          value: null,
-                          child: buildViewTile(null),
-                        ),
-                        for (final view in viewService.views) ...[
-                          DropdownMenuItem(
-                            value: view.id,
-                            child: buildViewTile(view),
-                          ),
-                        ],
-                      ],
-                    ),
+              Expanded(
+                flex: 4,
+                child: Paper(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: MEDIUM_SPACE,
+                    vertical: SMALL_SPACE,
                   ),
-                ),
-              Flexible(
-                child: SizedBox.square(
-                  dimension: 50,
-                  child: Center(
-                    child: Paper(
-                      width: null,
-                      borderRadius: BorderRadius.circular(HUGE_SPACE),
-                      padding: EdgeInsets.zero,
-                      child: PlatformIconButton(
-                        icon: const Icon(Icons.my_location),
-                        onPressed: () =>
-                            goToCurrentPosition(askPermissions: true),
+                  child: DropdownButton<String?>(
+                    isDense: true,
+                    value: selectedViewID,
+                    onChanged: (selection) {
+                      if (selection == null) {
+                        setState(() {
+                          showFAB = true;
+                          selectedViewID = null;
+                        });
+                        return;
+                      }
+
+                      final view = viewService.views.firstWhere(
+                        (view) => view.id == selection,
+                      );
+
+                      showViewLocations(view);
+                    },
+                    underline: Container(),
+                    alignment: Alignment.center,
+                    isExpanded: true,
+                    items: [
+                      DropdownMenuItem(
+                        value: null,
+                        child: buildViewTile(null),
                       ),
-                    ),
+                      for (final view in viewService.views) ...[
+                        DropdownMenuItem(
+                          value: view.id,
+                          child: buildViewTile(view),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
               ),
@@ -1000,6 +984,31 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
       context,
       l10n.linkCopiedToClipboard,
       type: MessageType.success,
+    );
+  }
+
+  Widget buildMapActions() {
+    const dimension = 50;
+    const diff = FAB_SIZE - dimension;
+
+    return Positioned(
+      // Add half the difference to center the button
+      right: FAB_MARGIN + diff / 2,
+      bottom: FAB_SIZE + FAB_MARGIN + SMALL_SPACE,
+      child: SizedBox.square(
+        dimension: 50,
+        child: Center(
+          child: Paper(
+            width: null,
+            borderRadius: BorderRadius.circular(HUGE_SPACE),
+            padding: EdgeInsets.zero,
+            child: PlatformIconButton(
+              icon: const Icon(Icons.my_location),
+              onPressed: () => goToCurrentPosition(askPermissions: true),
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -1088,6 +1097,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
         children: <Widget>[
           buildMap(),
           buildBar(),
+          buildMapActions(),
           ViewDetailsSheet(
             view: selectedView,
             lastLocation: lastLocation,
