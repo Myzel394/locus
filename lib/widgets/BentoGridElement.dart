@@ -51,7 +51,7 @@ class _BentoGridElementState extends State<BentoGridElement> {
         BentoType.tertiary: data.colorScheme.tertiaryContainer,
         BentoType.disabled: data.disabledColor,
       }[widget.type]!,
-      cupertino: (data) => data.primaryColor,
+      cupertino: (data) => data.primaryColor.withOpacity(.2),
     );
   }
 
@@ -84,7 +84,7 @@ class _BentoGridElementState extends State<BentoGridElement> {
         BentoType.tertiary: data.textTheme.bodySmall!.color!,
         BentoType.disabled: data.disabledColor,
       }[widget.type]!,
-      cupertino: (data) => data.textTheme.tabLabelTextStyle.color!,
+      cupertino: (data) => data.primaryColor,
     );
   }
 
