@@ -70,12 +70,6 @@ class _BentoGridElementState extends State<BentoGridElement> {
   }
 
   Color getDescriptionColor(final BuildContext context) {
-    final settings = context.read<SettingsService>();
-
-    if (settings.primaryColor != null) {
-      return settings.primaryColor!.withOpacity(.8);
-    }
-
     return platformThemeData(
       context,
       material: (data) => {
@@ -84,7 +78,7 @@ class _BentoGridElementState extends State<BentoGridElement> {
         BentoType.tertiary: data.textTheme.bodySmall!.color!,
         BentoType.disabled: data.disabledColor,
       }[widget.type]!,
-      cupertino: (data) => data.primaryColor,
+      cupertino: (data) => data.textTheme.navTitleTextStyle.color!,
     );
   }
 
