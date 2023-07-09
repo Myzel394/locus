@@ -171,10 +171,16 @@ class Task extends ChangeNotifier with LocationBase {
 
   DateTime? nextEndDate() => findNextEndDate(timers);
 
-  bool isInfinite() => timers.any((timer) => timer.isInfinite());
+  bool isInfinite() =>
+      timers.any((timer) => timer.isInfinite()) || timers.isEmpty;
 
   Future<bool> shouldRunNow() async {
     final executionStatus = await getExecutionStatus();
+
+    if (timers.isEmpty) {
+      return executionStatus != null;
+    }
+
     final shouldRunNowBasedOnTimers =
     timers.any((timer) => timer.shouldRun(DateTime.now()));
 
@@ -522,53 +528,36 @@ class TaskService extends ChangeNotifier {
   Future<void> checkup(final LogService logService) async {
     FlutterLogs.logInfo(LOG_TAG, "Task Service", "Doing checkup...");
 
+    final tasksToRemove = <Task>{};
+
     for (final task in tasks) {
-      if (!task.isInfinite() && task.nextEndDate() == null) {
+      if ((!task.isInfinite() && task.nextEndDate() == null) ||
+          (task.deleteAfterRun &&
+              !task.isInfinite() &&
+              task.timers.isNotEmpty)) {
         FlutterLogs.logInfo(LOG_TAG, "Task Service", "Removing task.");
-        // Delete task
-        remove(task);
-        await save();
+
+        tasksToRemove.add(task);
+      } else if (!(await task.shouldRunNow())) {
+        FlutterLogs.logInfo(LOG_TAG, "Task Service", "Stopping task.");
+        await task.stopExecutionImmediately();
 
         await logService.addLog(
-          Log.deleteTask(
+          Log.taskStatusChanged(
             initiator: LogInitiator.system,
+            taskId: task.id,
             taskName: task.name,
+            active: false,
           ),
         );
-      } else if (!(await task.shouldRunNow())) {
-        if (task.deleteAfterRun &&
-            !task.isInfinite() &&
-            task.timers.isNotEmpty) {
-          FlutterLogs.logInfo(
-            LOG_TAG,
-            "Task Service",
-            "Task should be deleted after run. Deleting now.",
-          );
-
-          remove(task);
-          await save();
-
-          await logService.addLog(
-            Log.deleteTask(
-              initiator: LogInitiator.system,
-              taskName: task.name,
-            ),
-          );
-        } else {
-          FlutterLogs.logInfo(LOG_TAG, "Task Service", "Stopping task.");
-          await task.stopExecutionImmediately();
-
-          await logService.addLog(
-            Log.taskStatusChanged(
-              initiator: LogInitiator.system,
-              taskId: task.id,
-              taskName: task.name,
-              active: false,
-            ),
-          );
-        }
       }
     }
+
+    for (final task in tasksToRemove) {
+      remove(task);
+    }
+
+    await save();
 
     FlutterLogs.logInfo(LOG_TAG, "Task Service", "Checkup done.");
   }
