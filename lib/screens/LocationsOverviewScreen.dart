@@ -967,7 +967,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     );
   }
 
-  Widget buildBar() {
+  Widget buildViewsSelection() {
     final settings = context.watch<SettingsService>();
     final viewService = context.watch<ViewService>();
 
@@ -1033,7 +1033,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
           child: SizedBox.square(
             dimension: 35.0,
             child: CupertinoButton(
-              color: getSheetColor(context),
+              color: Colors.white,
               padding: EdgeInsets.zero,
               onPressed: () {
                 showCupertinoModalPopup(
@@ -1301,7 +1301,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
       body: Stack(
         children: <Widget>[
           buildMap(),
-          buildBar(),
+          buildViewsSelection(),
           buildMapActions(),
           ViewDetailsSheet(
             view: selectedView,
