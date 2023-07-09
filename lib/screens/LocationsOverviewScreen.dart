@@ -927,6 +927,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
               latestLocation.latitude,
               latestLocation.longitude,
             ),
+            zoom: (await appleMapController!.getZoomLevel()) ?? 13.0,
           ),
         ),
       );
@@ -967,68 +968,116 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
   }
 
   Widget buildBar() {
+    final settings = context.watch<SettingsService>();
     final viewService = context.watch<ViewService>();
 
     if (viewService.views.isEmpty) {
       return const SizedBox.shrink();
     }
 
-    return Positioned(
-      left: MEDIUM_SPACE,
-      right: MEDIUM_SPACE,
-      top: SMALL_SPACE,
-      child: SafeArea(
-        bottom: false,
-        child: Center(
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Expanded(
-                flex: 4,
-                child: Paper(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: MEDIUM_SPACE,
-                    vertical: SMALL_SPACE,
-                  ),
-                  child: DropdownButton<String?>(
-                    isDense: true,
-                    value: selectedViewID,
-                    onChanged: (selection) {
-                      if (selection == null) {
-                        setState(() {
-                          showFAB = true;
-                          selectedViewID = null;
-                        });
-                        return;
-                      }
-
-                      final view = viewService.views.firstWhere(
-                        (view) => view.id == selection,
-                      );
-
-                      showViewLocations(view);
-                    },
-                    underline: Container(),
-                    alignment: Alignment.center,
-                    isExpanded: true,
-                    items: [
-                      DropdownMenuItem(
-                        value: null,
-                        child: buildViewTile(null),
-                      ),
-                      for (final view in viewService.views) ...[
-                        DropdownMenuItem(
-                          value: view.id,
-                          child: buildViewTile(view),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
+    return PlatformWidget(
+      material: (context, _) => Positioned(
+        left: MEDIUM_SPACE,
+        right: MEDIUM_SPACE,
+        top: isCupertino(context) ? LARGE_SPACE : SMALL_SPACE,
+        child: SafeArea(
+          bottom: false,
+          child: Center(
+            child: Paper(
+              padding: const EdgeInsets.symmetric(
+                horizontal: MEDIUM_SPACE,
+                vertical: SMALL_SPACE,
               ),
-            ],
+              child: DropdownButton<String?>(
+                isDense: true,
+                value: selectedViewID,
+                onChanged: (selection) {
+                  if (selection == null) {
+                    setState(() {
+                      showFAB = true;
+                      selectedViewID = null;
+                    });
+                    return;
+                  }
+
+                  final view = viewService.views.firstWhere(
+                    (view) => view.id == selection,
+                  );
+
+                  showViewLocations(view);
+                },
+                underline: Container(),
+                alignment: Alignment.center,
+                isExpanded: true,
+                items: [
+                  DropdownMenuItem(
+                    value: null,
+                    child: buildViewTile(null),
+                  ),
+                  for (final view in viewService.views) ...[
+                    DropdownMenuItem(
+                      value: view.id,
+                      child: buildViewTile(view),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+      cupertino: (context, _) => Positioned(
+        top: 100.0,
+        right: 5.0,
+        child: Center(
+          child: SizedBox.square(
+            dimension: 35.0,
+            child: CupertinoButton(
+              color: getSheetColor(context),
+              padding: EdgeInsets.zero,
+              onPressed: () {
+                showCupertinoModalPopup(
+                  context: context,
+                  barrierDismissible: true,
+                  builder: (cupertino) => CupertinoActionSheet(
+                    actions: createCancellableDialogActions(
+                      context,
+                      [
+                            CupertinoActionSheetAction(
+                              child: buildViewTile(null),
+                              onPressed: () {
+                                Navigator.pop(context);
+                                setState(() {
+                                  selectedViewID = null;
+                                });
+                              },
+                            )
+                          ] +
+                          viewService.views
+                              .map(
+                                (view) => CupertinoActionSheetAction(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                    showViewLocations(view);
+                                  },
+                                  child: buildViewTile(view),
+                                ),
+                              )
+                              .toList(),
+                    ),
+                  ),
+                );
+              },
+              child: selectedViewID == null
+                  ? Icon(
+                      Icons.location_on_rounded,
+                      color: settings.getPrimaryColor(context),
+                    )
+                  : Icon(
+                      Icons.circle_rounded,
+                      color: selectedView!.color,
+                    ),
+            ),
           ),
         ),
       ),
