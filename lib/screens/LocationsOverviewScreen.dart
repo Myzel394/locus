@@ -28,7 +28,9 @@ import 'package:locus/utils/show_message.dart';
 import 'package:locus/widgets/FABOpenContainer.dart';
 import 'package:locus/widgets/ModalSheet.dart';
 import 'package:locus/widgets/Paper.dart';
+import 'package:locus/widgets/PlatformFlavorWidget.dart';
 import 'package:map_launcher/map_launcher.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -165,9 +167,15 @@ class LocationsOverviewScreen extends StatefulWidget {
 }
 
 class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
-    with AutomaticKeepAliveClientMixin, WidgetsBindingObserver {
+    with
+        AutomaticKeepAliveClientMixin,
+        WidgetsBindingObserver,
+        TickerProviderStateMixin {
   late final LocationFetcher _fetchers;
   final MapController flutterMapController = MapController();
+
+  late final AnimationController rotationController;
+  late Animation<double> rotationAnimation;
 
   bool showFAB = true;
 
@@ -235,6 +243,24 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     BackgroundFetch.start();
     _handleViewAlarmChecker();
     _handleNotifications();
+
+    flutterMapController.mapEventStream.listen((event) {
+      if (event is MapEventRotate) {
+        print((event.targetRotation % 360) / 360);
+
+        rotationController.animateTo(
+          ((event.targetRotation % 360) / 360),
+          duration: Duration.zero,
+        );
+      }
+    });
+
+    rotationController =
+        AnimationController(vsync: this, duration: Duration.zero);
+    rotationAnimation = Tween<double>(
+      begin: 0,
+      end: 2 * pi,
+    ).animate(rotationController);
   }
 
   @override
@@ -995,19 +1021,52 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
       // Add half the difference to center the button
       right: FAB_MARGIN + diff / 2,
       bottom: FAB_SIZE + FAB_MARGIN + SMALL_SPACE,
-      child: SizedBox.square(
-        dimension: 50,
-        child: Center(
-          child: Paper(
-            width: null,
-            borderRadius: BorderRadius.circular(HUGE_SPACE),
-            padding: EdgeInsets.zero,
-            child: PlatformIconButton(
-              icon: const Icon(Icons.my_location),
-              onPressed: () => goToCurrentPosition(askPermissions: true),
+      child: Column(
+        children: [
+          SizedBox.square(
+            dimension: 50,
+            child: Center(
+              child: Paper(
+                width: null,
+                borderRadius: BorderRadius.circular(HUGE_SPACE),
+                padding: EdgeInsets.zero,
+                child: PlatformIconButton(
+                  icon: AnimatedBuilder(
+                    animation: rotationAnimation,
+                    builder: (context, child) => Transform.rotate(
+                      angle: rotationAnimation.value,
+                      child: child,
+                    ),
+                    child: PlatformFlavorWidget(
+                      material: (context, _) => Transform.rotate(
+                        angle: -pi / 4,
+                        child: const Icon(MdiIcons.compass),
+                      ),
+                      cupertino: (context, _) =>
+                          const Icon(CupertinoIcons.location_north_fill),
+                    ),
+                  ),
+                  onPressed: () => goToCurrentPosition(askPermissions: true),
+                ),
+              ),
             ),
           ),
-        ),
+          const SizedBox(height: SMALL_SPACE),
+          SizedBox.square(
+            dimension: 50,
+            child: Center(
+              child: Paper(
+                width: null,
+                borderRadius: BorderRadius.circular(HUGE_SPACE),
+                padding: EdgeInsets.zero,
+                child: PlatformIconButton(
+                  icon: const Icon(Icons.my_location),
+                  onPressed: () => goToCurrentPosition(askPermissions: true),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
