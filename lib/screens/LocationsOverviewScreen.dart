@@ -178,6 +178,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
   late Animation<double> rotationAnimation;
 
   bool showFAB = true;
+  bool isNorth = true;
 
   Stream<Position>? _positionStream;
 
@@ -246,12 +247,14 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
 
     flutterMapController.mapEventStream.listen((event) {
       if (event is MapEventRotate) {
-        print((event.targetRotation % 360) / 360);
-
         rotationController.animateTo(
           ((event.targetRotation % 360) / 360),
           duration: Duration.zero,
         );
+
+        setState(() {
+          isNorth = (event.targetRotation % 360).abs() < 1;
+        });
       }
     });
 
@@ -1017,6 +1020,8 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     const dimension = 50;
     const diff = FAB_SIZE - dimension;
 
+    final shades = getPrimaryColorShades(context);
+
     return Positioned(
       // Add half the difference to center the button
       right: FAB_MARGIN + diff / 2,
@@ -1031,6 +1036,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
                 borderRadius: BorderRadius.circular(HUGE_SPACE),
                 padding: EdgeInsets.zero,
                 child: PlatformIconButton(
+                  color: isNorth ? shades[200] : shades[400],
                   icon: AnimatedBuilder(
                     animation: rotationAnimation,
                     builder: (context, child) => Transform.rotate(
@@ -1046,7 +1052,9 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
                           const Icon(CupertinoIcons.location_north_fill),
                     ),
                   ),
-                  onPressed: () => goToCurrentPosition(askPermissions: true),
+                  onPressed: () {
+                    flutterMapController.rotate(0);
+                  },
                 ),
               ),
             ),
@@ -1060,6 +1068,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
                 borderRadius: BorderRadius.circular(HUGE_SPACE),
                 padding: EdgeInsets.zero,
                 child: PlatformIconButton(
+                  color: shades[400],
                   icon: const Icon(Icons.my_location),
                   onPressed: () => goToCurrentPosition(askPermissions: true),
                 ),
