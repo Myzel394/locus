@@ -1,15 +1,11 @@
 import 'dart:collection';
 import 'dart:convert';
-import 'dart:math';
 
 import 'package:cryptography/cryptography.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:geocoding/geocoding.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:locus/api/nostr-events.dart';
-import 'package:locus/constants/app.dart';
 import 'package:locus/constants/values.dart';
 import 'package:locus/models/log.dart';
 import 'package:locus/services/location_base.dart';
@@ -102,11 +98,12 @@ class Task extends ChangeNotifier with LocationBase {
     };
   }
 
-  static Future<Task> create(final String name,
-      final List<String> relays, {
-        List<TaskRuntimeTimer> timers = const [],
-        bool deleteAfterRun = false,
-      }) async {
+  static Future<Task> create(
+    final String name,
+    final List<String> relays, {
+    List<TaskRuntimeTimer> timers = const [],
+    bool deleteAfterRun = false,
+  }) async {
     FlutterLogs.logInfo(
       LOG_TAG,
       "Task",
@@ -119,9 +116,7 @@ class Task extends ChangeNotifier with LocationBase {
       id: uuid.v4(),
       name: name,
       encryptionPassword: secretKey,
-      nostrPrivateKey: Keychain
-          .generate()
-          .private,
+      nostrPrivateKey: Keychain.generate().private,
       relays: relays,
       createdAt: DateTime.now(),
       timers: timers,
@@ -182,7 +177,7 @@ class Task extends ChangeNotifier with LocationBase {
     }
 
     final shouldRunNowBasedOnTimers =
-    timers.any((timer) => timer.shouldRun(DateTime.now()));
+        timers.any((timer) => timer.shouldRun(DateTime.now()));
 
     if (shouldRunNowBasedOnTimers) {
       return true;
@@ -250,7 +245,7 @@ class Task extends ChangeNotifier with LocationBase {
   Future<DateTime?> startScheduleTomorrow() {
     final tomorrow = DateTime.now().add(const Duration(days: 1));
     final nextDate =
-    DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 6, 0, 0);
+        DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 6, 0, 0);
 
     return startSchedule(startDate: nextDate);
   }
@@ -355,7 +350,8 @@ class Task extends ChangeNotifier with LocationBase {
   // 2. Encrypt the task with the password
   // 3. Publish the encrypted task to a random Nostr relay
   // 4. Generate a link that contains the password and the Nostr relay ID
-  Future<String> generateLink(final String host, {
+  Future<String> generateLink(
+    final String host, {
     final void Function(TaskLinkPublishProgress progress)? onProgress,
   }) async {
     onProgress?.call(TaskLinkPublishProgress.startsSoon);
@@ -404,7 +400,8 @@ class Task extends ChangeNotifier with LocationBase {
   }
 
   Future<void> publishLocation(
-      final LocationPointService locationPoint,) async {
+    final LocationPointService locationPoint,
+  ) async {
     final eventManager = NostrEventsManager.fromTask(this);
 
     final rawMessage = jsonEncode(locationPoint.toJSON());
@@ -485,7 +482,7 @@ class TaskService extends ChangeNotifier {
     // await all `toJson` functions
     final data = await Future.wait<Map<String, dynamic>>(
       _tasks.map(
-            (task) => task.toJSON(),
+        (task) => task.toJSON(),
       ),
     );
 
@@ -534,11 +531,12 @@ class TaskService extends ChangeNotifier {
       if ((!task.isInfinite() && task.nextEndDate() == null) ||
           (task.deleteAfterRun &&
               !task.isInfinite() &&
-              task.timers.isNotEmpty)) {
+              task.timers.isNotEmpty &&
+              !(await task.shouldRunNow()))) {
         FlutterLogs.logInfo(LOG_TAG, "Task Service", "Removing task.");
 
         tasksToRemove.add(task);
-      } else if (!(await task.shouldRunNow())) {
+      } else if (!(await task.shouldRunNow()) && await task.isRunning()) {
         FlutterLogs.logInfo(LOG_TAG, "Task Service", "Stopping task.");
         await task.stopExecutionImmediately();
 
@@ -601,14 +599,14 @@ DateTime? findNextStartDate(final List<TaskRuntimeTimer> timers,
   return nextDates.first;
 }
 
-DateTime? findNextEndDate(final List<TaskRuntimeTimer> timers, {
+DateTime? findNextEndDate(
+  final List<TaskRuntimeTimer> timers, {
   final DateTime? startDate,
 }) {
   final now = startDate ?? DateTime.now();
   final nextDates = List<DateTime>.from(
     timers.map((timer) => timer.nextEndDate(now)).where((date) => date != null),
-  )
-    ..sort();
+  )..sort();
 
   if (nextDates.isEmpty) {
     return null;
@@ -619,10 +617,7 @@ DateTime? findNextEndDate(final List<TaskRuntimeTimer> timers, {
   for (final date in nextDates.sublist(1)) {
     final nextStartDate = findNextStartDate(timers, startDate: date);
     if (nextStartDate == null ||
-        nextStartDate
-            .difference(date)
-            .inMinutes
-            .abs() > 15) {
+        nextStartDate.difference(date).inMinutes.abs() > 15) {
       // No next start date found or the difference is more than 15 minutes, so this is the last date
       break;
     }

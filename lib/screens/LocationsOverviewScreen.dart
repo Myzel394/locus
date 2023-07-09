@@ -970,6 +970,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
   Widget buildViewsSelection() {
     final settings = context.watch<SettingsService>();
     final viewService = context.watch<ViewService>();
+    final l10n = AppLocalizations.of(context);
 
     if (viewService.views.isEmpty) {
       return const SizedBox.shrink();
@@ -1040,31 +1041,40 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
                   context: context,
                   barrierDismissible: true,
                   builder: (cupertino) => CupertinoActionSheet(
-                    actions: createCancellableDialogActions(
-                      context,
-                      [
-                            CupertinoActionSheetAction(
-                              child: buildViewTile(null),
-                              onPressed: () {
-                                Navigator.pop(context);
-                                setState(() {
-                                  selectedViewID = null;
-                                });
-                              },
-                            )
-                          ] +
-                          viewService.views
-                              .map(
-                                (view) => CupertinoActionSheetAction(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                    showViewLocations(view);
-                                  },
-                                  child: buildViewTile(view),
-                                ),
-                              )
-                              .toList(),
+                    cancelButton: CupertinoActionSheetAction(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: Text(l10n.cancelLabel),
                     ),
+                    actions: [
+                          CupertinoActionSheetAction(
+                            child: buildViewTile(
+                              null,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                            ),
+                            onPressed: () {
+                              Navigator.pop(context);
+                              setState(() {
+                                selectedViewID = null;
+                              });
+                            },
+                          )
+                        ] +
+                        viewService.views
+                            .map(
+                              (view) => CupertinoActionSheetAction(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  showViewLocations(view);
+                                },
+                                child: buildViewTile(
+                                  view,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                ),
+                              ),
+                            )
+                            .toList(),
                   ),
                 );
               },
@@ -1350,56 +1360,56 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
                 context: context,
                 barrierDismissible: true,
                 builder: (cupertino) => CupertinoActionSheet(
-                  actions: createCancellableDialogActions(
-                    context,
-                    [
-                      CupertinoActionSheetAction(
-                        onPressed: withPopNavigation(
-                            createNewQuickLocationShare)(context),
-                        child: CupertinoListTile(
-                          leading: const Icon(Icons.share_location_rounded),
-                          title: Text(l10n.shareLocation_title),
-                        ),
-                      ),
-                      CupertinoActionSheetAction(
-                        onPressed: withPopNavigation(importLocation)(context),
-                        child: CupertinoListTile(
-                          leading:
-                              const Icon(CupertinoIcons.square_arrow_down_fill),
-                          title: Text(l10n
-                              .sharesOverviewScreen_importTask_action_import),
-                        ),
-                      ),
-                      CupertinoActionSheetAction(
-                        onPressed: () {
-                          Navigator.pop(context);
-
-                          Navigator.push(
-                            context,
-                            MaterialWithModalsPageRoute(
-                              builder: (context) =>
-                                  const SharesOverviewScreen(),
-                            ),
-                          );
-                        },
-                        child: CupertinoListTile(
-                          leading: const Icon(CupertinoIcons.list_bullet),
-                          title: Text(l10n.sharesOverviewScreen_title),
-                        ),
-                      ),
-                      CupertinoActionSheetAction(
-                        onPressed: () {
-                          Navigator.pop(context);
-
-                          showSettings(context);
-                        },
-                        child: CupertinoListTile(
-                          leading: Icon(context.platformIcons.settings),
-                          title: Text(l10n.settingsScreen_title),
-                        ),
-                      ),
-                    ],
+                  cancelButton: CupertinoActionSheetAction(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(l10n.cancelLabel),
                   ),
+                  actions: [
+                    CupertinoActionSheetAction(
+                      onPressed: withPopNavigation(createNewQuickLocationShare)(
+                          context),
+                      child: CupertinoListTile(
+                        leading: const Icon(Icons.share_location_rounded),
+                        title: Text(l10n.shareLocation_title),
+                      ),
+                    ),
+                    CupertinoActionSheetAction(
+                      onPressed: withPopNavigation(importLocation)(context),
+                      child: CupertinoListTile(
+                        leading:
+                            const Icon(CupertinoIcons.square_arrow_down_fill),
+                        title: Text(
+                            l10n.sharesOverviewScreen_importTask_action_import),
+                      ),
+                    ),
+                    CupertinoActionSheetAction(
+                      onPressed: () {
+                        Navigator.pop(context);
+
+                        Navigator.push(
+                          context,
+                          MaterialWithModalsPageRoute(
+                            builder: (context) => const SharesOverviewScreen(),
+                          ),
+                        );
+                      },
+                      child: CupertinoListTile(
+                        leading: const Icon(CupertinoIcons.list_bullet),
+                        title: Text(l10n.sharesOverviewScreen_title),
+                      ),
+                    ),
+                    CupertinoActionSheetAction(
+                      onPressed: () {
+                        Navigator.pop(context);
+
+                        showSettings(context);
+                      },
+                      child: CupertinoListTile(
+                        leading: Icon(context.platformIcons.settings),
+                        title: Text(l10n.settingsScreen_title),
+                      ),
+                    ),
+                  ],
                 ),
               );
             },

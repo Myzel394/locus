@@ -488,33 +488,34 @@ class _ActiveSharesSheetState extends State<ActiveSharesSheet>
         _buildTitle(),
         const SizedBox(height: MEDIUM_SPACE),
         FutureBuilder<bool>(
-            future: getAreAllTasksRunning(),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                final isRunning = snapshot.data as bool;
+          future: getAreAllTasksRunning(),
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              final isRunning = snapshot.data as bool;
 
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    Flexible(
-                      child: Padding(
-                        padding: const EdgeInsets.all(SMALL_SPACE),
-                        child: _buildShareLocationButton(isRunning),
-                      ),
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Flexible(
+                    child: Padding(
+                      padding: const EdgeInsets.all(SMALL_SPACE),
+                      child: _buildShareLocationButton(isRunning),
                     ),
-                    Flexible(
-                      child: Padding(
-                        padding: const EdgeInsets.all(SMALL_SPACE),
-                        child: _buildToggleTasksStatusButton(isRunning),
-                      ),
+                  ),
+                  Flexible(
+                    child: Padding(
+                      padding: const EdgeInsets.all(SMALL_SPACE),
+                      child: _buildToggleTasksStatusButton(isRunning),
                     ),
-                  ],
-                );
-              }
+                  ),
+                ],
+              );
+            }
 
-              return const SizedBox.shrink();
-            }),
+            return const SizedBox.shrink();
+          },
+        ),
         ListView.builder(
           itemCount: quickShareTasks.length,
           shrinkWrap: true,

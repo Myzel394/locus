@@ -124,7 +124,7 @@ class _EmptyScreenState extends State<EmptyScreen> {
                   const SizedBox(width: SMALL_SPACE),
                   PlatformElevatedButton(
                     onPressed: () async {
-                      ImportScreen initialScreen = ImportScreen.ask;
+                      ImportScreen? initialScreen;
 
                       if (isCupertino(context)) {
                         initialScreen = await showCupertinoModalPopup(
@@ -135,31 +135,40 @@ class _EmptyScreenState extends State<EmptyScreen> {
                                 .sharesOverviewScreen_importTask_action_import),
                             message: Text(l10n
                                 .sharesOverviewScreen_importTask_action_importMethod),
-                            actions: createCancellableDialogActions(
-                              context,
-                              [
-                                CupertinoActionSheetAction(
-                                  isDefaultAction: true,
-                                  onPressed: () {
-                                    Navigator.of(context)
-                                        .pop(ImportScreen.askURL);
-                                  },
-                                  child: Text(l10n
-                                      .sharesOverviewScreen_importTask_action_importMethod_url),
-                                ),
-                                CupertinoActionSheetAction(
-                                  isDefaultAction: true,
-                                  onPressed: () {
-                                    Navigator.of(context)
-                                        .pop(ImportScreen.importFile);
-                                  },
-                                  child: Text(l10n
-                                      .sharesOverviewScreen_importTask_action_importMethod_file),
-                                ),
-                              ],
+                            cancelButton: CupertinoActionSheetAction(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: Text(l10n.cancelLabel),
                             ),
+                            actions: [
+                              CupertinoActionSheetAction(
+                                isDefaultAction: true,
+                                onPressed: () {
+                                  Navigator.of(context)
+                                      .pop(ImportScreen.askURL);
+                                },
+                                child: Text(l10n
+                                    .sharesOverviewScreen_importTask_action_importMethod_url),
+                              ),
+                              CupertinoActionSheetAction(
+                                isDefaultAction: true,
+                                onPressed: () {
+                                  Navigator.of(context)
+                                      .pop(ImportScreen.importFile);
+                                },
+                                child: Text(l10n
+                                    .sharesOverviewScreen_importTask_action_importMethod_file),
+                              ),
+                            ],
                           ),
                         );
+                      } else {
+                        initialScreen = ImportScreen.ask;
+                      }
+
+                      if (initialScreen == null) {
+                        return;
                       }
 
                       if (!mounted) {
