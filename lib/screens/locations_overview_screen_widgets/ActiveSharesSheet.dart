@@ -1,5 +1,8 @@
+import 'dart:ui';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/values.dart';
@@ -8,14 +11,13 @@ import 'package:locus/utils/location.dart';
 import 'package:locus/widgets/PlatformFlavorWidget.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 
+import './TaskTile.dart';
 import '../../constants/spacing.dart';
 import '../../services/task_service.dart';
 import '../../utils/theme.dart';
 import '../../widgets/ModalSheet.dart';
-import './TaskTile.dart';
 
 const MIN_SIZE = 0.1;
 
@@ -25,6 +27,7 @@ class ActiveSharesSheet extends StatefulWidget {
   final VoidCallback onThresholdPassed;
   final bool visible;
   final VoidCallback onShareLocation;
+  final VoidCallback onOpenActionSheet;
 
   const ActiveSharesSheet({
     required this.visible,
@@ -32,6 +35,7 @@ class ActiveSharesSheet extends StatefulWidget {
     required this.onThresholdReached,
     required this.onThresholdPassed,
     required this.onShareLocation,
+    required this.onOpenActionSheet,
     super.key,
   });
 
@@ -45,7 +49,7 @@ class _ActiveSharesSheetState extends State<ActiveSharesSheet>
   final textKey = GlobalKey();
   final sheetController = DraggableScrollableController();
   late final AnimationController offsetController;
-  late Animation<Offset> offsetProgress;
+  late Animation<double> offsetProgress;
 
   bool isInitializing = true;
   bool isLocationPointerVisible = false;
@@ -56,6 +60,8 @@ class _ActiveSharesSheetState extends State<ActiveSharesSheet>
   bool _hasCalledThreshold = false;
   bool _hasCalledPassed = false;
 
+  double _xOffset = 0;
+
   @override
   void initState() {
     super.initState();
@@ -63,19 +69,19 @@ class _ActiveSharesSheetState extends State<ActiveSharesSheet>
     offsetController =
         AnimationController(vsync: this, duration: Duration.zero);
     // Dummy animation so first render can occur without any problems
-    offsetProgress = Tween<Offset>(
-      begin: const Offset(0, 0),
-      end: const Offset(0, 0),
+    offsetProgress = Tween<double>(
+      begin: 0,
+      end: 1,
     ).animate(offsetController);
 
     WidgetsBinding.instance.addPersistentFrameCallback((_) {
       final wrapperWidth = wrapperKey.currentContext!.size!.width;
       final textWidth = textKey.currentContext!.size!.width;
-      final xOffset = (wrapperWidth - textWidth) / 2;
+      _xOffset = (wrapperWidth - textWidth) / 2;
 
-      offsetProgress = Tween<Offset>(
-        begin: Offset(-xOffset, 0),
-        end: const Offset(0, 0),
+      offsetProgress = Tween<double>(
+        begin: 0,
+        end: 1,
       ).animate(
         CurvedAnimation(
           curve: Curves.linearToEaseOut,
@@ -160,7 +166,7 @@ class _ActiveSharesSheetState extends State<ActiveSharesSheet>
 
   Future<bool> getAreAllTasksRunning() async {
     final tasksRunning =
-    await Future.wait(quickShareTasks.map((task) => task.isRunning()));
+        await Future.wait(quickShareTasks.map((task) => task.isRunning()));
 
     return tasksRunning.every((isRunning) => isRunning);
   }
@@ -182,10 +188,9 @@ class _ActiveSharesSheetState extends State<ActiveSharesSheet>
 
       await Future.wait(
         quickShareTasks.map(
-              (task) =>
-              task.publishLocation(
-                locationData.copyWithDifferentId(),
-              ),
+          (task) => task.publishLocation(
+            locationData.copyWithDifferentId(),
+          ),
         ),
       );
 
@@ -198,8 +203,7 @@ class _ActiveSharesSheetState extends State<ActiveSharesSheet>
       FlutterLogs.logError(
         LOG_TAG,
         "ActiveSharesSheet",
-        "Error while updating location for ${quickShareTasks
-            .length} tasks: $error",
+        "Error while updating location for ${quickShareTasks.length} tasks: $error",
       );
     } finally {
       setState(() {
@@ -253,23 +257,15 @@ class _ActiveSharesSheetState extends State<ActiveSharesSheet>
     final shades = getPrimaryColorShades(context);
 
     return SizedBox(
-      height: MediaQuery
-          .of(context)
-          .size
-          .height - kToolbarHeight,
+      height: MediaQuery.of(context).size.height -
+          kToolbarHeight -
+          MediaQuery.of(context).viewPadding.top,
       child: Column(
         key: wrapperKey,
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            l10n.locationsOverview_activeShares_amount(
-              quickShareTasks.length,
-            ),
-            key: textKey,
-            style: getTitle2TextStyle(context),
-            textAlign: TextAlign.center,
-          ),
+          _buildTitle(),
           Column(
             children: [
               SizedBox(
@@ -315,10 +311,9 @@ class _ActiveSharesSheetState extends State<ActiveSharesSheet>
             ],
           ),
           PlatformElevatedButton(
-            material: (_, __) =>
-                MaterialElevatedButtonData(
-                  icon: const Icon(Icons.share_location_rounded),
-                ),
+            material: (_, __) => MaterialElevatedButtonData(
+              icon: const Icon(Icons.share_location_rounded),
+            ),
             onPressed: () {
               sheetController.animateTo(
                 MIN_SIZE,
@@ -363,13 +358,11 @@ class _ActiveSharesSheetState extends State<ActiveSharesSheet>
             if (allTasksRunning) {
               return <Widget>[
                 PlatformFlavorWidget(
-                  material: (_, __) =>
-                  const Icon(
+                  material: (_, __) => const Icon(
                     Icons.stop_circle_rounded,
                     size: 42,
                   ),
-                  cupertino: (_, __) =>
-                  const Icon(
+                  cupertino: (_, __) => const Icon(
                     CupertinoIcons.stop_circle_fill,
                     size: 42,
                   ),
@@ -384,13 +377,11 @@ class _ActiveSharesSheetState extends State<ActiveSharesSheet>
 
             return <Widget>[
               PlatformFlavorWidget(
-                material: (_, __) =>
-                const Icon(
+                material: (_, __) => const Icon(
                   Icons.play_circle_rounded,
                   size: 42,
                 ),
-                cupertino: (_, __) =>
-                const Icon(
+                cupertino: (_, __) => const Icon(
                   CupertinoIcons.play_circle_fill,
                   size: 42,
                 ),
@@ -428,13 +419,11 @@ class _ActiveSharesSheetState extends State<ActiveSharesSheet>
 
               if (!allTasksRunning) {
                 return PlatformFlavorWidget(
-                  material: (_, __) =>
-                  const Icon(
+                  material: (_, __) => const Icon(
                     Icons.location_disabled_rounded,
                     size: 42,
                   ),
-                  cupertino: (_, __) =>
-                  const Icon(
+                  cupertino: (_, __) => const Icon(
                     CupertinoIcons.location_slash_fill,
                     size: 42,
                   ),
@@ -457,21 +446,46 @@ class _ActiveSharesSheetState extends State<ActiveSharesSheet>
     );
   }
 
-  Widget buildActiveSharesList() {
+  Widget _buildTitle() {
     final l10n = AppLocalizations.of(context);
 
+    return Row(
+      mainAxisSize: MainAxisSize.max,
+      children: [
+        if (isCupertino(context))
+          const Expanded(
+            child: SizedBox.square(),
+          ),
+        Expanded(
+          flex: 8,
+          child: Center(
+            child: Text(
+              l10n.locationsOverview_activeShares_amount(
+                quickShareTasks.length,
+              ),
+              key: textKey,
+              style: getTitle2TextStyle(context),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ),
+        if (isCupertino(context))
+          Expanded(
+            child: CupertinoButton(
+              onPressed: widget.onOpenActionSheet,
+              child: const Icon(CupertinoIcons.ellipsis_circle_fill),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget buildActiveSharesList() {
     return Column(
       key: wrapperKey,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          l10n.locationsOverview_activeShares_amount(
-            quickShareTasks.length,
-          ),
-          key: textKey,
-          style: getTitle2TextStyle(context),
-          textAlign: TextAlign.center,
-        ),
+        _buildTitle(),
         const SizedBox(height: MEDIUM_SPACE),
         FutureBuilder<bool>(
             future: getAreAllTasksRunning(),
@@ -519,28 +533,57 @@ class _ActiveSharesSheetState extends State<ActiveSharesSheet>
   Widget build(BuildContext context) {
     return Opacity(
       opacity: isInitializing ? 0 : 1,
-      child: AnimatedBuilder(
-        animation: offsetProgress,
-        builder: (context, child) =>
-            Transform.translate(
-              offset: offsetProgress.value,
-              child: child,
+      child: PlatformWidget(
+        material: (context, _) => AnimatedBuilder(
+          animation: offsetProgress,
+          builder: (context, child) => Transform.translate(
+            offset: Offset(-_xOffset * offsetProgress.value, 0),
+            child: child,
+          ),
+          child: DraggableScrollableSheet(
+            snap: true,
+            snapSizes: const [MIN_SIZE, 1],
+            minChildSize: 0.0,
+            initialChildSize: MIN_SIZE,
+            controller: sheetController,
+            builder: (context, controller) => ModalSheet(
+              child: SingleChildScrollView(
+                controller: controller,
+                child: quickShareTasks.isEmpty
+                    ? buildEmptyState()
+                    : buildActiveSharesList(),
+              ),
             ),
-        child: DraggableScrollableSheet(
+          ),
+        ),
+        cupertino: (context, _) => DraggableScrollableSheet(
           snap: true,
           snapSizes: const [MIN_SIZE, 1],
           minChildSize: 0.0,
           initialChildSize: MIN_SIZE,
           controller: sheetController,
-          builder: (context, controller) =>
-              ModalSheet(
-                child: SingleChildScrollView(
-                  controller: controller,
-                  child: quickShareTasks.isEmpty
-                      ? buildEmptyState()
-                      : buildActiveSharesList(),
-                ),
+          builder: (context, controller) => AnimatedBuilder(
+            animation: offsetProgress,
+            child: SingleChildScrollView(
+              controller: controller,
+              child: quickShareTasks.isEmpty
+                  ? buildEmptyState()
+                  : buildActiveSharesList(),
+            ),
+            builder: (context, child) => ModalSheet(
+              cupertinoPadding: EdgeInsets.only(
+                top: lerpDouble(
+                      MEDIUM_SPACE,
+                      HUGE_SPACE,
+                      offsetProgress.value,
+                    ) ??
+                    0,
+                left: MEDIUM_SPACE,
+                right: MEDIUM_SPACE,
               ),
+              child: child ?? const SizedBox.shrink(),
+            ),
+          ),
         ),
       ),
     );

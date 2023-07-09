@@ -6,7 +6,6 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/app.dart';
 import 'package:locus/widgets/PlatformFlavorWidget.dart';
-import 'package:locus/widgets/SettingsCaretIcon.dart';
 
 import '../../constants/spacing.dart';
 import '../../utils/theme.dart';
@@ -38,7 +37,9 @@ class _ImportSelectionState extends State<ImportSelection> {
     final l10n = AppLocalizations.of(context);
 
     return ModalSheetContent(
-      icon: Icons.file_download_rounded,
+      icon: isCupertino(context)
+          ? CupertinoIcons.square_arrow_down_fill
+          : Icons.file_download_rounded,
       title: l10n.sharesOverviewScreen_importTask_title,
       description: l10n.sharesOverviewScreen_importTask_description,
       children: [

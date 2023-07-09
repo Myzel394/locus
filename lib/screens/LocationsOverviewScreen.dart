@@ -23,13 +23,16 @@ import 'package:locus/screens/locations_overview_screen_widgets/ActiveSharesShee
 import 'package:locus/screens/locations_overview_screen_widgets/ShareLocationSheet.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/services/view_service.dart';
+import 'package:locus/utils/helpers.dart';
 import 'package:locus/utils/location.dart';
+import 'package:locus/utils/navigation.dart';
 import 'package:locus/utils/show_message.dart';
 import 'package:locus/widgets/FABOpenContainer.dart';
 import 'package:locus/widgets/Paper.dart';
 import 'package:locus/widgets/PlatformFlavorWidget.dart';
 import 'package:map_launcher/map_launcher.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:provider/provider.dart';
 import 'package:uni_links/uni_links.dart';
 
@@ -1195,6 +1198,64 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
               });
 
               createNewQuickLocationShare();
+            },
+            onOpenActionSheet: () {
+              showCupertinoModalPopup(
+                context: context,
+                barrierDismissible: true,
+                builder: (cupertino) => CupertinoActionSheet(
+                  actions: createCancellableDialogActions(
+                    context,
+                    [
+                      CupertinoActionSheetAction(
+                        onPressed: withPopNavigation(
+                            createNewQuickLocationShare)(context),
+                        child: CupertinoListTile(
+                          leading: const Icon(Icons.share_location_rounded),
+                          title: Text(l10n.shareLocation_title),
+                        ),
+                      ),
+                      CupertinoActionSheetAction(
+                        onPressed: withPopNavigation(importLocation)(context),
+                        child: CupertinoListTile(
+                          leading:
+                              const Icon(CupertinoIcons.square_arrow_down_fill),
+                          title: Text(l10n
+                              .sharesOverviewScreen_importTask_action_import),
+                        ),
+                      ),
+                      CupertinoActionSheetAction(
+                        onPressed: () {
+                          Navigator.pop(context);
+
+                          Navigator.push(
+                            context,
+                            MaterialWithModalsPageRoute(
+                              builder: (context) =>
+                                  const SharesOverviewScreen(),
+                            ),
+                          );
+                        },
+                        child: CupertinoListTile(
+                          leading: const Icon(CupertinoIcons.list_bullet),
+                          title: Text(l10n.sharesOverviewScreen_title),
+                        ),
+                      ),
+                      CupertinoActionSheetAction(
+                        onPressed: () {
+                          Navigator.pop(context);
+
+                          showSettings(context);
+                        },
+                        child: CupertinoListTile(
+                          leading: Icon(context.platformIcons.settings),
+                          title: Text(l10n.settingsScreen_title),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
             },
           ),
         ],
