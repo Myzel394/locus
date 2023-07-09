@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:basic_utils/basic_utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -96,17 +98,18 @@ class _CreateTaskScreenState extends State<CreateTaskScreen>
   }
 
   Future<void> createTask() async {
+    final taskService = context.read<TaskService>();
+    final logService = context.read<LogService>();
+
     final hasGrantedLocationPermission =
         await showLocationPermissionDialog(askForAlways: true);
-    final hasDisabledBatteryOptimizations =
-        await showDisableBatteryOptimizationsDialog();
+    final hasDisabledBatteryOptimizations = Platform.isAndroid
+        ? await showDisableBatteryOptimizationsDialog()
+        : true;
 
     if (!hasGrantedLocationPermission || !hasDisabledBatteryOptimizations) {
       return;
     }
-
-    final taskService = context.read<TaskService>();
-    final logService = context.read<LogService>();
 
     setState(() {
       _isError = false;

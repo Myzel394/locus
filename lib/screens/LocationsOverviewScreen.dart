@@ -1,39 +1,36 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
 
 import 'package:background_fetch/background_fetch.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/screens/ImportTaskSheet.dart';
 import 'package:locus/screens/SettingsScreen.dart';
 import 'package:locus/screens/SharesOverviewScreen.dart';
 import 'package:locus/screens/locations_overview_screen_widgets/ActiveSharesSheet.dart';
 import 'package:locus/screens/locations_overview_screen_widgets/ShareLocationSheet.dart';
-import 'package:locus/screens/shares_overview_screen_widgets/UpdateAvailableBanner.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:locus/utils/location.dart';
 import 'package:locus/utils/show_message.dart';
 import 'package:locus/widgets/FABOpenContainer.dart';
-import 'package:locus/widgets/ModalSheet.dart';
 import 'package:locus/widgets/Paper.dart';
 import 'package:locus/widgets/PlatformFlavorWidget.dart';
 import 'package:map_launcher/map_launcher.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:provider/provider.dart';
-import 'package:latlong2/latlong.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:uni_links/uni_links.dart';
 
 import '../constants/notifications.dart';
@@ -1020,64 +1017,69 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     const dimension = 50;
     const diff = FAB_SIZE - dimension;
 
+    final settings = context.watch<SettingsService>();
     final shades = getPrimaryColorShades(context);
 
-    return Positioned(
-      // Add half the difference to center the button
-      right: FAB_MARGIN + diff / 2,
-      bottom: FAB_SIZE + FAB_MARGIN + SMALL_SPACE,
-      child: Column(
-        children: [
-          SizedBox.square(
-            dimension: 50,
-            child: Center(
-              child: Paper(
-                width: null,
-                borderRadius: BorderRadius.circular(HUGE_SPACE),
-                padding: EdgeInsets.zero,
-                child: PlatformIconButton(
-                  color: isNorth ? shades[200] : shades[400],
-                  icon: AnimatedBuilder(
-                    animation: rotationAnimation,
-                    builder: (context, child) => Transform.rotate(
-                      angle: rotationAnimation.value,
-                      child: child,
-                    ),
-                    child: PlatformFlavorWidget(
-                      material: (context, _) => Transform.rotate(
-                        angle: -pi / 4,
-                        child: const Icon(MdiIcons.compass),
+    if (settings.getMapProvider() == MapProvider.openStreetMap) {
+      return Positioned(
+        // Add half the difference to center the button
+        right: FAB_MARGIN + diff / 2,
+        bottom: FAB_SIZE + FAB_MARGIN + SMALL_SPACE,
+        child: Column(
+          children: [
+            SizedBox.square(
+              dimension: 50,
+              child: Center(
+                child: Paper(
+                  width: null,
+                  borderRadius: BorderRadius.circular(HUGE_SPACE),
+                  padding: EdgeInsets.zero,
+                  child: PlatformIconButton(
+                    color: isNorth ? shades[200] : shades[400],
+                    icon: AnimatedBuilder(
+                      animation: rotationAnimation,
+                      builder: (context, child) => Transform.rotate(
+                        angle: rotationAnimation.value,
+                        child: child,
                       ),
-                      cupertino: (context, _) =>
-                          const Icon(CupertinoIcons.location_north_fill),
+                      child: PlatformFlavorWidget(
+                        material: (context, _) => Transform.rotate(
+                          angle: -pi / 4,
+                          child: const Icon(MdiIcons.compass),
+                        ),
+                        cupertino: (context, _) =>
+                            const Icon(CupertinoIcons.location_north_fill),
+                      ),
                     ),
+                    onPressed: () {
+                      flutterMapController.rotate(0);
+                    },
                   ),
-                  onPressed: () {
-                    flutterMapController.rotate(0);
-                  },
                 ),
               ),
             ),
-          ),
-          const SizedBox(height: SMALL_SPACE),
-          SizedBox.square(
-            dimension: 50,
-            child: Center(
-              child: Paper(
-                width: null,
-                borderRadius: BorderRadius.circular(HUGE_SPACE),
-                padding: EdgeInsets.zero,
-                child: PlatformIconButton(
-                  color: shades[400],
-                  icon: const Icon(Icons.my_location),
-                  onPressed: () => goToCurrentPosition(askPermissions: true),
+            const SizedBox(height: SMALL_SPACE),
+            SizedBox.square(
+              dimension: 50,
+              child: Center(
+                child: Paper(
+                  width: null,
+                  borderRadius: BorderRadius.circular(HUGE_SPACE),
+                  padding: EdgeInsets.zero,
+                  child: PlatformIconButton(
+                    color: shades[400],
+                    icon: const Icon(Icons.my_location),
+                    onPressed: () => goToCurrentPosition(askPermissions: true),
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
-      ),
-    );
+          ],
+        ),
+      );
+    }
+
+    return const SizedBox.shrink();
   }
 
   @override

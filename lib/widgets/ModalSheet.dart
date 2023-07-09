@@ -9,11 +9,16 @@ import '../services/settings_service.dart';
 class ModalSheet extends StatelessWidget {
   final Widget child;
   final bool miuiIsGapless;
+  final EdgeInsets cupertinoPadding;
 
   const ModalSheet({
     Key? key,
     required this.child,
     this.miuiIsGapless = false,
+    this.cupertinoPadding = const EdgeInsets.symmetric(
+      vertical: LARGE_SPACE,
+      horizontal: MEDIUM_SPACE,
+    ),
   }) : super(key: key);
 
   @override
@@ -26,7 +31,9 @@ class ModalSheet extends StatelessWidget {
       ),
       child: PlatformWidget(
         material: (_, __) => Padding(
-          padding: settings.isMIUI() && !miuiIsGapless ? const EdgeInsets.all(MEDIUM_SPACE) : EdgeInsets.zero,
+          padding: settings.isMIUI() && !miuiIsGapless
+              ? const EdgeInsets.all(MEDIUM_SPACE)
+              : EdgeInsets.zero,
           child: Container(
             width: double.infinity,
             constraints: const BoxConstraints(
@@ -43,7 +50,9 @@ class ModalSheet extends StatelessWidget {
             ),
             child: Padding(
               padding: EdgeInsets.only(
-                top: settings.isMIUI() && !miuiIsGapless ? MEDIUM_SPACE : LARGE_SPACE,
+                top: settings.isMIUI() && !miuiIsGapless
+                    ? MEDIUM_SPACE
+                    : LARGE_SPACE,
                 left: MEDIUM_SPACE,
                 right: MEDIUM_SPACE,
                 bottom: SMALL_SPACE,
@@ -55,10 +64,7 @@ class ModalSheet extends StatelessWidget {
         cupertino: (_, __) => CupertinoPopupSurface(
           isSurfacePainted: true,
           child: Padding(
-            padding: const EdgeInsets.symmetric(
-              vertical: LARGE_SPACE,
-              horizontal: MEDIUM_SPACE,
-            ),
+            padding: cupertinoPadding,
             child: child,
           ),
         ),

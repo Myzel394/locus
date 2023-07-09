@@ -1,20 +1,20 @@
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get_time_ago/get_time_ago.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:locus/screens/ViewDetailScreen.dart';
 import 'package:locus/services/location_point_service.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:locus/utils/PageRoute.dart';
 import 'package:locus/utils/location.dart';
 import 'package:locus/utils/permission.dart';
+import 'package:locus/widgets/ModalSheet.dart';
 import 'package:locus/widgets/RequestLocationPermissionMixin.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
@@ -23,7 +23,6 @@ import '../../utils/icon.dart';
 import '../../utils/theme.dart';
 import '../../widgets/AddressFetcher.dart';
 import '../../widgets/BentoGridElement.dart';
-import '../../widgets/Paper.dart';
 
 class ViewDetailsSheet extends StatefulWidget {
   final TaskView? view;
@@ -162,13 +161,7 @@ class _ViewDetailsSheetState extends State<ViewDetailsSheet> {
         0.22,
         1,
       ],
-      builder: (context, scrollController) => Paper(
-        borderRadius: const BorderRadius.only(
-          topRight: Radius.circular(MEDIUM_SPACE),
-          bottomRight: Radius.zero,
-          bottomLeft: Radius.zero,
-          topLeft: Radius.circular(MEDIUM_SPACE),
-        ),
+      builder: (context, scrollController) => ModalSheet(
         child: SingleChildScrollView(
           controller: scrollController,
           child: Column(

@@ -47,6 +47,8 @@ PODS:
     - DKImagePickerController/PhotoGallery
     - Flutter
   - Flutter (1.0.0)
+  - flutter_compass (0.0.1):
+    - Flutter
   - flutter_local_notifications (0.0.1):
     - Flutter
   - flutter_logs (0.0.1):
@@ -88,6 +90,8 @@ PODS:
     - Flutter
   - vibration (1.7.5):
     - Flutter
+  - wakelock (0.0.1):
+    - Flutter
   - ZIPFoundation (0.9.15)
 
 DEPENDENCIES:
@@ -99,6 +103,7 @@ DEPENDENCIES:
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - file_picker (from `.symlinks/plugins/file_picker/ios`)
   - Flutter (from `Flutter`)
+  - flutter_compass (from `.symlinks/plugins/flutter_compass/ios`)
   - flutter_local_notifications (from `.symlinks/plugins/flutter_local_notifications/ios`)
   - flutter_logs (from `.symlinks/plugins/flutter_logs/ios`)
   - flutter_osm_plugin (from `.symlinks/plugins/flutter_osm_plugin/ios`)
@@ -114,6 +119,7 @@ DEPENDENCIES:
   - uni_links (from `.symlinks/plugins/uni_links/ios`)
   - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
   - vibration (from `.symlinks/plugins/vibration/ios`)
+  - wakelock (from `.symlinks/plugins/wakelock/ios`)
 
 SPEC REPOS:
   trunk:
@@ -143,6 +149,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/file_picker/ios"
   Flutter:
     :path: Flutter
+  flutter_compass:
+    :path: ".symlinks/plugins/flutter_compass/ios"
   flutter_local_notifications:
     :path: ".symlinks/plugins/flutter_local_notifications/ios"
   flutter_logs:
@@ -173,6 +181,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/url_launcher_ios/ios"
   vibration:
     :path: ".symlinks/plugins/vibration/ios"
+  wakelock:
+    :path: ".symlinks/plugins/wakelock/ios"
 
 SPEC CHECKSUMS:
   Alamofire: d368e1ff8a298e6dde360e35a3e68e6c610e7204
@@ -186,6 +196,7 @@ SPEC CHECKSUMS:
   DKPhotoGallery: fdfad5125a9fdda9cc57df834d49df790dbb4179
   file_picker: ce3938a0df3cc1ef404671531facef740d03f920
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
+  flutter_compass: cbbd285cea1584c7ac9c4e0c3e1f17cbea55e855
   flutter_local_notifications: 0c0b1ae97e741e1521e4c1629a459d04b9aec743
   flutter_logs: 5d0dca26963e0f30b11a995a764744ef77d5d428
   flutter_osm_plugin: 029b14f54485ced3190bb2c4444616b76e10c6a8
@@ -205,6 +216,7 @@ SPEC CHECKSUMS:
   uni_links: d97da20c7701486ba192624d99bffaaffcfc298a
   url_launcher_ios: 08a3dfac5fb39e8759aeb0abbd5d9480f30fc8b4
   vibration: 7d883d141656a1c1a6d8d238616b2042a51a1241
+  wakelock: b0843b2479edbf6504d8d262c2959446f35373aa
   ZIPFoundation: 063163dc828bf699c5be160eb4f58f676322d94f
 
 PODFILE CHECKSUM: 819f6e738594296500811eae0a41f3dceed5a207

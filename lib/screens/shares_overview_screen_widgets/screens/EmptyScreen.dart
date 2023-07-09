@@ -1,9 +1,8 @@
 import 'package:animations/animations.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:lottie/lottie.dart';
 
 import '../../../constants/spacing.dart';
@@ -70,8 +69,12 @@ class _EmptyScreenState extends State<EmptyScreen> {
                 style: getCaptionTextStyle(context),
               ),
               const SizedBox(height: LARGE_SPACE),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+              Wrap(
+                direction:
+                    isCupertino(context) ? Axis.vertical : Axis.horizontal,
+                alignment: WrapAlignment.center,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: SMALL_SPACE,
                 children: [
                   OpenContainer(
                     transitionDuration: const Duration(milliseconds: 700),
@@ -81,9 +84,10 @@ class _EmptyScreenState extends State<EmptyScreen> {
                         Navigator.pop(context);
                       },
                     ),
-                    closedShape: const RoundedRectangleBorder(
+                    closedShape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(
-                        Radius.circular(HUGE_SPACE),
+                        Radius.circular(
+                            isCupertino(context) ? 8.0 : HUGE_SPACE),
                       ),
                     ),
                     closedBuilder: (context, action) => GestureDetector(
