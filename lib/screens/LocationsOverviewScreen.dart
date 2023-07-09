@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import "package:apple_maps_flutter/apple_maps_flutter.dart" as AppleMaps;
 import 'package:background_fetch/background_fetch.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -172,7 +173,8 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
         WidgetsBindingObserver,
         TickerProviderStateMixin {
   late final LocationFetcher _fetchers;
-  final MapController flutterMapController = MapController();
+  MapController? flutterMapController;
+  AppleMaps.AppleMapController? appleMapController;
 
   late final AnimationController rotationController;
   late Animation<double> rotationAnimation;
@@ -245,18 +247,22 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     _handleViewAlarmChecker();
     _handleNotifications();
 
-    flutterMapController.mapEventStream.listen((event) {
-      if (event is MapEventRotate) {
-        rotationController.animateTo(
-          ((event.targetRotation % 360) / 360),
-          duration: Duration.zero,
-        );
+    final settings = context.read<SettingsService>();
+    if (settings.getMapProvider() == MapProvider.openStreetMap) {
+      flutterMapController = MapController();
+      flutterMapController!.mapEventStream.listen((event) {
+        if (event is MapEventRotate) {
+          rotationController.animateTo(
+            ((event.targetRotation % 360) / 360),
+            duration: Duration.zero,
+          );
 
-        setState(() {
-          isNorth = (event.targetRotation % 360).abs() < 1;
-        });
-      }
-    });
+          setState(() {
+            isNorth = (event.targetRotation % 360).abs() < 1;
+          });
+        }
+      });
+    }
 
     rotationController =
         AnimationController(vsync: this, duration: Duration.zero);
@@ -268,7 +274,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
 
   @override
   dispose() {
-    flutterMapController.dispose();
+    flutterMapController?.dispose();
     _fetchers.dispose();
     _positionStream?.drain();
 
@@ -396,10 +402,20 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
       _updateLocationToSettings(position);
 
       if (!_hasGoneToInitialPosition) {
-        flutterMapController.move(
-          LatLng(position.latitude, position.longitude),
-          flutterMapController.zoom,
-        );
+        if (flutterMapController != null) {
+          flutterMapController!.move(
+            LatLng(position.latitude, position.longitude),
+            flutterMapController!.zoom,
+          );
+        }
+
+        if (appleMapController != null) {
+          appleMapController!.animateCamera(
+            AppleMaps.CameraUpdate.newLatLng(
+              AppleMaps.LatLng(position.latitude, position.longitude),
+            ),
+          );
+        }
         _hasGoneToInitialPosition = true;
       }
 
@@ -627,10 +643,24 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     _initLiveLocationUpdate();
 
     if (lastPosition != null) {
-      flutterMapController?.move(
-        LatLng(lastPosition!.latitude, lastPosition!.longitude),
-        13,
-      );
+      if (flutterMapController != null) {
+        flutterMapController?.move(
+          LatLng(lastPosition!.latitude, lastPosition!.longitude),
+          13,
+        );
+      }
+
+      if (appleMapController != null) {
+        appleMapController?.moveCamera(
+          AppleMaps.CameraUpdate.newCameraPosition(
+            AppleMaps.CameraPosition(
+              target: AppleMaps.LatLng(
+                  lastPosition!.latitude, lastPosition!.longitude),
+              zoom: 13,
+            ),
+          ),
+        );
+      }
     }
 
     FlutterLogs.logInfo(
@@ -707,7 +737,44 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
   }
 
   Widget buildMap() {
+    final settings = context.read<SettingsService>();
     final viewService = context.read<ViewService>();
+
+    if (settings.getMapProvider() == MapProvider.apple) {
+      return AppleMaps.AppleMap(
+        initialCameraPosition: const AppleMaps.CameraPosition(
+          target: AppleMaps.LatLng(40, 20),
+          zoom: 13.0,
+        ),
+        myLocationButtonEnabled: true,
+        myLocationEnabled: true,
+        compassEnabled: true,
+        onMapCreated: (controller) {
+          appleMapController = controller;
+        },
+        circles: viewService.views
+            .where(
+                (view) => selectedViewID == null || view.id == selectedViewID)
+            .map(
+              (view) => (_fetchers.locations[view] ?? [])
+                  .map(
+                    (location) => AppleMaps.Circle(
+                        circleId: AppleMaps.CircleId(location.id),
+                        center: AppleMaps.LatLng(
+                          location.latitude,
+                          location.longitude,
+                        ),
+                        radius: location.accuracy,
+                        fillColor: view.color.withOpacity(0.2),
+                        strokeColor: view.color,
+                        strokeWidth: location.accuracy < 10 ? 1 : 3),
+                  )
+                  .toList(),
+            )
+            .expand((element) => element)
+            .toSet(),
+      );
+    }
 
     return FlutterMap(
       mapController: flutterMapController,
@@ -846,10 +913,24 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
       return;
     }
 
-    flutterMapController.move(
-      LatLng(latestLocation.latitude, latestLocation.longitude),
-      flutterMapController.zoom,
-    );
+    if (flutterMapController != null) {
+      flutterMapController!.move(
+        LatLng(latestLocation.latitude, latestLocation.longitude),
+        flutterMapController!.zoom,
+      );
+    }
+    if (appleMapController != null) {
+      appleMapController!.moveCamera(
+        AppleMaps.CameraUpdate.newCameraPosition(
+          AppleMaps.CameraPosition(
+            target: AppleMaps.LatLng(
+              latestLocation.latitude,
+              latestLocation.longitude,
+            ),
+          ),
+        ),
+      );
+    }
   }
 
   Widget buildViewTile(
@@ -1055,7 +1136,9 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
                       ),
                     ),
                     onPressed: () {
-                      flutterMapController.rotate(0);
+                      if (flutterMapController != null) {
+                        flutterMapController!.rotate(0);
+                      }
                     },
                   ),
                 ),
@@ -1175,7 +1258,21 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
             view: selectedView,
             lastLocation: lastLocation,
             onGoToPosition: (position) {
-              flutterMapController.move(position, flutterMapController.zoom);
+              if (flutterMapController != null) {
+                flutterMapController!
+                    .move(position, flutterMapController!.zoom);
+              }
+
+              if (appleMapController != null) {
+                appleMapController!.moveCamera(
+                  AppleMaps.CameraUpdate.newLatLng(
+                    AppleMaps.LatLng(
+                      position.latitude,
+                      position.longitude,
+                    ),
+                  ),
+                );
+              }
             },
           ),
           ActiveSharesSheet(
