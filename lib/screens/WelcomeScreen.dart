@@ -7,6 +7,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/init_quick_actions.dart';
+import 'package:locus/screens/LocationsOverviewScreen.dart';
 import 'package:locus/screens/welcome_screen_widgets/SimpleContinuePage.dart';
 import 'package:locus/services/settings_service.dart';
 import 'package:locus/utils/PageRoute.dart';
@@ -14,7 +15,6 @@ import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 
 import '../utils/theme.dart';
-import 'SharesOverviewScreen.dart';
 
 const storage = FlutterSecureStorage();
 
@@ -62,7 +62,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       context,
       NativePageRoute(
         context: context,
-        builder: (context) => const SharesOverviewScreen(),
+        builder: (context) => const LocationsOverviewScreen(),
       ),
       (route) => false,
     );
