@@ -1246,38 +1246,60 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
       return Positioned(
         // Add half the difference to center the button
         right: FAB_MARGIN + diff / 2,
-        bottom: FAB_SIZE + FAB_MARGIN + SMALL_SPACE,
+        bottom: FAB_SIZE +
+            FAB_MARGIN +
+            (isCupertino(context) ? LARGE_SPACE : SMALL_SPACE),
         child: Column(
           children: [
             SizedBox.square(
               dimension: 50,
               child: Center(
-                child: Paper(
-                  width: null,
-                  borderRadius: BorderRadius.circular(HUGE_SPACE),
-                  padding: EdgeInsets.zero,
-                  child: PlatformIconButton(
-                    color: isNorth ? shades[200] : shades[400],
-                    icon: AnimatedBuilder(
-                      animation: rotationAnimation,
-                      builder: (context, child) => Transform.rotate(
-                        angle: rotationAnimation.value,
-                        child: child,
-                      ),
-                      child: PlatformFlavorWidget(
-                        material: (context, _) => Transform.rotate(
-                          angle: -pi / 4,
-                          child: const Icon(MdiIcons.compass),
+                child: PlatformWidget(
+                  material: (context, _) => Paper(
+                    width: null,
+                    borderRadius: BorderRadius.circular(HUGE_SPACE),
+                    padding: EdgeInsets.zero,
+                    child: IconButton(
+                      color: isNorth ? shades[200] : shades[400],
+                      icon: AnimatedBuilder(
+                        animation: rotationAnimation,
+                        builder: (context, child) => Transform.rotate(
+                          angle: rotationAnimation.value,
+                          child: child,
                         ),
-                        cupertino: (context, _) =>
-                            const Icon(CupertinoIcons.location_north_fill),
+                        child: PlatformFlavorWidget(
+                          material: (context, _) => Transform.rotate(
+                            angle: -pi / 4,
+                            child: const Icon(MdiIcons.compass),
+                          ),
+                          cupertino: (context, _) =>
+                              const Icon(CupertinoIcons.location_north_fill),
+                        ),
                       ),
+                      onPressed: () {
+                        if (flutterMapController != null) {
+                          flutterMapController!.rotate(0);
+                        }
+                      },
                     ),
+                  ),
+                  cupertino: (context, _) => CupertinoButton(
+                    color: isNorth ? shades[200] : shades[400],
+                    padding: EdgeInsets.zero,
+                    borderRadius: BorderRadius.circular(HUGE_SPACE),
                     onPressed: () {
                       if (flutterMapController != null) {
                         flutterMapController!.rotate(0);
                       }
                     },
+                    child: AnimatedBuilder(
+                      animation: rotationAnimation,
+                      builder: (context, child) => Transform.rotate(
+                        angle: rotationAnimation.value,
+                        child: child,
+                      ),
+                      child: const Icon(CupertinoIcons.location_north_fill),
+                    ),
                   ),
                 ),
               ),
@@ -1286,14 +1308,23 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
             SizedBox.square(
               dimension: 50,
               child: Center(
-                child: Paper(
-                  width: null,
-                  borderRadius: BorderRadius.circular(HUGE_SPACE),
-                  padding: EdgeInsets.zero,
-                  child: PlatformIconButton(
+                child: PlatformWidget(
+                  material: (context, _) => Paper(
+                    width: null,
+                    borderRadius: BorderRadius.circular(HUGE_SPACE),
+                    padding: EdgeInsets.zero,
+                    child: IconButton(
+                      color: shades[400],
+                      icon: const Icon(Icons.my_location),
+                      onPressed: () =>
+                          goToCurrentPosition(askPermissions: true),
+                    ),
+                  ),
+                  cupertino: (context, _) => CupertinoButton(
                     color: shades[400],
-                    icon: const Icon(Icons.my_location),
+                    padding: EdgeInsets.zero,
                     onPressed: () => goToCurrentPosition(askPermissions: true),
+                    child: const Icon(Icons.my_location),
                   ),
                 ),
               ),
