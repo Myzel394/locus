@@ -1004,58 +1004,8 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
       return const SizedBox.shrink();
     }
 
-    return PlatformWidget(
-      material: (context, _) => Positioned(
-        left: MEDIUM_SPACE,
-        right: MEDIUM_SPACE,
-        top: isCupertino(context) ? LARGE_SPACE : SMALL_SPACE,
-        child: SafeArea(
-          bottom: false,
-          child: Center(
-            child: Paper(
-              padding: const EdgeInsets.symmetric(
-                horizontal: MEDIUM_SPACE,
-                vertical: SMALL_SPACE,
-              ),
-              child: DropdownButton<String?>(
-                isDense: true,
-                value: selectedViewID,
-                onChanged: (selection) {
-                  if (selection == null) {
-                    setState(() {
-                      showFAB = true;
-                      selectedViewID = null;
-                    });
-                    return;
-                  }
-
-                  final view = viewService.views.firstWhere(
-                    (view) => view.id == selection,
-                  );
-
-                  showViewLocations(view);
-                },
-                underline: Container(),
-                alignment: Alignment.center,
-                isExpanded: true,
-                items: [
-                  DropdownMenuItem(
-                    value: null,
-                    child: buildViewTile(null),
-                  ),
-                  for (final view in viewService.views) ...[
-                    DropdownMenuItem(
-                      value: view.id,
-                      child: buildViewTile(view),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-      cupertino: (context, _) => Positioned(
+    if (settings.getMapProvider() == MapProvider.apple) {
+      return Positioned(
         top: 100.0,
         right: 5.0,
         child: Center(
@@ -1118,8 +1068,109 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
             ),
           ),
         ),
-      ),
-    );
+      );
+    } else {
+      return Positioned(
+        left: MEDIUM_SPACE,
+        right: MEDIUM_SPACE,
+        top: settings.getMapProvider() == MapProvider.apple
+            ? LARGE_SPACE
+            : SMALL_SPACE,
+        child: SafeArea(
+          bottom: false,
+          child: Center(
+            child: Paper(
+              padding: const EdgeInsets.symmetric(
+                horizontal: MEDIUM_SPACE,
+                vertical: SMALL_SPACE,
+              ),
+              child: PlatformWidget(
+                material: (context, _) => DropdownButton<String?>(
+                  isDense: true,
+                  value: selectedViewID,
+                  onChanged: (selection) {
+                    if (selection == null) {
+                      setState(() {
+                        showFAB = true;
+                        selectedViewID = null;
+                      });
+                      return;
+                    }
+
+                    final view = viewService.views.firstWhere(
+                      (view) => view.id == selection,
+                    );
+
+                    showViewLocations(view);
+                  },
+                  underline: Container(),
+                  alignment: Alignment.center,
+                  isExpanded: true,
+                  items: [
+                    DropdownMenuItem(
+                      value: null,
+                      child: buildViewTile(null),
+                    ),
+                    for (final view in viewService.views) ...[
+                      DropdownMenuItem(
+                        value: view.id,
+                        child: buildViewTile(view),
+                      ),
+                    ],
+                  ],
+                ),
+                cupertino: (context, _) => CupertinoButton(
+                  onPressed: () {
+                    showCupertinoModalPopup(
+                      context: context,
+                      barrierDismissible: true,
+                      builder: (cupertino) => CupertinoActionSheet(
+                        cancelButton: CupertinoActionSheetAction(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: Text(l10n.cancelLabel),
+                        ),
+                        actions: [
+                              CupertinoActionSheetAction(
+                                child: buildViewTile(
+                                  null,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                ),
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  setState(() {
+                                    selectedViewID = null;
+                                  });
+                                },
+                              )
+                            ] +
+                            viewService.views
+                                .map(
+                                  (view) => CupertinoActionSheetAction(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                      showViewLocations(view);
+                                    },
+                                    child: buildViewTile(
+                                      view,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                      ),
+                    );
+                  },
+                  child: buildViewTile(selectedView),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
   }
 
   LocationPointService? get lastLocation {
