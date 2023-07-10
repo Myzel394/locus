@@ -272,6 +272,8 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     ).animate(rotationController);
   }
 
+  _checkPermissionAndInitLiveLocation() {}
+
   @override
   dispose() {
     flutterMapController?.dispose();
@@ -409,12 +411,22 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
           );
         }
 
+        // Print statement is required to work
+        print(appleMapController);
         if (appleMapController != null) {
-          appleMapController!.animateCamera(
-            AppleMaps.CameraUpdate.newLatLng(
-              AppleMaps.LatLng(position.latitude, position.longitude),
-            ),
-          );
+          if (_hasGoneToInitialPosition) {
+            appleMapController!.animateCamera(
+              AppleMaps.CameraUpdate.newLatLng(
+                AppleMaps.LatLng(position.latitude, position.longitude),
+              ),
+            );
+          } else {
+            appleMapController!.moveCamera(
+              AppleMaps.CameraUpdate.newLatLng(
+                AppleMaps.LatLng(position.latitude, position.longitude),
+              ),
+            );
+          }
         }
         _hasGoneToInitialPosition = true;
       }
@@ -651,7 +663,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
       }
 
       if (appleMapController != null) {
-        appleMapController?.moveCamera(
+        appleMapController?.animateCamera(
           AppleMaps.CameraUpdate.newCameraPosition(
             AppleMaps.CameraPosition(
               target: AppleMaps.LatLng(
@@ -751,6 +763,22 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
         compassEnabled: true,
         onMapCreated: (controller) {
           appleMapController = controller;
+
+          if (lastPosition != null) {
+            appleMapController?.moveCamera(
+              AppleMaps.CameraUpdate.newCameraPosition(
+                AppleMaps.CameraPosition(
+                  target: AppleMaps.LatLng(
+                    lastPosition!.latitude,
+                    lastPosition!.longitude,
+                  ),
+                  zoom: 13,
+                ),
+              ),
+            );
+
+            _hasGoneToInitialPosition = true;
+          }
         },
         circles: viewService.views
             .where(
@@ -920,7 +948,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
       );
     }
     if (appleMapController != null) {
-      appleMapController!.moveCamera(
+      appleMapController!.animateCamera(
         AppleMaps.CameraUpdate.newCameraPosition(
           AppleMaps.CameraPosition(
             target: AppleMaps.LatLng(
