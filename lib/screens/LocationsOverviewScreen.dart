@@ -272,8 +272,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     ).animate(rotationController);
   }
 
-  _checkPermissionAndInitLiveLocation() {}
-
   @override
   dispose() {
     flutterMapController?.dispose();
