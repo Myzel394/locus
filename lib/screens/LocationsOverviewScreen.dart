@@ -15,6 +15,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:locus/constants/spacing.dart';
@@ -36,6 +37,7 @@ import 'package:map_launcher/map_launcher.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:provider/provider.dart';
+import 'package:simple_shadow/simple_shadow.dart';
 import 'package:uni_links/uni_links.dart';
 
 import '../constants/notifications.dart';
@@ -931,6 +933,8 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
   }
 
   Widget _buildOutOfBoundMarker(final TaskView view) {
+    final shades = getPrimaryColorShades(context);
+
     final lastLocation = _fetchers.locations[view]!.last;
 
     final bounds = flutterMapController!.bounds;
@@ -957,16 +961,36 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
       top: yPercentage * (MediaQuery.of(context).size.height - 40),
       child: Transform.rotate(
         angle: rotation,
-        child: Icon(
-          Icons.location_on,
-          size: 40,
-          color: view.color,
-          shadows: const [
-            Shadow(
-              blurRadius: 10,
+        child: Stack(
+          children: [
+            SimpleShadow(
+              opacity: .4,
+              sigma: 2,
               color: Colors.black,
-              offset: Offset(0, 0),
+              // Calculate offset based of rotation, shadow should always show down
+              offset: Offset(
+                sin(rotation) * 4,
+                cos(rotation) * 4,
+              ),
+              child: SvgPicture.asset(
+                "assets/location-out-of-bounds-marker.svg",
+                width: 60,
+                height: 60,
+                colorFilter: ColorFilter.mode(
+                  view.color.withOpacity(.3),
+                  BlendMode.srcATop,
+                ),
+              ),
             ),
+            Positioned(
+              left: 8.5,
+              top: 7,
+              child: Icon(
+                Icons.circle_rounded,
+                size: 30,
+                color: view.color,
+              ),
+            )
           ],
         ),
       ),
