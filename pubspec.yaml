@@ -101,14 +101,14 @@ dependencies:
 
 # Uncomment this for publishing FLOSS variant
 # Taken from https://github.com/Zverik/every_door/blob/aaf8d2fdeac483041bcac2c7c79ef760b99dff2b/pubspec.yaml#L55
-dependency_overrides:
-  geolocator_android:
-    git:
-      url: https://github.com/Zverik/flutter-geolocator.git
-      ref: floss
-      path: geolocator_android
-  nearby_connections:
-    path: dependency_overrides/nearby_connections
+#fdependency_overrides:
+#f  geolocator_android:
+#f    git:
+#f      url: https://github.com/Zverik/flutter-geolocator.git
+#f      ref: floss
+#f      path: geolocator_android
+#f  nearby_connections:
+#f    path: dependency_overrides/nearby_connections
 
 
 flutter_launcher_icons:

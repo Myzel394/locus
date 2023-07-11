@@ -92,9 +92,9 @@ dependencies {
 }
 
 // Remove this for FLOSS version
-configurations.all {
-    exclude group: 'com.google.android.gms'
-}
+//f configurations.all {
+//f     exclude group: 'com.google.android.gms'
+//f }
 
 ext.abiCodes = ["x86_64": 1, "armeabi-v7a": 2, "arm64-v8a": 3]
 import com.android.build.OutputFile
