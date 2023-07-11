@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import "package:apple_maps_flutter/apple_maps_flutter.dart" as AppleMaps;
 import 'package:background_fetch/background_fetch.dart';
@@ -251,6 +252,8 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     if (settings.getMapProvider() == MapProvider.openStreetMap) {
       flutterMapController = MapController();
       flutterMapController!.mapEventStream.listen((event) {
+        setState(() {});
+
         if (event is MapEventRotate) {
           rotationController.animateTo(
             ((event.targetRotation % 360) / 360),
@@ -927,6 +930,107 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     );
   }
 
+  Widget _buildOutOfBoundMarker(final TaskView view) {
+    final lastLocation = _fetchers.locations[view]!.last;
+
+    final bounds = flutterMapController!.bounds;
+    final xPercentage =
+        ((lastLocation.longitude - bounds!.west) / (bounds.east - bounds.west))
+            .clamp(0, 1);
+    final yPercentage = ((lastLocation.latitude - bounds!.north) /
+            (bounds.south - bounds.north))
+        .clamp(0, 1);
+
+    // Calculate the rotation between marker and last location
+    final markerLongitude =
+        bounds.west + xPercentage * (bounds.east - bounds.west);
+    final markerLatitude =
+        bounds.north + yPercentage * (bounds.south - bounds.north);
+
+    final diffLongitude = lastLocation.longitude - markerLongitude;
+    final diffLatitude = lastLocation.latitude - markerLatitude;
+
+    final rotation = atan2(diffLongitude, diffLatitude) + pi;
+
+    return Positioned(
+      left: xPercentage * (MediaQuery.of(context).size.width - 40),
+      top: yPercentage * (MediaQuery.of(context).size.height - 40),
+      child: Transform.rotate(
+        angle: rotation,
+        child: Icon(
+          Icons.location_on,
+          size: 40,
+          color: view.color,
+          shadows: const [
+            Shadow(
+              blurRadius: 10,
+              color: Colors.black,
+              offset: Offset(0, 0),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<bool> _isLocationOutOfBound(final Position location) async {
+    final settings = context.read<SettingsService>();
+
+    if (settings.getMapProvider() == MapProvider.openStreetMap) {
+      final bounds = flutterMapController!.bounds;
+
+      if (bounds == null) {
+        return false;
+      }
+
+      return location.longitude < bounds.west ||
+          location.longitude > bounds.east ||
+          location.latitude < bounds.south ||
+          location.latitude > bounds.north;
+    } else {
+      final bounds = await appleMapController!.getVisibleRegion();
+
+      return location.longitude < bounds.southwest.longitude ||
+          location.longitude > bounds.northeast.longitude ||
+          location.latitude < bounds.southwest.latitude ||
+          location.latitude > bounds.northeast.latitude;
+    }
+  }
+
+  // Returns a stream of views whose last location is out of bounds
+  Stream<TaskView> _getOutOfBoundsViews() async* {
+    if (_fetchers.isLoading && false) {
+      return;
+    }
+
+    for (final view in _fetchers.views) {
+      if (_fetchers.locations[view]?.isEmpty ?? true) {
+        continue;
+      }
+
+      final lastLocation = _fetchers.locations[view]!.last;
+
+      if (await _isLocationOutOfBound(lastLocation.asPosition())) {
+        yield view;
+      }
+    }
+  }
+
+  Widget buildOutOfBoundsMarkers() {
+    return FutureBuilder<List<TaskView>>(
+      future: _getOutOfBoundsViews().toList(),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return Stack(
+            children: snapshot.data!.map(_buildOutOfBoundMarker).toList(),
+          );
+        }
+
+        return const SizedBox();
+      },
+    );
+  }
+
   void showViewLocations(final TaskView view) async {
     setState(() {
       showFAB = false;
@@ -1419,6 +1523,8 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
       body: Stack(
         children: <Widget>[
           buildMap(),
+          buildOutOfBoundsMarkers(),
+          /*
           buildViewsSelection(),
           buildMapActions(),
           ViewDetailsSheet(
@@ -1522,6 +1628,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
               );
             },
           ),
+           */
         ],
       ),
     );
