@@ -538,7 +538,7 @@ class _ActiveSharesSheetState extends State<ActiveSharesSheet>
         material: (context, _) => AnimatedBuilder(
           animation: offsetProgress,
           builder: (context, child) => Transform.translate(
-            offset: Offset(-_xOffset * offsetProgress.value, 0),
+            offset: Offset(-_xOffset * (1 - offsetProgress.value), 0),
             child: child,
           ),
           child: DraggableScrollableSheet(
