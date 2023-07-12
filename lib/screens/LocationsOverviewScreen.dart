@@ -68,6 +68,10 @@ enum LocationStatus {
 const FAB_SIZE = 56.0;
 const FAB_MARGIN = 16.0;
 
+const OUT_OF_BOUND_MARKER_X_PADDING = 12;
+const OUT_OF_BOUND_MARKER_Y_PADDING = FAB_SIZE + FAB_MARGIN;
+const OUT_OF_BOUND_MARKER_SIZE = 60;
+
 class LocationFetcher extends ChangeNotifier {
   final Iterable<TaskView> views;
   final Map<TaskView, List<LocationPointService>> _locations = {};
@@ -933,17 +937,22 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
   }
 
   Widget _buildOutOfBoundMarker(final TaskView view) {
-    final shades = getPrimaryColorShades(context);
-
     final lastLocation = _fetchers.locations[view]!.last;
 
     final bounds = flutterMapController!.bounds;
+    final size = MediaQuery.of(context).size;
+
+    // Add some padding to the bounds
+    final availableWidth = size.width - OUT_OF_BOUND_MARKER_X_PADDING * 2;
+    final availableHeight = size.height - OUT_OF_BOUND_MARKER_Y_PADDING * 2;
+    final xAvailablePercentage = availableWidth / size.width;
+    final yAvailablePercentage = availableHeight / size.height;
     final xPercentage =
         ((lastLocation.longitude - bounds!.west) / (bounds.east - bounds.west))
-            .clamp(0, 1);
-    final yPercentage = ((lastLocation.latitude - bounds!.north) /
-            (bounds.south - bounds.north))
-        .clamp(0, 1);
+            .clamp(1 - xAvailablePercentage, xAvailablePercentage);
+    final yPercentage =
+        ((lastLocation.latitude - bounds.north) / (bounds.south - bounds.north))
+            .clamp(1 - yAvailablePercentage, yAvailablePercentage);
 
     // Calculate the rotation between marker and last location
     final markerLongitude =
@@ -956,42 +965,54 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
 
     final rotation = atan2(diffLongitude, diffLatitude) + pi;
 
+    final totalDiff = Geolocator.distanceBetween(
+      lastLocation.latitude,
+      lastLocation.longitude,
+      markerLatitude,
+      markerLongitude,
+    );
+
     return Positioned(
-      left: xPercentage * (MediaQuery.of(context).size.width - 40),
-      top: yPercentage * (MediaQuery.of(context).size.height - 40),
-      child: Transform.rotate(
-        angle: rotation,
-        child: Stack(
-          children: [
-            SimpleShadow(
-              opacity: .4,
-              sigma: 2,
-              color: Colors.black,
-              // Calculate offset based of rotation, shadow should always show down
-              offset: Offset(
-                sin(rotation) * 4,
-                cos(rotation) * 4,
-              ),
-              child: SvgPicture.asset(
-                "assets/location-out-of-bounds-marker.svg",
-                width: 60,
-                height: 60,
-                colorFilter: ColorFilter.mode(
-                  view.color.withOpacity(.3),
-                  BlendMode.srcATop,
+      // Subtract `OUT_OF_BOUND_MARKER_SIZE` to make sure the marker doesn't
+      // overlap with the bounds
+      left: xPercentage * (size.width - OUT_OF_BOUND_MARKER_SIZE),
+      top: yPercentage * size.height,
+      child: Opacity(
+        opacity: (1000000 / totalDiff).clamp(0.2, 1),
+        child: Transform.rotate(
+          angle: rotation,
+          child: Stack(
+            children: [
+              SimpleShadow(
+                opacity: .4,
+                sigma: 2,
+                color: Colors.black,
+                // Calculate offset based of rotation, shadow should always show down
+                offset: Offset(
+                  sin(rotation) * 4,
+                  cos(rotation) * 4,
+                ),
+                child: SvgPicture.asset(
+                  "assets/location-out-of-bounds-marker.svg",
+                  width: OUT_OF_BOUND_MARKER_SIZE.toDouble(),
+                  height: OUT_OF_BOUND_MARKER_SIZE.toDouble(),
+                  colorFilter: ColorFilter.mode(
+                    view.color.withOpacity(.3),
+                    BlendMode.srcATop,
+                  ),
                 ),
               ),
-            ),
-            Positioned(
-              left: 8.5,
-              top: 7,
-              child: Icon(
-                Icons.circle_rounded,
-                size: 30,
-                color: view.color,
-              ),
-            )
-          ],
+              Positioned(
+                left: 8.5,
+                top: 7,
+                child: Icon(
+                  Icons.circle_rounded,
+                  size: 30,
+                  color: view.color,
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );
