@@ -1010,19 +1010,31 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
                       width: OUT_OF_BOUND_MARKER_SIZE.toDouble(),
                       height: OUT_OF_BOUND_MARKER_SIZE.toDouble(),
                       colorFilter: ColorFilter.mode(
-                        view.color.withOpacity(.3),
+                        getSheetColor(context),
                         BlendMode.srcATop,
                       ),
                     ),
                   ),
                 ),
                 Positioned(
-                  left: OUT_OF_BOUND_MARKER_SIZE / 2 - 30 / 2,
-                  top: 7,
+                  left: OUT_OF_BOUND_MARKER_SIZE / 2 - 40 / 2,
+                  top: 3,
                   child: Icon(
                     Icons.circle_rounded,
-                    size: 30,
+                    size: 40,
                     color: view.color,
+                  ),
+                ),
+                Positioned(
+                  left: OUT_OF_BOUND_MARKER_SIZE / 2 - 30 / 2,
+                  top: 7.5,
+                  child: Transform.rotate(
+                    angle: -rotation,
+                    child: Icon(
+                      Icons.location_on_rounded,
+                      size: 30,
+                      color: getSheetColor(context),
+                    ),
                   ),
                 )
               ],
