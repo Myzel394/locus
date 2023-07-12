@@ -68,7 +68,7 @@ enum LocationStatus {
 const FAB_SIZE = 56.0;
 const FAB_MARGIN = 16.0;
 
-const OUT_OF_BOUND_MARKER_X_PADDING = 12;
+const OUT_OF_BOUND_MARKER_X_PADDING = 5;
 const OUT_OF_BOUND_MARKER_Y_PADDING = FAB_SIZE + FAB_MARGIN;
 const OUT_OF_BOUND_MARKER_SIZE = 60;
 
@@ -972,46 +972,61 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
       markerLongitude,
     );
 
+    final bottomRightMapActionsHeight = size.width - (FAB_SIZE + FAB_MARGIN);
+    final width =
+        size.width - OUT_OF_BOUND_MARKER_X_PADDING - OUT_OF_BOUND_MARKER_SIZE;
+    final height = xPercentage * size.width > bottomRightMapActionsHeight
+        ? size.height - (FAB_SIZE + FAB_MARGIN) * 2
+        : size.height - OUT_OF_BOUND_MARKER_Y_PADDING;
+
     return Positioned(
       // Subtract `OUT_OF_BOUND_MARKER_SIZE` to make sure the marker doesn't
       // overlap with the bounds
-      left: xPercentage * (size.width - OUT_OF_BOUND_MARKER_SIZE),
-      top: yPercentage * size.height,
+      left: xPercentage * width,
+      top: yPercentage * height,
       child: Opacity(
         opacity: (1000000 / totalDiff).clamp(0.2, 1),
         child: Transform.rotate(
           angle: rotation,
-          child: Stack(
-            children: [
-              SimpleShadow(
-                opacity: .4,
-                sigma: 2,
-                color: Colors.black,
-                // Calculate offset based of rotation, shadow should always show down
-                offset: Offset(
-                  sin(rotation) * 4,
-                  cos(rotation) * 4,
-                ),
-                child: SvgPicture.asset(
-                  "assets/location-out-of-bounds-marker.svg",
-                  width: OUT_OF_BOUND_MARKER_SIZE.toDouble(),
-                  height: OUT_OF_BOUND_MARKER_SIZE.toDouble(),
-                  colorFilter: ColorFilter.mode(
-                    view.color.withOpacity(.3),
-                    BlendMode.srcATop,
+          child: GestureDetector(
+            onTap: () {
+              showViewLocations(view);
+            },
+            child: Stack(
+              children: [
+                SimpleShadow(
+                  opacity: .4,
+                  sigma: 2,
+                  color: Colors.black,
+                  // Calculate offset based of rotation, shadow should always show down
+                  offset: Offset(
+                    sin(rotation) * 4,
+                    cos(rotation) * 4,
+                  ),
+                  child: SizedBox.square(
+                    dimension: OUT_OF_BOUND_MARKER_SIZE.toDouble(),
+                    child: SvgPicture.asset(
+                      "assets/location-out-of-bounds-marker.svg",
+                      width: OUT_OF_BOUND_MARKER_SIZE.toDouble(),
+                      height: OUT_OF_BOUND_MARKER_SIZE.toDouble(),
+                      colorFilter: ColorFilter.mode(
+                        view.color.withOpacity(.3),
+                        BlendMode.srcATop,
+                      ),
+                    ),
                   ),
                 ),
-              ),
-              Positioned(
-                left: 8.5,
-                top: 7,
-                child: Icon(
-                  Icons.circle_rounded,
-                  size: 30,
-                  color: view.color,
-                ),
-              )
-            ],
+                Positioned(
+                  left: OUT_OF_BOUND_MARKER_SIZE / 2 - 30 / 2,
+                  top: 7,
+                  child: Icon(
+                    Icons.circle_rounded,
+                    size: 30,
+                    color: view.color,
+                  ),
+                )
+              ],
+            ),
           ),
         ),
       ),
@@ -1569,7 +1584,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
         children: <Widget>[
           buildMap(),
           buildOutOfBoundsMarkers(),
-          /*
           buildViewsSelection(),
           buildMapActions(),
           ViewDetailsSheet(
@@ -1673,7 +1687,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
               );
             },
           ),
-           */
         ],
       ),
     );
