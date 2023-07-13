@@ -49,7 +49,8 @@ class _OutOfBoundMarkerState extends State<OutOfBoundMarker>
   // the computed variable, for better performance
   Size size = const Size(0, 0);
   double xAvailablePercentage = 0;
-  double yAvailablePercentage = 0;
+  double yAvailablePercentageStart = 0;
+  double yAvailablePercentageEnd = 1;
   double width = 0;
   double height = 0;
 
@@ -94,14 +95,18 @@ class _OutOfBoundMarkerState extends State<OutOfBoundMarker>
 
   void _updateSizes() {
     final size = MediaQuery.of(context).size;
-    final availableWidth = size.width - OUT_OF_BOUND_MARKER_X_PADDING;
-    final availableHeight = size.height - OUT_OF_BOUND_MARKER_Y_PADDING;
 
     setState(() {
       this.size = size;
-      xAvailablePercentage = availableWidth / size.width;
-      yAvailablePercentage = availableHeight / size.height;
+      xAvailablePercentage =
+          (size.width - OUT_OF_BOUND_MARKER_X_PADDING) / size.width;
+      yAvailablePercentageStart = OUT_OF_BOUND_MARKER_TOP_PADDING / size.height;
+      yAvailablePercentageEnd =
+          (size.height - OUT_OF_BOUND_MARKER_BOTTOM_PADDING) / size.height;
     });
+
+    // (h - o) / h
+    // h / h - o / h
   }
 
   void updatePosition() async {
@@ -127,7 +132,7 @@ class _OutOfBoundMarkerState extends State<OutOfBoundMarker>
             .clamp(1 - xAvailablePercentage, xAvailablePercentage);
     final yPercentage =
         ((widget.lastViewLocation.latitude - north) / (south - north))
-            .clamp(1 - yAvailablePercentage, yAvailablePercentage);
+            .clamp(yAvailablePercentageStart, yAvailablePercentageEnd);
 
     // Calculate the rotation between marker and last location
     final markerLongitude = west + xPercentage * (east - west);
@@ -148,9 +153,10 @@ class _OutOfBoundMarkerState extends State<OutOfBoundMarker>
     final bottomRightMapActionsHeight = size.width - (FAB_SIZE + FAB_MARGIN);
     final width =
         size.width - OUT_OF_BOUND_MARKER_X_PADDING - OUT_OF_BOUND_MARKER_SIZE;
-    final height = xPercentage * size.width > bottomRightMapActionsHeight
-        ? size.height - (FAB_SIZE + FAB_MARGIN) * 3
-        : size.height - OUT_OF_BOUND_MARKER_Y_PADDING;
+    final height = (xPercentage * size.width > bottomRightMapActionsHeight &&
+            yPercentage > 0.5)
+        ? size.height - (FAB_SIZE + FAB_MARGIN) * 2
+        : size.height;
 
     setState(() {
       x = xPercentage * width;
