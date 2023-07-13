@@ -92,6 +92,10 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
 
   Stream<Position>? _positionStream;
 
+  // Dummy stream to trigger updates to out of bound markers
+  StreamController<MapEventWithMove> mapEventStream =
+      StreamController<MapEventWithMove>.broadcast();
+
   // Since we already listen to the latest position, we will pass it
   // manually to `current_location_layer` to avoid it also registering
   // extra listeners.
@@ -159,8 +163,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     if (settings.getMapProvider() == MapProvider.openStreetMap) {
       flutterMapController = MapController();
       flutterMapController!.mapEventStream.listen((event) {
-        setState(() {});
-
         if (event is MapEventRotate) {
           rotationController.animateTo(
             ((event.targetRotation % 360) / 360),
@@ -170,6 +172,10 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
           setState(() {
             isNorth = (event.targetRotation % 360).abs() < 1;
           });
+        }
+
+        if (event is MapEventWithMove) {
+          mapEventStream.add(event);
         }
       });
     }
@@ -191,6 +197,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     _viewsAlarmCheckerTimer?.cancel();
     _uniLinksStream?.cancel();
     _positionStream?.drain();
+    mapEventStream.close();
 
     _removeLiveLocationUpdate();
 
@@ -881,31 +888,22 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
   }
 
   Widget buildOutOfBoundsMarkers() {
-    return FutureBuilder<List<TaskView>>(
-      future: _getOutOfBoundsViews().toList(),
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return Stack(
-            children: snapshot.data!
-                .map(
-                  (view) => OutOfBoundMarker(
-                    lastViewLocation: _fetchers.locations[view]!.last,
-                    onTap: () {
-                      showViewLocations(view);
-                    },
-                    view: view,
-                    north: flutterMapController!.bounds!.north,
-                    east: flutterMapController!.bounds!.east,
-                    south: flutterMapController!.bounds!.south,
-                    west: flutterMapController!.bounds!.west,
-                  ),
-                )
-                .toList(),
-          );
-        }
-
-        return const SizedBox();
-      },
+    return Stack(
+      children: _fetchers.views
+          .where((view) => _fetchers.locations[view]?.isNotEmpty ?? false)
+          .map(
+            (view) => OutOfBoundMarker(
+              lastViewLocation: _fetchers.locations[view]!.last,
+              onTap: () {
+                showViewLocations(view);
+              },
+              view: view,
+              updateStream: mapEventStream.stream,
+              appleMapController: appleMapController,
+              flutterMapController: flutterMapController,
+            ),
+          )
+          .toList(),
     );
   }
 

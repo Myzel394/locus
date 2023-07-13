@@ -10,5 +10,5 @@ double getRotationBetweenTwoPoints(
   final diffLongitude = secondPoint.longitude - firstPoint.longitude;
   final diffLatitude = secondPoint.latitude - firstPoint.latitude;
 
-  return atan2(diffLongitude, diffLatitude) + pi;
+  return atan2(diffLatitude, diffLongitude) + pi;
 }

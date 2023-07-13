@@ -168,4 +168,6 @@ class LocationPointService {
         heading: heading ?? 0.0,
         timestamp: createdAt,
       );
+
+  LatLng asLatLng() => LatLng(latitude, longitude);
 }
