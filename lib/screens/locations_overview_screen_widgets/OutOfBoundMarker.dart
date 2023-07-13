@@ -177,7 +177,7 @@ class _OutOfBoundMarkerState extends State<OutOfBoundMarker>
       left: x,
       top: y,
       child: Opacity(
-        opacity: (1000000 / totalDiff).clamp(0.2, 1),
+        opacity: (MAX_TOTAL_DIFF_IN_METERS / totalDiff).clamp(0.2, 1),
         child: Transform.rotate(
           angle: rotation,
           child: GestureDetector(
