@@ -202,8 +202,8 @@ class _OutOfBoundMarkerState extends State<OutOfBoundMarker>
         scale: isOutOfBounds ? 1 : 0,
         duration: isOutOfBounds
             ? const Duration(milliseconds: 900)
-            : const Duration(milliseconds: 200),
-        curve: isOutOfBounds ? Curves.elasticOut : Curves.easeIn,
+            : const Duration(milliseconds: 100),
+        curve: isOutOfBounds ? Curves.elasticOut : Curves.easeOut,
         child: Opacity(
           opacity: (MAX_TOTAL_DIFF_IN_METERS / totalDiff).clamp(0.2, 1),
           child: Transform.rotate(
