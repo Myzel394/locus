@@ -13,6 +13,7 @@ import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/AddressFetcher.dart';
 import 'package:locus/widgets/DetailInformationBox.dart';
 import 'package:locus/widgets/RelaySelectSheet.dart';
+import 'package:locus/widgets/SimpleAddressFetcher.dart';
 import 'package:locus/widgets/TimerWidget.dart';
 import 'package:provider/provider.dart';
 
@@ -96,49 +97,8 @@ class _DetailsState extends State<Details> {
                     : Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          AddressFetcher(
-                            latitude: widget.locations.last.latitude,
-                            longitude: widget.locations.last.longitude,
-                            builder: (address) => Text.rich(
-                              TextSpan(
-                                children: [
-                                  TextSpan(
-                                    text: address,
-                                    style: getBodyTextTextStyle(context),
-                                  ),
-                                  TextSpan(
-                                    text:
-                                        " (${widget.locations.last.latitude}, ${widget.locations.last.longitude})",
-                                    style: getCaptionTextStyle(context),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            rawLocationBuilder: (isLoading) => Row(
-                              children: <Widget>[
-                                Flexible(
-                                  child: Text(
-                                    "${widget.locations.last.latitude}, ${widget.locations.last.longitude}",
-                                    style: getBodyTextTextStyle(context),
-                                    overflow: TextOverflow.clip,
-                                  ),
-                                ),
-                                const SizedBox(width: SMALL_SPACE),
-                                isLoading
-                                    ? SizedBox.square(
-                                        dimension:
-                                            getIconSizeForBodyText(context),
-                                        child:
-                                            PlatformCircularProgressIndicator(
-                                          material: (_, __) =>
-                                              MaterialProgressIndicatorData(
-                                            strokeWidth: 2,
-                                          ),
-                                        ),
-                                      )
-                                    : const SizedBox.shrink(),
-                              ],
-                            ),
+                          SimpleAddressFetcher(
+                            location: widget.locations.last.asLatLng(),
                           ),
                           const SizedBox(height: MEDIUM_SPACE),
                           Tooltip(

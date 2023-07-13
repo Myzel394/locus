@@ -8,6 +8,7 @@
   "biometricsFailed": "You could not be authenticated",
   "openInMaps": "Open in Maps",
   "addLabel": "Add",
+  "showDetailsLabel": "Show Details",
   "addNewValueLabel": "Add \"{value}\"",
   "@addNewValueLabel": {
     "placeholders": {

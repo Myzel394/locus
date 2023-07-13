@@ -25,6 +25,7 @@ import 'package:locus/screens/SharesOverviewScreen.dart';
 import 'package:locus/screens/locations_overview_screen_widgets/ActiveSharesSheet.dart';
 import 'package:locus/screens/locations_overview_screen_widgets/OutOfBoundMarker.dart';
 import 'package:locus/screens/locations_overview_screen_widgets/ShareLocationSheet.dart';
+import 'package:locus/screens/locations_overview_screen_widgets/ViewLocationPopup.dart';
 import 'package:locus/screens/locations_overview_screen_widgets/view_location_fetcher.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/services/view_service.dart';
@@ -82,6 +83,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
         TickerProviderStateMixin {
   late final ViewLocationFetcher _fetchers;
   MapController? flutterMapController;
+  PopupController? flutterMapPopupController;
   AppleMaps.AppleMapController? appleMapController;
 
   late final AnimationController rotationController;
@@ -178,6 +180,8 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
           mapEventStream.add(event);
         }
       });
+
+      flutterMapPopupController = PopupController();
     }
 
     rotationController =
@@ -758,55 +762,23 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
         PopupMarkerLayer(
           options: PopupMarkerLayerOptions(
             markerTapBehavior: MarkerTapBehavior.togglePopupAndHideRest(),
+            popupController: flutterMapPopupController,
             popupDisplayOptions: PopupDisplayOptions(
               builder: (context, marker) {
-                final l10n = AppLocalizations.of(context);
                 final view = viewService.views.firstWhere(
                   (view) => Key(view.id) == marker.key,
                 );
 
-                return Paper(
-                  width: null,
-                  child: Padding(
-                    padding: const EdgeInsets.all(MEDIUM_SPACE),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: <Widget>[
-                            Icon(
-                              Icons.circle_rounded,
-                              size: 20,
-                              color: view.color,
-                            ),
-                            const SizedBox(width: SMALL_SPACE),
-                            Text(view.name),
-                          ],
-                        ),
-                        const SizedBox(height: MEDIUM_SPACE),
-                        PlatformTextButton(
-                          child: Text(l10n.openInMaps),
-                          onPressed: () {
-                            showPlatformModalSheet(
-                              context: context,
-                              material: MaterialModalSheetData(
-                                backgroundColor: Colors.transparent,
-                              ),
-                              builder: (context) => OpenInMaps(
-                                destination: Coords(
-                                  marker.point.latitude,
-                                  marker.point.longitude,
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
+                return ViewLocationPopup(
+                  view: view,
+                  location: marker.point,
+                  onShowDetails: () {
+                    flutterMapPopupController!.togglePopup(marker);
+                    setState(() {
+                      showFAB = false;
+                      selectedViewID = view.id;
+                    });
+                  },
                 );
               },
             ),

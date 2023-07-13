@@ -16,6 +16,7 @@ import 'package:locus/utils/location.dart';
 import 'package:locus/utils/permission.dart';
 import 'package:locus/widgets/ModalSheet.dart';
 import 'package:locus/widgets/RequestLocationPermissionMixin.dart';
+import 'package:locus/widgets/SimpleAddressFetcher.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 import '../../constants/spacing.dart';
@@ -188,36 +189,7 @@ class _ViewDetailsSheetState extends State<ViewDetailsSheet> {
                   l10n.locationFetchEmptyError,
                 )
               else ...[
-                AddressFetcher(
-                  latitude: lastLocation.latitude,
-                  longitude: lastLocation.longitude,
-                  builder: (address) => Text.rich(
-                    TextSpan(
-                      children: [
-                        TextSpan(
-                          text: address,
-                          style: getBodyTextTextStyle(context),
-                        ),
-                        TextSpan(
-                          text: " (${lastLocation.formatRawAddress()})",
-                          style: getCaptionTextStyle(context),
-                        ),
-                      ],
-                    ),
-                  ),
-                  rawLocationBuilder: (isLoading) => Row(
-                    children: <Widget>[
-                      if (isLoading) ...[
-                        PlatformCircularProgressIndicator(),
-                        const SizedBox(width: SMALL_SPACE),
-                      ],
-                      Text(
-                        widget.lastLocation!.formatRawAddress(),
-                        style: getBodyTextTextStyle(context),
-                      ),
-                    ],
-                  ),
-                ),
+                SimpleAddressFetcher(location: lastLocation.asLatLng()),
                 const SizedBox(width: MEDIUM_SPACE),
                 GridView.count(
                   crossAxisCount: 2,

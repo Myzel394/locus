@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:locus/constants/values.dart';
+import "package:latlong2/latlong.dart";
 
 enum LocationMethod {
   best,
@@ -113,3 +114,6 @@ Stream<Position> getLastAndCurrentPosition({
 
   return controller.stream;
 }
+
+String formatRawAddress(final LatLng location) =>
+    "${location.latitude.toStringAsFixed(5)}, ${location.longitude.toStringAsFixed(5)}";
