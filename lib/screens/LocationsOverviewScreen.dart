@@ -95,8 +95,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
   Stream<Position>? _positionStream;
 
   // Dummy stream to trigger updates to out of bound markers
-  StreamController<MapEventWithMove> mapEventStream =
-      StreamController<MapEventWithMove>.broadcast();
+  StreamController<void> mapEventStream = StreamController<void>.broadcast();
 
   // Since we already listen to the latest position, we will pass it
   // manually to `current_location_layer` to avoid it also registering
@@ -176,8 +175,10 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
           });
         }
 
-        if (event is MapEventWithMove) {
-          mapEventStream.add(event);
+        if (event is MapEventWithMove ||
+            event is MapEventDoubleTapZoom ||
+            event is MapEventScrollWheelZoom) {
+          mapEventStream.add(null);
         }
       });
 

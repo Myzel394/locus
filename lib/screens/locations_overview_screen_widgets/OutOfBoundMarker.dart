@@ -23,7 +23,7 @@ class OutOfBoundMarker extends StatefulWidget {
   final AppleMaps.AppleMapController? appleMapController;
 
   // Stream that tells when to update
-  final Stream<MapEventWithMove> updateStream;
+  final Stream<void> updateStream;
 
   const OutOfBoundMarker({
     required this.onTap,
@@ -64,7 +64,7 @@ class _OutOfBoundMarkerState extends State<OutOfBoundMarker>
   void initState() {
     super.initState();
 
-    _updateSubscription = widget.updateStream.listen((event) {
+    _updateSubscription = widget.updateStream.listen((_) {
       updatePosition();
     });
 
