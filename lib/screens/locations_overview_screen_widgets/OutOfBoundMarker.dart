@@ -1,15 +1,17 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:apple_maps_flutter/apple_maps_flutter.dart' as AppleMaps;
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:locus/services/location_point_service.dart';
 import "package:latlong2/latlong.dart";
+import 'package:locus/constants/spacing.dart';
+import 'package:locus/services/location_point_service.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:simple_shadow/simple_shadow.dart';
-import 'package:apple_maps_flutter/apple_maps_flutter.dart' as AppleMaps;
 
 import '../../utils/theme.dart';
 import 'constants.dart';
@@ -60,6 +62,16 @@ class _OutOfBoundMarkerState extends State<OutOfBoundMarker>
   double rotation = 0;
   double totalDiff = 0;
 
+  double get outOfBoundMarkerTopPadding {
+    return isCupertino(context) ? HUGE_SPACE * 2 : HUGE_SPACE + MEDIUM_SPACE;
+  }
+
+  double get outOfBoundMarkerBottomPadding {
+    return isCupertino(context)
+        ? FAB_SIZE + FAB_MARGIN + OUT_OF_BOUND_MARKER_SIZE + LARGE_SPACE
+        : FAB_SIZE + FAB_MARGIN + OUT_OF_BOUND_MARKER_SIZE + LARGE_SPACE;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -100,9 +112,9 @@ class _OutOfBoundMarkerState extends State<OutOfBoundMarker>
       this.size = size;
       xAvailablePercentage =
           (size.width - OUT_OF_BOUND_MARKER_X_PADDING) / size.width;
-      yAvailablePercentageStart = OUT_OF_BOUND_MARKER_TOP_PADDING / size.height;
+      yAvailablePercentageStart = outOfBoundMarkerTopPadding / size.height;
       yAvailablePercentageEnd =
-          (size.height - OUT_OF_BOUND_MARKER_BOTTOM_PADDING) / size.height;
+          (size.height - outOfBoundMarkerBottomPadding) / size.height;
     });
 
     // (h - o) / h
