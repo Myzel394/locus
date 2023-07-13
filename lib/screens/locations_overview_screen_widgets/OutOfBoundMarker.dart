@@ -90,8 +90,8 @@ class _OutOfBoundMarkerState extends State<OutOfBoundMarker>
 
   void _updateSizes() {
     final size = MediaQuery.of(context).size;
-    final availableWidth = size.width - OUT_OF_BOUND_MARKER_X_PADDING * 2;
-    final availableHeight = size.height - OUT_OF_BOUND_MARKER_Y_PADDING * 2;
+    final availableWidth = size.width - OUT_OF_BOUND_MARKER_X_PADDING;
+    final availableHeight = size.height - OUT_OF_BOUND_MARKER_Y_PADDING;
 
     setState(() {
       this.size = size;
@@ -134,7 +134,7 @@ class _OutOfBoundMarkerState extends State<OutOfBoundMarker>
     final width =
         size.width - OUT_OF_BOUND_MARKER_X_PADDING - OUT_OF_BOUND_MARKER_SIZE;
     final height = xPercentage * size.width > bottomRightMapActionsHeight
-        ? size.height - (FAB_SIZE + FAB_MARGIN) * 2
+        ? size.height - (FAB_SIZE + FAB_MARGIN) * 3
         : size.height - OUT_OF_BOUND_MARKER_Y_PADDING;
 
     setState(() {
