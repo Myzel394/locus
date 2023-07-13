@@ -43,6 +43,8 @@ class _OutOfBoundMarkerState extends State<OutOfBoundMarker>
     with WidgetsBindingObserver {
   late final StreamSubscription<void> _updateSubscription;
 
+  bool isOutOfBounds = false;
+
   // Instead of using `MediaQuery.of(context).size`, we use a variable to store
   // the computed variable, for better performance
   Size size = const Size(0, 0);
@@ -68,6 +70,7 @@ class _OutOfBoundMarkerState extends State<OutOfBoundMarker>
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _updateSizes();
+      updatePosition();
     });
   }
 
@@ -85,6 +88,7 @@ class _OutOfBoundMarkerState extends State<OutOfBoundMarker>
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _updateSizes();
+      updatePosition();
     });
   }
 
@@ -106,6 +110,17 @@ class _OutOfBoundMarkerState extends State<OutOfBoundMarker>
     final east = bounds[1];
     final south = bounds[2];
     final west = bounds[3];
+
+    // Check if the marker is inside the bounds
+    if (widget.lastViewLocation.latitude < north &&
+        widget.lastViewLocation.latitude > south &&
+        widget.lastViewLocation.longitude < east &&
+        widget.lastViewLocation.longitude > west) {
+      setState(() {
+        isOutOfBounds = false;
+      });
+      return;
+    }
 
     final xPercentage =
         ((widget.lastViewLocation.longitude - west) / (east - west))
@@ -142,6 +157,7 @@ class _OutOfBoundMarkerState extends State<OutOfBoundMarker>
       y = yPercentage * height;
       this.rotation = rotation;
       this.totalDiff = totalDiff;
+      isOutOfBounds = true;
     });
   }
 
@@ -176,58 +192,65 @@ class _OutOfBoundMarkerState extends State<OutOfBoundMarker>
     return Positioned(
       left: x,
       top: y,
-      child: Opacity(
-        opacity: (MAX_TOTAL_DIFF_IN_METERS / totalDiff).clamp(0.2, 1),
-        child: Transform.rotate(
-          angle: rotation,
-          child: GestureDetector(
-            onTap: widget.onTap,
-            child: Stack(
-              children: [
-                SimpleShadow(
-                  opacity: .4,
-                  sigma: 2,
-                  color: Colors.black,
-                  // Calculate offset based of rotation, shadow should always show down
-                  offset: Offset(
-                    sin(rotation) * 4,
-                    cos(rotation) * 4,
-                  ),
-                  child: SizedBox.square(
-                    dimension: OUT_OF_BOUND_MARKER_SIZE.toDouble(),
-                    child: SvgPicture.asset(
-                      "assets/location-out-of-bounds-marker.svg",
-                      width: OUT_OF_BOUND_MARKER_SIZE.toDouble(),
-                      height: OUT_OF_BOUND_MARKER_SIZE.toDouble(),
-                      colorFilter: ColorFilter.mode(
-                        getSheetColor(context),
-                        BlendMode.srcATop,
+      child: AnimatedScale(
+        scale: isOutOfBounds ? 1 : 0,
+        duration: isOutOfBounds
+            ? const Duration(milliseconds: 900)
+            : const Duration(milliseconds: 200),
+        curve: isOutOfBounds ? Curves.elasticOut : Curves.easeIn,
+        child: Opacity(
+          opacity: (MAX_TOTAL_DIFF_IN_METERS / totalDiff).clamp(0.2, 1),
+          child: Transform.rotate(
+            angle: rotation,
+            child: GestureDetector(
+              onTap: widget.onTap,
+              child: Stack(
+                children: [
+                  SimpleShadow(
+                    opacity: .4,
+                    sigma: 2,
+                    color: Colors.black,
+                    // Calculate offset based of rotation, shadow should always show down
+                    offset: Offset(
+                      sin(rotation) * 4,
+                      cos(rotation) * 4,
+                    ),
+                    child: SizedBox.square(
+                      dimension: OUT_OF_BOUND_MARKER_SIZE.toDouble(),
+                      child: SvgPicture.asset(
+                        "assets/location-out-of-bounds-marker.svg",
+                        width: OUT_OF_BOUND_MARKER_SIZE.toDouble(),
+                        height: OUT_OF_BOUND_MARKER_SIZE.toDouble(),
+                        colorFilter: ColorFilter.mode(
+                          getSheetColor(context),
+                          BlendMode.srcATop,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                Positioned(
-                  left: OUT_OF_BOUND_MARKER_SIZE / 2 - 40 / 2,
-                  top: 3,
-                  child: Icon(
-                    Icons.circle_rounded,
-                    size: 40,
-                    color: widget.view.color,
-                  ),
-                ),
-                Positioned(
-                  left: OUT_OF_BOUND_MARKER_SIZE / 2 - 30 / 2,
-                  top: 7.5,
-                  child: Transform.rotate(
-                    angle: -rotation,
+                  Positioned(
+                    left: OUT_OF_BOUND_MARKER_SIZE / 2 - 40 / 2,
+                    top: 3,
                     child: Icon(
-                      Icons.location_on_rounded,
-                      size: 30,
-                      color: getSheetColor(context),
+                      Icons.circle_rounded,
+                      size: 40,
+                      color: widget.view.color,
                     ),
                   ),
-                )
-              ],
+                  Positioned(
+                    left: OUT_OF_BOUND_MARKER_SIZE / 2 - 30 / 2,
+                    top: 7.5,
+                    child: Transform.rotate(
+                      angle: -rotation,
+                      child: Icon(
+                        Icons.location_on_rounded,
+                        size: 30,
+                        color: getSheetColor(context),
+                      ),
+                    ),
+                  )
+                ],
+              ),
             ),
           ),
         ),
