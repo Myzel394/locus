@@ -10,7 +10,9 @@ import 'package:geolocator/geolocator.dart';
 import "package:latlong2/latlong.dart";
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/services/location_point_service.dart';
+import 'package:locus/services/settings_service.dart';
 import 'package:locus/services/view_service.dart';
+import 'package:provider/provider.dart';
 import 'package:simple_shadow/simple_shadow.dart';
 
 import '../../utils/theme.dart';
@@ -122,6 +124,9 @@ class _OutOfBoundMarkerState extends State<OutOfBoundMarker>
   }
 
   void updatePosition() async {
+    final settings = context.read<SettingsService>();
+    final usesOpenStreetMap =
+        settings.getMapProvider() == MapProvider.openStreetMap;
     final bounds = await getBounds();
     final north = bounds[0];
     final east = bounds[1];
@@ -165,8 +170,9 @@ class _OutOfBoundMarkerState extends State<OutOfBoundMarker>
     final bottomRightMapActionsHeight = size.width - (FAB_SIZE + FAB_MARGIN);
     final width =
         size.width - OUT_OF_BOUND_MARKER_X_PADDING - OUT_OF_BOUND_MARKER_SIZE;
-    final height = (xPercentage * size.width > bottomRightMapActionsHeight &&
-            yPercentage > 0.5)
+    final height = usesOpenStreetMap &&
+            (xPercentage * size.width > bottomRightMapActionsHeight &&
+                yPercentage > 0.5)
         ? size.height - (FAB_SIZE + FAB_MARGIN) * 2
         : size.height;
 

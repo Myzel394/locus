@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
 
 import "package:apple_maps_flutter/apple_maps_flutter.dart" as AppleMaps;
 import 'package:background_fetch/background_fetch.dart';
@@ -15,7 +14,6 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:locus/constants/spacing.dart';
@@ -36,11 +34,9 @@ import 'package:locus/utils/show_message.dart';
 import 'package:locus/widgets/FABOpenContainer.dart';
 import 'package:locus/widgets/Paper.dart';
 import 'package:locus/widgets/PlatformFlavorWidget.dart';
-import 'package:map_launcher/map_launcher.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:provider/provider.dart';
-import 'package:simple_shadow/simple_shadow.dart';
 import 'package:uni_links/uni_links.dart';
 
 import '../constants/notifications.dart';
@@ -57,7 +53,6 @@ import '../utils/color.dart';
 import '../utils/permission.dart';
 import '../utils/platform.dart';
 import '../utils/theme.dart';
-import '../widgets/OpenInMaps.dart';
 import 'ViewDetailScreen.dart';
 import 'locations_overview_screen_widgets/ViewDetailsSheet.dart';
 import 'locations_overview_screen_widgets/constants.dart';
@@ -681,6 +676,9 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
         myLocationButtonEnabled: true,
         myLocationEnabled: true,
         compassEnabled: true,
+        onCameraMove: (_) {
+          mapEventStream.add(null);
+        },
         onMapCreated: (controller) {
           appleMapController = controller;
 
