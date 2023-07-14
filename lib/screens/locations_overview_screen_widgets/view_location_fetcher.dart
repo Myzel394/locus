@@ -43,36 +43,49 @@ class ViewLocationFetcher extends ChangeNotifier {
     );
   }
 
-  void _fetchLast24Hours() {
-    _getLocationsUnsubscribers.addAll(
-      views.map(
-        (view) => view.getLocations(
-          from: DateTime.now().subtract(const Duration(days: 1)),
-          onLocationFetched: (location) {
-            if (!_mounted) {
-              return;
-            }
+  void _fetchView(final TaskView view, {
+    final DateTime? from,
+    final int? limit,
+  }) {
+    assert(!_locations.containsKey(view));
 
-            _locations[view] = List<LocationPointService>.from(
-              [..._locations[view] ?? [], location],
-            );
-          },
-          onEnd: () {
-            if (!_mounted) {
-              return;
-            }
+    _getLocationsUnsubscribers.add(
+      view.getLocations(
+        from: from,
+        limit: limit,
+        onLocationFetched: (location) {
+          if (!_mounted) {
+            return;
+          }
 
-            _locations[view] = _locations[view]!
-              ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+          _locations[view] = List<LocationPointService>.from(
+            [..._locations[view] ?? [], location],
+          );
+        },
+        onEnd: () {
+          if (!_mounted) {
+            return;
+          }
 
-            _setIsLoading(_locations.keys.length == views.length);
-          },
-          onEmptyEnd: () {
-            _fetchLastLocation(view);
-          },
-        ),
+          _locations[view] = _locations[view]!
+            ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+
+          _setIsLoading(_locations.keys.length == views.length);
+        },
+        onEmptyEnd: () {
+          _fetchLastLocation(view);
+        },
       ),
     );
+  }
+
+  void _fetchLast24Hours() {
+    for (final view in views) {
+      _fetchView(
+        view,
+        from: DateTime.now().subtract(const Duration(hours: 24)),
+      );
+    }
   }
 
   void fetchLocations() {
@@ -84,6 +97,15 @@ class ViewLocationFetcher extends ChangeNotifier {
   void _setIsLoading(final bool isLoading) {
     _isLoading = isLoading;
     notifyListeners();
+  }
+
+  void addView(final TaskView view) {
+    _setIsLoading(true);
+
+    _fetchView(
+      view,
+      from: DateTime.now().subtract(const Duration(hours: 24)),
+    );
   }
 
   @override

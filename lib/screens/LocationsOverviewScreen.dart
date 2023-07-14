@@ -132,6 +132,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
         _setLocationFromSettings();
 
         final taskService = context.read<TaskService>();
+        final viewService = context.read<ViewService>();
         final logService = context.read<LogService>();
         final appUpdateService = context.read<AppUpdateService>();
         _fetchers.addListener(_rebuild);
@@ -149,6 +150,8 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
             _initLiveLocationUpdate();
           }
         });
+
+        viewService.addListener(_handleViewServiceChange);
       });
 
     BackgroundFetch.start();
@@ -216,6 +219,13 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     if (state == AppLifecycleState.resumed) {
       goToCurrentPosition(showErrorMessage: false);
     }
+  }
+
+  void _handleViewServiceChange() {
+    final viewService = context.read<ViewService>();
+    final newView = viewService.views.last;
+
+    _fetchers.addView(newView);
   }
 
   void _setLocationFromSettings() async {
