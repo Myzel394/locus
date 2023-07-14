@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:apple_maps_flutter/apple_maps_flutter.dart' as AppleMaps;
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_svg/svg.dart';
@@ -64,6 +65,8 @@ class _OutOfBoundMarkerState extends State<OutOfBoundMarker>
   double rotation = 0;
   double totalDiff = 0;
 
+  bool isPressing = false;
+
   double get outOfBoundMarkerTopPadding {
     return isCupertino(context) ? HUGE_SPACE * 2 : HUGE_SPACE + MEDIUM_SPACE;
   }
@@ -118,9 +121,6 @@ class _OutOfBoundMarkerState extends State<OutOfBoundMarker>
       yAvailablePercentageEnd =
           (size.height - outOfBoundMarkerBottomPadding) / size.height;
     });
-
-    // (h - o) / h
-    // h / h - o / h
   }
 
   void updatePosition() async {
@@ -217,17 +217,60 @@ class _OutOfBoundMarkerState extends State<OutOfBoundMarker>
       left: x,
       top: y,
       child: AnimatedScale(
-        scale: isOutOfBounds ? 1 : 0,
-        duration: isOutOfBounds
-            ? const Duration(milliseconds: 900)
-            : const Duration(milliseconds: 100),
-        curve: isOutOfBounds ? Curves.elasticOut : Curves.easeOut,
+        scale: (() {
+          if (!isOutOfBounds) {
+            return 0.07;
+          }
+
+          if (isPressing) {
+            return 0.85;
+          }
+
+          return 1.0;
+        })(),
+        duration: (() {
+          if (!isOutOfBounds) {
+            return 100.ms;
+          }
+
+          if (isPressing) {
+            return 400.ms;
+          }
+
+          return 900.ms;
+        })(),
+        curve: (() {
+          if (!isOutOfBounds) {
+            return Curves.easeOut;
+          }
+
+          if (isPressing) {
+            return Curves.bounceOut;
+          }
+
+          return Curves.elasticOut;
+        })(),
         child: Opacity(
           opacity: (MAX_TOTAL_DIFF_IN_METERS / totalDiff).clamp(0.2, 1),
           child: Transform.rotate(
             angle: rotation,
             child: GestureDetector(
               onTap: widget.onTap,
+              onTapDown: (_) {
+                setState(() {
+                  isPressing = true;
+                });
+              },
+              onTapUp: (_) {
+                setState(() {
+                  isPressing = false;
+                });
+              },
+              onTapCancel: () {
+                setState(() {
+                  isPressing = false;
+                });
+              },
               child: Stack(
                 children: [
                   SimpleShadow(
