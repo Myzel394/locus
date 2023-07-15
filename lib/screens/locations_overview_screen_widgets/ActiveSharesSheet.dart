@@ -548,6 +548,7 @@ class _ActiveSharesSheetState extends State<ActiveSharesSheet>
             initialChildSize: MIN_SIZE,
             controller: sheetController,
             builder: (context, controller) => ModalSheet(
+              miuiIsGapless: true,
               child: SingleChildScrollView(
                 controller: controller,
                 child: quickShareTasks.isEmpty

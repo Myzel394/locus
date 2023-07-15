@@ -44,7 +44,7 @@ class ViewDetailsSheet extends StatefulWidget {
 class _ViewDetailsSheetState extends State<ViewDetailsSheet> {
   final containerKey = GlobalKey();
   final DraggableScrollableController controller =
-      DraggableScrollableController();
+  DraggableScrollableController();
 
   TaskView? oldView;
   LocationPointService? oldLastLocation;
@@ -126,14 +126,15 @@ class _ViewDetailsSheetState extends State<ViewDetailsSheet> {
                     widget.lastLocation!.latitude,
                     widget.lastLocation!.longitude,
                   ),
-                  builder: (context) => Transform.rotate(
-                    angle: widget.lastLocation!.heading!,
-                    child: Icon(
-                      CupertinoIcons.location_north_fill,
-                      color: getPrimaryColorShades(context)[0],
-                      size: 30,
-                    ),
-                  ),
+                  builder: (context) =>
+                      Transform.rotate(
+                        angle: widget.lastLocation!.heading!,
+                        child: Icon(
+                          CupertinoIcons.location_north_fill,
+                          color: getPrimaryColorShades(context)[0],
+                          size: 30,
+                        ),
+                      ),
                 ),
               ],
             )
@@ -159,129 +160,136 @@ class _ViewDetailsSheetState extends State<ViewDetailsSheet> {
       snapSizes: const [
         0.0,
         0.15,
+
         0.22,
         1,
       ],
-      builder: (context, scrollController) => ModalSheet(
-        child: SingleChildScrollView(
-          controller: scrollController,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              const SizedBox(height: MEDIUM_SPACE),
-              if (view != null)
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    Icon(
-                      Icons.circle_rounded,
-                      size: 20,
-                      color: view.color,
+      builder: (context, scrollController) =>
+          ModalSheet(
+            miuiIsGapless: true,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  const SizedBox(height: MEDIUM_SPACE),
+                  if (view != null)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: <Widget>[
+                        Icon(
+                          Icons.circle_rounded,
+                          size: 20,
+                          color: view.color,
+                        ),
+                        const SizedBox(width: SMALL_SPACE),
+                        Text(view.name),
+                      ],
                     ),
-                    const SizedBox(width: SMALL_SPACE),
-                    Text(view.name),
-                  ],
-                ),
-              const SizedBox(height: LARGE_SPACE),
-              if (lastLocation == null)
-                Text(
-                  l10n.locationFetchEmptyError,
-                )
-              else ...[
-                SimpleAddressFetcher(location: lastLocation.asLatLng()),
-                const SizedBox(width: MEDIUM_SPACE),
-                GridView.count(
-                  crossAxisCount: 2,
-                  shrinkWrap: true,
-                  mainAxisSpacing: MEDIUM_SPACE,
-                  crossAxisSpacing: MEDIUM_SPACE,
-                  physics: const NeverScrollableScrollPhysics(),
-                  children: [
-                    LastLocationBentoElement(
-                      view: view!,
-                      lastLocation: lastLocation,
-                    ),
-                    DistanceBentoElement(
-                      lastLocation: lastLocation,
-                      onTap: () {
-                        controller.animateTo(
-                          0.22,
-                          duration: const Duration(milliseconds: 150),
-                          curve: Curves.fastLinearToSlowEaseIn,
-                        );
-
-                        widget.onGoToPosition(
-                          LatLng(
-                            lastLocation.latitude,
-                            lastLocation.longitude,
+                  const SizedBox(height: LARGE_SPACE),
+                  if (lastLocation == null)
+                    Text(
+                      l10n.locationFetchEmptyError,
+                    )
+                  else
+                    ...[
+                      SimpleAddressFetcher(location: lastLocation.asLatLng()),
+                      const SizedBox(width: MEDIUM_SPACE),
+                      GridView.count(
+                        crossAxisCount: 2,
+                        shrinkWrap: true,
+                        mainAxisSpacing: MEDIUM_SPACE,
+                        crossAxisSpacing: MEDIUM_SPACE,
+                        physics: const NeverScrollableScrollPhysics(),
+                        children: [
+                          LastLocationBentoElement(
+                            view: view!,
+                            lastLocation: lastLocation,
                           ),
-                        );
-                      },
-                    ),
-                    BentoGridElement(
-                      title: lastLocation.altitude == null
-                          ? l10n.unknownValue
-                          : l10n.locations_values_altitude_m(
+                          DistanceBentoElement(
+                            lastLocation: lastLocation,
+                            onTap: () {
+                              controller.animateTo(
+                                0.22,
+                                duration: const Duration(milliseconds: 150),
+                                curve: Curves.fastLinearToSlowEaseIn,
+                              );
+
+                              widget.onGoToPosition(
+                                LatLng(
+                                  lastLocation.latitude,
+                                  lastLocation.longitude,
+                                ),
+                              );
+                            },
+                          ),
+                          BentoGridElement(
+                            title: lastLocation.altitude == null
+                                ? l10n.unknownValue
+                                : l10n.locations_values_altitude_m(
                               lastLocation.altitude!.round(),
                             ),
-                      icon: platformThemeData(
-                        context,
-                        material: (_) => Icons.height_rounded,
-                        cupertino: (_) => CupertinoIcons.arrow_up,
-                      ),
-                      type: BentoType.tertiary,
-                      description: l10n.locations_values_altitude_description,
-                    ),
-                    BentoGridElement(
-                      title: lastLocation.speed == null
-                          ? l10n.unknownValue
-                          : l10n.locations_values_speed_kmh(
+                            icon: platformThemeData(
+                              context,
+                              material: (_) => Icons.height_rounded,
+                              cupertino: (_) => CupertinoIcons.arrow_up,
+                            ),
+                            type: BentoType.tertiary,
+                            description: l10n
+                                .locations_values_altitude_description,
+                          ),
+                          BentoGridElement(
+                            title: lastLocation.speed == null
+                                ? l10n.unknownValue
+                                : l10n.locations_values_speed_kmh(
                               (lastLocation.speed! * 3.6).round(),
                             ),
-                      icon: platformThemeData(
-                        context,
-                        material: (_) => Icons.speed,
-                        cupertino: (_) => CupertinoIcons.speedometer,
-                      ),
-                      type: BentoType.tertiary,
-                      description: l10n.locations_values_speed_description,
-                    ),
-                    BentoGridElement(
-                      title: lastLocation.batteryLevel == null
-                          ? l10n.unknownValue
-                          : l10n.locations_values_battery_value(
+                            icon: platformThemeData(
+                              context,
+                              material: (_) => Icons.speed,
+                              cupertino: (_) => CupertinoIcons.speedometer,
+                            ),
+                            type: BentoType.tertiary,
+                            description: l10n
+                                .locations_values_speed_description,
+                          ),
+                          BentoGridElement(
+                            title: lastLocation.batteryLevel == null
+                                ? l10n.unknownValue
+                                : l10n.locations_values_battery_value(
                               (lastLocation.batteryLevel! * 100).round(),
                             ),
-                      icon: getIconDataForBatteryLevel(
-                        context,
-                        lastLocation.batteryLevel,
-                      ),
-                      description: l10n.locations_values_battery_description,
-                      type: BentoType.tertiary,
-                    ),
-                    BentoGridElement(
-                      title: lastLocation.batteryState == null
-                          ? l10n.unknownValue
-                          : l10n.locations_values_batteryState_value(
+                            icon: getIconDataForBatteryLevel(
+                              context,
+                              lastLocation.batteryLevel,
+                            ),
+                            description: l10n
+                                .locations_values_battery_description,
+                            type: BentoType.tertiary,
+                          ),
+                          BentoGridElement(
+                            title: lastLocation.batteryState == null
+                                ? l10n.unknownValue
+                                : l10n.locations_values_batteryState_value(
                               lastLocation.batteryState!.name,
                             ),
-                      icon: Icons.cable_rounded,
-                      type: BentoType.tertiary,
-                      description:
-                          l10n.locations_values_batteryState_description,
-                    ),
-                  ],
-                ),
-                if (widget.lastLocation?.heading != null) ...[
-                  const SizedBox(height: MEDIUM_SPACE),
-                  buildHeadingMap(),
+                            icon: Icons.cable_rounded,
+                            type: BentoType.tertiary,
+                            description:
+                            l10n.locations_values_batteryState_description,
+                          ),
+                        ],
+                      ),
+                      if (widget.lastLocation?.heading != null) ...[
+                        const SizedBox(height: MEDIUM_SPACE),
+                        buildHeadingMap(),
+                      ],
+                    ],
                 ],
-              ],
-            ],
+              ),
+            ),
           ),
-        ),
-      ),
     );
   }
 }
@@ -344,16 +352,16 @@ class _DistanceBentoElementState extends State<DistanceBentoElement>
     return BentoGridElement(
       onTap: hasGrantedPermission == false
           ? () async {
-              final hasGranted = await requestBasicLocationPermission();
+        final hasGranted = await requestBasicLocationPermission();
 
-              if (hasGranted) {
-                fetchCurrentPosition();
+        if (hasGranted) {
+          fetchCurrentPosition();
 
-                setState(() {
-                  hasGrantedPermission = true;
-                });
-              }
-            }
+          setState(() {
+            hasGrantedPermission = true;
+          });
+        }
+      }
           : widget.onTap,
       title: (() {
         if (!hasGrantedPermission) {
@@ -366,12 +374,12 @@ class _DistanceBentoElementState extends State<DistanceBentoElement>
 
         return l10n.locations_values_distance_km(
           (Geolocator.distanceBetween(
-                    currentPosition!.latitude,
-                    currentPosition!.longitude,
-                    widget.lastLocation.latitude,
-                    widget.lastLocation.longitude,
-                  ) /
-                  1000)
+            currentPosition!.latitude,
+            currentPosition!.longitude,
+            widget.lastLocation.latitude,
+            widget.lastLocation.longitude,
+          ) /
+              1000)
               .floor()
               .toString(),
         );
@@ -435,18 +443,20 @@ class _LastLocationBentoElementState extends State<LastLocationBentoElement> {
         if (isCupertino(context)) {
           Navigator.of(context).push(
             MaterialWithModalsPageRoute(
-              builder: (context) => ViewDetailScreen(
-                view: widget.view,
-              ),
+              builder: (context) =>
+                  ViewDetailScreen(
+                    view: widget.view,
+                  ),
             ),
           );
         } else {
           Navigator.of(context).push(
             NativePageRoute(
               context: context,
-              builder: (context) => ViewDetailScreen(
-                view: widget.view,
-              ),
+              builder: (context) =>
+                  ViewDetailScreen(
+                    view: widget.view,
+                  ),
             ),
           );
         }
