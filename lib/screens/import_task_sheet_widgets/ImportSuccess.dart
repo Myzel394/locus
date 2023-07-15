@@ -18,7 +18,8 @@ class ImportSuccess extends StatefulWidget {
   State<ImportSuccess> createState() => _ImportSuccessState();
 }
 
-class _ImportSuccessState extends State<ImportSuccess> with TickerProviderStateMixin {
+class _ImportSuccessState extends State<ImportSuccess>
+    with TickerProviderStateMixin {
   late final AnimationController _lottieController;
 
   @override
@@ -63,7 +64,7 @@ class _ImportSuccessState extends State<ImportSuccess> with TickerProviderStateM
         ),
         const SizedBox(height: MEDIUM_SPACE),
         Text(
-          l10n.mainScreen_importTask_successMessage,
+          l10n.sharesOverviewScreen_importTask_successMessage,
           textAlign: TextAlign.center,
           style: getSubTitleTextStyle(context),
         ),

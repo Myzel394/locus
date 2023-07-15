@@ -1,10 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:cryptography/cryptography.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:locus/api/nostr-fetch.dart';
 import 'package:locus/services/task_service.dart';
@@ -14,6 +17,7 @@ import 'package:uuid/uuid.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../api/get-locations.dart' as getLocationsAPI;
+import '../constants/values.dart';
 import 'location_alarm_service.dart';
 import 'location_base.dart';
 import 'location_point_service.dart';
@@ -41,6 +45,7 @@ class TaskView extends ChangeNotifier with LocationBase {
   final List<String> relays;
   final List<LocationAlarmServiceBase> alarms;
   final String id;
+  Color color;
   DateTime lastAlarmCheck;
   DateTime? lastMaybeTrigger;
   String name;
@@ -50,6 +55,7 @@ class TaskView extends ChangeNotifier with LocationBase {
     required this.nostrPublicKey,
     required this.relays,
     required this.name,
+    required this.color,
     this.lastMaybeTrigger,
     String? id,
     DateTime? lastAlarmCheck,
@@ -103,6 +109,9 @@ class TaskView extends ChangeNotifier with LocationBase {
         lastMaybeTrigger: json["lastMaybeTrigger"] != null
             ? DateTime.parse(json["lastMaybeTrigger"])
             : null,
+        color: json["color"] != null
+            ? Color(json["color"])
+            : Colors.primaries[Random().nextInt(Colors.primaries.length)],
       );
 
   static Future<TaskView> fetchFromNostr(
@@ -137,6 +146,10 @@ class TaskView extends ChangeNotifier with LocationBase {
               return;
             }
 
+            if (completer.isCompleted) {
+              return;
+            }
+
             completer.complete(
               TaskView(
                 encryptionPassword: SecretKey(
@@ -145,9 +158,17 @@ class TaskView extends ChangeNotifier with LocationBase {
                 nostrPublicKey: data['nostrPublicKey'],
                 relays: List<String>.from(data['relays']),
                 name: l10n.longFormattedDate(DateTime.now()),
+                color:
+                    Colors.primaries[Random().nextInt(Colors.primaries.length)],
               ),
             );
           } catch (error) {
+            FlutterLogs.logError(
+              LOG_TAG,
+              "Import TaskView",
+              "Error while fetching importing view: $error",
+            );
+
             completer.completeError(error);
           }
         },
@@ -158,9 +179,14 @@ class TaskView extends ChangeNotifier with LocationBase {
 
   void update({
     final String? name,
+    final Color? color,
   }) {
     if (name != null) {
       this.name = name;
+    }
+
+    if (color != null) {
+      this.color = color;
     }
 
     notifyListeners();
@@ -176,6 +202,7 @@ class TaskView extends ChangeNotifier with LocationBase {
       "alarms": alarms.map((alarm) => alarm.toJSON()).toList(),
       "lastAlarmCheck": lastAlarmCheck.toIso8601String(),
       "lastMaybeTrigger": lastMaybeTrigger?.toIso8601String(),
+      "color": color.value,
     };
   }
 
@@ -208,6 +235,7 @@ class TaskView extends ChangeNotifier with LocationBase {
   VoidCallback getLocations({
     required void Function(LocationPointService) onLocationFetched,
     required void Function() onEnd,
+    final VoidCallback? onEmptyEnd,
     int? limit,
     DateTime? from,
   }) =>
@@ -217,6 +245,7 @@ class TaskView extends ChangeNotifier with LocationBase {
         relays: relays,
         onLocationFetched: onLocationFetched,
         onEnd: onEnd,
+        onEmptyEnd: onEmptyEnd,
         from: from,
         limit: limit,
       );

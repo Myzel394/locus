@@ -8,6 +8,7 @@ import 'package:locus/constants/spacing.dart';
 import 'package:locus/screens/LogDetailScreen.dart';
 import 'package:locus/screens/log_detail_screen_widgets/LogCreatedAtInfo.dart';
 import 'package:locus/screens/log_detail_screen_widgets/LogTypeInfo.dart';
+import 'package:locus/screens/shares_overview_screen_widgets/values.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/MaybeMaterial.dart';
 import 'package:provider/provider.dart';
@@ -16,7 +17,6 @@ import '../models/log.dart';
 import '../services/log_service.dart';
 import '../widgets/Paper.dart';
 import 'log_detail_screen_widgets/LogIcon.dart';
-import 'main_screen_widgets/values.dart';
 
 class LogsScreen extends StatefulWidget {
   const LogsScreen({Key? key}) : super(key: key);
@@ -25,7 +25,8 @@ class LogsScreen extends StatefulWidget {
   State<LogsScreen> createState() => _LogsScreenState();
 }
 
-class _LogsScreenState extends State<LogsScreen> with AutomaticKeepAliveClientMixin {
+class _LogsScreenState extends State<LogsScreen>
+    with AutomaticKeepAliveClientMixin {
   bool get wantKeepAlive => true;
 
   @override
@@ -38,7 +39,9 @@ class _LogsScreenState extends State<LogsScreen> with AutomaticKeepAliveClientMi
     return PlatformScaffold(
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: Platform.isAndroid ? const EdgeInsets.only(bottom: FAB_DIMENSION) : EdgeInsets.zero,
+          padding: Platform.isAndroid
+              ? const EdgeInsets.only(bottom: FAB_DIMENSION)
+              : EdgeInsets.zero,
           child: Column(
             children: <Widget>[
               Padding(
@@ -77,7 +80,8 @@ class _LogsScreenState extends State<LogsScreen> with AutomaticKeepAliveClientMi
                 physics: const NeverScrollableScrollPhysics(),
                 itemBuilder: (context, final int index) {
                   // Reverse
-                  final Log log = logService.logs[logService.logs.length - index - 1];
+                  final Log log =
+                      logService.logs[logService.logs.length - index - 1];
                   return Stack(
                     children: <Widget>[
                       Positioned(
@@ -88,7 +92,7 @@ class _LogsScreenState extends State<LogsScreen> with AutomaticKeepAliveClientMi
                         child: Hero(
                           tag: "${log.id}:paper",
                           child: Paper(
-                            roundness: 0,
+                            borderRadius: BorderRadius.zero,
                             child: Container(),
                           ),
                         ),
@@ -97,7 +101,8 @@ class _LogsScreenState extends State<LogsScreen> with AutomaticKeepAliveClientMi
                         onTap: () {
                           Navigator.of(context).push(
                             PageRouteBuilder(
-                              pageBuilder: (_, __, ___) => LogDetailScreen(log: log),
+                              pageBuilder: (_, __, ___) =>
+                                  LogDetailScreen(log: log),
                               fullscreenDialog: true,
                               barrierColor: Colors.black.withOpacity(.3),
                               opaque: false,

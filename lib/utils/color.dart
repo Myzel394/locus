@@ -1,4 +1,8 @@
+import 'dart:math';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 
 MaterialColor createMaterialColor(Color color) {
   List strengths = <double>[.05];
@@ -19,4 +23,31 @@ MaterialColor createMaterialColor(Color color) {
   }
 
   return MaterialColor(color.value, swatch);
+}
+
+/// Picks a random color from the Material color palette, if design is material,
+/// or from the Cupertino color palette, if design is cupertino.
+Color pickRandomColor(
+  final BuildContext context, {
+  final bool onlyMaterial = false,
+}) {
+  final colors = onlyMaterial
+      ? Colors.primaries
+      : platformThemeData(
+          context,
+          material: (data) => Colors.primaries,
+          cupertino: (data) => [
+            CupertinoColors.systemRed,
+            CupertinoColors.systemOrange,
+            CupertinoColors.systemYellow,
+            CupertinoColors.systemGreen,
+            CupertinoColors.systemTeal,
+            CupertinoColors.systemBlue,
+            CupertinoColors.systemIndigo,
+            CupertinoColors.systemPurple,
+            CupertinoColors.systemPink,
+          ],
+        );
+
+  return colors[Random().nextInt(colors.length)];
 }

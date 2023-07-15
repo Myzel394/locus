@@ -38,8 +38,11 @@ class AppUpdateService extends ChangeNotifier {
     return AppUpdateService.fromJSON(jsonDecode(data) as Map<String, dynamic>);
   }
 
-  static AppUpdateService fromJSON(final Map<String, dynamic> data) => AppUpdateService(
-        outDateDate: data['outDateDate'] == null ? null : DateTime.parse(data['outDateDate'] as String),
+  static AppUpdateService fromJSON(final Map<String, dynamic> data) =>
+      AppUpdateService(
+        outDateDate: data['outDateDate'] == null
+            ? null
+            : DateTime.parse(data['outDateDate'] as String),
         hideBanner: data['hideBanner'] as bool,
         hideDialogue: data['hideDialogue'] as bool,
       );
@@ -53,7 +56,8 @@ class AppUpdateService extends ChangeNotifier {
 
   bool get isUpdateAvailable => _isUpdateAvailable;
 
-  Future<Version> getCurrentVersion() async => Version.parse(CURRENT_APP_VERSION);
+  Future<Version> getCurrentVersion() async =>
+      Version.parse(CURRENT_APP_VERSION);
 
   Future<void> checkForUpdates({final bool force = false}) async {
     if (_outDateDate != null && !force) {

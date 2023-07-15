@@ -13,6 +13,7 @@ import 'package:locus/screens/view_alarm_screen_widgets/RadiusRegionMetaDataShee
 import 'package:locus/services/location_alarm_service.dart';
 import 'package:locus/services/settings_service.dart';
 import 'package:locus/utils/helper_sheet.dart';
+import 'package:locus/utils/location.dart';
 import 'package:locus/utils/permission.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/RequestNotificationPermissionMixin.dart';
@@ -28,10 +29,12 @@ class ViewAlarmSelectRadiusRegionScreen extends StatefulWidget {
   });
 
   @override
-  State<ViewAlarmSelectRadiusRegionScreen> createState() => _ViewAlarmSelectRadiusRegionScreenState();
+  State<ViewAlarmSelectRadiusRegionScreen> createState() =>
+      _ViewAlarmSelectRadiusRegionScreenState();
 }
 
-class _ViewAlarmSelectRadiusRegionScreenState extends State<ViewAlarmSelectRadiusRegionScreen>
+class _ViewAlarmSelectRadiusRegionScreenState
+    extends State<ViewAlarmSelectRadiusRegionScreen>
     with RequestNotificationPermissionMixin {
   MapController? flutterMapController;
   AppleMaps.AppleMapController? appleMapController;
@@ -39,6 +42,7 @@ class _ViewAlarmSelectRadiusRegionScreenState extends State<ViewAlarmSelectRadiu
   bool isInScaleMode = false;
   double radius = 100;
   double previousScale = 1;
+  Stream<Position>? _positionStream;
 
   @override
   void initState() {
@@ -81,7 +85,8 @@ class _ViewAlarmSelectRadiusRegionScreenState extends State<ViewAlarmSelectRadiu
               const Icon(Icons.touch_app_rounded),
               const SizedBox(width: MEDIUM_SPACE),
               Flexible(
-                child: Text(l10n.location_addAlarm_radiusBased_help_tapDescription),
+                child: Text(
+                    l10n.location_addAlarm_radiusBased_help_tapDescription),
               ),
             ],
           ),
@@ -91,7 +96,8 @@ class _ViewAlarmSelectRadiusRegionScreenState extends State<ViewAlarmSelectRadiu
               const Icon(Icons.pinch_rounded),
               const SizedBox(width: MEDIUM_SPACE),
               Flexible(
-                child: Text(l10n.location_addAlarm_radiusBased_help_pinchDescription),
+                child: Text(
+                    l10n.location_addAlarm_radiusBased_help_pinchDescription),
               ),
             ],
           ),
@@ -107,41 +113,24 @@ class _ViewAlarmSelectRadiusRegionScreenState extends State<ViewAlarmSelectRadiu
       return;
     }
 
-    Geolocator.getLastKnownPosition().then((location) {
-      if (location == null) {
-        return;
-      }
-
-      flutterMapController?.move(
-        LatLng(location.latitude, location.longitude),
-        13,
-      );
-      appleMapController?.moveCamera(
-        AppleMaps.CameraUpdate.newLatLng(
-          AppleMaps.LatLng(location.latitude, location.longitude),
-        ),
-      );
-    });
-
-    Geolocator.getCurrentPosition(
-      // We want to get the position as fast as possible
-      desiredAccuracy: LocationAccuracy.lowest,
-    ).then((location) {
-      flutterMapController?.move(
-        LatLng(location.latitude, location.longitude),
-        13,
-      );
-      appleMapController?.moveCamera(
-        AppleMaps.CameraUpdate.newLatLng(
-          AppleMaps.LatLng(location.latitude, location.longitude),
-        ),
-      );
-    });
+    _positionStream = getLastAndCurrentPosition()
+      ..listen((position) {
+        flutterMapController?.move(
+          LatLng(position.latitude, position.longitude),
+          13,
+        );
+        appleMapController?.moveCamera(
+          AppleMaps.CameraUpdate.newLatLng(
+            AppleMaps.LatLng(position.latitude, position.longitude),
+          ),
+        );
+      });
   }
 
   @override
   void dispose() {
     flutterMapController?.dispose();
+    _positionStream?.drain();
 
     super.dispose();
   }
@@ -173,7 +162,8 @@ class _ViewAlarmSelectRadiusRegionScreenState extends State<ViewAlarmSelectRadiu
       ),
     );
 
-    final hasGrantedNotificationAccess = await showNotificationPermissionDialog();
+    final hasGrantedNotificationAccess =
+        await showNotificationPermissionDialog();
 
     if (!hasGrantedNotificationAccess) {
       return;
@@ -337,7 +327,9 @@ class _ViewAlarmSelectRadiusRegionScreenState extends State<ViewAlarmSelectRadiu
           ),
         ],
         cupertino: (_, __) => CupertinoNavigationBarData(
-          backgroundColor: isInScaleMode ? null : getCupertinoAppBarColorForMapScreen(context),
+          backgroundColor: isInScaleMode
+              ? null
+              : getCupertinoAppBarColorForMapScreen(context),
         ),
       ),
       body: GestureDetector(

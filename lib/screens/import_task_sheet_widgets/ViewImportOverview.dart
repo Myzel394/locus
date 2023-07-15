@@ -115,7 +115,7 @@ class _ViewImportOverviewState extends State<ViewImportOverview> {
           )
         else ...[
           Text(
-            l10n.mainScreen_importTask_importOverview_lastPosition,
+            l10n.sharesOverviewScreen_importTask_importOverview_lastPosition,
             textAlign: TextAlign.center,
             style: getSubTitleTextStyle(context),
           ),
@@ -138,7 +138,7 @@ class _ViewImportOverviewState extends State<ViewImportOverview> {
           material: (_, __) => MaterialElevatedButtonData(
             icon: const Icon(Icons.file_download_outlined),
           ),
-          child: Text(l10n.mainScreen_importTask_importLabel),
+          child: Text(l10n.sharesOverviewScreen_importTask_importLabel),
         ),
       ],
     );

@@ -104,6 +104,7 @@ class NostrFetch {
   VoidCallback fetchEvents({
     required final Future<void> Function(Message message, String relay) onEvent,
     required final void Function() onEnd,
+    final void Function()? onEmptyEnd,
   }) {
     final List<WebSocket> sockets = [];
 
@@ -118,8 +119,23 @@ class NostrFetch {
         relay: relay,
         onEvent: onEvent,
         onEnd: onEnd,
+        onEmptyEnd: () {
+          FlutterLogs.logInfo(
+            LOG_TAG,
+            "Nostr Socket $relay - End of Stream",
+            "End of stream received, but no event was received.",
+          );
+
+          onEmptyEnd?.call();
+        },
       ).then((socket) {
         sockets.add(socket);
+      }).catchError((error) {
+        FlutterLogs.logError(
+          LOG_TAG,
+          "Nostr Socket",
+          "Error for socket: $error",
+        );
       });
     }
 

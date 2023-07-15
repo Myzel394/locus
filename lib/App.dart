@@ -4,7 +4,8 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/colors.dart';
 import 'package:locus/screens/BiometricsRequiredStartupScreen.dart';
-import 'package:locus/screens/MainScreen.dart';
+import 'package:locus/screens/LocationsOverviewScreen.dart';
+import 'package:locus/screens/SharesOverviewScreen.dart';
 import 'package:locus/screens/WelcomeScreen.dart';
 import 'package:locus/services/settings_service.dart';
 import 'package:locus/utils/PageRoute.dart';
@@ -194,7 +195,7 @@ class App extends StatelessWidget {
                 return const WelcomeScreen();
               }
 
-              return const MainScreen();
+              return const LocationsOverviewScreen();
             })();
 
             if (isCupertino(context)) {

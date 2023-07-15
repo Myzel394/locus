@@ -5,35 +5,40 @@ import 'package:locus/constants/spacing.dart';
 
 class Paper extends StatelessWidget {
   final Widget child;
-  final double roundness;
   final BoxConstraints? constraints;
   final BoxDecoration decoration;
   final double? width;
+  final double? height;
+  final EdgeInsets? padding;
+  final BorderRadius borderRadius;
 
-  const Paper({
+  Paper({
     required this.child,
-    double? roundness,
+    BorderRadius? borderRadius,
     BoxDecoration? decoration,
+    this.height,
     this.width = double.infinity,
+    this.padding = const EdgeInsets.all(MEDIUM_SPACE),
     this.constraints,
     Key? key,
-  })  : roundness = roundness ?? MEDIUM_SPACE,
+  })  : borderRadius = borderRadius ?? BorderRadius.circular(MEDIUM_SPACE),
         decoration = decoration ?? const BoxDecoration(),
         super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(MEDIUM_SPACE),
+      padding: padding,
       constraints: constraints,
       width: width,
+      height: height,
       decoration: decoration.copyWith(
         color: platformThemeData(
           context,
           material: (data) => data.dialogBackgroundColor,
           cupertino: (data) => data.barBackgroundColor,
         ),
-        borderRadius: BorderRadius.circular(roundness),
+        borderRadius: borderRadius,
       ),
       child: child,
     );

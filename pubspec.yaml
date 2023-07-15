@@ -94,6 +94,11 @@ dependencies:
   vibration: ^1.7.7
   local_auth: ^2.1.6
   wakelock: ^0.4.0
+  figma_squircle: ^0.5.3
+  get_time_ago: ^1.2.2
+  flutter_expandable_fab: ^1.8.1
+  flutter_map_location_marker: ^6.0.0
+  simple_shadow: ^0.3.1
 
 # Uncomment this for publishing FLOSS variant
 # Taken from https://github.com/Zverik/every_door/blob/aaf8d2fdeac483041bcac2c7c79ef760b99dff2b/pubspec.yaml#L55
@@ -151,6 +156,7 @@ flutter:
   assets:
     - assets/lotties/
     - assets/logo.svg
+    - assets/location-out-of-bounds-marker.svg
     - assets/honorable-mentions/
     - assets/bunny.mp3
 

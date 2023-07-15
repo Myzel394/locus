@@ -1,15 +1,11 @@
 import 'dart:collection';
 import 'dart:convert';
-import 'dart:math';
 
 import 'package:cryptography/cryptography.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:geocoding/geocoding.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:locus/api/nostr-events.dart';
-import 'package:locus/constants/app.dart';
 import 'package:locus/constants/values.dart';
 import 'package:locus/models/log.dart';
 import 'package:locus/services/location_base.dart';
@@ -170,10 +166,16 @@ class Task extends ChangeNotifier with LocationBase {
 
   DateTime? nextEndDate() => findNextEndDate(timers);
 
-  bool isInfinite() => timers.any((timer) => timer.isInfinite());
+  bool isInfinite() =>
+      timers.any((timer) => timer.isInfinite()) || timers.isEmpty;
 
   Future<bool> shouldRunNow() async {
     final executionStatus = await getExecutionStatus();
+
+    if (timers.isEmpty) {
+      return executionStatus != null;
+    }
+
     final shouldRunNowBasedOnTimers =
         timers.any((timer) => timer.shouldRun(DateTime.now()));
 
@@ -523,20 +525,18 @@ class TaskService extends ChangeNotifier {
   Future<void> checkup(final LogService logService) async {
     FlutterLogs.logInfo(LOG_TAG, "Task Service", "Doing checkup...");
 
-    for (final task in tasks) {
-      if (!task.isInfinite() && task.nextEndDate() == null) {
-        FlutterLogs.logInfo(LOG_TAG, "Task Service", "Removing task.");
-        // Delete task
-        remove(task);
-        await save();
+    final tasksToRemove = <Task>{};
 
-        await logService.addLog(
-          Log.deleteTask(
-            initiator: LogInitiator.system,
-            taskName: task.name,
-          ),
-        );
-      } else if (!(await task.shouldRunNow()) && (await task.isRunning())) {
+    for (final task in tasks) {
+      if ((!task.isInfinite() && task.nextEndDate() == null) ||
+          (task.deleteAfterRun &&
+              !task.isInfinite() &&
+              task.timers.isNotEmpty &&
+              !(await task.shouldRunNow()))) {
+        FlutterLogs.logInfo(LOG_TAG, "Task Service", "Removing task.");
+
+        tasksToRemove.add(task);
+      } else if (!(await task.shouldRunNow()) && await task.isRunning()) {
         FlutterLogs.logInfo(LOG_TAG, "Task Service", "Stopping task.");
         await task.stopExecutionImmediately();
 
@@ -550,6 +550,12 @@ class TaskService extends ChangeNotifier {
         );
       }
     }
+
+    for (final task in tasksToRemove) {
+      remove(task);
+    }
+
+    await save();
 
     FlutterLogs.logInfo(LOG_TAG, "Task Service", "Checkup done.");
   }
@@ -593,12 +599,18 @@ DateTime? findNextStartDate(final List<TaskRuntimeTimer> timers,
   return nextDates.first;
 }
 
-DateTime? findNextEndDate(final List<TaskRuntimeTimer> timers,
-    {final DateTime? startDate}) {
+DateTime? findNextEndDate(
+  final List<TaskRuntimeTimer> timers, {
+  final DateTime? startDate,
+}) {
   final now = startDate ?? DateTime.now();
   final nextDates = List<DateTime>.from(
     timers.map((timer) => timer.nextEndDate(now)).where((date) => date != null),
   )..sort();
+
+  if (nextDates.isEmpty) {
+    return null;
+  }
 
   DateTime endDate = nextDates.first;
 

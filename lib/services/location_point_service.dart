@@ -46,6 +46,9 @@ class LocationPointService {
         headingAccuracy = headingAccuracy == 0.0 ? null : headingAccuracy,
         batteryLevel = batteryLevel == 0.0 ? null : batteryLevel;
 
+  String formatRawAddress() =>
+      "${latitude.toStringAsFixed(5)}, ${longitude.toStringAsFixed(5)}";
+
   factory LocationPointService.dummyFromLatLng(final LatLng latLng,
       {final double accuracy = 10.0}) =>
       LocationPointService(
@@ -153,4 +156,18 @@ class LocationPointService {
 
     return LocationPointService.fromJSON(jsonDecode(message));
   }
+
+  Position asPosition() =>
+      Position(
+        latitude: latitude,
+        longitude: longitude,
+        altitude: altitude ?? 0.0,
+        accuracy: accuracy,
+        speed: speed ?? 0.0,
+        speedAccuracy: speedAccuracy ?? 0.0,
+        heading: heading ?? 0.0,
+        timestamp: createdAt,
+      );
+
+  LatLng asLatLng() => LatLng(latitude, longitude);
 }

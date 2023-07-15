@@ -25,12 +25,7 @@ class ViewTile extends StatelessWidget {
     final viewService = context.read<ViewService>();
 
     return PlatformListTile(
-      title: view.name == null
-          ? Text(
-              l10n.unnamedView,
-              style: const TextStyle(fontFamily: "Cursive"),
-            )
-          : Text(view.name!),
+      title: Text(view.name!),
       trailing: PlatformPopup<String>(
         type: PlatformPopupType.tap,
         items: [
@@ -44,8 +39,11 @@ class ViewTile extends StatelessWidget {
                   context: context,
                   barrierDismissible: true,
                   builder: (context) => PlatformAlertDialog(
+                    material: (_, __) => MaterialAlertDialogData(
+                      icon: Icon(context.platformIcons.delete),
+                    ),
                     title:
-                        Text(l10n.viewAction_delete_confirm_title(view.name!)),
+                        Text(l10n.viewAction_delete_confirm_title(view.name)),
                     content: Text(l10n.actionNotUndoable),
                     actions: createCancellableDialogActions(
                       context,

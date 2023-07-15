@@ -6,6 +6,7 @@ import 'package:locus/constants/spacing.dart';
 import 'package:locus/utils/locus-verification.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:locus/widgets/ModalSheetContent.dart';
 
 import '../../constants/values.dart';
 import '../../widgets/ModalSheet.dart';
@@ -99,21 +100,12 @@ class _ServerOriginSheetState extends State<ServerOriginSheet> {
     return Form(
       key: formKey,
       child: ModalSheet(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            Text(
-              l10n.settingsScreen_settings_serverOrigin_label,
-              style: getTitle2TextStyle(context),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: MEDIUM_SPACE),
-            Text(
-              l10n.settingsScreen_settings_serverOrigin_description,
-              style: getBodyTextTextStyle(context),
-            ),
-            const SizedBox(height: LARGE_SPACE),
+        child: ModalSheetContent(
+          title: l10n.settingsScreen_settings_serverOrigin_label,
+          description: l10n.settingsScreen_settings_serverOrigin_description,
+          submitLabel: l10n.closePositiveSheetAction,
+          onSubmit: isLoading ? null : checkServerOrigin,
+          children: [
             PlatformTextFormField(
               controller: nameController,
               enabled: !isLoading,
@@ -173,15 +165,6 @@ class _ServerOriginSheetState extends State<ServerOriginSheet> {
                 textAlign: TextAlign.center,
               ),
             ],
-            const SizedBox(height: MEDIUM_SPACE),
-            PlatformElevatedButton(
-              material: (_, __) => MaterialElevatedButtonData(
-                icon: const Icon(Icons.check_rounded),
-              ),
-              padding: const EdgeInsets.symmetric(vertical: MEDIUM_SPACE),
-              onPressed: isLoading ? null : checkServerOrigin,
-              child: Text(l10n.closePositiveSheetAction),
-            ),
           ],
         ),
       ),

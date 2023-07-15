@@ -104,6 +104,7 @@ VoidCallback getLocations({
   required final List<String> relays,
   required void Function(LocationPointService) onLocationFetched,
   required void Function() onEnd,
+  final VoidCallback? onEmptyEnd,
   int? limit,
   DateTime? from,
   DateTime? until,
@@ -134,6 +135,7 @@ VoidCallback getLocations({
       onLocationFetched(location);
     },
     onEnd: onEnd,
+    onEmptyEnd: onEmptyEnd,
   );
 }
 

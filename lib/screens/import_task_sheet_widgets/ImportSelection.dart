@@ -1,12 +1,15 @@
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/app.dart';
+import 'package:locus/widgets/PlatformFlavorWidget.dart';
 
 import '../../constants/spacing.dart';
 import '../../utils/theme.dart';
+import '../../widgets/ModalSheetContent.dart';
 
 enum ImportSelectionType {
   url,
@@ -33,62 +36,77 @@ class _ImportSelectionState extends State<ImportSelection> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
 
-    return Column(
-      children: <Widget>[
-        Text(
-          l10n.mainScreen_importTask_title,
-          style: getSubTitleTextStyle(context),
-        ),
-        const SizedBox(height: LARGE_SPACE),
-        Text(
-          l10n.mainScreen_importTask_description,
-          style: getBodyTextTextStyle(context),
-        ),
-        const SizedBox(height: MEDIUM_SPACE),
+    return ModalSheetContent(
+      icon: isCupertino(context)
+          ? CupertinoIcons.square_arrow_down_fill
+          : Icons.file_download_rounded,
+      title: l10n.sharesOverviewScreen_importTask_title,
+      description: l10n.sharesOverviewScreen_importTask_description,
+      children: [
         if (errorMessage != null) ...[
           Text(
             errorMessage!,
-            style: getBodyTextTextStyle(context).copyWith(color: getErrorColor(context)),
+            style: getBodyTextTextStyle(context)
+                .copyWith(color: getErrorColor(context)),
           ),
           const SizedBox(height: MEDIUM_SPACE),
         ],
-        Wrap(
-          spacing: MEDIUM_SPACE,
-          direction: Axis.vertical,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: <Widget>[
-            PlatformElevatedButton(
-              padding: const EdgeInsets.all(MEDIUM_SPACE),
-              onPressed: () {
-                widget.onSelect(ImportSelectionType.url);
-              },
-              material: (_, __) => MaterialElevatedButtonData(
-                icon: const Icon(Icons.link_rounded),
-              ),
-              child: Text(l10n.mainScreen_importTask_action_importMethod_url),
-            ),
-            PlatformElevatedButton(
-              padding: const EdgeInsets.all(MEDIUM_SPACE),
-              material: (_, __) => MaterialElevatedButtonData(
-                icon: const Icon(Icons.file_open_rounded),
-              ),
-              onPressed: () async {
-                widget.onSelect(ImportSelectionType.file);
-              },
-              child: Text(l10n.mainScreen_importTask_action_importMethod_file),
-            ),
-            if (Platform.isAndroid && isGMSFlavor)
-              PlatformElevatedButton(
-                padding: const EdgeInsets.all(MEDIUM_SPACE),
-                material: (_, __) => MaterialElevatedButtonData(
-                  icon: const Icon(Icons.bluetooth_audio_rounded),
+        Center(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              PlatformListTile(
+                title: Text(
+                  l10n.sharesOverviewScreen_importTask_action_importMethod_url,
                 ),
-                onPressed: () async {
-                  widget.onSelect(ImportSelectionType.bluetooth);
+                leading: PlatformFlavorWidget(
+                  material: (_, __) => const Icon(Icons.link_rounded),
+                  cupertino: (_, __) => const Icon(CupertinoIcons.link),
+                ),
+                trailing: PlatformFlavorWidget(
+                  material: (_, __) => const Icon(Icons.chevron_right_rounded),
+                  cupertino: (_, __) =>
+                      const Icon(CupertinoIcons.right_chevron),
+                ),
+                onTap: () {
+                  widget.onSelect(ImportSelectionType.url);
                 },
-                child: Text(l10n.mainScreen_importTask_action_importMethod_bluetooth),
-              )
-          ],
+              ),
+              PlatformListTile(
+                title: Text(
+                  l10n.sharesOverviewScreen_importTask_action_importMethod_file,
+                ),
+                leading: PlatformFlavorWidget(
+                  material: (_, __) => const Icon(Icons.file_open_rounded),
+                  cupertino: (_, __) => const Icon(CupertinoIcons.doc),
+                ),
+                trailing: PlatformFlavorWidget(
+                  material: (_, __) => const Icon(Icons.chevron_right_rounded),
+                  cupertino: (_, __) =>
+                      const Icon(CupertinoIcons.right_chevron),
+                ),
+                onTap: () {
+                  widget.onSelect(ImportSelectionType.file);
+                },
+              ),
+              if (Platform.isAndroid && isGMSFlavor)
+                PlatformListTile(
+                  title: Text(
+                    l10n.sharesOverviewScreen_importTask_action_importMethod_bluetooth,
+                  ),
+                  leading: const Icon(Icons.bluetooth_audio_rounded),
+                  trailing: PlatformFlavorWidget(
+                    material: (_, __) =>
+                        const Icon(Icons.chevron_right_rounded),
+                    cupertino: (_, __) =>
+                        const Icon(CupertinoIcons.right_chevron),
+                  ),
+                  onTap: () {
+                    widget.onSelect(ImportSelectionType.bluetooth);
+                  },
+                ),
+            ],
+          ),
         ),
       ],
     );

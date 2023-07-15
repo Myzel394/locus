@@ -194,6 +194,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
                 : EdgeInsets.zero,
             child: PlatformPopup<String>(
               type: PlatformPopupType.tap,
+              cupertinoButtonPadding: EdgeInsets.zero,
               items: [
                 PlatformPopupMenuItem(
                   label: PlatformListTile(

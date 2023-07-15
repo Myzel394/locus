@@ -8,9 +8,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:local_auth/local_auth.dart';
+import 'package:locus/api/nostr-relays.dart';
 import 'package:locus/constants/app.dart';
 
 import '../api/get-address.dart';
+import '../utils/cache.dart';
 import '../utils/device.dart';
 import '../utils/platform.dart';
 
@@ -49,6 +51,32 @@ GeocoderProvider selectRandomProvider() {
   return providers[Random().nextInt(providers.length)];
 }
 
+class SettingsLastMapLocation {
+  final double latitude;
+  final double longitude;
+  final double accuracy;
+
+  const SettingsLastMapLocation({
+    required this.latitude,
+    required this.longitude,
+    required this.accuracy,
+  });
+
+  factory SettingsLastMapLocation.fromJSON(final Map<String, dynamic> data) =>
+      SettingsLastMapLocation(
+        latitude: data['latitude'] as double,
+        longitude: data['longitude'] as double,
+        accuracy: data['accuracy'] as double,
+      );
+
+  Map<String, dynamic> toJSON() =>
+      {
+        'latitude': latitude,
+        'longitude': longitude,
+        'accuracy': accuracy,
+      };
+}
+
 class SettingsService extends ChangeNotifier {
   String localeName;
   bool automaticallyLookupAddresses;
@@ -59,6 +87,7 @@ class SettingsService extends ChangeNotifier {
   String serverOrigin;
   List<String> _relays;
   AndroidTheme androidTheme;
+  SettingsLastMapLocation? lastMapLocation;
 
   GeocoderProvider geocoderProvider;
 
@@ -85,6 +114,7 @@ class SettingsService extends ChangeNotifier {
     required this.alwaysUseBatterySaveMode,
     required this.serverOrigin,
     this.lastHeadlessRun,
+    this.lastMapLocation,
     Set<String>? seenHelperSheets,
     List<String>? relays,
   })
@@ -110,6 +140,7 @@ class SettingsService extends ChangeNotifier {
       alwaysUseBatterySaveMode: false,
       lastHeadlessRun: null,
       serverOrigin: "https://locus.cfd",
+      lastMapLocation: null,
     );
   }
 
@@ -136,6 +167,9 @@ class SettingsService extends ChangeNotifier {
           ? DateTime.parse(data['lastHeadlessRun'])
           : null,
       serverOrigin: data['serverOrigin'],
+      lastMapLocation: data['lastMapLocation'] != null
+          ? SettingsLastMapLocation.fromJSON(data['lastMapLocation'])
+          : null,
     );
   }
 
@@ -175,6 +209,7 @@ class SettingsService extends ChangeNotifier {
       "alwaysUseBatterySaveMode": alwaysUseBatterySaveMode,
       "lastHeadlessRun": lastHeadlessRun?.toIso8601String(),
       "serverOrigin": serverOrigin,
+      "lastMapLocation": lastMapLocation?.toJSON(),
     };
   }
 
@@ -265,6 +300,19 @@ class SettingsService extends ChangeNotifier {
     return UnmodifiableListView(_relays);
   }
 
+  Future<Iterable<String>> getDefaultRelaysOrRandom() async {
+    if (_relays.isNotEmpty) {
+      return _relays;
+    }
+
+    final relaysData = await withCache(getNostrRelays, "relays")();
+    final relays = List<String>.from(relaysData["relays"] as List<dynamic>);
+
+    relays.shuffle();
+
+    return relays.take(5);
+  }
+
   void setRelays(final List<String> value) {
     _relays = value;
     notifyListeners();
@@ -336,6 +384,13 @@ class SettingsService extends ChangeNotifier {
 
   void serverServerOrigin(final String value) {
     serverOrigin = value;
+    notifyListeners();
+  }
+
+  SettingsLastMapLocation? getLastMapLocation() => lastMapLocation;
+
+  void setLastMapLocation(final SettingsLastMapLocation? value) {
+    lastMapLocation = value;
     notifyListeners();
   }
 }
