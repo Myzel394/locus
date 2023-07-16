@@ -4,8 +4,10 @@ import 'package:background_fetch/background_fetch.dart';
 import 'package:basic_utils/basic_utils.dart';
 import 'package:battery_plus/battery_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_logs/flutter_logs.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:locus/constants/notifications.dart';
 import 'package:locus/constants/values.dart';
 import 'package:locus/services/location_alarm_service.dart';
@@ -26,11 +28,8 @@ Future<void> updateLocation() async {
   await taskService.checkup(logService);
   final runningTasks = await taskService.getRunningTasks().toList();
 
-  FlutterLogs.logInfo(
-      LOG_TAG,
-      "Headless Task; Update Location",
-      "Everything restored, now checking for running tasks."
-  );
+  FlutterLogs.logInfo(LOG_TAG, "Headless Task; Update Location",
+      "Everything restored, now checking for running tasks.");
 
   if (runningTasks.isEmpty) {
     FlutterLogs.logInfo(
@@ -41,13 +40,26 @@ Future<void> updateLocation() async {
     return;
   }
 
-
   FlutterLogs.logInfo(
     LOG_TAG,
     "Headless Task; Update Location",
     "Fetching position now...",
   );
-  final position = await getCurrentPosition();
+  late final Position position;
+
+  try {
+    position = await getCurrentPosition(timeouts: [
+      3.minutes,
+    ]);
+  } catch (error) {
+    FlutterLogs.logError(
+      LOG_TAG,
+      "Headless Task; Update Location",
+      "Error while fetching position: $error",
+    );
+    return;
+  }
+
   FlutterLogs.logInfo(
     LOG_TAG,
     "Headless Task; Update Location",
@@ -80,11 +92,10 @@ Future<void> updateLocation() async {
       accuracy: locationData.accuracy,
       tasks: List<UpdatedTaskData>.from(
         runningTasks.map(
-              (task) =>
-              UpdatedTaskData(
-                id: task.id,
-                name: task.name,
-              ),
+          (task) => UpdatedTaskData(
+            id: task.id,
+            name: task.name,
+          ),
         ),
       ),
     ),
@@ -101,12 +112,11 @@ Future<void> checkViewAlarms({
       onTrigger: (alarm, location, __) async {
         if (alarm is RadiusBasedRegionLocationAlarm) {
           final flutterLocalNotificationsPlugin =
-          FlutterLocalNotificationsPlugin();
+              FlutterLocalNotificationsPlugin();
 
           flutterLocalNotificationsPlugin.show(
             int.parse(
-                "${location.createdAt.millisecond}${location.createdAt
-                    .microsecond}"),
+                "${location.createdAt.millisecond}${location.createdAt.microsecond}"),
             StringUtils.truncate(
               l10n.locationAlarm_radiusBasedRegion_notificationTitle_whenEnter(
                 view.name,
@@ -120,7 +130,7 @@ Future<void> checkViewAlarms({
                 AndroidChannelIDs.locationAlarms.name,
                 l10n.androidNotificationChannel_locationAlarms_name,
                 channelDescription:
-                l10n.androidNotificationChannel_locationAlarms_description,
+                    l10n.androidNotificationChannel_locationAlarms_description,
                 importance: Importance.max,
                 priority: Priority.max,
               ),
@@ -141,15 +151,11 @@ Future<void> checkViewAlarms({
 
         if (alarm is RadiusBasedRegionLocationAlarm) {
           final flutterLocalNotificationsPlugin =
-          FlutterLocalNotificationsPlugin();
+              FlutterLocalNotificationsPlugin();
 
           flutterLocalNotificationsPlugin.show(
             int.parse(
-                "${DateTime
-                    .now()
-                    .millisecond}${DateTime
-                    .now()
-                    .microsecond}"),
+                "${DateTime.now().millisecond}${DateTime.now().microsecond}"),
             StringUtils.truncate(
               l10n.locationAlarm_radiusBasedRegion_notificationTitle_whenEnter(
                 view.name,
@@ -166,7 +172,7 @@ Future<void> checkViewAlarms({
                   alarm.zoneName,
                 ),
                 channelDescription:
-                l10n.androidNotificationChannel_locationAlarms_description,
+                    l10n.androidNotificationChannel_locationAlarms_description,
                 importance: Importance.max,
                 priority: Priority.max,
               ),
@@ -208,12 +214,36 @@ void backgroundFetchHeadlessTask(HeadlessTask task) async {
   String taskId = task.taskId;
   bool isTimeout = task.timeout;
 
+  FlutterLogs.logInfo(
+    LOG_TAG,
+    "Headless Task",
+    "Running headless task with ID $taskId",
+  );
+
   if (isTimeout) {
+    FlutterLogs.logInfo(
+      LOG_TAG,
+      "Headless Task",
+      "Task $taskId timed out.",
+    );
+
     BackgroundFetch.finish(taskId);
     return;
   }
 
+  FlutterLogs.logInfo(
+    LOG_TAG,
+    "Headless Task",
+    "Starting headless task with ID $taskId now...",
+  );
+
   await runHeadlessTask();
+
+  FlutterLogs.logInfo(
+    LOG_TAG,
+    "Headless Task",
+    "Starting headless task with ID $taskId now... Done!",
+  );
 
   BackgroundFetch.finish(taskId);
 }
@@ -316,14 +346,14 @@ void configureBackgroundFetch() {
       startOnBoot: true,
       stopOnTerminate: false,
     ),
-        (taskId) async {
+    (taskId) async {
       // We only use one taskId to update the location for all tasks,
       // so we don't need to check the taskId.
       await runHeadlessTask();
 
       BackgroundFetch.finish(taskId);
     },
-        (taskId) {
+    (taskId) {
       // Timeout, we need to finish immediately.
       BackgroundFetch.finish(taskId);
     },

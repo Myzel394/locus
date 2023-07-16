@@ -21,7 +21,7 @@ Future<Position?> _getLocationUsingMethod(
   FlutterLogs.logInfo(
     LOG_TAG,
     "Get Location",
-    "Getting location using method: $method",
+    "Getting location using method: $method with timeout $TIMEOUT_DURATION",
   );
 
   try {
@@ -70,7 +70,7 @@ Future<Position> getCurrentPosition({
   final List<Duration> timeouts = const [
     Duration(seconds: 5),
     TIMEOUT_DURATION,
-    Duration(minutes: 3)
+    Duration(minutes: 5)
   ],
 }) async {
   for (final timeout in timeouts) {

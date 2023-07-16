@@ -10,94 +10,6 @@ import 'package:nostr/nostr.dart';
 
 import 'nostr-fetch.dart';
 
-Future<WebSocket> openSocket({
-  required final String url,
-  required final Request request,
-  required final SecretKey encryptionPassword,
-  required void Function(LocationPointService) onLocationFetched,
-  required void Function() onEnd,
-}) async {
-  FlutterLogs.logInfo(
-    LOG_TAG,
-    "Nostr Socket $url",
-    "Creating socket...",
-  );
-
-  final List<Future<LocationPointService>> decryptionProcesses = [];
-
-  bool hasReceivedEvent = false;
-  bool hasReceivedEndOfStream = false;
-
-  final socket = await WebSocket.connect(url);
-
-  socket.add(request.serialize());
-
-  FlutterLogs.logInfo(
-    LOG_TAG,
-    "Nostr Socket $url",
-    "Socket created, listening...",
-  );
-
-  socket.listen((rawEvent) {
-    final event = Message.deserialize(rawEvent);
-
-    switch (event.type) {
-      case "EVENT":
-        FlutterLogs.logInfo(
-          LOG_TAG,
-          "Nostr Socket $url - Event",
-          "New event received, decrypting...",
-        );
-
-        hasReceivedEvent = true;
-
-        try {
-          final locationProcess = LocationPointService.fromEncrypted(
-            event.message.content,
-            encryptionPassword,
-          );
-
-          decryptionProcesses.add(locationProcess);
-
-          locationProcess.then((location) {
-            onLocationFetched(location);
-            decryptionProcesses.remove(locationProcess);
-
-            if (decryptionProcesses.isEmpty && hasReceivedEndOfStream) {
-              onEnd();
-            }
-          });
-        } catch (error) {
-          FlutterLogs.logError(
-            LOG_TAG,
-            "Nostr Socket $url - Event",
-            "Error while decrypting event: $error",
-          );
-        }
-
-        break;
-      case "EOSE":
-        FlutterLogs.logInfo(
-          LOG_TAG,
-          "Nostr Socket $url - End of Stream",
-          "End of stream received.",
-        );
-
-        socket.close();
-
-        hasReceivedEndOfStream = true;
-
-        if ((decryptionProcesses.isEmpty && hasReceivedEvent) ||
-            !hasReceivedEvent) {
-          onEnd();
-        }
-        break;
-    }
-  });
-
-  return socket;
-}
-
 VoidCallback getLocations({
   required final String nostrPublicKey,
   required final SecretKey encryptionPassword,
@@ -115,7 +27,7 @@ VoidCallback getLocations({
       authors: [nostrPublicKey],
       limit: limit,
       until:
-          until == null ? null : (until.millisecondsSinceEpoch / 1000).floor(),
+      until == null ? null : (until.millisecondsSinceEpoch / 1000).floor(),
       since: from == null ? null : (from.millisecondsSinceEpoch / 1000).floor(),
     ),
   ]);
@@ -127,12 +39,34 @@ VoidCallback getLocations({
 
   return nostrFetch.fetchEvents(
     onEvent: (message, _) async {
-      final location = await LocationPointService.fromEncrypted(
-        message.message.content,
-        encryptionPassword,
+      FlutterLogs.logInfo(
+        LOG_TAG,
+        "GetLocations",
+        "New message. Decrypting...",
       );
 
-      onLocationFetched(location);
+      try {
+        final location = await LocationPointService.fromEncrypted(
+          message.message.content,
+          encryptionPassword,
+        );
+
+        FlutterLogs.logInfo(
+          LOG_TAG,
+          "GetLocations",
+          "New message. Decrypting... Done!",
+        );
+
+        onLocationFetched(location);
+      } catch (error) {
+        FlutterLogs.logError(
+          LOG_TAG,
+          "GetLocations",
+          "Error decrypting message: $error",
+        );
+
+        return;
+      }
     },
     onEnd: onEnd,
     onEmptyEnd: onEmptyEnd,
