@@ -130,6 +130,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
       ..addObserver(this)
       ..addPostFrameCallback((_) async {
         _setLocationFromSettings();
+        configureBackgroundFetch();
 
         final taskService = context.read<TaskService>();
         final viewService = context.read<ViewService>();
@@ -154,7 +155,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
         viewService.addListener(_handleViewServiceChange);
       });
 
-    BackgroundFetch.start();
     _handleViewAlarmChecker();
     _handleNotifications();
 

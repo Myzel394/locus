@@ -331,31 +331,66 @@ Future<void> runHeadlessTask() async {
   );
 }
 
-void configureBackgroundFetch() {
+void registerBackgroundFetch() {
+  FlutterLogs.logInfo(
+    LOG_TAG,
+    "Background Fetch",
+    "Registering headless task...",
+  );
+
   BackgroundFetch.registerHeadlessTask(backgroundFetchHeadlessTask);
 
-  BackgroundFetch.configure(
-    BackgroundFetchConfig(
-      minimumFetchInterval: 15,
-      requiresCharging: false,
-      enableHeadless: true,
-      requiredNetworkType: NetworkType.ANY,
-      requiresBatteryNotLow: false,
-      requiresDeviceIdle: false,
-      requiresStorageNotLow: false,
-      startOnBoot: true,
-      stopOnTerminate: false,
-    ),
-    (taskId) async {
-      // We only use one taskId to update the location for all tasks,
-      // so we don't need to check the taskId.
-      await runHeadlessTask();
-
-      BackgroundFetch.finish(taskId);
-    },
-    (taskId) {
-      // Timeout, we need to finish immediately.
-      BackgroundFetch.finish(taskId);
-    },
+  FlutterLogs.logInfo(
+    LOG_TAG,
+    "Background Fetch",
+    "Registering headless task... Done!",
   );
+}
+
+Future<void> configureBackgroundFetch() async {
+  FlutterLogs.logInfo(
+    LOG_TAG,
+    "Background Fetch",
+    "Configuring background fetch...",
+  );
+
+  try {
+    BackgroundFetch.configure(
+      BackgroundFetchConfig(
+        minimumFetchInterval: 15,
+        requiresCharging: false,
+        enableHeadless: true,
+        requiredNetworkType: NetworkType.ANY,
+        requiresBatteryNotLow: false,
+        requiresDeviceIdle: false,
+        requiresStorageNotLow: false,
+        startOnBoot: true,
+        stopOnTerminate: false,
+      ),
+      (taskId) async {
+        // We only use one taskId to update the location for all tasks,
+        // so we don't need to check the taskId.
+        await runHeadlessTask();
+
+        BackgroundFetch.finish(taskId);
+      },
+      (taskId) {
+        // Timeout, we need to finish immediately.
+        BackgroundFetch.finish(taskId);
+      },
+    );
+
+    FlutterLogs.logInfo(
+      LOG_TAG,
+      "Background Fetch",
+      "Configuring background fetch. Configuring... Done!",
+    );
+  } catch (error) {
+    FlutterLogs.logError(
+      LOG_TAG,
+      "Background Fetch",
+      "Configuring background fetch. Configuring... Failed! $error",
+    );
+    return;
+  }
 }

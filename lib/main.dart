@@ -17,7 +17,9 @@ import 'package:provider/provider.dart';
 
 const storage = FlutterSecureStorage();
 
-final StreamController<NotificationResponse> selectedNotificationsStream = StreamController.broadcast();
+final StreamController<
+    NotificationResponse> selectedNotificationsStream = StreamController
+    .broadcast();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,7 +30,12 @@ void main() async {
   ]);
 
   await FlutterLogs.initLogs(
-    logLevelsEnabled: [LogLevel.INFO, LogLevel.WARNING, LogLevel.ERROR, LogLevel.SEVERE],
+    logLevelsEnabled: [
+      LogLevel.INFO,
+      LogLevel.WARNING,
+      LogLevel.ERROR,
+      LogLevel.SEVERE
+    ],
     timeStampFormat: TimeStampFormat.TIME_FORMAT_READABLE,
     directoryStructure: DirectoryStructure.FOR_DATE,
     logTypesEnabled: ["device", "network", "errors"],
@@ -75,11 +82,12 @@ void main() async {
         ChangeNotifierProvider<ViewService>(create: (_) => viewService),
         ChangeNotifierProvider<SettingsService>(create: (_) => settingsService),
         ChangeNotifierProvider<LogService>(create: (_) => logService),
-        ChangeNotifierProvider<AppUpdateService>(create: (_) => appUpdateService),
+        ChangeNotifierProvider<AppUpdateService>(
+            create: (_) => appUpdateService),
       ],
       child: const App(),
     ),
   );
 
-  configureBackgroundFetch();
+  registerBackgroundFetch();
 }
