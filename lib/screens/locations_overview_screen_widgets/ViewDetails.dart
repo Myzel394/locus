@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:apple_maps_flutter/apple_maps_flutter.dart' as AppleMaps;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -20,7 +19,6 @@ import '../../utils/permission.dart';
 import '../../utils/theme.dart';
 import '../../widgets/BentoGridElement.dart';
 import '../../widgets/RequestLocationPermissionMixin.dart';
-import '../../widgets/SimpleAddressFetcher.dart';
 import '../ViewDetailScreen.dart';
 
 class ViewDetails extends StatefulWidget {
@@ -100,97 +98,91 @@ class _ViewDetailsState extends State<ViewDetails> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
 
-    final view = widget.view ?? oldView;
-    final lastLocation = widget.location ?? oldLastLocation;
+    final view = (widget.view ?? oldView)!;
+    final lastLocation = (widget.location ?? oldLastLocation)!;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: <Widget>[
-        if (lastLocation == null)
-          Text(
-            l10n.locationFetchEmptyError,
-          )
-        else ...[
-          GridView.count(
-            crossAxisCount: 2,
-            shrinkWrap: true,
-            mainAxisSpacing: MEDIUM_SPACE,
-            crossAxisSpacing: MEDIUM_SPACE,
-            physics: const NeverScrollableScrollPhysics(),
-            children: [
-              LastLocationBentoElement(
-                view: view!,
-                lastLocation: lastLocation,
-              ),
-              DistanceBentoElement(
-                lastLocation: lastLocation,
-                onTap: () {
-                  widget.onGoToPosition(
-                    LatLng(
-                      lastLocation.latitude,
-                      lastLocation.longitude,
+        GridView.count(
+          crossAxisCount: 2,
+          shrinkWrap: true,
+          mainAxisSpacing: MEDIUM_SPACE,
+          crossAxisSpacing: MEDIUM_SPACE,
+          physics: const NeverScrollableScrollPhysics(),
+          children: [
+            LastLocationBentoElement(
+              view: view,
+              lastLocation: lastLocation,
+            ),
+            DistanceBentoElement(
+              lastLocation: lastLocation,
+              onTap: () {
+                widget.onGoToPosition(
+                  LatLng(
+                    lastLocation.latitude,
+                    lastLocation.longitude,
+                  ),
+                );
+              },
+            ),
+            BentoGridElement(
+              title: lastLocation.altitude == null
+                  ? l10n.unknownValue
+                  : l10n.locations_values_altitude_m(
+                      lastLocation.altitude!.round(),
                     ),
-                  );
-                },
+              icon: platformThemeData(
+                context,
+                material: (_) => Icons.height_rounded,
+                cupertino: (_) => CupertinoIcons.arrow_up,
               ),
-              BentoGridElement(
-                title: lastLocation.altitude == null
-                    ? l10n.unknownValue
-                    : l10n.locations_values_altitude_m(
-                        lastLocation.altitude!.round(),
-                      ),
-                icon: platformThemeData(
-                  context,
-                  material: (_) => Icons.height_rounded,
-                  cupertino: (_) => CupertinoIcons.arrow_up,
-                ),
-                type: BentoType.tertiary,
-                description: l10n.locations_values_altitude_description,
+              type: BentoType.tertiary,
+              description: l10n.locations_values_altitude_description,
+            ),
+            BentoGridElement(
+              title: lastLocation.speed == null
+                  ? l10n.unknownValue
+                  : l10n.locations_values_speed_kmh(
+                      (lastLocation.speed! * 3.6).round(),
+                    ),
+              icon: platformThemeData(
+                context,
+                material: (_) => Icons.speed,
+                cupertino: (_) => CupertinoIcons.speedometer,
               ),
-              BentoGridElement(
-                title: lastLocation!.speed == null
-                    ? l10n.unknownValue
-                    : l10n.locations_values_speed_kmh(
-                        (lastLocation!.speed! * 3.6).round(),
-                      ),
-                icon: platformThemeData(
-                  context,
-                  material: (_) => Icons.speed,
-                  cupertino: (_) => CupertinoIcons.speedometer,
-                ),
-                type: BentoType.tertiary,
-                description: l10n.locations_values_speed_description,
+              type: BentoType.tertiary,
+              description: l10n.locations_values_speed_description,
+            ),
+            BentoGridElement(
+              title: lastLocation.batteryLevel == null
+                  ? l10n.unknownValue
+                  : l10n.locations_values_battery_value(
+                      (lastLocation.batteryLevel! * 100).round(),
+                    ),
+              icon: getIconDataForBatteryLevel(
+                context,
+                lastLocation.batteryLevel,
               ),
-              BentoGridElement(
-                title: lastLocation.batteryLevel == null
-                    ? l10n.unknownValue
-                    : l10n.locations_values_battery_value(
-                        (lastLocation.batteryLevel! * 100).round(),
-                      ),
-                icon: getIconDataForBatteryLevel(
-                  context,
-                  lastLocation.batteryLevel,
-                ),
-                description: l10n.locations_values_battery_description,
-                type: BentoType.tertiary,
-              ),
-              BentoGridElement(
-                title: lastLocation.batteryState == null
-                    ? l10n.unknownValue
-                    : l10n.locations_values_batteryState_value(
-                        lastLocation.batteryState!.name,
-                      ),
-                icon: Icons.cable_rounded,
-                type: BentoType.tertiary,
-                description: l10n.locations_values_batteryState_description,
-              ),
-            ],
-          ),
-          if (lastLocation?.heading != null) ...[
-            const SizedBox(height: MEDIUM_SPACE),
-            buildHeadingMap(lastLocation!),
+              description: l10n.locations_values_battery_description,
+              type: BentoType.tertiary,
+            ),
+            BentoGridElement(
+              title: lastLocation.batteryState == null
+                  ? l10n.unknownValue
+                  : l10n.locations_values_batteryState_value(
+                      lastLocation.batteryState!.name,
+                    ),
+              icon: Icons.cable_rounded,
+              type: BentoType.tertiary,
+              description: l10n.locations_values_batteryState_description,
+            ),
           ],
+        ),
+        if (lastLocation.heading != null) ...[
+          const SizedBox(height: MEDIUM_SPACE),
+          buildHeadingMap(lastLocation),
         ],
       ],
     );

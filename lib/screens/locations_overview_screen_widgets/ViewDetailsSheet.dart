@@ -108,21 +108,21 @@ class _ViewDetailsSheetState extends State<ViewDetailsSheet> {
           controller: scrollController,
           child: Column(
             children: [
-              if (widget.locations != null) ...[
-                const SizedBox(height: LARGE_SPACE),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    Icon(
-                      Icons.circle_rounded,
-                      size: 20,
-                      color: widget.view!.color,
-                    ),
-                    const SizedBox(width: SMALL_SPACE),
-                    Text(widget.view!.name),
-                  ],
-                ),
+              const SizedBox(height: LARGE_SPACE),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Icon(
+                    Icons.circle_rounded,
+                    size: 20,
+                    color: widget.view!.color,
+                  ),
+                  const SizedBox(width: SMALL_SPACE),
+                  Text(widget.view!.name),
+                ],
+              ),
+              if (widget.locations != null && widget.locations!.isNotEmpty) ...[
                 const SizedBox(height: LARGE_SPACE),
                 SizedBox(
                   height: 120,
@@ -170,7 +170,10 @@ class _ViewDetailsSheetState extends State<ViewDetailsSheet> {
                     },
                   ),
                 )
-              ]
+              ] else
+                Text(
+                  l10n.locationFetchEmptyError,
+                )
             ],
           ),
         ),
