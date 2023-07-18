@@ -731,6 +731,38 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
             )
             .expand((element) => element)
             .toSet(),
+        polylines: Set<AppleMaps.Polyline>.from(
+          _fetchers.locations.entries
+              .where((entry) =>
+                  selectedViewID == null || entry.key.id == selectedViewID)
+              .map(
+            (entry) {
+              final view = entry.key;
+              final locations = entry.value ?? [];
+
+              return AppleMaps.Polyline(
+                polylineId: AppleMaps.PolylineId(view.id),
+                color: entry.key.color.withOpacity(0.9),
+                width: 10,
+                jointType: AppleMaps.JointType.round,
+                polylineCap: AppleMaps.Cap.roundCap,
+                consumeTapEvents: true,
+                onTap: () {
+                  setState(() {
+                    showFAB = false;
+                    selectedViewID = view.id;
+                  });
+                },
+                points: List<AppleMaps.LatLng>.from(
+                  locations.reversed.map(
+                    (location) =>
+                        AppleMaps.LatLng(location.latitude, location.longitude),
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
       );
     }
 
@@ -771,7 +803,10 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
         ),
         PolylineLayer(
           polylines: List<Polyline>.from(
-            _fetchers.locations.entries.map(
+            _fetchers.locations.entries
+                .where((entry) =>
+                    selectedViewID == null || entry.key.id == selectedViewID)
+                .map(
               (entry) {
                 final view = entry.key;
                 final locations = entry.value ?? [];
