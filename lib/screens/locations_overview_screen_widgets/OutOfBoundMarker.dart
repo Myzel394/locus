@@ -219,7 +219,7 @@ class _OutOfBoundMarkerState extends State<OutOfBoundMarker>
       child: AnimatedScale(
         scale: (() {
           if (!isOutOfBounds) {
-            return 0.07;
+            return 0.0;
           }
 
           if (isPressing) {
