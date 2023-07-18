@@ -161,10 +161,18 @@ class _ViewDetailsSheetState extends State<ViewDetailsSheet> {
                       margin:
                           const EdgeInsets.symmetric(horizontal: MEDIUM_SPACE),
                       padding: const EdgeInsets.all(MEDIUM_SPACE),
-                      child: Center(
-                        child: SimpleAddressFetcher(
-                          location: widget.locations![index].asLatLng(),
-                        ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: <Widget>[
+                          const Icon(Icons.drag_indicator_rounded),
+                          const SizedBox(width: SMALL_SPACE),
+                          Flexible(
+                            child: SimpleAddressFetcher(
+                              location: widget.locations![index].asLatLng(),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
