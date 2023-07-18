@@ -30,7 +30,10 @@ class ViewLocationFetcher extends ChangeNotifier {
             return;
           }
 
-          _locations[view] = [location];
+          _locations[view] = [
+            ...(locations[view] ?? []),
+            location,
+          ];
         },
         onEnd: () {
           if (!_mounted) {
@@ -43,7 +46,8 @@ class ViewLocationFetcher extends ChangeNotifier {
     );
   }
 
-  void _fetchView(final TaskView view, {
+  void _fetchView(
+    final TaskView view, {
     final DateTime? from,
     final int? limit,
   }) {
@@ -58,6 +62,7 @@ class ViewLocationFetcher extends ChangeNotifier {
             return;
           }
 
+          print("Location fetched: ${location.createdAt}");
           _locations[view] = List<LocationPointService>.from(
             [..._locations[view] ?? [], location],
           );
