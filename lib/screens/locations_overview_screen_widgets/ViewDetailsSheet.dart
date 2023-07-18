@@ -6,6 +6,7 @@ import 'package:locus/screens/locations_overview_screen_widgets/ViewDetails.dart
 import 'package:locus/services/location_point_service.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:locus/widgets/ModalSheet.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../constants/spacing.dart';
 import '../../widgets/SimpleAddressFetcher.dart';
@@ -30,14 +31,15 @@ class _ViewDetailsSheetState extends State<ViewDetailsSheet> {
   final containerKey = GlobalKey();
 
   final DraggableScrollableController controller =
-      DraggableScrollableController();
+  DraggableScrollableController();
 
   // Index starting from last element
   int locationIndex = 0;
 
-  LocationPointService? get currentLocation => widget.locations == null
-      ? null
-      : widget.locations![widget.locations!.length - 1 - locationIndex];
+  LocationPointService? get currentLocation =>
+      widget.locations == null
+          ? null
+          : widget.locations![widget.locations!.length - 1 - locationIndex];
 
   @override
   void initState() {
@@ -89,6 +91,8 @@ class _ViewDetailsSheetState extends State<ViewDetailsSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return DraggableScrollableSheet(
       controller: controller,
       minChildSize: 0.0,
@@ -101,83 +105,90 @@ class _ViewDetailsSheetState extends State<ViewDetailsSheet> {
         0.22,
         1,
       ],
-      builder: (context, scrollController) => ModalSheet(
-        miuiIsGapless: true,
-        materialPadding: EdgeInsets.zero,
-        child: SingleChildScrollView(
-          controller: scrollController,
-          child: Column(
-            children: [
-              const SizedBox(height: LARGE_SPACE),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  Icon(
-                    Icons.circle_rounded,
-                    size: 20,
-                    color: widget.view!.color,
-                  ),
-                  const SizedBox(width: SMALL_SPACE),
-                  Text(widget.view!.name),
-                ],
-              ),
-              if (widget.locations != null && widget.locations!.isNotEmpty) ...[
-                const SizedBox(height: LARGE_SPACE),
-                SizedBox(
-                  height: 120,
-                  child: PageView.builder(
-                    onPageChanged: (index) {
-                      setState(() {
-                        locationIndex = index;
-                      });
-                    },
-                    reverse: true,
-                    itemCount: widget.locations!.length,
-                    itemBuilder: (context, index) => Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(MEDIUM_SPACE),
-                        color: platformThemeData(
-                          context,
-                          material: (data) => data.colorScheme.surfaceVariant,
-                          cupertino: (data) => data.scaffoldBackgroundColor,
-                        ),
+      builder: (context, scrollController) =>
+          ModalSheet(
+            miuiIsGapless: true,
+            materialPadding: EdgeInsets.zero,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: Column(
+                children: [
+                  const SizedBox(height: LARGE_SPACE),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      Icon(
+                        Icons.circle_rounded,
+                        size: 20,
+                        color: widget.view!.color,
                       ),
-                      margin:
-                          const EdgeInsets.symmetric(horizontal: MEDIUM_SPACE),
-                      padding: const EdgeInsets.all(MEDIUM_SPACE),
-                      child: Center(
-                        child: SimpleAddressFetcher(
-                          location: widget.locations![index].asLatLng(),
-                        ),
+                      const SizedBox(width: SMALL_SPACE),
+                      Text(widget.view!.name),
+                    ],
+                  ),
+                  if (widget.locations != null &&
+                      widget.locations!.isNotEmpty) ...[
+                    const SizedBox(height: LARGE_SPACE),
+                    SizedBox(
+                      height: 120,
+                      child: PageView.builder(
+                        onPageChanged: (index) {
+                          setState(() {
+                            locationIndex = index;
+                          });
+                        },
+                        reverse: true,
+                        itemCount: widget.locations!.length,
+                        itemBuilder: (context, index) =>
+                            Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(
+                                    MEDIUM_SPACE),
+                                color: platformThemeData(
+                                  context,
+                                  material: (data) =>
+                                  data.colorScheme.surfaceVariant,
+                                  cupertino: (data) =>
+                                  data.scaffoldBackgroundColor,
+                                ),
+                              ),
+                              margin:
+                              const EdgeInsets.symmetric(
+                                  horizontal: MEDIUM_SPACE),
+                              padding: const EdgeInsets.all(MEDIUM_SPACE),
+                              child: Center(
+                                child: SimpleAddressFetcher(
+                                  location: widget.locations![index].asLatLng(),
+                                ),
+                              ),
+                            ),
                       ),
                     ),
-                  ),
-                ),
-                const SizedBox(width: MEDIUM_SPACE),
-                Padding(
-                  padding: const EdgeInsets.all(MEDIUM_SPACE),
-                  child: ViewDetails(
-                    location: currentLocation,
-                    view: widget.view,
-                    onGoToPosition: (position) {
-                      controller.animateTo(
-                        0.22,
-                        duration: const Duration(milliseconds: 150),
-                        curve: Curves.fastLinearToSlowEaseIn,
-                      );
-                      widget.onGoToPosition(position);
-                    },
-                  ),
-                )
-              ] else
-                Text(
-                  l10n.locationFetchEmptyError,
-                )
-            ],
+                    const SizedBox(width: MEDIUM_SPACE),
+                    Padding(
+                      padding: const EdgeInsets.all(MEDIUM_SPACE),
+                      child: ViewDetails(
+                        location: currentLocation,
+                        view: widget.view,
+                        onGoToPosition: (position) {
+                          controller.animateTo(
+                            0.22,
+                            duration: const Duration(milliseconds: 150),
+                            curve: Curves.fastLinearToSlowEaseIn,
+                          );
+                          widget.onGoToPosition(position);
+                        },
+                      ),
+                    )
+                  ] else
+                    Text(
+                      l10n.locationFetchEmptyError,
+                    )
+                ],
+              ),
+            ),
           ),
-        ),
-      ),
     );
   }
 }
