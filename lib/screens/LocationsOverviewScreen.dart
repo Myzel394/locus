@@ -63,6 +63,8 @@ enum LocationStatus {
   fetching,
 }
 
+const LOCATION_POLYLINE_OPAQUE_AMOUNT_THRESHOLD = 100;
+
 class LocationsOverviewScreen extends StatefulWidget {
   const LocationsOverviewScreen({super.key});
 
@@ -754,13 +756,13 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
                 (view) => (_fetchers.locations[view] ?? [])
                     .mapIndexed(
                       (index, location) => CircleMarker(
-                          radius: 10,
-                          useRadiusInMeter: true,
-                          point: LatLng(location.latitude, location.longitude),
-                          borderStrokeWidth: 1,
-                          color: view.color.withOpacity(.1),
-                          borderColor:
-                              view.color.withOpacity(index == 0 ? .1 : 1)),
+                        radius: 10,
+                        useRadiusInMeter: true,
+                        point: LatLng(location.latitude, location.longitude),
+                        borderStrokeWidth: 1,
+                        color: view.color.withOpacity(.1),
+                        borderColor: view.color,
+                      ),
                     )
                     .toList(),
               )
@@ -768,23 +770,32 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
               .toList(),
         ),
         PolylineLayer(
-          polylines: [
-            for (final entry in _fetchers.locations.entries)
-              Polyline(
-                color: entry.key.color,
-                strokeWidth: 4,
-                strokeJoin: StrokeJoin.round,
-                gradientColors:
-                    List<Color>.generate(9, (index) => entry.key.color) +
-                        [entry.key.color.withOpacity(.2)],
-                points: List<LatLng>.from(
-                  (_fetchers.locations[entry.key] ?? []).reversed.map(
-                        (location) =>
-                            LatLng(location.latitude, location.longitude),
-                      ),
-                ),
-              )
-          ],
+          polylines: List<Polyline>.from(
+            _fetchers.locations.entries.map(
+              (entry) {
+                final view = entry.key;
+                final locations = entry.value ?? [];
+
+                return Polyline(
+                  color: entry.key.color.withOpacity(0.9),
+                  strokeWidth: 10,
+                  strokeJoin: StrokeJoin.round,
+                  gradientColors: locations.length <=
+                          LOCATION_POLYLINE_OPAQUE_AMOUNT_THRESHOLD
+                      ? null
+                      : List<Color>.generate(
+                              9, (index) => entry.key.color.withOpacity(0.9)) +
+                          [entry.key.color.withOpacity(.3)],
+                  points: List<LatLng>.from(
+                    locations.reversed.map(
+                      (location) =>
+                          LatLng(location.latitude, location.longitude),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
         ),
         _buildUserMarkerLayer(),
         PopupMarkerLayer(
@@ -883,7 +894,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
 
     if (flutterMapController != null) {
       flutterMapController!.move(
-        LatLng(50.0, 7.0),
+        LatLng(latestLocation.latitude, latestLocation.longitude),
         flutterMapController!.zoom,
       );
     }
