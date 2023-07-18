@@ -6,15 +6,17 @@ import 'package:provider/provider.dart';
 import '../constants/spacing.dart';
 import '../services/settings_service.dart';
 
-class ModalSheet extends StatelessWidget {
+class ModalSheet extends StatefulWidget {
   final Widget child;
   final bool miuiIsGapless;
   final EdgeInsets cupertinoPadding;
   final EdgeInsets? materialPadding;
+  final DraggableScrollableController? sheetController;
 
   const ModalSheet({
     Key? key,
     required this.child,
+    this.sheetController,
     this.miuiIsGapless = false,
     this.materialPadding,
     this.cupertinoPadding = const EdgeInsets.symmetric(
@@ -22,6 +24,37 @@ class ModalSheet extends StatelessWidget {
       horizontal: MEDIUM_SPACE,
     ),
   }) : super(key: key);
+
+  @override
+  State<ModalSheet> createState() => _ModalSheetState();
+}
+
+class _ModalSheetState extends State<ModalSheet> {
+  bool isExpanded = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.sheetController != null) {
+      widget.sheetController!.addListener(_scrollListener);
+    }
+  }
+
+  void _scrollListener() {
+    setState(() {
+      isExpanded = widget.sheetController!.size == 1.0;
+    });
+  }
+
+  @override
+  void dispose() {
+    if (widget.sheetController != null) {
+      widget.sheetController!.removeListener(_scrollListener);
+    }
+
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +66,7 @@ class ModalSheet extends StatelessWidget {
       ),
       child: PlatformWidget(
         material: (_, __) => Padding(
-          padding: settings.isMIUI() && !miuiIsGapless
+          padding: settings.isMIUI() && !widget.miuiIsGapless
               ? const EdgeInsets.all(MEDIUM_SPACE)
               : EdgeInsets.zero,
           child: Container(
@@ -43,32 +76,34 @@ class ModalSheet extends StatelessWidget {
             ),
             decoration: BoxDecoration(
               color: getSheetColor(context),
-              borderRadius: settings.isMIUI() && !miuiIsGapless
-                  ? const BorderRadius.all(Radius.circular(LARGE_SPACE))
-                  : const BorderRadius.only(
-                      topLeft: Radius.circular(LARGE_SPACE),
-                      topRight: Radius.circular(LARGE_SPACE),
-                    ),
+              borderRadius: isExpanded
+                  ? BorderRadius.zero
+                  : settings.isMIUI() && !widget.miuiIsGapless
+                      ? const BorderRadius.all(Radius.circular(LARGE_SPACE))
+                      : const BorderRadius.only(
+                          topLeft: Radius.circular(LARGE_SPACE),
+                          topRight: Radius.circular(LARGE_SPACE),
+                        ),
             ),
             child: Padding(
-              padding: materialPadding ??
+              padding: widget.materialPadding ??
                   EdgeInsets.only(
-                    top: settings.isMIUI() && !miuiIsGapless
+                    top: settings.isMIUI() && !widget.miuiIsGapless
                         ? MEDIUM_SPACE
                         : LARGE_SPACE,
                     left: MEDIUM_SPACE,
                     right: MEDIUM_SPACE,
                     bottom: SMALL_SPACE,
                   ),
-              child: child,
+              child: widget.child,
             ),
           ),
         ),
         cupertino: (_, __) => CupertinoPopupSurface(
           isSurfacePainted: true,
           child: Padding(
-            padding: cupertinoPadding,
-            child: child,
+            padding: widget.cupertinoPadding,
+            child: widget.child,
           ),
         ),
       ),
