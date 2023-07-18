@@ -1369,7 +1369,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
           buildMapActions(),
           ViewDetailsSheet(
             view: selectedView,
-            lastLocation: lastLocation,
+            locations: _fetchers.locations[selectedView],
             onGoToPosition: (position) {
               if (flutterMapController != null) {
                 flutterMapController!

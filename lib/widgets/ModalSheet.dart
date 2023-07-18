@@ -10,11 +10,13 @@ class ModalSheet extends StatelessWidget {
   final Widget child;
   final bool miuiIsGapless;
   final EdgeInsets cupertinoPadding;
+  final EdgeInsets? materialPadding;
 
   const ModalSheet({
     Key? key,
     required this.child,
     this.miuiIsGapless = false,
+    this.materialPadding,
     this.cupertinoPadding = const EdgeInsets.symmetric(
       vertical: LARGE_SPACE,
       horizontal: MEDIUM_SPACE,
@@ -49,14 +51,15 @@ class ModalSheet extends StatelessWidget {
                     ),
             ),
             child: Padding(
-              padding: EdgeInsets.only(
-                top: settings.isMIUI() && !miuiIsGapless
-                    ? MEDIUM_SPACE
-                    : LARGE_SPACE,
-                left: MEDIUM_SPACE,
-                right: MEDIUM_SPACE,
-                bottom: SMALL_SPACE,
-              ),
+              padding: materialPadding ??
+                  EdgeInsets.only(
+                    top: settings.isMIUI() && !miuiIsGapless
+                        ? MEDIUM_SPACE
+                        : LARGE_SPACE,
+                    left: MEDIUM_SPACE,
+                    right: MEDIUM_SPACE,
+                    bottom: SMALL_SPACE,
+                  ),
               child: child,
             ),
           ),
