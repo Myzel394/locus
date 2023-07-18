@@ -1,39 +1,24 @@
-import 'dart:async';
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:get_time_ago/get_time_ago.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:locus/screens/ViewDetailScreen.dart';
+import 'package:locus/screens/locations_overview_screen_widgets/ViewDetails.dart';
 import 'package:locus/services/location_point_service.dart';
 import 'package:locus/services/view_service.dart';
-import 'package:locus/utils/PageRoute.dart';
-import 'package:locus/utils/location.dart';
-import 'package:locus/utils/permission.dart';
 import 'package:locus/widgets/ModalSheet.dart';
-import 'package:locus/widgets/RequestLocationPermissionMixin.dart';
-import 'package:locus/widgets/SimpleAddressFetcher.dart';
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 import '../../constants/spacing.dart';
-import '../../utils/icon.dart';
-import '../../utils/theme.dart';
-import '../../widgets/AddressFetcher.dart';
-import '../../widgets/BentoGridElement.dart';
+import '../../widgets/SimpleAddressFetcher.dart';
 
 class ViewDetailsSheet extends StatefulWidget {
   final TaskView? view;
-  final LocationPointService? lastLocation;
+  final List<LocationPointService>? locations;
   final void Function(LatLng position) onGoToPosition;
 
   const ViewDetailsSheet({
+    required this.view,
+    required this.locations,
     required this.onGoToPosition,
-    this.view,
-    this.lastLocation,
     super.key,
   });
 
@@ -43,19 +28,24 @@ class ViewDetailsSheet extends StatefulWidget {
 
 class _ViewDetailsSheetState extends State<ViewDetailsSheet> {
   final containerKey = GlobalKey();
-  final DraggableScrollableController controller =
-  DraggableScrollableController();
 
+  final DraggableScrollableController controller =
+      DraggableScrollableController();
+
+  // Index starting from last element
+  int locationIndex = 0;
   TaskView? oldView;
-  LocationPointService? oldLastLocation;
+  bool isExpanded = false;
+
+  LocationPointService? get currentLocation => widget.locations == null
+      ? null
+      : widget.locations![widget.locations!.length - 1 - locationIndex];
 
   @override
   void initState() {
     super.initState();
 
     controller.addListener(() {
-      // I don't know why, but this is required
-      print(controller.size);
       // User should not be able to close the sheet when a view is selected.
       // Dynamically changing the snap sizes doesn't seem to work.
       // Instead we will simply reopen the sheet if the user tries to close it.
@@ -66,6 +56,10 @@ class _ViewDetailsSheetState extends State<ViewDetailsSheet> {
           curve: Curves.bounceOut,
         );
       }
+
+      setState(() {
+        isExpanded = controller.size == 1.0;
+      });
     });
   }
 
@@ -80,10 +74,9 @@ class _ViewDetailsSheetState extends State<ViewDetailsSheet> {
   void didUpdateWidget(covariant ViewDetailsSheet oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (oldWidget.view != widget.view) {
-      oldView = oldWidget.view;
-      oldLastLocation = oldWidget.lastLocation;
+    oldView = oldWidget.view;
 
+    if (oldWidget.view != widget.view) {
       if (widget.view == null) {
         controller.animateTo(
           0,
@@ -100,56 +93,10 @@ class _ViewDetailsSheetState extends State<ViewDetailsSheet> {
     }
   }
 
-  Widget buildHeadingMap() {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(LARGE_SPACE),
-      child: SizedBox(
-        height: 200,
-        child: FlutterMap(
-          options: MapOptions(
-            center: LatLng(
-              widget.lastLocation!.latitude,
-              widget.lastLocation!.longitude,
-            ),
-            zoom: 13,
-          ),
-          children: [
-            TileLayer(
-              urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-              subdomains: const ['a', 'b', 'c'],
-              userAgentPackageName: "app.myzel394.locus",
-            ),
-            MarkerLayer(
-              markers: [
-                Marker(
-                  point: LatLng(
-                    widget.lastLocation!.latitude,
-                    widget.lastLocation!.longitude,
-                  ),
-                  builder: (context) =>
-                      Transform.rotate(
-                        angle: widget.lastLocation!.heading!,
-                        child: Icon(
-                          CupertinoIcons.location_north_fill,
-                          color: getPrimaryColorShades(context)[0],
-                          size: 30,
-                        ),
-                      ),
-                ),
-              ],
-            )
-          ],
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-
     final view = widget.view ?? oldView;
-    final lastLocation = widget.lastLocation ?? oldLastLocation;
 
     return DraggableScrollableSheet(
       controller: controller,
@@ -160,314 +107,100 @@ class _ViewDetailsSheetState extends State<ViewDetailsSheet> {
       snapSizes: const [
         0.0,
         0.15,
-
         0.22,
         1,
       ],
-      builder: (context, scrollController) =>
-          ModalSheet(
-            miuiIsGapless: true,
-            child: SingleChildScrollView(
-              controller: scrollController,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  const SizedBox(height: MEDIUM_SPACE),
-                  if (view != null)
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: <Widget>[
-                        Icon(
-                          Icons.circle_rounded,
-                          size: 20,
-                          color: view.color,
-                        ),
-                        const SizedBox(width: SMALL_SPACE),
-                        Text(view.name),
-                      ],
+      builder: (context, scrollController) => ModalSheet(
+        miuiIsGapless: true,
+        materialPadding: EdgeInsets.zero,
+        cupertinoPadding: EdgeInsets.zero,
+        sheetController: controller,
+        child: SingleChildScrollView(
+          controller: scrollController,
+          child: Column(
+            children: [
+              const SizedBox(height: MEDIUM_SPACE),
+              if (view != null)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    Icon(
+                      Icons.circle_rounded,
+                      size: 20,
+                      color: view.color,
                     ),
-                  const SizedBox(height: LARGE_SPACE),
-                  if (lastLocation == null)
-                    Text(
-                      l10n.locationFetchEmptyError,
-                    )
-                  else
-                    ...[
-                      SimpleAddressFetcher(location: lastLocation.asLatLng()),
-                      const SizedBox(width: MEDIUM_SPACE),
-                      GridView.count(
-                        crossAxisCount: 2,
-                        shrinkWrap: true,
-                        mainAxisSpacing: MEDIUM_SPACE,
-                        crossAxisSpacing: MEDIUM_SPACE,
-                        physics: const NeverScrollableScrollPhysics(),
-                        children: [
-                          LastLocationBentoElement(
-                            view: view!,
-                            lastLocation: lastLocation,
-                          ),
-                          DistanceBentoElement(
-                            lastLocation: lastLocation,
-                            onTap: () {
-                              controller.animateTo(
-                                0.22,
-                                duration: const Duration(milliseconds: 150),
-                                curve: Curves.fastLinearToSlowEaseIn,
-                              );
-
-                              widget.onGoToPosition(
-                                LatLng(
-                                  lastLocation.latitude,
-                                  lastLocation.longitude,
-                                ),
-                              );
-                            },
-                          ),
-                          BentoGridElement(
-                            title: lastLocation.altitude == null
-                                ? l10n.unknownValue
-                                : l10n.locations_values_altitude_m(
-                              lastLocation.altitude!.round(),
+                    const SizedBox(width: SMALL_SPACE),
+                    Text(view.name),
+                  ],
+                ),
+              if (widget.locations != null && widget.locations!.isNotEmpty) ...[
+                const SizedBox(height: MEDIUM_SPACE),
+                SizedBox(
+                  height: 120,
+                  child: PageView.builder(
+                    physics: isExpanded
+                        ? null
+                        : const NeverScrollableScrollPhysics(),
+                    onPageChanged: (index) {
+                      setState(() {
+                        locationIndex = index;
+                      });
+                    },
+                    reverse: true,
+                    itemCount: widget.locations!.length,
+                    itemBuilder: (context, index) => Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(MEDIUM_SPACE),
+                        color: platformThemeData(
+                          context,
+                          material: (data) => data.colorScheme.surfaceVariant,
+                          cupertino: (data) => data.barBackgroundColor,
+                        ),
+                      ),
+                      margin:
+                          const EdgeInsets.symmetric(horizontal: MEDIUM_SPACE),
+                      padding: const EdgeInsets.all(MEDIUM_SPACE),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: <Widget>[
+                          const Icon(Icons.drag_indicator_rounded),
+                          const SizedBox(width: SMALL_SPACE),
+                          Flexible(
+                            child: SimpleAddressFetcher(
+                              location: widget.locations![index].asLatLng(),
                             ),
-                            icon: platformThemeData(
-                              context,
-                              material: (_) => Icons.height_rounded,
-                              cupertino: (_) => CupertinoIcons.arrow_up,
-                            ),
-                            type: BentoType.tertiary,
-                            description: l10n
-                                .locations_values_altitude_description,
-                          ),
-                          BentoGridElement(
-                            title: lastLocation.speed == null
-                                ? l10n.unknownValue
-                                : l10n.locations_values_speed_kmh(
-                              (lastLocation.speed! * 3.6).round(),
-                            ),
-                            icon: platformThemeData(
-                              context,
-                              material: (_) => Icons.speed,
-                              cupertino: (_) => CupertinoIcons.speedometer,
-                            ),
-                            type: BentoType.tertiary,
-                            description: l10n
-                                .locations_values_speed_description,
-                          ),
-                          BentoGridElement(
-                            title: lastLocation.batteryLevel == null
-                                ? l10n.unknownValue
-                                : l10n.locations_values_battery_value(
-                              (lastLocation.batteryLevel! * 100).round(),
-                            ),
-                            icon: getIconDataForBatteryLevel(
-                              context,
-                              lastLocation.batteryLevel,
-                            ),
-                            description: l10n
-                                .locations_values_battery_description,
-                            type: BentoType.tertiary,
-                          ),
-                          BentoGridElement(
-                            title: lastLocation.batteryState == null
-                                ? l10n.unknownValue
-                                : l10n.locations_values_batteryState_value(
-                              lastLocation.batteryState!.name,
-                            ),
-                            icon: Icons.cable_rounded,
-                            type: BentoType.tertiary,
-                            description:
-                            l10n.locations_values_batteryState_description,
                           ),
                         ],
                       ),
-                      if (widget.lastLocation?.heading != null) ...[
-                        const SizedBox(height: MEDIUM_SPACE),
-                        buildHeadingMap(),
-                      ],
-                    ],
-                ],
-              ),
-            ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: MEDIUM_SPACE),
+                Padding(
+                  padding: const EdgeInsets.all(MEDIUM_SPACE),
+                  child: ViewDetails(
+                    location: currentLocation,
+                    view: widget.view,
+                    onGoToPosition: (position) {
+                      controller.animateTo(
+                        0.22,
+                        duration: const Duration(milliseconds: 150),
+                        curve: Curves.fastLinearToSlowEaseIn,
+                      );
+                      widget.onGoToPosition(position);
+                    },
+                  ),
+                )
+              ] else
+                Text(
+                  l10n.locationFetchEmptyError,
+                )
+            ],
           ),
-    );
-  }
-}
-
-class DistanceBentoElement extends StatefulWidget {
-  final LocationPointService lastLocation;
-  final VoidCallback onTap;
-
-  const DistanceBentoElement({
-    required this.onTap,
-    required this.lastLocation,
-    super.key,
-  });
-
-  @override
-  State<DistanceBentoElement> createState() => _DistanceBentoElementState();
-}
-
-class _DistanceBentoElementState extends State<DistanceBentoElement>
-    with RequestLocationPermissionMixin {
-  Stream<Position>? _positionStream;
-  bool hasGrantedPermission = false;
-  Position? currentPosition;
-
-  void fetchCurrentPosition() async {
-    _positionStream = getLastAndCurrentPosition(updateLocation: true)
-      ..listen((position) {
-        setState(() {
-          currentPosition = position;
-        });
-      });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (await hasGrantedLocationPermission()) {
-        fetchCurrentPosition();
-
-        setState(() {
-          hasGrantedPermission = true;
-        });
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _positionStream?.drain();
-
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-
-    return BentoGridElement(
-      onTap: hasGrantedPermission == false
-          ? () async {
-        final hasGranted = await requestBasicLocationPermission();
-
-        if (hasGranted) {
-          fetchCurrentPosition();
-
-          setState(() {
-            hasGrantedPermission = true;
-          });
-        }
-      }
-          : widget.onTap,
-      title: (() {
-        if (!hasGrantedPermission) {
-          return l10n.locations_values_distance_permissionRequired;
-        }
-
-        if (currentPosition == null) {
-          return l10n.loading;
-        }
-
-        return l10n.locations_values_distance_km(
-          (Geolocator.distanceBetween(
-            currentPosition!.latitude,
-            currentPosition!.longitude,
-            widget.lastLocation.latitude,
-            widget.lastLocation.longitude,
-          ) /
-              1000)
-              .floor()
-              .toString(),
-        );
-      })(),
-      type: hasGrantedPermission && currentPosition != null
-          ? BentoType.secondary
-          : BentoType.disabled,
-      icon: platformThemeData(
-        context,
-        material: (_) => Icons.map,
-        cupertino: (_) => CupertinoIcons.map,
-      ),
-      description: l10n.locations_values_distance_description,
-    );
-  }
-}
-
-// We use a custom element for this, because it will be updated
-// in a specific interval and so we reduce the amount of
-// elements that need to be updated
-class LastLocationBentoElement extends StatefulWidget {
-  final TaskView view;
-  final LocationPointService lastLocation;
-
-  const LastLocationBentoElement({
-    required this.view,
-    required this.lastLocation,
-    super.key,
-  });
-
-  @override
-  State<LastLocationBentoElement> createState() =>
-      _LastLocationBentoElementState();
-}
-
-class _LastLocationBentoElementState extends State<LastLocationBentoElement> {
-  late final Timer _timer;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _timer = Timer.periodic(const Duration(minutes: 1), (_) {
-      setState(() {});
-    });
-  }
-
-  @override
-  void dispose() {
-    _timer.cancel();
-
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-
-    return BentoGridElement(
-      onTap: () {
-        if (isCupertino(context)) {
-          Navigator.of(context).push(
-            MaterialWithModalsPageRoute(
-              builder: (context) =>
-                  ViewDetailScreen(
-                    view: widget.view,
-                  ),
-            ),
-          );
-        } else {
-          Navigator.of(context).push(
-            NativePageRoute(
-              context: context,
-              builder: (context) =>
-                  ViewDetailScreen(
-                    view: widget.view,
-                  ),
-            ),
-          );
-        }
-      },
-      title: GetTimeAgo.parse(
-        DateTime.now().subtract(
-          DateTime.now().difference(widget.lastLocation.createdAt),
         ),
       ),
-      icon: Icons.location_on_rounded,
-      description: l10n.locations_values_lastLocation_description,
     );
   }
 }

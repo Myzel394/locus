@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import "package:apple_maps_flutter/apple_maps_flutter.dart" as AppleMaps;
-import 'package:background_fetch/background_fetch.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -747,25 +747,44 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
           userAgentPackageName: "app.myzel394.locus",
         ),
         CircleLayer(
-          circles: viewService.views
+          circles: viewService.views.reversed
               .where(
                   (view) => selectedViewID == null || view.id == selectedViewID)
               .map(
                 (view) => (_fetchers.locations[view] ?? [])
-                    .map(
-                      (location) => CircleMarker(
-                        radius: location.accuracy,
-                        useRadiusInMeter: true,
-                        point: LatLng(location.latitude, location.longitude),
-                        borderStrokeWidth: location.accuracy < 10 ? 1 : 3,
-                        color: view.color.withOpacity(.1),
-                        borderColor: view.color,
-                      ),
+                    .mapIndexed(
+                      (index, location) => CircleMarker(
+                          radius: 10,
+                          useRadiusInMeter: true,
+                          point: LatLng(location.latitude, location.longitude),
+                          borderStrokeWidth: 1,
+                          color: view.color.withOpacity(.1),
+                          borderColor:
+                              view.color.withOpacity(index == 0 ? .1 : 1)),
                     )
                     .toList(),
               )
               .expand((element) => element)
               .toList(),
+        ),
+        PolylineLayer(
+          polylines: [
+            for (final entry in _fetchers.locations.entries)
+              Polyline(
+                color: entry.key.color,
+                strokeWidth: 4,
+                strokeJoin: StrokeJoin.round,
+                gradientColors:
+                    List<Color>.generate(9, (index) => entry.key.color) +
+                        [entry.key.color.withOpacity(.2)],
+                points: List<LatLng>.from(
+                  (_fetchers.locations[entry.key] ?? []).reversed.map(
+                        (location) =>
+                            LatLng(location.latitude, location.longitude),
+                      ),
+                ),
+              )
+          ],
         ),
         _buildUserMarkerLayer(),
         PopupMarkerLayer(
@@ -825,49 +844,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     );
   }
 
-  Future<bool> _isLocationOutOfBound(final Position location) async {
-    final settings = context.read<SettingsService>();
-
-    if (settings.getMapProvider() == MapProvider.openStreetMap) {
-      final bounds = flutterMapController!.bounds;
-
-      if (bounds == null) {
-        return false;
-      }
-
-      return location.longitude < bounds.west ||
-          location.longitude > bounds.east ||
-          location.latitude < bounds.south ||
-          location.latitude > bounds.north;
-    } else {
-      final bounds = await appleMapController!.getVisibleRegion();
-
-      return location.longitude < bounds.southwest.longitude ||
-          location.longitude > bounds.northeast.longitude ||
-          location.latitude < bounds.southwest.latitude ||
-          location.latitude > bounds.northeast.latitude;
-    }
-  }
-
-  // Returns a stream of views whose last location is out of bounds
-  Stream<TaskView> _getOutOfBoundsViews() async* {
-    if (_fetchers.isLoading && false) {
-      return;
-    }
-
-    for (final view in _fetchers.views) {
-      if (_fetchers.locations[view]?.isEmpty ?? true) {
-        continue;
-      }
-
-      final lastLocation = _fetchers.locations[view]!.last;
-
-      if (await _isLocationOutOfBound(lastLocation.asPosition())) {
-        yield view;
-      }
-    }
-  }
-
   Widget buildOutOfBoundsMarkers() {
     return Stack(
       children: _fetchers.views
@@ -888,11 +864,16 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     );
   }
 
-  void showViewLocations(final TaskView view) async {
+  void showViewLocations(final TaskView view,
+      {final bool jumpToLatestLocation = true}) async {
     setState(() {
       showFAB = false;
       selectedViewID = view.id;
     });
+
+    if (!jumpToLatestLocation) {
+      return;
+    }
 
     final latestLocation = _fetchers.locations[view]?.last;
 
@@ -902,7 +883,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
 
     if (flutterMapController != null) {
       flutterMapController!.move(
-        LatLng(latestLocation.latitude, latestLocation.longitude),
+        LatLng(50.0, 7.0),
         flutterMapController!.zoom,
       );
     }
@@ -1385,7 +1366,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
           buildMapActions(),
           ViewDetailsSheet(
             view: selectedView,
-            lastLocation: lastLocation,
+            locations: _fetchers.locations[selectedView],
             onGoToPosition: (position) {
               if (flutterMapController != null) {
                 flutterMapController!
