@@ -1,12 +1,11 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:locus/screens/locations_overview_screen_widgets/ViewDetails.dart';
 import 'package:locus/services/location_point_service.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:locus/widgets/ModalSheet.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../constants/spacing.dart';
 import '../../widgets/SimpleAddressFetcher.dart';
@@ -114,6 +113,7 @@ class _ViewDetailsSheetState extends State<ViewDetailsSheet> {
       builder: (context, scrollController) => ModalSheet(
         miuiIsGapless: true,
         materialPadding: EdgeInsets.zero,
+        cupertinoPadding: EdgeInsets.zero,
         sheetController: controller,
         child: SingleChildScrollView(
           controller: scrollController,
@@ -155,7 +155,7 @@ class _ViewDetailsSheetState extends State<ViewDetailsSheet> {
                         color: platformThemeData(
                           context,
                           material: (data) => data.colorScheme.surfaceVariant,
-                          cupertino: (data) => data.scaffoldBackgroundColor,
+                          cupertino: (data) => data.barBackgroundColor,
                         ),
                       ),
                       margin:

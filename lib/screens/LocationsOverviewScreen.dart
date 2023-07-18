@@ -1,10 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'package:collection/collection.dart';
 
 import "package:apple_maps_flutter/apple_maps_flutter.dart" as AppleMaps;
-import 'package:background_fetch/background_fetch.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -732,8 +731,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
             .toSet(),
       );
     }
-
-    print(_fetchers.locations);
 
     return FlutterMap(
       mapController: flutterMapController,
