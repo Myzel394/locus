@@ -45,7 +45,7 @@ class _AddressFetcherState extends State<AddressFetcher> {
 
     try {
       final address =
-          await settings.getAddress(widget.latitude, widget.longitude);
+      await settings.getAddress(widget.latitude, widget.longitude);
 
       if (!mounted) {
         return;
@@ -54,8 +54,11 @@ class _AddressFetcherState extends State<AddressFetcher> {
       setState(() {
         this.address = address;
       });
-    } catch (_) {
-    } finally {
+    } catch (_) {} finally {
+      if (!mounted) {
+        return;
+      }
+
       setState(() {
         isLoading = false;
       });
