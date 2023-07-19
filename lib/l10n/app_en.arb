@@ -458,6 +458,11 @@
   "settingsScreen_import_file": "Import file",
   "settingsScreen_import_pickerTitle": "Select the export.locus.json file to import your data",
   "settingsScreen_import_transfer": "Transfer from old device",
+  "settingsScreen_import_confirmation_title": "Are you sure you want to import your data?",
+  "settingsScreen_import_confirmation_description": "Do you want to import your data? THIS WILL OVERWRITE YOUR CURRENT DATA (SHARES, SETTINGS, ETC.) WITH THE DATA FROM THE IMPORT!",
+  "settingsScreen_import_confirmation_confirm": "Import",
+  "settingsScreen_import_restart_title": "Restart Locus",
+  "settingsScreen_import_restart_description": "Locus needs to be restart to finish the import. Please restart the app now.",
   "settingsScreen_version": "Version {version} ({flavor, select, gms{GMS} floss{FLOSS} other{Unknown}})",
   "@settingsScreen_version": {
     "placeholders": {

@@ -13,6 +13,8 @@ import 'package:locus/services/settings_service.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:locus/utils/PageRoute.dart';
+import 'package:locus/utils/platform.dart';
+import 'package:locus/widgets/PlatformFlavorWidget.dart';
 
 import '../../constants/spacing.dart';
 import '../../utils/theme.dart';
@@ -38,8 +40,39 @@ class ImportSheet extends StatefulWidget {
 class _ImportSheetState extends State<ImportSheet> {
   String errorMessage = "";
 
-  void parseRawData(final String rawData) async {
+  void importRawData(final String rawData) async {
     final l10n = AppLocalizations.of(context);
+
+    final shouldImport = await showPlatformDialog(
+      context: context,
+      builder: (context) => PlatformAlertDialog(
+        material: (context, __) => MaterialAlertDialogData(
+          icon: PlatformFlavorWidget(
+            material: (context, _) => const Icon(Icons.warning_rounded),
+            cupertino: (context, _) =>
+                const Icon(CupertinoIcons.exclamationmark_triangle_fill),
+          ),
+        ),
+        title: Text(l10n.settingsScreen_import_confirmation_title),
+        content: Text(l10n.settingsScreen_import_confirmation_description),
+        actions: createCancellableDialogActions(
+          context,
+          [
+            PlatformDialogAction(
+              material: (context, _) => MaterialDialogActionData(
+                icon: const Icon(Icons.download_rounded),
+              ),
+              child: Text(l10n.settingsScreen_import_confirmation_confirm),
+              onPressed: () => Navigator.pop(context, true),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (shouldImport != true || !mounted) {
+      return;
+    }
 
     try {
       final data = jsonDecode(rawData);
@@ -108,7 +141,7 @@ class _ImportSheetState extends State<ImportSheet> {
                     final content = String.fromCharCodes(
                         List<int>.from(result.files[0].bytes!));
 
-                    parseRawData(content);
+                    importRawData(content);
                   } catch (_) {
                     setState(() {
                       errorMessage = l10n.unknownError;
@@ -131,7 +164,7 @@ class _ImportSheetState extends State<ImportSheet> {
                           NativePageRoute(
                             context: context,
                             builder: (context) => TransferReceiverScreen(
-                                onContentReceived: parseRawData),
+                                onContentReceived: importRawData),
                           ),
                         );
                       },

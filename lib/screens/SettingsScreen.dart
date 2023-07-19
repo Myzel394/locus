@@ -559,7 +559,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   ]);
 
                                   if (context.mounted) {
-                                    Navigator.pop(context, true);
+                                    final shouldClose =
+                                        await showPlatformDialog(
+                                      context: context,
+                                      barrierDismissible: !Platform.isAndroid,
+                                      builder: (context) => PlatformAlertDialog(
+                                        title: Text(l10n
+                                            .settingsScreen_import_restart_title),
+                                        content: Text(l10n
+                                            .settingsScreen_import_restart_description),
+                                        actions: [
+                                          PlatformDialogAction(
+                                            child: Text(l10n.closeApp),
+                                            onPressed: () => Navigator.pop(
+                                                context, Platform.isAndroid),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+
+                                    if (!mounted) {
+                                      return;
+                                    }
+
+                                    if (shouldClose != true) {
+                                      Navigator.pop(context);
+                                      return;
+                                    }
+
+                                    exit(0);
                                   }
                                 },
                               ),
