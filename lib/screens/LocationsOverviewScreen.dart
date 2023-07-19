@@ -812,15 +812,15 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
                 final locations = entry.value ?? [];
 
                 return Polyline(
-                  color: entry.key.color.withOpacity(0.9),
+                  color: view.color.withOpacity(0.9),
                   strokeWidth: 10,
                   strokeJoin: StrokeJoin.round,
                   gradientColors: locations.length <=
                           LOCATION_POLYLINE_OPAQUE_AMOUNT_THRESHOLD
                       ? null
                       : List<Color>.generate(
-                              9, (index) => entry.key.color.withOpacity(0.9)) +
-                          [entry.key.color.withOpacity(.3)],
+                              9, (index) => view.color.withOpacity(0.9)) +
+                          [view.color.withOpacity(.3)],
                   points: List<LatLng>.from(
                     locations.reversed.map(
                       (location) =>
