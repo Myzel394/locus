@@ -40,6 +40,9 @@ class ViewLocationFetcher extends ChangeNotifier {
             return;
           }
 
+          _locations[view] = _locations[view]!
+            ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+
           _setIsLoading(_locations.keys.length == views.length);
         },
       ),
@@ -62,7 +65,6 @@ class ViewLocationFetcher extends ChangeNotifier {
             return;
           }
 
-          print("Location fetched: ${location.createdAt}");
           _locations[view] = List<LocationPointService>.from(
             [..._locations[view] ?? [], location],
           );
