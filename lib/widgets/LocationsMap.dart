@@ -16,6 +16,7 @@ import 'package:locus/utils/permission.dart';
 import 'package:locus/widgets/Paper.dart';
 import 'package:provider/provider.dart';
 
+import '../constants/values.dart';
 import '../services/location_point_service.dart';
 import '../utils/location.dart';
 
@@ -300,51 +301,68 @@ class _LocationsMapState extends State<LocationsMap> {
     switch (settings.getMapProvider()) {
       case MapProvider.apple:
         return AppleMaps.AppleMap(
-            initialCameraPosition: AppleMaps.CameraPosition(
-              target: toAppleCoordinate(getInitialPosition()),
-              zoom: widget.initialZoomLevel,
-            ),
-            onMapCreated: (controller) {
-              appleMapsController = controller;
-            },
-            myLocationEnabled: true,
-            annotations: widget.controller.locations.isNotEmpty
-                ? {
-                    AppleMaps.Annotation(
-                      annotationId: AppleMaps.AnnotationId(
-                        "annotation_${widget.controller.locations.last.latitude}:${widget.controller.locations.last.longitude}",
-                      ),
-                      position: AppleMaps.LatLng(
-                        widget.controller.locations.last.latitude,
-                        widget.controller.locations.last.longitude,
-                      ),
-                      infoWindow: AppleMaps.InfoWindow(
-                        title: "Last location",
-                        snippet: snippetText,
-                      ),
+          initialCameraPosition: AppleMaps.CameraPosition(
+            target: toAppleCoordinate(getInitialPosition()),
+            zoom: widget.initialZoomLevel,
+          ),
+          onMapCreated: (controller) {
+            appleMapsController = controller;
+          },
+          myLocationEnabled: true,
+          annotations: widget.controller.locations.isNotEmpty
+              ? {
+                  AppleMaps.Annotation(
+                    annotationId: AppleMaps.AnnotationId(
+                      "annotation_${widget.controller.locations.last.latitude}:${widget.controller.locations.last.longitude}",
                     ),
-                  }
-                : {},
-            circles: {
-              ...(widget.showCircles
-                  ? widget.circles.map((circle) => circle.asAppleMaps)
-                  : {}),
-              ...widget.controller.locations.map(
-                (location) => AppleMaps.Circle(
-                  circleId: AppleMaps.CircleId(
-                    "circle_${location.latitude}:${location.longitude}",
+                    position: AppleMaps.LatLng(
+                      widget.controller.locations.last.latitude,
+                      widget.controller.locations.last.longitude,
+                    ),
+                    infoWindow: AppleMaps.InfoWindow(
+                      title: "Last location",
+                      snippet: snippetText,
+                    ),
                   ),
-                  center: AppleMaps.LatLng(
-                    location.latitude,
-                    location.longitude,
-                  ),
-                  fillColor: Colors.blue.withOpacity(0.2),
-                  strokeColor: Colors.blue,
-                  strokeWidth: location.accuracy < 10 ? 1 : 3,
-                  radius: location.accuracy,
+                }
+              : {},
+          circles: {
+            ...(widget.showCircles
+                ? widget.circles.map((circle) => circle.asAppleMaps)
+                : {}),
+            ...widget.controller.locations.map(
+              (location) => AppleMaps.Circle(
+                circleId: AppleMaps.CircleId(
+                  "circle_${location.latitude}:${location.longitude}",
+                ),
+                center: AppleMaps.LatLng(
+                  location.latitude,
+                  location.longitude,
+                ),
+                fillColor: Colors.blue.withOpacity(0.2),
+                strokeColor: Colors.blue,
+                strokeWidth: location.accuracy < 10 ? 1 : 3,
+                radius: location.accuracy,
+              ),
+            ),
+          },
+          polylines: {
+            AppleMaps.Polyline(
+              polylineId: AppleMaps.PolylineId("polyline"),
+              color: Colors.blue.withOpacity(0.9),
+              width: 10,
+              jointType: AppleMaps.JointType.round,
+              polylineCap: AppleMaps.Cap.roundCap,
+              consumeTapEvents: true,
+              points: List<AppleMaps.LatLng>.from(
+                widget.controller.locations.reversed.map(
+                  (location) =>
+                      AppleMaps.LatLng(location.latitude, location.longitude),
                 ),
               ),
-            });
+            )
+          },
+        );
       case MapProvider.openStreetMap:
         return FlutterMap(
           options: MapOptions(
@@ -386,7 +404,7 @@ class _LocationsMapState extends State<LocationsMap> {
                   )
                   .toList(),
             ),
-            if (widget.controller.locations.isNotEmpty)
+            if (widget.controller.locations.isNotEmpty) ...[
               PopupMarkerLayer(
                 options: PopupMarkerLayerOptions(
                   markers: [
@@ -409,6 +427,26 @@ class _LocationsMapState extends State<LocationsMap> {
                   ),
                 ),
               ),
+              PolylineLayer(polylines: [
+                Polyline(
+                  color: Colors.blue.withOpacity(0.9),
+                  strokeWidth: 10,
+                  strokeJoin: StrokeJoin.round,
+                  gradientColors: widget.controller.locations.length <=
+                          LOCATION_POLYLINE_OPAQUE_AMOUNT_THRESHOLD
+                      ? null
+                      : List<Color>.generate(
+                              9, (index) => Colors.blue.withOpacity(0.9)) +
+                          [Colors.blue.withOpacity(0.3)],
+                  points: List<LatLng>.from(
+                    widget.controller.locations.reversed.map(
+                      (location) =>
+                          LatLng(location.latitude, location.longitude),
+                    ),
+                  ),
+                )
+              ]),
+            ],
           ],
         );
     }

@@ -63,8 +63,6 @@ enum LocationStatus {
   fetching,
 }
 
-const LOCATION_POLYLINE_OPAQUE_AMOUNT_THRESHOLD = 100;
-
 class LocationsOverviewScreen extends StatefulWidget {
   const LocationsOverviewScreen({super.key});
 
