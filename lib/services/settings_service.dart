@@ -10,6 +10,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:locus/api/nostr-relays.dart';
 import 'package:locus/constants/app.dart';
+import 'package:locus/constants/values.dart';
 
 import '../api/get-address.dart';
 import '../utils/cache.dart';
@@ -69,8 +70,7 @@ class SettingsLastMapLocation {
         accuracy: data['accuracy'] as double,
       );
 
-  Map<String, dynamic> toJSON() =>
-      {
+  Map<String, dynamic> toJSON() => {
         'latitude': latitude,
         'longitude': longitude,
         'accuracy': accuracy,
@@ -88,6 +88,7 @@ class SettingsService extends ChangeNotifier {
   List<String> _relays;
   AndroidTheme androidTheme;
   SettingsLastMapLocation? lastMapLocation;
+  String currentAppVersion;
 
   GeocoderProvider geocoderProvider;
 
@@ -113,12 +114,12 @@ class SettingsService extends ChangeNotifier {
     required this.requireBiometricAuthenticationOnStart,
     required this.alwaysUseBatterySaveMode,
     required this.serverOrigin,
+    required this.currentAppVersion,
     this.lastHeadlessRun,
     this.lastMapLocation,
     Set<String>? seenHelperSheets,
     List<String>? relays,
-  })
-      : _relays = relays ?? [],
+  })  : _relays = relays ?? [],
         _seenHelperSheets = seenHelperSheets ?? {};
 
   static Future<SettingsService> createDefault() async {
@@ -126,9 +127,9 @@ class SettingsService extends ChangeNotifier {
       automaticallyLookupAddresses: true,
       primaryColor: null,
       androidTheme:
-      await fetchIsMIUI() ? AndroidTheme.miui : AndroidTheme.materialYou,
+          await fetchIsMIUI() ? AndroidTheme.miui : AndroidTheme.materialYou,
       mapProvider:
-      isPlatformApple() ? MapProvider.apple : MapProvider.openStreetMap,
+          isPlatformApple() ? MapProvider.apple : MapProvider.openStreetMap,
       showHints: true,
       geocoderProvider: isSystemGeocoderAvailable()
           ? GeocoderProvider.system
@@ -141,6 +142,7 @@ class SettingsService extends ChangeNotifier {
       lastHeadlessRun: null,
       serverOrigin: "https://locus.cfd",
       lastMapLocation: null,
+      currentAppVersion: CURRENT_APP_VERSION,
     );
   }
 
@@ -151,7 +153,7 @@ class SettingsService extends ChangeNotifier {
     return SettingsService(
       automaticallyLookupAddresses: data['automaticallyLoadLocation'],
       primaryColor:
-      data['primaryColor'] != null ? Color(data['primaryColor']) : null,
+          data['primaryColor'] != null ? Color(data['primaryColor']) : null,
       mapProvider: MapProvider.values[data['mapProvider']],
       relays: List<String>.from(data['relays'] ?? []),
       showHints: data['showHints'],
@@ -161,7 +163,7 @@ class SettingsService extends ChangeNotifier {
       userHasSeenWelcomeScreen: data['userHasSeenWelcomeScreen'],
       seenHelperSheets: Set<String>.from(data['seenHelperSheets'] ?? {}),
       requireBiometricAuthenticationOnStart:
-      data['requireBiometricAuthenticationOnStart'],
+          data['requireBiometricAuthenticationOnStart'],
       alwaysUseBatterySaveMode: data['alwaysUseBatterySaveMode'],
       lastHeadlessRun: data['lastHeadlessRun'] != null
           ? DateTime.parse(data['lastHeadlessRun'])
@@ -170,6 +172,7 @@ class SettingsService extends ChangeNotifier {
       lastMapLocation: data['lastMapLocation'] != null
           ? SettingsLastMapLocation.fromJSON(data['lastMapLocation'])
           : null,
+      currentAppVersion: data['currentAppVersion'],
     );
   }
 
@@ -205,16 +208,19 @@ class SettingsService extends ChangeNotifier {
       "userHasSeenWelcomeScreen": userHasSeenWelcomeScreen,
       "seenHelperSheets": _seenHelperSheets.toList(),
       "requireBiometricAuthenticationOnStart":
-      requireBiometricAuthenticationOnStart,
+          requireBiometricAuthenticationOnStart,
       "alwaysUseBatterySaveMode": alwaysUseBatterySaveMode,
       "lastHeadlessRun": lastHeadlessRun?.toIso8601String(),
       "serverOrigin": serverOrigin,
       "lastMapLocation": lastMapLocation?.toJSON(),
+      "currentAppVersion": currentAppVersion,
     };
   }
 
-  Future<String> getAddress(final double latitude,
-      final double longitude,) async {
+  Future<String> getAddress(
+    final double latitude,
+    final double longitude,
+  ) async {
     final providers = [
       getGeocoderProvider(),
       ...GeocoderProvider.values
@@ -246,8 +252,7 @@ class SettingsService extends ChangeNotifier {
     throw Exception("Failed to get address from any provider");
   }
 
-  Future<void> save() =>
-      storage.write(
+  Future<void> save() => storage.write(
         key: STORAGE_KEY,
         value: jsonEncode(toJSON()),
       );
@@ -268,13 +273,9 @@ class SettingsService extends ChangeNotifier {
 
     // Return system default
     if (isCupertino(context)) {
-      return CupertinoTheme
-          .of(context)
-          .primaryColor;
+      return CupertinoTheme.of(context).primaryColor;
     } else {
-      return Theme
-          .of(context)
-          .primaryColor;
+      return Theme.of(context).primaryColor;
     }
   }
 
