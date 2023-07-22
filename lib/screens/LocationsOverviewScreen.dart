@@ -891,7 +891,9 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
   Widget buildOutOfBoundsMarkers() {
     return Stack(
       children: _fetchers.views
-          .where((view) => _fetchers.locations[view]?.isNotEmpty ?? false)
+          .where((view) =>
+              (_fetchers.locations[view]?.isNotEmpty ?? false) &&
+              (selectedViewID == null || selectedViewID == view.id))
           .map(
             (view) => OutOfBoundMarker(
               lastViewLocation: _fetchers.locations[view]!.last,
