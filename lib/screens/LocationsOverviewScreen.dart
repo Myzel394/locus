@@ -57,6 +57,9 @@ import 'ViewDetailScreen.dart';
 import 'locations_overview_screen_widgets/ViewDetailsSheet.dart';
 import 'locations_overview_screen_widgets/constants.dart';
 
+// After this threshold, locations will not be merged together anymore
+const LOCATION_DETAILS_ZOOM_THRESHOLD = 16;
+
 enum LocationStatus {
   stale,
   active,
@@ -86,6 +89,8 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
 
   bool showFAB = true;
   bool isNorth = true;
+
+  bool showDetailedLocations = false;
 
   Stream<Position>? _positionStream;
 
@@ -177,6 +182,13 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
             event is MapEventDoubleTapZoom ||
             event is MapEventScrollWheelZoom) {
           mapEventStream.add(null);
+
+          print(event.zoom);
+
+          setState(() {
+            showDetailedLocations =
+                event.zoom >= LOCATION_DETAILS_ZOOM_THRESHOLD;
+          });
         }
       });
 
@@ -247,6 +259,16 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
         accuracy: position.accuracy,
       ),
     );
+  }
+
+  List<LocationPointService> mergeLocationsIfRequired(
+    final List<LocationPointService> locations,
+  ) {
+    if (showDetailedLocations) {
+      return locations;
+    }
+
+    return mergeLocations(locations);
   }
 
   void _createLocationFetcher() {
@@ -686,8 +708,13 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
         myLocationButtonEnabled: true,
         myLocationEnabled: true,
         compassEnabled: true,
-        onCameraMove: (_) {
+        onCameraMove: (movement) {
           mapEventStream.add(null);
+
+          setState(() {
+            showDetailedLocations =
+                movement.zoom >= LOCATION_DETAILS_ZOOM_THRESHOLD;
+          });
         },
         onMapCreated: (controller) {
           appleMapController = controller;
@@ -712,20 +739,21 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
             .where(
                 (view) => selectedViewID == null || view.id == selectedViewID)
             .map(
-              (view) => mergeLocations(_fetchers.locations[view] ?? [])
-                  .map(
-                    (location) => AppleMaps.Circle(
-                        circleId: AppleMaps.CircleId(location.id),
-                        center: AppleMaps.LatLng(
-                          location.latitude,
-                          location.longitude,
-                        ),
-                        radius: location.accuracy,
-                        fillColor: view.color.withOpacity(0.2),
-                        strokeColor: view.color,
-                        strokeWidth: location.accuracy < 10 ? 1 : 3),
-                  )
-                  .toList(),
+              (view) =>
+                  mergeLocationsIfRequired(_fetchers.locations[view] ?? [])
+                      .map(
+                        (location) => AppleMaps.Circle(
+                            circleId: AppleMaps.CircleId(location.id),
+                            center: AppleMaps.LatLng(
+                              location.latitude,
+                              location.longitude,
+                            ),
+                            radius: location.accuracy,
+                            fillColor: view.color.withOpacity(0.2),
+                            strokeColor: view.color,
+                            strokeWidth: location.accuracy < 10 ? 1 : 3),
+                      )
+                      .toList(),
             )
             .expand((element) => element)
             .toSet(),
@@ -751,7 +779,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
                     selectedViewID = view.id;
                   });
                 },
-                points: mergeLocations(locations)
+                points: mergeLocationsIfRequired(locations)
                     .reversed
                     .map(
                       (location) => AppleMaps.LatLng(
@@ -786,18 +814,20 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
               .where(
                   (view) => selectedViewID == null || view.id == selectedViewID)
               .map(
-                (view) => mergeLocations(_fetchers.locations[view] ?? [])
-                    .mapIndexed(
-                      (index, location) => CircleMarker(
-                        radius: location.accuracy,
-                        useRadiusInMeter: true,
-                        point: LatLng(location.latitude, location.longitude),
-                        borderStrokeWidth: 1,
-                        color: view.color.withOpacity(.1),
-                        borderColor: view.color,
-                      ),
-                    )
-                    .toList(),
+                (view) =>
+                    mergeLocationsIfRequired(_fetchers.locations[view] ?? [])
+                        .mapIndexed(
+                          (index, location) => CircleMarker(
+                            radius: location.accuracy,
+                            useRadiusInMeter: true,
+                            point:
+                                LatLng(location.latitude, location.longitude),
+                            borderStrokeWidth: 1,
+                            color: view.color.withOpacity(.1),
+                            borderColor: view.color,
+                          ),
+                        )
+                        .toList(),
               )
               .expand((element) => element)
               .toList(),
@@ -822,7 +852,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
                       : List<Color>.generate(
                               9, (index) => view.color.withOpacity(0.9)) +
                           [view.color.withOpacity(.3)],
-                  points: mergeLocations(locations)
+                  points: mergeLocationsIfRequired(locations)
                       .reversed
                       .map(
                         (location) =>
