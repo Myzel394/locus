@@ -712,7 +712,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
             .where(
                 (view) => selectedViewID == null || view.id == selectedViewID)
             .map(
-              (view) => (_fetchers.locations[view] ?? [])
+              (view) => mergeLocations(_fetchers.locations[view] ?? [])
                   .map(
                     (location) => AppleMaps.Circle(
                         circleId: AppleMaps.CircleId(location.id),
@@ -751,12 +751,15 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
                     selectedViewID = view.id;
                   });
                 },
-                points: List<AppleMaps.LatLng>.from(
-                  locations.reversed.map(
-                    (location) =>
-                        AppleMaps.LatLng(location.latitude, location.longitude),
-                  ),
-                ),
+                points: mergeLocations(locations)
+                    .reversed
+                    .map(
+                      (location) => AppleMaps.LatLng(
+                        location.latitude,
+                        location.longitude,
+                      ),
+                    )
+                    .toList(),
               );
             },
           ),
@@ -783,10 +786,10 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
               .where(
                   (view) => selectedViewID == null || view.id == selectedViewID)
               .map(
-                (view) => (_fetchers.locations[view] ?? [])
+                (view) => mergeLocations(_fetchers.locations[view] ?? [])
                     .mapIndexed(
                       (index, location) => CircleMarker(
-                        radius: 10,
+                        radius: location.accuracy,
                         useRadiusInMeter: true,
                         point: LatLng(location.latitude, location.longitude),
                         borderStrokeWidth: 1,
@@ -819,12 +822,13 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
                       : List<Color>.generate(
                               9, (index) => view.color.withOpacity(0.9)) +
                           [view.color.withOpacity(.3)],
-                  points: List<LatLng>.from(
-                    locations.reversed.map(
-                      (location) =>
-                          LatLng(location.latitude, location.longitude),
-                    ),
-                  ),
+                  points: mergeLocations(locations)
+                      .reversed
+                      .map(
+                        (location) =>
+                            LatLng(location.latitude, location.longitude),
+                      )
+                      .toList(),
                 );
               },
             ),

@@ -24,6 +24,7 @@ class LocationPointService {
   final double? headingAccuracy;
   final double? batteryLevel;
   final BatteryState? batteryState;
+  final bool isCopy;
 
   LocationPointService({
     required this.id,
@@ -37,6 +38,7 @@ class LocationPointService {
     double? heading,
     double? headingAccuracy,
     double? batteryLevel,
+    this.isCopy = false,
     this.batteryState,
   })
       : altitude = altitude == 0.0 ? null : altitude,
@@ -170,4 +172,32 @@ class LocationPointService {
       );
 
   LatLng asLatLng() => LatLng(latitude, longitude);
+
+  LocationPointService copyWith({
+    final double? latitude,
+    final double? longitude,
+    final double? altitude,
+    final double? accuracy,
+    final double? speed,
+    final double? speedAccuracy,
+    final double? heading,
+    final double? headingAccuracy,
+    final double? batteryLevel,
+    final BatteryState? batteryState,
+  }) =>
+      LocationPointService(
+        id: id,
+        createdAt: createdAt,
+        latitude: latitude ?? this.latitude,
+        longitude: longitude ?? this.longitude,
+        altitude: altitude ?? this.altitude,
+        accuracy: accuracy ?? this.accuracy,
+        speed: speed ?? this.speed,
+        speedAccuracy: speedAccuracy ?? this.speedAccuracy,
+        heading: heading ?? this.heading,
+        headingAccuracy: headingAccuracy ?? this.headingAccuracy,
+        batteryLevel: batteryLevel ?? this.batteryLevel,
+        batteryState: batteryState ?? this.batteryState,
+        isCopy: true,
+      );
 }
