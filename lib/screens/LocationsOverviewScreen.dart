@@ -1267,9 +1267,11 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
   }
 
   Widget buildMapActions() {
-    const dimension = 50;
+    const margin = 10.0;
+    const dimension = 50.0;
     const diff = FAB_SIZE - dimension;
 
+    final l10n = AppLocalizations.of(context);
     final settings = context.watch<SettingsService>();
     final shades = getPrimaryColorShades(context);
 
@@ -1283,104 +1285,122 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
         child: Column(
           children: [
             if (showDetailedLocations) ...[
-              SizedBox.square(
-                dimension: 50,
-                child: Center(
-                  child: Paper(
-                    width: null,
-                    borderRadius: BorderRadius.circular(HUGE_SPACE),
-                    padding: EdgeInsets.zero,
-                    child: IconButton(
-                      color: shades[400],
-                      icon: Icon(disableShowDetailedLocations
-                          ? MdiIcons.mapMarkerMultipleOutline
-                          : MdiIcons.mapMarkerMultiple),
-                      onPressed: () {
-                        setState(() {
-                          disableShowDetailedLocations =
-                              !disableShowDetailedLocations;
-                        });
-                      },
+              Tooltip(
+                message: disableShowDetailedLocations
+                    ? l10n.locationsOverview_mapAction_detailedLocations_show
+                    : l10n.locationsOverview_mapAction_detailedLocations_hide,
+                preferBelow: false,
+                margin: const EdgeInsets.only(bottom: margin),
+                child: SizedBox.square(
+                  dimension: dimension,
+                  child: Center(
+                    child: Paper(
+                      width: null,
+                      borderRadius: BorderRadius.circular(HUGE_SPACE),
+                      padding: EdgeInsets.zero,
+                      child: IconButton(
+                        color: shades[400],
+                        icon: Icon(disableShowDetailedLocations
+                            ? MdiIcons.mapMarkerMultipleOutline
+                            : MdiIcons.mapMarkerMultiple),
+                        onPressed: () {
+                          setState(() {
+                            disableShowDetailedLocations =
+                                !disableShowDetailedLocations;
+                          });
+                        },
+                      ),
                     ),
                   ),
                 ),
               ),
               const SizedBox(height: SMALL_SPACE),
             ],
-            SizedBox.square(
-              dimension: 50,
-              child: Center(
-                child: PlatformWidget(
-                  material: (context, _) => Paper(
-                    width: null,
-                    borderRadius: BorderRadius.circular(HUGE_SPACE),
-                    padding: EdgeInsets.zero,
-                    child: IconButton(
-                      color: isNorth ? shades[200] : shades[400],
-                      icon: AnimatedBuilder(
-                        animation: rotationAnimation,
-                        builder: (context, child) => Transform.rotate(
-                          angle: rotationAnimation.value,
-                          child: child,
-                        ),
-                        child: PlatformFlavorWidget(
-                          material: (context, _) => Transform.rotate(
-                            angle: -pi / 4,
-                            child: const Icon(MdiIcons.compass),
+            Tooltip(
+              message: l10n.locationsOverview_mapAction_alignNorth,
+              preferBelow: false,
+              margin: const EdgeInsets.only(bottom: margin),
+              child: SizedBox.square(
+                dimension: dimension,
+                child: Center(
+                  child: PlatformWidget(
+                    material: (context, _) => Paper(
+                      width: null,
+                      borderRadius: BorderRadius.circular(HUGE_SPACE),
+                      padding: EdgeInsets.zero,
+                      child: IconButton(
+                        color: isNorth ? shades[200] : shades[400],
+                        icon: AnimatedBuilder(
+                          animation: rotationAnimation,
+                          builder: (context, child) => Transform.rotate(
+                            angle: rotationAnimation.value,
+                            child: child,
                           ),
-                          cupertino: (context, _) =>
-                              const Icon(CupertinoIcons.location_north_fill),
+                          child: PlatformFlavorWidget(
+                            material: (context, _) => Transform.rotate(
+                              angle: -pi / 4,
+                              child: const Icon(MdiIcons.compass),
+                            ),
+                            cupertino: (context, _) =>
+                                const Icon(CupertinoIcons.location_north_fill),
+                          ),
                         ),
+                        onPressed: () {
+                          if (flutterMapController != null) {
+                            flutterMapController!.rotate(0);
+                          }
+                        },
                       ),
+                    ),
+                    cupertino: (context, _) => CupertinoButton(
+                      color: isNorth ? shades[200] : shades[400],
+                      padding: EdgeInsets.zero,
+                      borderRadius: BorderRadius.circular(HUGE_SPACE),
                       onPressed: () {
                         if (flutterMapController != null) {
                           flutterMapController!.rotate(0);
                         }
                       },
-                    ),
-                  ),
-                  cupertino: (context, _) => CupertinoButton(
-                    color: isNorth ? shades[200] : shades[400],
-                    padding: EdgeInsets.zero,
-                    borderRadius: BorderRadius.circular(HUGE_SPACE),
-                    onPressed: () {
-                      if (flutterMapController != null) {
-                        flutterMapController!.rotate(0);
-                      }
-                    },
-                    child: AnimatedBuilder(
-                      animation: rotationAnimation,
-                      builder: (context, child) => Transform.rotate(
-                        angle: rotationAnimation.value,
-                        child: child,
+                      child: AnimatedBuilder(
+                        animation: rotationAnimation,
+                        builder: (context, child) => Transform.rotate(
+                          angle: rotationAnimation.value,
+                          child: child,
+                        ),
+                        child: const Icon(CupertinoIcons.location_north_fill),
                       ),
-                      child: const Icon(CupertinoIcons.location_north_fill),
                     ),
                   ),
                 ),
               ),
             ),
             const SizedBox(height: SMALL_SPACE),
-            SizedBox.square(
-              dimension: 50,
-              child: Center(
-                child: PlatformWidget(
-                  material: (context, _) => Paper(
-                    width: null,
-                    borderRadius: BorderRadius.circular(HUGE_SPACE),
-                    padding: EdgeInsets.zero,
-                    child: IconButton(
+            Tooltip(
+              message: l10n.locationsOverview_mapAction_goToCurrentPosition,
+              preferBelow: false,
+              margin: const EdgeInsets.only(bottom: margin),
+              child: SizedBox.square(
+                dimension: dimension,
+                child: Center(
+                  child: PlatformWidget(
+                    material: (context, _) => Paper(
+                      width: null,
+                      borderRadius: BorderRadius.circular(HUGE_SPACE),
+                      padding: EdgeInsets.zero,
+                      child: IconButton(
+                        color: shades[400],
+                        icon: const Icon(Icons.my_location),
+                        onPressed: () =>
+                            goToCurrentPosition(askPermissions: true),
+                      ),
+                    ),
+                    cupertino: (context, _) => CupertinoButton(
                       color: shades[400],
-                      icon: const Icon(Icons.my_location),
+                      padding: EdgeInsets.zero,
                       onPressed: () =>
                           goToCurrentPosition(askPermissions: true),
+                      child: const Icon(Icons.my_location),
                     ),
-                  ),
-                  cupertino: (context, _) => CupertinoButton(
-                    color: shades[400],
-                    padding: EdgeInsets.zero,
-                    onPressed: () => goToCurrentPosition(askPermissions: true),
-                    child: const Icon(Icons.my_location),
                   ),
                 ),
               ),
