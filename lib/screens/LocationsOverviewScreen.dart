@@ -58,7 +58,7 @@ import 'locations_overview_screen_widgets/ViewDetailsSheet.dart';
 import 'locations_overview_screen_widgets/constants.dart';
 
 // After this threshold, locations will not be merged together anymore
-const LOCATION_DETAILS_ZOOM_THRESHOLD = 16;
+const LOCATION_DETAILS_ZOOM_THRESHOLD = 17;
 
 enum LocationStatus {
   stale,
@@ -91,6 +91,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
   bool isNorth = true;
 
   bool showDetailedLocations = false;
+  bool disableShowDetailedLocations = false;
 
   Stream<Position>? _positionStream;
 
@@ -113,6 +114,8 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
   String? selectedViewID;
 
   bool _hasGoneToInitialPosition = false;
+
+  Map<TaskView, List<LocationPointService>> _cachedMergedLocations = {};
 
   TaskView? get selectedView {
     if (selectedViewID == null) {
@@ -182,8 +185,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
             event is MapEventDoubleTapZoom ||
             event is MapEventScrollWheelZoom) {
           mapEventStream.add(null);
-
-          print(event.zoom);
 
           setState(() {
             showDetailedLocations =
@@ -262,13 +263,26 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
   }
 
   List<LocationPointService> mergeLocationsIfRequired(
-    final List<LocationPointService> locations,
+    final TaskView view,
   ) {
-    if (showDetailedLocations) {
+    final locations = _fetchers.locations[view] ?? [];
+
+    if (showDetailedLocations && !disableShowDetailedLocations) {
       return locations;
     }
 
-    return mergeLocations(locations);
+    if (_cachedMergedLocations.containsKey(selectedView)) {
+      return _cachedMergedLocations[selectedView]!;
+    }
+
+    final mergedLocations = mergeLocations(
+      locations,
+      distanceThreshold: LOCATION_MERGE_DISTANCE_THRESHOLD,
+    );
+
+    _cachedMergedLocations[view] = mergedLocations;
+
+    return mergedLocations;
   }
 
   void _createLocationFetcher() {
@@ -739,21 +753,20 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
             .where(
                 (view) => selectedViewID == null || view.id == selectedViewID)
             .map(
-              (view) =>
-                  mergeLocationsIfRequired(_fetchers.locations[view] ?? [])
-                      .map(
-                        (location) => AppleMaps.Circle(
-                            circleId: AppleMaps.CircleId(location.id),
-                            center: AppleMaps.LatLng(
-                              location.latitude,
-                              location.longitude,
-                            ),
-                            radius: location.accuracy,
-                            fillColor: view.color.withOpacity(0.2),
-                            strokeColor: view.color,
-                            strokeWidth: location.accuracy < 10 ? 1 : 3),
-                      )
-                      .toList(),
+              (view) => mergeLocationsIfRequired(view)
+                  .map(
+                    (location) => AppleMaps.Circle(
+                        circleId: AppleMaps.CircleId(location.id),
+                        center: AppleMaps.LatLng(
+                          location.latitude,
+                          location.longitude,
+                        ),
+                        radius: location.accuracy,
+                        fillColor: view.color.withOpacity(0.2),
+                        strokeColor: view.color,
+                        strokeWidth: location.accuracy < 10 ? 1 : 3),
+                  )
+                  .toList(),
             )
             .expand((element) => element)
             .toSet(),
@@ -779,7 +792,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
                     selectedViewID = view.id;
                   });
                 },
-                points: mergeLocationsIfRequired(locations)
+                points: mergeLocationsIfRequired(entry.key)
                     .reversed
                     .map(
                       (location) => AppleMaps.LatLng(
@@ -814,20 +827,18 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
               .where(
                   (view) => selectedViewID == null || view.id == selectedViewID)
               .map(
-                (view) =>
-                    mergeLocationsIfRequired(_fetchers.locations[view] ?? [])
-                        .mapIndexed(
-                          (index, location) => CircleMarker(
-                            radius: location.accuracy,
-                            useRadiusInMeter: true,
-                            point:
-                                LatLng(location.latitude, location.longitude),
-                            borderStrokeWidth: 1,
-                            color: view.color.withOpacity(.1),
-                            borderColor: view.color,
-                          ),
-                        )
-                        .toList(),
+                (view) => mergeLocationsIfRequired(view)
+                    .mapIndexed(
+                      (index, location) => CircleMarker(
+                        radius: location.accuracy,
+                        useRadiusInMeter: true,
+                        point: LatLng(location.latitude, location.longitude),
+                        borderStrokeWidth: 1,
+                        color: view.color.withOpacity(.1),
+                        borderColor: view.color,
+                      ),
+                    )
+                    .toList(),
               )
               .expand((element) => element)
               .toList(),
@@ -852,7 +863,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
                       : List<Color>.generate(
                               9, (index) => view.color.withOpacity(0.9)) +
                           [view.color.withOpacity(.3)],
-                  points: mergeLocationsIfRequired(locations)
+                  points: mergeLocationsIfRequired(entry.key)
                       .reversed
                       .map(
                         (location) =>
@@ -1271,6 +1282,31 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
             (isCupertino(context) ? LARGE_SPACE : SMALL_SPACE),
         child: Column(
           children: [
+            if (showDetailedLocations) ...[
+              SizedBox.square(
+                dimension: 50,
+                child: Center(
+                  child: Paper(
+                    width: null,
+                    borderRadius: BorderRadius.circular(HUGE_SPACE),
+                    padding: EdgeInsets.zero,
+                    child: IconButton(
+                      color: shades[400],
+                      icon: Icon(disableShowDetailedLocations
+                          ? MdiIcons.mapMarkerMultipleOutline
+                          : MdiIcons.mapMarkerMultiple),
+                      onPressed: () {
+                        setState(() {
+                          disableShowDetailedLocations =
+                              !disableShowDetailedLocations;
+                        });
+                      },
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: SMALL_SPACE),
+            ],
             SizedBox.square(
               dimension: 50,
               child: Center(

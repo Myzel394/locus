@@ -144,7 +144,6 @@ List<LocationPointService> mergeLocations(
 
     if (distance > distanceThreshold) {
       hasAddedFirstLocation = false;
-
       mergedLocations.add(location);
       continue;
     }
