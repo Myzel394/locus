@@ -160,7 +160,7 @@ List<LocationPointService> mergeLocations(
     final newLocation = location.copyWith(
       latitude: location.latitude + vector.latitude / 2,
       longitude: location.longitude + vector.longitude / 2,
-      accuracy: (location.accuracy + nextLocation.accuracy) / 2,
+      accuracy: (location.accuracy) + nextLocation.accuracy / 2,
     );
 
     mergedLocations.add(newLocation);
