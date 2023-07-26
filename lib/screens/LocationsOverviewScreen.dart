@@ -7,6 +7,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_logs/flutter_logs.dart';
@@ -1284,8 +1285,12 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
             (isCupertino(context) ? LARGE_SPACE : SMALL_SPACE),
         child: Column(
           children: [
-            if (showDetailedLocations) ...[
-              Tooltip(
+            AnimatedScale(
+              scale: showDetailedLocations ? 1 : 0,
+              duration:
+                  showDetailedLocations ? 1200.milliseconds : 100.milliseconds,
+              curve: showDetailedLocations ? Curves.elasticOut : Curves.easeIn,
+              child: Tooltip(
                 message: disableShowDetailedLocations
                     ? l10n.locationsOverview_mapAction_detailedLocations_show
                     : l10n.locationsOverview_mapAction_detailedLocations_hide,
@@ -1314,8 +1319,8 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
                   ),
                 ),
               ),
-              const SizedBox(height: SMALL_SPACE),
-            ],
+            ),
+            const SizedBox(height: SMALL_SPACE),
             Tooltip(
               message: l10n.locationsOverview_mapAction_alignNorth,
               preferBelow: false,
