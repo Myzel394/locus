@@ -528,15 +528,18 @@ class TaskService extends ChangeNotifier {
     final tasksToRemove = <Task>{};
 
     for (final task in tasks) {
+      final isRunning = await task.isRunning();
+      final shouldRun = await task.shouldRunNow();
+
       if ((!task.isInfinite() && task.nextEndDate() == null) ||
           (task.deleteAfterRun &&
               !task.isInfinite() &&
               task.timers.isNotEmpty &&
-              !(await task.shouldRunNow()))) {
+              !shouldRun)) {
         FlutterLogs.logInfo(LOG_TAG, "Task Service", "Removing task.");
 
         tasksToRemove.add(task);
-      } else if (!(await task.shouldRunNow()) && await task.isRunning()) {
+      } else if (!shouldRun && isRunning) {
         FlutterLogs.logInfo(LOG_TAG, "Task Service", "Stopping task.");
         await task.stopExecutionImmediately();
 
@@ -546,6 +549,18 @@ class TaskService extends ChangeNotifier {
             taskId: task.id,
             taskName: task.name,
             active: false,
+          ),
+        );
+      } else if (shouldRun && !isRunning) {
+        FlutterLogs.logInfo(LOG_TAG, "Task Service", "Start task.");
+        await task.startExecutionImmediately();
+
+        await logService.addLog(
+          Log.taskStatusChanged(
+            initiator: LogInitiator.system,
+            taskId: task.id,
+            taskName: task.name,
+            active: true,
           ),
         );
       }
