@@ -7,6 +7,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_expandable_fab/flutter_expandable_fab.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_logs/flutter_logs.dart';
@@ -57,6 +58,9 @@ import 'ViewDetailScreen.dart';
 import 'locations_overview_screen_widgets/ViewDetailsSheet.dart';
 import 'locations_overview_screen_widgets/constants.dart';
 
+// After this threshold, locations will not be merged together anymore
+const LOCATION_DETAILS_ZOOM_THRESHOLD = 17;
+
 enum LocationStatus {
   stale,
   active,
@@ -87,6 +91,9 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
   bool showFAB = true;
   bool isNorth = true;
 
+  bool showDetailedLocations = false;
+  bool disableShowDetailedLocations = false;
+
   Stream<Position>? _positionStream;
 
   // Dummy stream to trigger updates to out of bound markers
@@ -108,6 +115,8 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
   String? selectedViewID;
 
   bool _hasGoneToInitialPosition = false;
+
+  Map<TaskView, List<LocationPointService>> _cachedMergedLocations = {};
 
   TaskView? get selectedView {
     if (selectedViewID == null) {
@@ -177,6 +186,11 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
             event is MapEventDoubleTapZoom ||
             event is MapEventScrollWheelZoom) {
           mapEventStream.add(null);
+
+          setState(() {
+            showDetailedLocations =
+                event.zoom >= LOCATION_DETAILS_ZOOM_THRESHOLD;
+          });
         }
       });
 
@@ -247,6 +261,29 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
         accuracy: position.accuracy,
       ),
     );
+  }
+
+  List<LocationPointService> mergeLocationsIfRequired(
+    final TaskView view,
+  ) {
+    final locations = _fetchers.locations[view] ?? [];
+
+    if (showDetailedLocations && !disableShowDetailedLocations) {
+      return locations;
+    }
+
+    if (_cachedMergedLocations.containsKey(selectedView)) {
+      return _cachedMergedLocations[selectedView]!;
+    }
+
+    final mergedLocations = mergeLocations(
+      locations,
+      distanceThreshold: LOCATION_MERGE_DISTANCE_THRESHOLD,
+    );
+
+    _cachedMergedLocations[view] = mergedLocations;
+
+    return mergedLocations;
   }
 
   void _createLocationFetcher() {
@@ -686,8 +723,13 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
         myLocationButtonEnabled: true,
         myLocationEnabled: true,
         compassEnabled: true,
-        onCameraMove: (_) {
+        onCameraMove: (movement) {
           mapEventStream.add(null);
+
+          setState(() {
+            showDetailedLocations =
+                movement.zoom >= LOCATION_DETAILS_ZOOM_THRESHOLD;
+          });
         },
         onMapCreated: (controller) {
           appleMapController = controller;
@@ -712,7 +754,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
             .where(
                 (view) => selectedViewID == null || view.id == selectedViewID)
             .map(
-              (view) => (_fetchers.locations[view] ?? [])
+              (view) => mergeLocationsIfRequired(view)
                   .map(
                     (location) => AppleMaps.Circle(
                         circleId: AppleMaps.CircleId(location.id),
@@ -751,12 +793,15 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
                     selectedViewID = view.id;
                   });
                 },
-                points: List<AppleMaps.LatLng>.from(
-                  locations.reversed.map(
-                    (location) =>
-                        AppleMaps.LatLng(location.latitude, location.longitude),
-                  ),
-                ),
+                points: mergeLocationsIfRequired(entry.key)
+                    .reversed
+                    .map(
+                      (location) => AppleMaps.LatLng(
+                        location.latitude,
+                        location.longitude,
+                      ),
+                    )
+                    .toList(),
               );
             },
           ),
@@ -783,10 +828,10 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
               .where(
                   (view) => selectedViewID == null || view.id == selectedViewID)
               .map(
-                (view) => (_fetchers.locations[view] ?? [])
+                (view) => mergeLocationsIfRequired(view)
                     .mapIndexed(
                       (index, location) => CircleMarker(
-                        radius: 10,
+                        radius: location.accuracy,
                         useRadiusInMeter: true,
                         point: LatLng(location.latitude, location.longitude),
                         borderStrokeWidth: 1,
@@ -819,12 +864,13 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
                       : List<Color>.generate(
                               9, (index) => view.color.withOpacity(0.9)) +
                           [view.color.withOpacity(.3)],
-                  points: List<LatLng>.from(
-                    locations.reversed.map(
-                      (location) =>
-                          LatLng(location.latitude, location.longitude),
-                    ),
-                  ),
+                  points: mergeLocationsIfRequired(entry.key)
+                      .reversed
+                      .map(
+                        (location) =>
+                            LatLng(location.latitude, location.longitude),
+                      )
+                      .toList(),
                 );
               },
             ),
@@ -1222,9 +1268,11 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
   }
 
   Widget buildMapActions() {
-    const dimension = 50;
+    const margin = 10.0;
+    const dimension = 50.0;
     const diff = FAB_SIZE - dimension;
 
+    final l10n = AppLocalizations.of(context);
     final settings = context.watch<SettingsService>();
     final shades = getPrimaryColorShades(context);
 
@@ -1237,80 +1285,127 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
             (isCupertino(context) ? LARGE_SPACE : SMALL_SPACE),
         child: Column(
           children: [
-            SizedBox.square(
-              dimension: 50,
-              child: Center(
-                child: PlatformWidget(
-                  material: (context, _) => Paper(
-                    width: null,
-                    borderRadius: BorderRadius.circular(HUGE_SPACE),
-                    padding: EdgeInsets.zero,
-                    child: IconButton(
-                      color: isNorth ? shades[200] : shades[400],
-                      icon: AnimatedBuilder(
-                        animation: rotationAnimation,
-                        builder: (context, child) => Transform.rotate(
-                          angle: rotationAnimation.value,
-                          child: child,
-                        ),
-                        child: PlatformFlavorWidget(
-                          material: (context, _) => Transform.rotate(
-                            angle: -pi / 4,
-                            child: const Icon(MdiIcons.compass),
-                          ),
-                          cupertino: (context, _) =>
-                              const Icon(CupertinoIcons.location_north_fill),
-                        ),
+            AnimatedScale(
+              scale: showDetailedLocations ? 1 : 0,
+              duration:
+                  showDetailedLocations ? 1200.milliseconds : 100.milliseconds,
+              curve: showDetailedLocations ? Curves.elasticOut : Curves.easeIn,
+              child: Tooltip(
+                message: disableShowDetailedLocations
+                    ? l10n.locationsOverview_mapAction_detailedLocations_show
+                    : l10n.locationsOverview_mapAction_detailedLocations_hide,
+                preferBelow: false,
+                margin: const EdgeInsets.only(bottom: margin),
+                child: SizedBox.square(
+                  dimension: dimension,
+                  child: Center(
+                    child: Paper(
+                      width: null,
+                      borderRadius: BorderRadius.circular(HUGE_SPACE),
+                      padding: EdgeInsets.zero,
+                      child: IconButton(
+                        color: shades[400],
+                        icon: Icon(disableShowDetailedLocations
+                            ? MdiIcons.mapMarkerMultipleOutline
+                            : MdiIcons.mapMarkerMultiple),
+                        onPressed: () {
+                          setState(() {
+                            disableShowDetailedLocations =
+                                !disableShowDetailedLocations;
+                          });
+                        },
                       ),
-                      onPressed: () {
-                        if (flutterMapController != null) {
-                          flutterMapController!.rotate(0);
-                        }
-                      },
-                    ),
-                  ),
-                  cupertino: (context, _) => CupertinoButton(
-                    color: isNorth ? shades[200] : shades[400],
-                    padding: EdgeInsets.zero,
-                    borderRadius: BorderRadius.circular(HUGE_SPACE),
-                    onPressed: () {
-                      if (flutterMapController != null) {
-                        flutterMapController!.rotate(0);
-                      }
-                    },
-                    child: AnimatedBuilder(
-                      animation: rotationAnimation,
-                      builder: (context, child) => Transform.rotate(
-                        angle: rotationAnimation.value,
-                        child: child,
-                      ),
-                      child: const Icon(CupertinoIcons.location_north_fill),
                     ),
                   ),
                 ),
               ),
             ),
             const SizedBox(height: SMALL_SPACE),
-            SizedBox.square(
-              dimension: 50,
-              child: Center(
-                child: PlatformWidget(
-                  material: (context, _) => Paper(
-                    width: null,
-                    borderRadius: BorderRadius.circular(HUGE_SPACE),
-                    padding: EdgeInsets.zero,
-                    child: IconButton(
-                      color: shades[400],
-                      icon: const Icon(Icons.my_location),
-                      onPressed: () =>
-                          goToCurrentPosition(askPermissions: true),
+            Tooltip(
+              message: l10n.locationsOverview_mapAction_alignNorth,
+              preferBelow: false,
+              margin: const EdgeInsets.only(bottom: margin),
+              child: SizedBox.square(
+                dimension: dimension,
+                child: Center(
+                  child: PlatformWidget(
+                    material: (context, _) => Paper(
+                      width: null,
+                      borderRadius: BorderRadius.circular(HUGE_SPACE),
+                      padding: EdgeInsets.zero,
+                      child: IconButton(
+                        color: isNorth ? shades[200] : shades[400],
+                        icon: AnimatedBuilder(
+                          animation: rotationAnimation,
+                          builder: (context, child) => Transform.rotate(
+                            angle: rotationAnimation.value,
+                            child: child,
+                          ),
+                          child: PlatformFlavorWidget(
+                            material: (context, _) => Transform.rotate(
+                              angle: -pi / 4,
+                              child: const Icon(MdiIcons.compass),
+                            ),
+                            cupertino: (context, _) =>
+                                const Icon(CupertinoIcons.location_north_fill),
+                          ),
+                        ),
+                        onPressed: () {
+                          if (flutterMapController != null) {
+                            flutterMapController!.rotate(0);
+                          }
+                        },
+                      ),
+                    ),
+                    cupertino: (context, _) => CupertinoButton(
+                      color: isNorth ? shades[200] : shades[400],
+                      padding: EdgeInsets.zero,
+                      borderRadius: BorderRadius.circular(HUGE_SPACE),
+                      onPressed: () {
+                        if (flutterMapController != null) {
+                          flutterMapController!.rotate(0);
+                        }
+                      },
+                      child: AnimatedBuilder(
+                        animation: rotationAnimation,
+                        builder: (context, child) => Transform.rotate(
+                          angle: rotationAnimation.value,
+                          child: child,
+                        ),
+                        child: const Icon(CupertinoIcons.location_north_fill),
+                      ),
                     ),
                   ),
-                  cupertino: (context, _) => CupertinoButton(
-                    color: shades[400],
-                    padding: EdgeInsets.zero,
-                    onPressed: () => goToCurrentPosition(askPermissions: true),
-                    child: const Icon(Icons.my_location),
+                ),
+              ),
+            ),
+            const SizedBox(height: SMALL_SPACE),
+            Tooltip(
+              message: l10n.locationsOverview_mapAction_goToCurrentPosition,
+              preferBelow: false,
+              margin: const EdgeInsets.only(bottom: margin),
+              child: SizedBox.square(
+                dimension: dimension,
+                child: Center(
+                  child: PlatformWidget(
+                    material: (context, _) => Paper(
+                      width: null,
+                      borderRadius: BorderRadius.circular(HUGE_SPACE),
+                      padding: EdgeInsets.zero,
+                      child: IconButton(
+                        color: shades[400],
+                        icon: const Icon(Icons.my_location),
+                        onPressed: () =>
+                            goToCurrentPosition(askPermissions: true),
+                      ),
+                    ),
+                    cupertino: (context, _) => CupertinoButton(
+                      color: shades[400],
+                      padding: EdgeInsets.zero,
+                      onPressed: () =>
+                          goToCurrentPosition(askPermissions: true),
+                      child: const Icon(Icons.my_location),
+                    ),
                   ),
                 ),
               ),
