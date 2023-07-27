@@ -1,7 +1,8 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_platform_widgets/flutter_platform_widgets.dart' hide PlatformListTile;
+import 'package:flutter_platform_widgets/flutter_platform_widgets.dart'
+    hide PlatformListTile;
 import 'package:locus/services/timers_service.dart';
 
 import 'PlatformListTile.dart';
@@ -10,7 +11,8 @@ import 'WeekdaySelection.dart';
 class TimerController extends ChangeNotifier {
   final List<TaskRuntimeTimer> _timers = [];
 
-  UnmodifiableListView<TaskRuntimeTimer> get timers => UnmodifiableListView(_timers);
+  UnmodifiableListView<TaskRuntimeTimer> get timers =>
+      UnmodifiableListView(_timers);
 
   void add(final TaskRuntimeTimer timer) {
     // Merge the new timer if a timer for the same weekday already exists
@@ -135,7 +137,8 @@ class _TimerWidgetState extends State<TimerWidget> {
                 ? PlatformIconButton(
                     icon: PlatformWidget(
                       material: (_, __) => const Icon(Icons.cancel),
-                      cupertino: (_, __) => const Icon(CupertinoIcons.clear_thick_circled),
+                      cupertino: (_, __) =>
+                          const Icon(CupertinoIcons.clear_thick_circled),
                     ),
                     onPressed: () {
                       _controller.removeAt(index);
@@ -155,7 +158,7 @@ class _TimerWidgetState extends State<TimerWidget> {
                     );
 
                     if (data != null) {
-                      _controller.timers.add(
+                      _controller.add(
                         WeekdayTimer(
                           day: data["weekday"] as int,
                           startTime: data["startTime"] as TimeOfDay,
