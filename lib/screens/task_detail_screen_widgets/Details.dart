@@ -18,6 +18,7 @@ import 'package:locus/widgets/TimerWidget.dart';
 import 'package:provider/provider.dart';
 
 import '../../widgets/PlatformListTile.dart';
+import '../../widgets/TimerWidgetSheet.dart';
 
 class Details extends StatefulWidget {
   final List<LocationPointService> locations;
@@ -37,6 +38,7 @@ class Details extends StatefulWidget {
 
 class _DetailsState extends State<Details> {
   late final RelayController _relaysController;
+  final timersController = TimerController();
 
   @override
   void initState() {
@@ -45,12 +47,20 @@ class _DetailsState extends State<Details> {
     _relaysController = RelayController(
       relays: widget.task.relays,
     );
+    timersController.addAll(widget.task.timers);
+    widget.task.addListener(updateUI);
   }
 
   @override
   void dispose() {
     _relaysController.dispose();
+    widget.task.removeListener(updateUI);
+
     super.dispose();
+  }
+
+  void updateUI() {
+    setState(() {});
   }
 
   @override
@@ -431,10 +441,57 @@ class _DetailsState extends State<Details> {
               ),
               DetailInformationBox(
                 title: l10n.detailsTimersLabel,
-                child: TimerWidget(
-                  timers: widget.task.timers,
-                  allowEdit: false,
-                  physics: const NeverScrollableScrollPhysics(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (timersController.timers.isEmpty)
+                      Text(
+                        l10n.taskDetails_noTimers,
+                        textAlign: TextAlign.start,
+                        style: getBodyTextTextStyle(context),
+                      )
+                    else
+                      TimerWidget(
+                        timers: timersController.timers,
+                        allowEdit: false,
+                        physics: const NeverScrollableScrollPhysics(),
+                      ),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: PlatformTextButton(
+                        material: (_, __) => MaterialTextButtonData(
+                          icon: Icon(context.platformIcons.edit),
+                        ),
+                        child: Text(l10n.editTimers),
+                        onPressed: () async {
+                          final logService = context.read<LogService>();
+
+                          final timers = await showPlatformModalSheet(
+                            context: context,
+                            material: MaterialModalSheetData(
+                              backgroundColor: Colors.transparent,
+                              isScrollControlled: true,
+                              isDismissible: true,
+                            ),
+                            builder: (_) => TimerWidgetSheet(
+                              allowEmpty: true,
+                              controller: timersController,
+                            ),
+                          );
+
+                          if (timers == null) {
+                            return;
+                          }
+
+                          await widget.task
+                              .update(timers: timersController.timers);
+                          taskService.update(widget.task);
+                          await taskService.save();
+                          await taskService.checkup(logService);
+                        },
+                      ),
+                    ),
+                  ],
                 ),
               ),
               Center(

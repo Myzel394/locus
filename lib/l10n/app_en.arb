@@ -57,6 +57,7 @@
   "deleteLabel": "Delete",
   "dismissLabel": "Dismiss",
   "editRelays": "Edit Relays",
+  "editTimers": "Edit Timers",
   "uniLinksOpenError": "Link could not be opened",
   "actionNotUndoable": "This action cannot be undone!",
   "linkCopiedToClipboard": "Link copied to clipboard!",
@@ -285,6 +286,7 @@
   "taskDetails_goToDetails": "Go to Details",
   "taskDetails_lastKnownLocation": "Last known location",
   "taskDetails_noLocations": "No locations saved yet",
+  "taskDetails_noTimers": "No timers set up",
   "taskDetails_summary": "{count, plural, =1{One location saved} other{{count} locations saved}} ranging from {startDate} to {endDate}",
   "@taskDetails_summary": {
     "placeholders": {
