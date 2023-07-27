@@ -311,6 +311,8 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
         foregroundNotificationConfig: ForegroundNotificationConfig(
           notificationText: l10n.backgroundLocationFetch_text,
           notificationTitle: l10n.backgroundLocationFetch_title,
+          notificationIcon:
+              const AndroidResource(name: "ic_quick_actions_share_now"),
         ),
       );
     } else if (isPlatformApple()) {
