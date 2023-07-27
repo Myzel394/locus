@@ -72,21 +72,20 @@ class _DetailsState extends State<Details> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
         PlatformTextButton(
-          material: (_, __) =>
-              MaterialTextButtonData(
-                style: ButtonStyle(
-                  // Not rounded, but square
-                  shape: MaterialStateProperty.all(
-                    const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.zero,
-                    ),
-                  ),
-                  padding: MaterialStateProperty.all(
-                    const EdgeInsets.all(MEDIUM_SPACE),
-                  ),
+          material: (_, __) => MaterialTextButtonData(
+            style: ButtonStyle(
+              // Not rounded, but square
+              shape: MaterialStateProperty.all(
+                const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.zero,
                 ),
-                icon: const Icon(Icons.arrow_upward_rounded),
               ),
+              padding: MaterialStateProperty.all(
+                const EdgeInsets.all(MEDIUM_SPACE),
+              ),
+            ),
+            icon: const Icon(Icons.arrow_upward_rounded),
+          ),
           onPressed: widget.onGoBack,
           child: Text(l10n.goBack),
         ),
@@ -106,54 +105,54 @@ class _DetailsState extends State<Details> {
                 child: widget.locations.isEmpty
                     ? Text(l10n.taskDetails_noLocations)
                     : Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    SimpleAddressFetcher(
-                      location: widget.locations.last.asLatLng(),
-                    ),
-                    const SizedBox(height: MEDIUM_SPACE),
-                    Tooltip(
-                      message:
-                      l10n.taskDetails_mostRecentLocationExplanation,
-                      textAlign: TextAlign.center,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
-                          Icon(
-                            context.platformIcons.time,
-                            size: getIconSizeForBodyText(context),
+                          SimpleAddressFetcher(
+                            location: widget.locations.last.asLatLng(),
                           ),
-                          const SizedBox(width: TINY_SPACE),
-                          Text(
-                            widget.locations.last.createdAt.toString(),
-                            style: getBodyTextTextStyle(context),
-                            textAlign: TextAlign.start,
+                          const SizedBox(height: MEDIUM_SPACE),
+                          Tooltip(
+                            message:
+                                l10n.taskDetails_mostRecentLocationExplanation,
+                            textAlign: TextAlign.center,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: <Widget>[
+                                Icon(
+                                  context.platformIcons.time,
+                                  size: getIconSizeForBodyText(context),
+                                ),
+                                const SizedBox(width: TINY_SPACE),
+                                Text(
+                                  widget.locations.last.createdAt.toString(),
+                                  style: getBodyTextTextStyle(context),
+                                  textAlign: TextAlign.start,
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),
-                    ),
-                  ],
-                ),
               ),
               GestureDetector(
                 onTap: widget.locations.isEmpty
                     ? null
                     : () {
-                  Navigator.of(context).push(
-                    PageRouteBuilder(
-                      opaque: true,
-                      fullscreenDialog: true,
-                      barrierColor: Colors.black.withOpacity(0.7),
-                      barrierDismissible: true,
-                      pageBuilder: (context, _, __) =>
-                          LocationPointsDetailsScreen(
-                            locations: widget.locations,
-                            isPreview: false,
+                        Navigator.of(context).push(
+                          PageRouteBuilder(
+                            opaque: true,
+                            fullscreenDialog: true,
+                            barrierColor: Colors.black.withOpacity(0.7),
+                            barrierDismissible: true,
+                            pageBuilder: (context, _, __) =>
+                                LocationPointsDetailsScreen(
+                              locations: widget.locations,
+                              isPreview: false,
+                            ),
                           ),
-                    ),
-                  );
-                },
+                        );
+                      },
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
@@ -175,22 +174,20 @@ class _DetailsState extends State<Details> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: List<Widget>.from(
-                    widget.task.relays.map(
-                          (relay) =>
-                          PlatformListTile(
+                        widget.task.relays.map(
+                          (relay) => PlatformListTile(
                             title: Text(
                               relay,
                             ),
                             trailing: const SizedBox.shrink(),
                           ),
-                    ),
-                  ) +
+                        ),
+                      ) +
                       [
                         PlatformTextButton(
-                          material: (_, __) =>
-                              MaterialTextButtonData(
-                                icon: Icon(context.platformIcons.edit),
-                              ),
+                          material: (_, __) => MaterialTextButtonData(
+                            icon: Icon(context.platformIcons.edit),
+                          ),
                           child: Text(l10n.editRelays),
                           onPressed: () async {
                             await showPlatformModalSheet(
@@ -200,10 +197,9 @@ class _DetailsState extends State<Details> {
                                 isDismissible: true,
                                 backgroundColor: Colors.transparent,
                               ),
-                              builder: (context) =>
-                                  RelaySelectSheet(
-                                    controller: _relaysController,
-                                  ),
+                              builder: (context) => RelaySelectSheet(
+                                controller: _relaysController,
+                              ),
                             );
 
                             await widget.task
@@ -253,13 +249,12 @@ class _DetailsState extends State<Details> {
                               if (isRunning)
                                 PlatformTextButton(
                                   child: Text(l10n.taskAction_stop),
-                                  material: (_, __) =>
-                                      MaterialTextButtonData(
-                                        icon: const Icon(Icons.stop_rounded),
-                                      ),
+                                  material: (_, __) => MaterialTextButtonData(
+                                    icon: const Icon(Icons.stop_rounded),
+                                  ),
                                   onPressed: () async {
                                     final logService =
-                                    context.read<LogService>();
+                                        context.read<LogService>();
                                     await widget.task
                                         .stopExecutionImmediately();
 
@@ -278,14 +273,12 @@ class _DetailsState extends State<Details> {
                               else
                                 PlatformTextButton(
                                   child: Text(l10n.taskAction_start),
-                                  material: (_, __) =>
-                                      MaterialTextButtonData(
-                                        icon: const Icon(
-                                            Icons.play_arrow_rounded),
-                                      ),
+                                  material: (_, __) => MaterialTextButtonData(
+                                    icon: const Icon(Icons.play_arrow_rounded),
+                                  ),
                                   onPressed: () async {
                                     final logService =
-                                    context.read<LogService>();
+                                        context.read<LogService>();
                                     await widget.task
                                         .startExecutionImmediately();
 
@@ -305,7 +298,7 @@ class _DetailsState extends State<Details> {
                               FutureBuilder<Map<String, dynamic>>(
                                 future: (() async {
                                   final status =
-                                  await widget.task.getScheduleStatus();
+                                      await widget.task.getScheduleStatus();
 
                                   if (status == null) {
                                     return Map<String, dynamic>.from({});
@@ -321,12 +314,11 @@ class _DetailsState extends State<Details> {
                                             false)) {
                                       return PlatformTextButton(
                                         child:
-                                        Text(l10n.taskAction_stopSchedule),
+                                            Text(l10n.taskAction_stopSchedule),
                                         material: (_, __) =>
                                             MaterialTextButtonData(
-                                              icon: const Icon(
-                                                  Icons.stop_outlined),
-                                            ),
+                                          icon: const Icon(Icons.stop_outlined),
+                                        ),
                                         onPressed: () async {
                                           await widget.task.stopSchedule();
 
@@ -340,37 +332,35 @@ class _DetailsState extends State<Details> {
                                             context: context,
                                             builder: (context) =>
                                                 PlatformAlertDialog(
-                                                  title: Text(l10n
-                                                      .taskAction_stopSchedule_title),
-                                                  content: Text(l10n
-                                                      .taskAction_stopSchedule_description),
-                                                  actions: <Widget>[
-                                                    PlatformDialogAction(
-                                                      child: Text(
-                                                          l10n
-                                                              .closeNeutralAction),
-                                                      onPressed: () {
-                                                        Navigator.of(context)
-                                                            .pop();
-                                                      },
-                                                    ),
-                                                  ],
+                                              title: Text(l10n
+                                                  .taskAction_stopSchedule_title),
+                                              content: Text(l10n
+                                                  .taskAction_stopSchedule_description),
+                                              actions: <Widget>[
+                                                PlatformDialogAction(
+                                                  child: Text(
+                                                      l10n.closeNeutralAction),
+                                                  onPressed: () {
+                                                    Navigator.of(context).pop();
+                                                  },
                                                 ),
+                                              ],
+                                            ),
                                           );
                                         },
                                       );
                                     } else {
                                       return PlatformTextButton(
                                         child:
-                                        Text(l10n.taskAction_startSchedule),
+                                            Text(l10n.taskAction_startSchedule),
                                         material: (_, __) =>
                                             MaterialTextButtonData(
-                                              icon: const Icon(
-                                                  Icons.schedule_rounded),
-                                            ),
+                                          icon: const Icon(
+                                              Icons.schedule_rounded),
+                                        ),
                                         onPressed: () async {
                                           final startDate =
-                                          await widget.task.startSchedule();
+                                              await widget.task.startSchedule();
 
                                           taskService.update(widget.task);
 
@@ -383,46 +373,45 @@ class _DetailsState extends State<Details> {
                                               context: context,
                                               builder: (context) =>
                                                   PlatformAlertDialog(
-                                                    title: Text(l10n
-                                                        .taskAction_startSchedule_notScheduled_title),
-                                                    content: Text(l10n
-                                                        .taskAction_startSchedule_notScheduled_description),
-                                                    actions: <Widget>[
-                                                      PlatformDialogAction(
-                                                        child: Text(l10n
-                                                            .closeNeutralAction),
-                                                        onPressed: () {
-                                                          Navigator.of(context)
-                                                              .pop();
-                                                        },
-                                                      ),
-                                                    ],
+                                                title: Text(l10n
+                                                    .taskAction_startSchedule_notScheduled_title),
+                                                content: Text(l10n
+                                                    .taskAction_startSchedule_notScheduled_description),
+                                                actions: <Widget>[
+                                                  PlatformDialogAction(
+                                                    child: Text(l10n
+                                                        .closeNeutralAction),
+                                                    onPressed: () {
+                                                      Navigator.of(context)
+                                                          .pop();
+                                                    },
                                                   ),
+                                                ],
+                                              ),
                                             );
                                           } else {
                                             await showPlatformDialog(
                                               context: context,
                                               builder: (context) =>
                                                   PlatformAlertDialog(
-                                                    title: Text(l10n
-                                                        .taskAction_startSchedule_title),
-                                                    content: Text(
-                                                      l10n
-                                                          .taskAction_startSchedule_description(
-                                                        startDate,
-                                                      ),
-                                                    ),
-                                                    actions: <Widget>[
-                                                      PlatformDialogAction(
-                                                        child: Text(l10n
-                                                            .closeNeutralAction),
-                                                        onPressed: () {
-                                                          Navigator.of(context)
-                                                              .pop();
-                                                        },
-                                                      ),
-                                                    ],
+                                                title: Text(l10n
+                                                    .taskAction_startSchedule_title),
+                                                content: Text(
+                                                  l10n.taskAction_startSchedule_description(
+                                                    startDate,
                                                   ),
+                                                ),
+                                                actions: <Widget>[
+                                                  PlatformDialogAction(
+                                                    child: Text(l10n
+                                                        .closeNeutralAction),
+                                                    onPressed: () {
+                                                      Navigator.of(context)
+                                                          .pop();
+                                                    },
+                                                  ),
+                                                ],
+                                              ),
                                             );
                                           }
                                         },
@@ -433,8 +422,8 @@ class _DetailsState extends State<Details> {
                                   return PlatformCircularProgressIndicator(
                                     material: (_, __) =>
                                         MaterialProgressIndicatorData(
-                                          strokeWidth: 2,
-                                        ),
+                                      strokeWidth: 2,
+                                    ),
                                   );
                                 },
                               ),
@@ -470,10 +459,9 @@ class _DetailsState extends State<Details> {
                     Align(
                       alignment: Alignment.centerRight,
                       child: PlatformTextButton(
-                        material: (_, __) =>
-                            MaterialTextButtonData(
-                              icon: Icon(context.platformIcons.edit),
-                            ),
+                        material: (_, __) => MaterialTextButtonData(
+                          icon: Icon(context.platformIcons.edit),
+                        ),
                         child: Text(l10n.editTimers),
                         onPressed: () async {
                           final logService = context.read<LogService>();
@@ -485,11 +473,10 @@ class _DetailsState extends State<Details> {
                               isScrollControlled: true,
                               isDismissible: true,
                             ),
-                            builder: (_) =>
-                                TimerWidgetSheet(
-                                  allowEmpty: true,
-                                  controller: timersController,
-                                ),
+                            builder: (_) => TimerWidgetSheet(
+                              allowEmpty: true,
+                              controller: timersController,
+                            ),
                           );
 
                           if (timers == null) {
@@ -504,6 +491,7 @@ class _DetailsState extends State<Details> {
                           await taskService.save();
                           await widget.task.startSchedule();
                           await taskService.checkup(logService);
+                          await widget.task.update();
                         },
                       ),
                     ),
@@ -513,59 +501,45 @@ class _DetailsState extends State<Details> {
               Center(
                 child: PlatformTextButton(
                   child: Text(l10n.taskDetails_deleteTask),
-                  material: (_, __) =>
-                      MaterialTextButtonData(
-                        icon: Icon(context.platformIcons.delete),
-                        style: TextButton.styleFrom(
-                          foregroundColor: Theme
-                              .of(context)
-                              .errorColor,
-                        ),
-                      ),
-                  cupertino: (_, __) =>
-                      CupertinoTextButtonData(
-                        color: Theme
-                            .of(context)
-                            .errorColor,
-                      ),
+                  material: (_, __) => MaterialTextButtonData(
+                    icon: Icon(context.platformIcons.delete),
+                    style: TextButton.styleFrom(
+                      foregroundColor: Theme.of(context).errorColor,
+                    ),
+                  ),
+                  cupertino: (_, __) => CupertinoTextButtonData(
+                    color: Theme.of(context).errorColor,
+                  ),
                   onPressed: () async {
                     final logService = context.read<LogService>();
 
                     final confirmed = await showPlatformDialog(
                       context: context,
-                      builder: (context) =>
-                          PlatformAlertDialog(
-                            title: Text(l10n.taskDetails_deleteTask),
-                            content: Text(l10n.taskDetails_deleteTask_confirm),
-                            material: (_, __) =>
-                                MaterialAlertDialogData(
-                                  icon: Icon(context.platformIcons.delete),
+                      builder: (context) => PlatformAlertDialog(
+                        title: Text(l10n.taskDetails_deleteTask),
+                        content: Text(l10n.taskDetails_deleteTask_confirm),
+                        material: (_, __) => MaterialAlertDialogData(
+                          icon: Icon(context.platformIcons.delete),
+                        ),
+                        actions: createCancellableDialogActions(
+                          context,
+                          [
+                            PlatformDialogAction(
+                              child: Text(l10n.deleteLabel),
+                              onPressed: () => Navigator.of(context).pop(true),
+                              material: (_, __) => MaterialDialogActionData(
+                                style: TextButton.styleFrom(
+                                  foregroundColor: Theme.of(context).errorColor,
                                 ),
-                            actions: createCancellableDialogActions(
-                              context,
-                              [
-                                PlatformDialogAction(
-                                  child: Text(l10n.deleteLabel),
-                                  onPressed: () =>
-                                      Navigator.of(context).pop(true),
-                                  material: (_, __) =>
-                                      MaterialDialogActionData(
-                                        style: TextButton.styleFrom(
-                                          foregroundColor: Theme
-                                              .of(context)
-                                              .errorColor,
-                                        ),
-                                        icon: const Icon(
-                                            Icons.delete_forever_rounded),
-                                      ),
-                                  cupertino: (_, __) =>
-                                      CupertinoDialogActionData(
-                                        isDestructiveAction: true,
-                                      ),
-                                ),
-                              ],
+                                icon: const Icon(Icons.delete_forever_rounded),
+                              ),
+                              cupertino: (_, __) => CupertinoDialogActionData(
+                                isDestructiveAction: true,
+                              ),
                             ),
-                          ),
+                          ],
+                        ),
+                      ),
                     );
 
                     if (confirmed == true) {
