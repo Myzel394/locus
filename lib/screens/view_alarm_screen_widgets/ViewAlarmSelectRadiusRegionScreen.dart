@@ -21,6 +21,7 @@ import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:vibration/vibration.dart';
 
+import '../../widgets/LocusFlutterMap.dart';
 import '../../widgets/MapBanner.dart';
 
 class ViewAlarmSelectRadiusRegionScreen extends StatefulWidget {
@@ -252,7 +253,7 @@ class _ViewAlarmSelectRadiusRegionScreenState
       );
     }
 
-    return FlutterMap(
+    return LocusFlutterMap(
       mapController: flutterMapController,
       options: MapOptions(
         onLongPress: (_, __) {
@@ -276,11 +277,6 @@ class _ViewAlarmSelectRadiusRegionScreenState
         maxZoom: 18,
       ),
       children: [
-        TileLayer(
-          urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-          subdomains: const ['a', 'b', 'c'],
-          userAgentPackageName: "app.myzel394.locus",
-        ),
         if (alarmCenter != null)
           if (isInScaleMode)
             Shimmer.fromColors(

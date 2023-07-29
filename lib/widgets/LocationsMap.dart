@@ -19,6 +19,7 @@ import 'package:provider/provider.dart';
 import '../constants/values.dart';
 import '../services/location_point_service.dart';
 import '../utils/location.dart';
+import 'LocusFlutterMap.dart';
 
 AppleMaps.LatLng toAppleMapsCoordinates(final LatLng coordinates) =>
     AppleMaps.LatLng(coordinates.latitude, coordinates.longitude);
@@ -364,7 +365,7 @@ class _LocationsMapState extends State<LocationsMap> {
           },
         );
       case MapProvider.openStreetMap:
-        return FlutterMap(
+        return LocusFlutterMap(
           options: MapOptions(
             center: getInitialPosition(),
             zoom: widget.initialZoomLevel,
@@ -372,11 +373,6 @@ class _LocationsMapState extends State<LocationsMap> {
           ),
           mapController: flutterMapController,
           children: [
-            TileLayer(
-              urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-              subdomains: const ['a', 'b', 'c'],
-              userAgentPackageName: "app.myzel394.locus",
-            ),
             if (widget.circles.isNotEmpty)
               AnimatedOpacity(
                 duration: const Duration(milliseconds: 300),

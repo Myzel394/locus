@@ -18,6 +18,7 @@ import '../../utils/location.dart';
 import '../../utils/permission.dart';
 import '../../utils/theme.dart';
 import '../../widgets/BentoGridElement.dart';
+import '../../widgets/LocusFlutterMap.dart';
 import '../../widgets/RequestLocationPermissionMixin.dart';
 import '../ViewDetailScreen.dart';
 
@@ -56,7 +57,7 @@ class _ViewDetailsState extends State<ViewDetails> {
       borderRadius: BorderRadius.circular(LARGE_SPACE),
       child: SizedBox(
         height: 200,
-        child: FlutterMap(
+        child: LocusFlutterMap(
           options: MapOptions(
             center: LatLng(
               lastLocation.latitude,
@@ -65,11 +66,6 @@ class _ViewDetailsState extends State<ViewDetails> {
             zoom: 13,
           ),
           children: [
-            TileLayer(
-              urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-              subdomains: const ['a', 'b', 'c'],
-              userAgentPackageName: "app.myzel394.locus",
-            ),
             MarkerLayer(
               markers: [
                 Marker(

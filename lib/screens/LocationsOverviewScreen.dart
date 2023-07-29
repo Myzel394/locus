@@ -33,6 +33,7 @@ import 'package:locus/utils/location.dart';
 import 'package:locus/utils/navigation.dart';
 import 'package:locus/utils/show_message.dart';
 import 'package:locus/widgets/FABOpenContainer.dart';
+import 'package:locus/widgets/LocusFlutterMap.dart';
 import 'package:locus/widgets/Paper.dart';
 import 'package:locus/widgets/PlatformFlavorWidget.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
@@ -780,7 +781,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
               .map(
             (entry) {
               final view = entry.key;
-              final locations = entry.value ?? [];
 
               return AppleMaps.Polyline(
                 polylineId: AppleMaps.PolylineId(view.id),
@@ -811,20 +811,9 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
       );
     }
 
-    return FlutterMap(
+    return LocusFlutterMap(
       mapController: flutterMapController,
-      options: MapOptions(
-        maxZoom: 18,
-        minZoom: 2,
-        center: LatLng(40, 20),
-        zoom: 13.0,
-      ),
       children: [
-        TileLayer(
-          urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-          subdomains: const ['a', 'b', 'c'],
-          userAgentPackageName: "app.myzel394.locus",
-        ),
         CircleLayer(
           circles: viewService.views.reversed
               .where(
@@ -854,7 +843,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
                 .map(
               (entry) {
                 final view = entry.key;
-                final locations = entry.value ?? [];
+                final locations = mergeLocationsIfRequired(entry.key);
 
                 return Polyline(
                   color: view.color.withOpacity(0.9),
@@ -866,8 +855,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
                       : List<Color>.generate(
                               9, (index) => view.color.withOpacity(0.9)) +
                           [view.color.withOpacity(.3)],
-                  points: mergeLocationsIfRequired(entry.key)
-                      .reversed
+                  points: locations.reversed
                       .map(
                         (location) =>
                             LatLng(location.latitude, location.longitude),
