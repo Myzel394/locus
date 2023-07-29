@@ -22,7 +22,7 @@ Future<Position?> _getLocationUsingMethod(
   FlutterLogs.logInfo(
     LOG_TAG,
     "Get Location",
-    "Getting location using method: $method with timeout $TIMEOUT_DURATION",
+    "Getting location using method: $method with timeout $timeout",
   );
 
   try {
