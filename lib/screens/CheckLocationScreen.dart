@@ -39,6 +39,7 @@ class _CheckLocationScreenState extends State<CheckLocationScreen>
     with RequestLocationPermissionMixin {
   LoadStatus status = LoadStatus.idle;
   LocationMethod? method;
+  Duration? timeout;
 
   Future<void> _showSuccessDialog(final Position location) async {
     final l10n = AppLocalizations.of(context);
@@ -177,9 +178,10 @@ class _CheckLocationScreenState extends State<CheckLocationScreen>
 
     try {
       final location = await getCurrentPosition(
-        onMethodCheck: (method) {
+        onMethodCheck: (method, timeout) {
           setState(() {
             this.method = method;
+            this.timeout = timeout;
           });
         },
       );
@@ -371,7 +373,7 @@ class _CheckLocationScreenState extends State<CheckLocationScreen>
                     ),
                   ],
                 ),
-                if (status == LoadStatus.loading)
+                if (status == LoadStatus.loading && timeout != null)
                   Column(
                     children: <Widget>[
                       if (method != null) ...[
@@ -383,14 +385,8 @@ class _CheckLocationScreenState extends State<CheckLocationScreen>
                       ],
                       TweenAnimationBuilder<double>(
                         key: ValueKey(method),
-                        duration:
-                            Duration(seconds: TIMEOUT_DURATION.inSeconds + 5),
+                        duration: timeout!,
                         curve: Curves.easeInOut,
-                        onEnd: () {
-                          if (status == LoadStatus.loading) {
-                            failCheck();
-                          }
-                        },
                         tween: Tween<double>(
                           begin: 1,
                           end: 0,

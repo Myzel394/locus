@@ -67,7 +67,7 @@ Future<Position?> _getLocationUsingMethod(
 }
 
 Future<Position> getCurrentPosition({
-  final void Function(LocationMethod)? onMethodCheck,
+  final void Function(LocationMethod, Duration)? onMethodCheck,
   final List<Duration> timeouts = const [
     Duration(seconds: 5),
     TIMEOUT_DURATION,
@@ -76,7 +76,7 @@ Future<Position> getCurrentPosition({
 }) async {
   for (final timeout in timeouts) {
     for (final method in LocationMethod.values) {
-      onMethodCheck?.call(method);
+      onMethodCheck?.call(method, timeout);
 
       final position = await _getLocationUsingMethod(method, timeout);
       if (position != null) {

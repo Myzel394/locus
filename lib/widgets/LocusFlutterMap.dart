@@ -29,33 +29,34 @@ class LocusFlutterMap extends StatelessWidget {
     );
 
     return FlutterMap(
-        options: options ??
-            MapOptions(
-              maxZoom: 18,
-              minZoom: 2,
-              center: LatLng(40, 20),
-              zoom: 13.0,
+      options: options ??
+          MapOptions(
+            maxZoom: 18,
+            minZoom: 2,
+            center: LatLng(40, 20),
+            zoom: 13.0,
+          ),
+      nonRotatedChildren: nonRotatedChildren,
+      mapController: mapController,
+      children: [
+        if (isDarkMode)
+          ColorFiltered(
+            colorFilter: const ColorFilter.mode(
+              Colors.white,
+              BlendMode.difference,
             ),
-        nonRotatedChildren: nonRotatedChildren,
-        mapController: mapController,
-        children: [
-          if (isDarkMode)
-            ColorFiltered(
+            child: ColorFiltered(
               colorFilter: const ColorFilter.mode(
-                Colors.white,
-                BlendMode.difference,
+                Color(0xFFFF8800),
+                BlendMode.hue,
               ),
-              child: ColorFiltered(
-                colorFilter: const ColorFilter.mode(
-                  Color(0xFFFF8800),
-                  BlendMode.hue,
-                ),
-                child: tileLayer,
-              ),
-            )
-          else
-            tileLayer,
-          ...children,
-        ]);
+              child: tileLayer,
+            ),
+          )
+        else
+          tileLayer,
+        ...children,
+      ],
+    );
   }
 }
