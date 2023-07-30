@@ -1,5 +1,4 @@
 import 'package:animations/animations.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:locus/services/settings_service.dart';
 import 'package:locus/utils/color.dart';

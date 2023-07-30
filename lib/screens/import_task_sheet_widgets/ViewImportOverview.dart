@@ -28,7 +28,7 @@ class _ViewImportOverviewState extends State<ViewImportOverview> {
   void Function()? _unsubscribeGetLocations;
   final LocationsMapController _controller = LocationsMapController();
   bool _isLoading = true;
-  bool _isError = false;
+  final bool _isError = false;
 
   double timeOffset = 0;
 
@@ -48,7 +48,7 @@ class _ViewImportOverviewState extends State<ViewImportOverview> {
   }
 
   addListener() async {
-    _unsubscribeGetLocations = await widget.view.getLocations(
+    _unsubscribeGetLocations = widget.view.getLocations(
       limit: 1,
       onLocationFetched: (final LocationPointService location) {
         if (!mounted) {

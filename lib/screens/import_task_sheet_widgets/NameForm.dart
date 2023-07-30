@@ -72,7 +72,7 @@ class _NameFormState extends State<NameForm> {
               }
 
               if (viewService.views.any(
-                  (element) => element.name?.toLowerCase() == lowerCasedName)) {
+                  (element) => element.name.toLowerCase() == lowerCasedName)) {
                 return l10n
                     .sharesOverviewScreen_importTask_action_name_errors_sameNameAlreadyExists;
               }

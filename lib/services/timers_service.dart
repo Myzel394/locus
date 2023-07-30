@@ -41,8 +41,8 @@ class WeekdayTimer extends TaskRuntimeTimer {
 
   static WeekdayTimer allDay(final int day) => WeekdayTimer(
         day: day,
-        startTime: TimeOfDay(hour: 0, minute: 0),
-        endTime: TimeOfDay(hour: 23, minute: 59),
+        startTime: const TimeOfDay(hour: 0, minute: 0),
+        endTime: const TimeOfDay(hour: 23, minute: 59),
       );
 
   static const IDENTIFIER = "weekday";

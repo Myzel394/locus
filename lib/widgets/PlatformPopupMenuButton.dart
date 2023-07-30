@@ -14,7 +14,7 @@ class PlatformPopupMenuButton<T> extends StatelessWidget {
   final Widget? icon;
   final EdgeInsets? cupertinoButtonPadding;
 
-  PlatformPopupMenuButton({
+  const PlatformPopupMenuButton({
     Key? key,
     this.child,
     required this.itemBuilder,

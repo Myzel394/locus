@@ -38,7 +38,8 @@ class SendViewByBluetooth extends StatefulWidget {
   State<SendViewByBluetooth> createState() => _SendViewByBluetoothState();
 }
 
-class _SendViewByBluetoothState extends State<SendViewByBluetooth> with BluetoothPermissionMixin {
+class _SendViewByBluetoothState extends State<SendViewByBluetooth>
+    with BluetoothPermissionMixin {
   final id = uuid.v4();
   final List<EndpointInformation> endpoints = [];
 
@@ -79,7 +80,8 @@ class _SendViewByBluetoothState extends State<SendViewByBluetooth> with Bluetoot
         });
       },
       onEndpointLost: (endpointID) {
-        final index = endpoints.indexWhere((element) => element.id == endpointID);
+        final index =
+            endpoints.indexWhere((element) => element.id == endpointID);
 
         setState(() {
           rejectedEndpoints.remove(endpointID);
@@ -99,7 +101,8 @@ class _SendViewByBluetoothState extends State<SendViewByBluetooth> with Bluetoot
         padding: const EdgeInsets.symmetric(vertical: MEDIUM_SPACE),
         child: (() {
           if (!hasGrantedBluetoothPermission) {
-            return BluetoothPermissionRequiredScreen(onRequest: checkBluetoothPermission);
+            return BluetoothPermissionRequiredScreen(
+                onRequest: checkBluetoothPermission);
           }
 
           return Column(
@@ -128,7 +131,9 @@ class _SendViewByBluetoothState extends State<SendViewByBluetooth> with Bluetoot
                   shrinkWrap: true,
                   itemBuilder: (context, index) {
                     final endpoint = endpoints[index];
-                    final shouldDisable = rejectedEndpoints.contains(endpoint.id) || attemptConnectionID != null;
+                    final shouldDisable =
+                        rejectedEndpoints.contains(endpoint.id) ||
+                            attemptConnectionID != null;
 
                     return PlatformListTile(
                         title: Text(endpoint.name),
@@ -163,7 +168,8 @@ class _SendViewByBluetoothState extends State<SendViewByBluetooth> with Bluetoot
                                       await Nearby().acceptConnection(
                                         endpoint.id,
                                         onPayLoadRecieved: (_, payload) {
-                                          if (listEquals(payload.bytes, TRANSFER_SUCCESS_MESSAGE)) {
+                                          if (listEquals(payload.bytes,
+                                              TRANSFER_SUCCESS_MESSAGE)) {
                                             Navigator.of(context).pop();
                                           }
                                         },
@@ -179,9 +185,11 @@ class _SendViewByBluetoothState extends State<SendViewByBluetooth> with Bluetoot
                                           rejectedEndpoints.add(endpoint.id);
                                         });
                                       } else if (status == Status.CONNECTED) {
-                                        final bytes = const Utf8Encoder().convert(widget.data);
+                                        final bytes = const Utf8Encoder()
+                                            .convert(widget.data);
 
-                                        Nearby().sendBytesPayload(endpoint.id, bytes);
+                                        Nearby().sendBytesPayload(
+                                            endpoint.id, bytes);
                                       }
                                     },
                                     onDisconnected: (id) {
@@ -205,7 +213,5 @@ class _SendViewByBluetoothState extends State<SendViewByBluetooth> with Bluetoot
         })(),
       ),
     );
-
-    return const Placeholder();
   }
 }

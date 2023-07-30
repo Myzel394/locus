@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:apple_maps_flutter/apple_maps_flutter.dart' as AppleMaps;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -18,7 +17,6 @@ import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:provider/provider.dart';
 
 import '../../models/log.dart';
-import '../../services/settings_service.dart';
 import '../../utils/PageRoute.dart';
 import '../../widgets/LocusFlutterMap.dart';
 import '../../widgets/PlatformFlavorWidget.dart';
@@ -146,10 +144,9 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
   }
 
   Widget buildMap(final RadiusBasedRegionLocationAlarm alarm) {
-    final settings = context.read<SettingsService>();
-
     // Apple Maps doesn't seem to be working with multiple maps
     // see https://github.com/LuisThein/apple_maps_flutter/issues/44
+    /*
     if (settings.mapProvider == MapProvider.apple && false) {
       return AppleMaps.AppleMap(
         key: ValueKey(alarm.id),
@@ -186,6 +183,7 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
         },
       );
     }
+   */
 
     return LocusFlutterMap(
       options: MapOptions(

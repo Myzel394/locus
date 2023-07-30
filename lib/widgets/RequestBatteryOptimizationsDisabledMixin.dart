@@ -1,5 +1,4 @@
 import 'package:disable_battery_optimization/disable_battery_optimization.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/utils/theme.dart';
@@ -16,7 +15,8 @@ mixin RequestBatteryOptimizationsDisabledMixin {
   Future<bool> showDisableBatteryOptimizationsDialog() async {
     final settings = context.read<SettingsService>();
 
-    final status = await DisableBatteryOptimization.isBatteryOptimizationDisabled;
+    final status =
+        await DisableBatteryOptimization.isBatteryOptimizationDisabled;
     final autoStart = await DisableBatteryOptimization.isAutoStartEnabled;
 
     if (status == true && autoStart == true) {
@@ -33,7 +33,8 @@ mixin RequestBatteryOptimizationsDisabledMixin {
       context: context,
       builder: (context) => PlatformAlertDialog(
         title: Text(l10n.permissions_batteryOptimizations_askPermission_title),
-        content: Text(l10n.permissions_batteryOptimizations_askPermission_message),
+        content:
+            Text(l10n.permissions_batteryOptimizations_askPermission_message),
         material: (_, __) => MaterialAlertDialogData(
           icon: const Icon(Icons.battery_std_rounded),
         ),
@@ -42,11 +43,15 @@ mixin RequestBatteryOptimizationsDisabledMixin {
           [
             PlatformDialogAction(
               material: (_, __) => MaterialDialogActionData(
-                icon: settings.isMIUI() ? null : const Icon(Icons.check_circle_outline_rounded),
+                icon: settings.isMIUI()
+                    ? null
+                    : const Icon(Icons.check_circle_outline_rounded),
               ),
               onPressed: () async {
-                await DisableBatteryOptimization.showDisableBatteryOptimizationSettings();
-                await DisableBatteryOptimization.showDisableManufacturerBatteryOptimizationSettings(
+                await DisableBatteryOptimization
+                    .showDisableBatteryOptimizationSettings();
+                await DisableBatteryOptimization
+                    .showDisableManufacturerBatteryOptimizationSettings(
                   l10n.permissions_batteryOptimizations_disableManufacturerOptimization_title,
                   l10n.permissions_batteryOptimizations_disableManufacturerOptimization_message,
                 );
@@ -56,8 +61,12 @@ mixin RequestBatteryOptimizationsDisabledMixin {
                 );
 
                 final isIgnoringBatteryOptimizations =
-                    (await DisableBatteryOptimization.isBatteryOptimizationDisabled) ?? false;
-                final isAutoStartEnabled = (await DisableBatteryOptimization.isAutoStartEnabled) ?? false;
+                    (await DisableBatteryOptimization
+                            .isBatteryOptimizationDisabled) ??
+                        false;
+                final isAutoStartEnabled =
+                    (await DisableBatteryOptimization.isAutoStartEnabled) ??
+                        false;
 
                 if (!context.mounted) {
                   return;
@@ -69,7 +78,8 @@ mixin RequestBatteryOptimizationsDisabledMixin {
                   Navigator.of(context).pop(false);
                 }
               },
-              child: Text(l10n.permissions_batteryOptimizations_askPermission_action_label),
+              child: Text(l10n
+                  .permissions_batteryOptimizations_askPermission_action_label),
             )
           ],
         ),

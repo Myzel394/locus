@@ -156,8 +156,6 @@ class SettingsDropdownTile<T> extends AbstractSettingsTile {
 
   @override
   Widget build(BuildContext context) {
-    final theme = SettingsTheme.of(context);
-
     if (isMaterial(context)) {
       return DropdownTile(
         title: title,

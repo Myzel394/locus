@@ -1,11 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:cryptography/cryptography.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -16,7 +14,7 @@ import 'package:nostr/nostr.dart';
 import 'package:uuid/uuid.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../api/get-locations.dart' as getLocationsAPI;
+import '../api/get-locations.dart' as get_locations_api;
 import '../constants/values.dart';
 import 'location_alarm_service.dart';
 import 'location_base.dart';
@@ -41,7 +39,9 @@ class ViewServiceLinkParameters {
 
 class TaskView extends ChangeNotifier with LocationBase {
   final SecretKey _encryptionPassword;
+  @override
   final String nostrPublicKey;
+  @override
   final List<String> relays;
   final List<LocationAlarmServiceBase> alarms;
   final String id;
@@ -232,6 +232,7 @@ class TaskView extends ChangeNotifier with LocationBase {
     return null;
   }
 
+  @override
   VoidCallback getLocations({
     required void Function(LocationPointService) onLocationFetched,
     required void Function() onEnd,
@@ -239,7 +240,7 @@ class TaskView extends ChangeNotifier with LocationBase {
     int? limit,
     DateTime? from,
   }) =>
-      getLocationsAPI.getLocations(
+      get_locations_api.getLocations(
         encryptionPassword: _encryptionPassword,
         nostrPublicKey: nostrPublicKey,
         relays: relays,
@@ -254,7 +255,7 @@ class TaskView extends ChangeNotifier with LocationBase {
     int? limit,
     DateTime? from,
   }) =>
-      getLocationsAPI.getLocationsAsFuture(
+      get_locations_api.getLocationsAsFuture(
         encryptionPassword: _encryptionPassword,
         nostrPublicKey: nostrPublicKey,
         relays: relays,

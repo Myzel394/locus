@@ -10,7 +10,6 @@ import 'package:locus/utils/navigation.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../screens/SettingsScreen.dart';
 
 enum HintType {
   quickActions,

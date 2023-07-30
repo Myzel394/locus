@@ -2,14 +2,13 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:io';
 
-import 'package:apple_maps_flutter/apple_maps_flutter.dart' as AppleMaps;
+import 'package:apple_maps_flutter/apple_maps_flutter.dart' as apple_maps;
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 
-// Provided by the flutter_map package
 import 'package:latlong2/latlong.dart';
 import 'package:locus/services/settings_service.dart';
 import 'package:locus/utils/permission.dart';
@@ -21,8 +20,8 @@ import '../services/location_point_service.dart';
 import '../utils/location.dart';
 import 'LocusFlutterMap.dart';
 
-AppleMaps.LatLng toAppleMapsCoordinates(final LatLng coordinates) =>
-    AppleMaps.LatLng(coordinates.latitude, coordinates.longitude);
+apple_maps.LatLng toAppleMapsCoordinates(final LatLng coordinates) =>
+    apple_maps.LatLng(coordinates.latitude, coordinates.longitude);
 
 class LocationsMapController extends ChangeNotifier {
   // A controller for `LocationsMap`
@@ -134,8 +133,8 @@ class LocationsMapCircle {
     this.strokeWidth = 5.0,
   }) : strokeColor = strokeColor ?? color;
 
-  AppleMaps.Circle get asAppleMaps => AppleMaps.Circle(
-        circleId: AppleMaps.CircleId(center.toString()),
+  apple_maps.Circle get asAppleMaps => apple_maps.Circle(
+        circleId: apple_maps.CircleId(center.toString()),
         center: toAppleMapsCoordinates(center),
         radius: radius,
         fillColor: color,
@@ -178,11 +177,11 @@ class _LocationsMapState extends State<LocationsMap> {
   late final StreamSubscription _controllerSubscription;
   Stream<Position>? _positionStream;
 
-  AppleMaps.AppleMapController? appleMapsController;
+  apple_maps.AppleMapController? appleMapsController;
   MapController? flutterMapController;
 
   static toAppleCoordinate(final LatLng latLng) =>
-      AppleMaps.LatLng(latLng.latitude, latLng.longitude);
+      apple_maps.LatLng(latLng.latitude, latLng.longitude);
 
   bool get shouldUseAppleMaps {
     final settings = context.read<SettingsService>();
@@ -269,8 +268,8 @@ class _LocationsMapState extends State<LocationsMap> {
   void moveToPosition(final LatLng latLng) async {
     if (shouldUseAppleMaps) {
       appleMapsController!.animateCamera(
-        AppleMaps.CameraUpdate.newCameraPosition(
-          AppleMaps.CameraPosition(
+        apple_maps.CameraUpdate.newCameraPosition(
+          apple_maps.CameraPosition(
             target: toAppleCoordinate(latLng),
             zoom: await appleMapsController!.getZoomLevel() ?? 13,
           ),
@@ -301,8 +300,8 @@ class _LocationsMapState extends State<LocationsMap> {
 
     switch (settings.getMapProvider()) {
       case MapProvider.apple:
-        return AppleMaps.AppleMap(
-          initialCameraPosition: AppleMaps.CameraPosition(
+        return apple_maps.AppleMap(
+          initialCameraPosition: apple_maps.CameraPosition(
             target: toAppleCoordinate(getInitialPosition()),
             zoom: widget.initialZoomLevel,
           ),
@@ -312,15 +311,15 @@ class _LocationsMapState extends State<LocationsMap> {
           myLocationEnabled: true,
           annotations: widget.controller.locations.isNotEmpty
               ? {
-                  AppleMaps.Annotation(
-                    annotationId: AppleMaps.AnnotationId(
+                  apple_maps.Annotation(
+                    annotationId: apple_maps.AnnotationId(
                       "annotation_${widget.controller.locations.last.latitude}:${widget.controller.locations.last.longitude}",
                     ),
-                    position: AppleMaps.LatLng(
+                    position: apple_maps.LatLng(
                       widget.controller.locations.last.latitude,
                       widget.controller.locations.last.longitude,
                     ),
-                    infoWindow: AppleMaps.InfoWindow(
+                    infoWindow: apple_maps.InfoWindow(
                       title: "Last location",
                       snippet: snippetText,
                     ),
@@ -332,11 +331,11 @@ class _LocationsMapState extends State<LocationsMap> {
                 ? widget.circles.map((circle) => circle.asAppleMaps)
                 : {}),
             ...widget.controller.locations.map(
-              (location) => AppleMaps.Circle(
-                circleId: AppleMaps.CircleId(
+              (location) => apple_maps.Circle(
+                circleId: apple_maps.CircleId(
                   "circle_${location.latitude}:${location.longitude}",
                 ),
-                center: AppleMaps.LatLng(
+                center: apple_maps.LatLng(
                   location.latitude,
                   location.longitude,
                 ),
@@ -348,17 +347,17 @@ class _LocationsMapState extends State<LocationsMap> {
             ),
           },
           polylines: {
-            AppleMaps.Polyline(
-              polylineId: AppleMaps.PolylineId("polyline"),
+            apple_maps.Polyline(
+              polylineId: apple_maps.PolylineId("polyline"),
               color: Colors.blue.withOpacity(0.9),
               width: 10,
-              jointType: AppleMaps.JointType.round,
-              polylineCap: AppleMaps.Cap.roundCap,
+              jointType: apple_maps.JointType.round,
+              polylineCap: apple_maps.Cap.roundCap,
               consumeTapEvents: true,
-              points: List<AppleMaps.LatLng>.from(
+              points: List<apple_maps.LatLng>.from(
                 widget.controller.locations.reversed.map(
                   (location) =>
-                      AppleMaps.LatLng(location.latitude, location.longitude),
+                      apple_maps.LatLng(location.latitude, location.longitude),
                 ),
               ),
             )

@@ -2,8 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import "package:apple_maps_flutter/apple_maps_flutter.dart" as AppleMaps;
-import 'package:background_fetch/background_fetch.dart';
+import "package:apple_maps_flutter/apple_maps_flutter.dart" as apple_maps;
 import 'package:collection/collection.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -85,7 +84,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
   late final ViewLocationFetcher _fetchers;
   MapController? flutterMapController;
   PopupController? flutterMapPopupController;
-  AppleMaps.AppleMapController? appleMapController;
+  apple_maps.AppleMapController? appleMapController;
 
   late final AnimationController rotationController;
   late Animation<double> rotationAnimation;
@@ -118,7 +117,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
 
   bool _hasGoneToInitialPosition = false;
 
-  Map<TaskView, List<LocationPointService>> _cachedMergedLocations = {};
+  final Map<TaskView, List<LocationPointService>> _cachedMergedLocations = {};
 
   TaskView? get selectedView {
     if (selectedViewID == null) {
@@ -382,14 +381,14 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
         if (appleMapController != null) {
           if (_hasGoneToInitialPosition) {
             appleMapController!.animateCamera(
-              AppleMaps.CameraUpdate.newLatLng(
-                AppleMaps.LatLng(position.latitude, position.longitude),
+              apple_maps.CameraUpdate.newLatLng(
+                apple_maps.LatLng(position.latitude, position.longitude),
               ),
             );
           } else {
             appleMapController!.moveCamera(
-              AppleMaps.CameraUpdate.newLatLng(
-                AppleMaps.LatLng(position.latitude, position.longitude),
+              apple_maps.CameraUpdate.newLatLng(
+                apple_maps.LatLng(position.latitude, position.longitude),
               ),
             );
           }
@@ -630,9 +629,9 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
 
       if (appleMapController != null) {
         appleMapController?.animateCamera(
-          AppleMaps.CameraUpdate.newCameraPosition(
-            AppleMaps.CameraPosition(
-              target: AppleMaps.LatLng(
+          apple_maps.CameraUpdate.newCameraPosition(
+            apple_maps.CameraPosition(
+              target: apple_maps.LatLng(
                   lastPosition!.latitude, lastPosition!.longitude),
               zoom: 13,
             ),
@@ -719,9 +718,9 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     final viewService = context.read<ViewService>();
 
     if (settings.getMapProvider() == MapProvider.apple) {
-      return AppleMaps.AppleMap(
-        initialCameraPosition: const AppleMaps.CameraPosition(
-          target: AppleMaps.LatLng(40, 20),
+      return apple_maps.AppleMap(
+        initialCameraPosition: const apple_maps.CameraPosition(
+          target: apple_maps.LatLng(40, 20),
           zoom: 13.0,
         ),
         myLocationButtonEnabled: true,
@@ -740,9 +739,9 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
 
           if (lastPosition != null) {
             appleMapController?.moveCamera(
-              AppleMaps.CameraUpdate.newCameraPosition(
-                AppleMaps.CameraPosition(
-                  target: AppleMaps.LatLng(
+              apple_maps.CameraUpdate.newCameraPosition(
+                apple_maps.CameraPosition(
+                  target: apple_maps.LatLng(
                     lastPosition!.latitude,
                     lastPosition!.longitude,
                   ),
@@ -760,9 +759,9 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
             .map(
               (view) => mergeLocationsIfRequired(view)
                   .map(
-                    (location) => AppleMaps.Circle(
-                        circleId: AppleMaps.CircleId(location.id),
-                        center: AppleMaps.LatLng(
+                    (location) => apple_maps.Circle(
+                        circleId: apple_maps.CircleId(location.id),
+                        center: apple_maps.LatLng(
                           location.latitude,
                           location.longitude,
                         ),
@@ -775,7 +774,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
             )
             .expand((element) => element)
             .toSet(),
-        polylines: Set<AppleMaps.Polyline>.from(
+        polylines: Set<apple_maps.Polyline>.from(
           _fetchers.locations.entries
               .where((entry) =>
                   selectedViewID == null || entry.key.id == selectedViewID)
@@ -783,12 +782,12 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
             (entry) {
               final view = entry.key;
 
-              return AppleMaps.Polyline(
-                polylineId: AppleMaps.PolylineId(view.id),
+              return apple_maps.Polyline(
+                polylineId: apple_maps.PolylineId(view.id),
                 color: entry.key.color.withOpacity(0.9),
                 width: 10,
-                jointType: AppleMaps.JointType.round,
-                polylineCap: AppleMaps.Cap.roundCap,
+                jointType: apple_maps.JointType.round,
+                polylineCap: apple_maps.Cap.roundCap,
                 consumeTapEvents: true,
                 onTap: () {
                   setState(() {
@@ -799,7 +798,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
                 points: mergeLocationsIfRequired(entry.key)
                     .reversed
                     .map(
-                      (location) => AppleMaps.LatLng(
+                      (location) => apple_maps.LatLng(
                         location.latitude,
                         location.longitude,
                       ),
@@ -972,9 +971,9 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     }
     if (appleMapController != null) {
       appleMapController!.animateCamera(
-        AppleMaps.CameraUpdate.newCameraPosition(
-          AppleMaps.CameraPosition(
-            target: AppleMaps.LatLng(
+        apple_maps.CameraUpdate.newCameraPosition(
+          apple_maps.CameraPosition(
+            target: apple_maps.LatLng(
               latestLocation.latitude,
               latestLocation.longitude,
             ),
@@ -1507,8 +1506,8 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
 
               if (appleMapController != null) {
                 appleMapController!.moveCamera(
-                  AppleMaps.CameraUpdate.newLatLng(
-                    AppleMaps.LatLng(
+                  apple_maps.CameraUpdate.newLatLng(
+                    apple_maps.LatLng(
                       position.latitude,
                       position.longitude,
                     ),

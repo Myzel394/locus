@@ -140,7 +140,7 @@ class ExampleTasksRoulette extends StatelessWidget {
                       },
                 child: Text(
                   example.name,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 14,
                   ),
                 ),

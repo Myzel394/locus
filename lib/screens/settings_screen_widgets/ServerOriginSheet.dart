@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
-import 'package:locus/api/get-locus-verification.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/utils/locus-verification.dart';
 import 'package:locus/utils/theme.dart';
@@ -47,7 +46,7 @@ class _ServerOriginSheetState extends State<ServerOriginSheet> {
         "Checking server origin.",
       );
 
-      final origin = "https://" + nameController.text;
+      final origin = "https://${nameController.text}";
 
       try {
         final isOriginValid = await verifyServerOrigin(origin);

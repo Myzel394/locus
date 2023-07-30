@@ -1,12 +1,10 @@
 import 'dart:math';
 
 import 'package:basic_utils/basic_utils.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:intl/intl.dart';
-import 'package:locus/constants/spacing.dart';
 import 'package:locus/constants/values.dart';
 import 'package:locus/services/timers_service.dart';
 import 'package:locus/utils/date.dart';
@@ -15,7 +13,6 @@ import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/ModalSheet.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:locus/widgets/ModalSheetContent.dart';
-import 'package:locus/widgets/PlatformFlavorWidget.dart';
 import 'package:locus/widgets/PlatformRadioTile.dart';
 import 'package:provider/provider.dart';
 

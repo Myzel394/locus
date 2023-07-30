@@ -1,16 +1,13 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:locus/widgets/Paper.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:locus/widgets/PlatformFlavorWidget.dart';
 import 'package:locus/widgets/SimpleAddressFetcher.dart';
 import 'package:map_launcher/map_launcher.dart';
 import "package:latlong2/latlong.dart";
 
 import '../../constants/spacing.dart';
-import '../../utils/theme.dart';
 import '../../widgets/OpenInMaps.dart';
 
 class ViewLocationPopup extends StatelessWidget {

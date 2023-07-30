@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/utils/bluetooth.dart';
@@ -28,7 +27,8 @@ class TransferReceiverScreen extends StatefulWidget {
   State<TransferReceiverScreen> createState() => _TransferReceiverScreenState();
 }
 
-class _TransferReceiverScreenState extends State<TransferReceiverScreen> with BluetoothPermissionMixin {
+class _TransferReceiverScreenState extends State<TransferReceiverScreen>
+    with BluetoothPermissionMixin {
   bool connectionEstablished = false;
   String? connectionID;
   int? connectionPIN;
@@ -57,7 +57,11 @@ class _TransferReceiverScreenState extends State<TransferReceiverScreen> with Bl
   startAdvertising() async {
     final serviceID = await getBluetoothServiceID();
 
-    Nearby().askBluetoothPermission();
+    final hasGranted = await checkIfHasBluetoothPermission();
+
+    if (!hasGranted) {
+      return;
+    }
 
     await Nearby().startAdvertising(
       PACKAGE_NAME,
@@ -90,7 +94,8 @@ class _TransferReceiverScreenState extends State<TransferReceiverScreen> with Bl
     Nearby().acceptConnection(
       connectionID!,
       onPayLoadRecieved: (_, payload) async {
-        await Nearby().sendBytesPayload(connectionID!, TRANSFER_SUCCESS_MESSAGE);
+        await Nearby().sendBytesPayload(
+            connectionID!, TRANSFER_SUCCESS_MESSAGE);
 
         widget.onContentReceived(
           const Utf8Decoder().convert(payload.bytes!),
@@ -118,7 +123,8 @@ class _TransferReceiverScreenState extends State<TransferReceiverScreen> with Bl
           child: Center(
             child: (() {
               if (!hasGrantedBluetoothPermission) {
-                return BluetoothPermissionRequiredScreen(onRequest: checkBluetoothPermission);
+                return BluetoothPermissionRequiredScreen(
+                    onRequest: checkBluetoothPermission);
               }
 
               if (progress != null) {
@@ -183,7 +189,8 @@ class _TransferReceiverScreenState extends State<TransferReceiverScreen> with Bl
                   const SizedBox(height: MEDIUM_SPACE),
                   PlatformElevatedButton(
                     onPressed: acceptConnection,
-                    child: Text(l10n.settingsScreen_settings_importExport_transfer_connectionActionLabel),
+                    child: Text(l10n
+                        .settingsScreen_settings_importExport_transfer_connectionActionLabel),
                   ),
                 ],
               );

@@ -1,17 +1,12 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart'
     hide PlatformListTile;
 import 'package:locus/constants/values.dart';
-import 'package:locus/services/settings_service.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/utils/PageRoute.dart';
 import 'package:provider/provider.dart';
-import 'package:share_plus/share_plus.dart';
 
 import '../../models/log.dart';
 import '../../services/log_service.dart';
@@ -43,7 +38,6 @@ class _TaskTileState extends State<TaskTile> with TaskLinkGenerationMixin {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final taskService = context.watch<TaskService>();
-    final settings = context.watch<SettingsService>();
 
     return PlatformListTile(
       title: Text(widget.task.name),

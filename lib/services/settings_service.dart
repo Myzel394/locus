@@ -98,7 +98,7 @@ class SettingsService extends ChangeNotifier {
   // Apple
   MapProvider mapProvider;
 
-  Set<String> _seenHelperSheets;
+  final Set<String> _seenHelperSheets;
 
   DateTime? lastHeadlessRun;
 

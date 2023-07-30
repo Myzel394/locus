@@ -1,7 +1,6 @@
 import 'dart:math' as math;
 
-import 'package:apple_maps_flutter/apple_maps_flutter.dart' as AppleMaps;
-import 'package:flutter/cupertino.dart';
+import 'package:apple_maps_flutter/apple_maps_flutter.dart' as apple_maps;
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -38,7 +37,7 @@ class _ViewAlarmSelectRadiusRegionScreenState
     extends State<ViewAlarmSelectRadiusRegionScreen>
     with RequestNotificationPermissionMixin {
   MapController? flutterMapController;
-  AppleMaps.AppleMapController? appleMapController;
+  apple_maps.AppleMapController? appleMapController;
   LatLng? alarmCenter;
   bool isInScaleMode = false;
   double radius = 100;
@@ -121,8 +120,8 @@ class _ViewAlarmSelectRadiusRegionScreenState
           13,
         );
         appleMapController?.moveCamera(
-          AppleMaps.CameraUpdate.newLatLng(
-            AppleMaps.LatLng(position.latitude, position.longitude),
+          apple_maps.CameraUpdate.newLatLng(
+            apple_maps.LatLng(position.latitude, position.longitude),
           ),
         );
       });
@@ -208,9 +207,9 @@ class _ViewAlarmSelectRadiusRegionScreenState
     final settings = context.read<SettingsService>();
 
     if (settings.mapProvider == MapProvider.apple) {
-      return AppleMaps.AppleMap(
-        initialCameraPosition: const AppleMaps.CameraPosition(
-          target: AppleMaps.LatLng(40, 20),
+      return apple_maps.AppleMap(
+        initialCameraPosition: const apple_maps.CameraPosition(
+          target: apple_maps.LatLng(40, 20),
           zoom: 13,
         ),
         onMapCreated: (controller) {
@@ -238,9 +237,9 @@ class _ViewAlarmSelectRadiusRegionScreenState
         },
         circles: {
           if (alarmCenter != null)
-            AppleMaps.Circle(
-              circleId: AppleMaps.CircleId('alarm-${radius.round()}'),
-              center: AppleMaps.LatLng(
+            apple_maps.Circle(
+              circleId: apple_maps.CircleId('alarm-${radius.round()}'),
+              center: apple_maps.LatLng(
                 alarmCenter!.latitude,
                 alarmCenter!.longitude,
               ),

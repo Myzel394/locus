@@ -5,7 +5,7 @@ import 'package:locus/services/location_point_service.dart';
 
 // DuckDuckGo's headquarter
 final CENTER = LatLng(40.04114, -75.48702);
-final RADIUS = 100.0;
+const RADIUS = 100.0;
 final INSIDE_POINT = LatLng(40.04114, -75.48702);
 // Some random point in Russia - this should be pretty much outside the radius
 final OUTSIDE_POINT = LatLng(60.14924, 63.49002);

@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
@@ -16,19 +15,19 @@ mixin TaskLinkGenerationMixin {
 
   bool get mounted;
 
-  ScaffoldFeatureController<SnackBar,
-      SnackBarClosedReason>? taskLinkGenerationSnackbar;
+  ScaffoldFeatureController<SnackBar, SnackBarClosedReason>?
+      taskLinkGenerationSnackbar;
 
   Map<TaskLinkPublishProgress?, String> getProgressTextMap() {
     final l10n = AppLocalizations.of(context);
 
     return {
       TaskLinkPublishProgress.encrypting:
-      l10n.taskAction_generateLink_process_encrypting,
+          l10n.taskAction_generateLink_process_encrypting,
       TaskLinkPublishProgress.publishing:
-      l10n.taskAction_generateLink_process_publishing,
+          l10n.taskAction_generateLink_process_publishing,
       TaskLinkPublishProgress.creatingURI:
-      l10n.taskAction_generateLink_process_creatingURI,
+          l10n.taskAction_generateLink_process_creatingURI,
     };
   }
 
@@ -42,11 +41,12 @@ mixin TaskLinkGenerationMixin {
         if (taskLinkGenerationSnackbar != null) {
           try {
             taskLinkGenerationSnackbar!.close();
-          } catch (e) {}
+          } catch (e) {
+            // ignore
+          }
         }
 
-        if (progress != TaskLinkPublishProgress.done &&
-            Platform.isAndroid) {
+        if (progress != TaskLinkPublishProgress.done && Platform.isAndroid) {
           final scaffold = ScaffoldMessenger.of(context);
 
           taskLinkGenerationSnackbar = scaffold.showSnackBar(

@@ -56,6 +56,7 @@ class RadiusBasedRegionLocationAlarm extends LocationAlarmServiceBase {
     required String id,
   }) : super(id);
 
+  @override
   LocationAlarmType get IDENTIFIER => LocationAlarmType.radiusBasedRegion;
 
   factory RadiusBasedRegionLocationAlarm.fromJSON(final Map<String, dynamic> data) => RadiusBasedRegionLocationAlarm(

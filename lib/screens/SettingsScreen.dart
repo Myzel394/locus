@@ -159,7 +159,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         settingsTileTextColor: platformThemeData(
           context,
-          material: (data) => data.textTheme.bodyText2!.color,
+          material: (data) => data.textTheme.bodyMedium!.color,
           cupertino: (data) => data.textTheme.navTitleTextStyle.color,
         ),
         tileDescriptionTextColor:
@@ -624,10 +624,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     if (kDebugMode)
                       SettingsSection(
-                        title: Text("Debug"),
+                        title: const Text("Debug"),
                         tiles: [
                           SettingsTile(
-                            title: Text("Reset App"),
+                            title: const Text("Reset App"),
                             onPressed: (_) async {
                               storage.deleteAll();
 

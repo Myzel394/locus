@@ -4,10 +4,18 @@ import 'package:nearby_connections/nearby_connections.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 Future<bool> checkIfHasBluetoothPermission() async {
-  final bluetoothGranted = await Nearby().checkBluetoothPermission();
+  final bluetoothGranted = (await Future.wait([
+    Permission.bluetoothAdvertise.isGranted,
+    Permission.bluetoothConnect.isGranted,
+    Permission.bluetoothScan.isGranted
+  ])).every((element) => element == true);
 
   if (!bluetoothGranted) {
-    Nearby().askBluetoothPermission();
+    await [
+      Permission.bluetoothAdvertise,
+      Permission.bluetoothConnect,
+      Permission.bluetoothScan,
+    ].request();
 
     return false;
   }

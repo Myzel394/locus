@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 extension DateTimeExtension on DateTime {
   DateTime next(int day) {
-    return this.add(
+    return add(
       Duration(
-        days: (day - this.weekday) % DateTime.daysPerWeek,
+        days: (day - weekday) % DateTime.daysPerWeek,
       ),
     );
   }

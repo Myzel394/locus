@@ -7,8 +7,6 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart'
 import 'package:flutter_svg/svg.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/services/settings_service.dart';
-import 'package:locus/utils/device.dart';
-import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/ModalSheet.dart';
 import 'package:locus/widgets/ModalSheetContent.dart';
 import 'package:map_launcher/map_launcher.dart';

@@ -7,7 +7,6 @@ import 'package:locus/constants/spacing.dart';
 import 'package:locus/constants/timers.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/services/timers_service.dart';
-import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/ModalSheet.dart';
 import 'package:locus/widgets/ModalSheetContent.dart';
 import 'package:locus/widgets/PlatformPopup.dart';

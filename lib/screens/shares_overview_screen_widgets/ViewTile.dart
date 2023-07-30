@@ -25,7 +25,7 @@ class ViewTile extends StatelessWidget {
     final viewService = context.read<ViewService>();
 
     return PlatformListTile(
-      title: Text(view.name!),
+      title: Text(view.name),
       trailing: PlatformPopup<String>(
         type: PlatformPopupType.tap,
         items: [

@@ -6,8 +6,6 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/widgets/ModalSheetContent.dart';
 
 import '../../constants/spacing.dart';
-import '../../utils/theme.dart';
-import 'URLImporter.dart';
 
 class URLForm extends StatefulWidget {
   final TextEditingController controller;

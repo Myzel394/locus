@@ -2,11 +2,9 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
-import 'package:locus/services/app_update_service.dart';
 import 'package:locus/services/settings_service.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/services/view_service.dart';
@@ -16,7 +14,6 @@ import 'package:provider/provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../TaskTile.dart';
-import '../UpdateAvailableBanner.dart';
 import '../ViewTile.dart';
 import '../values.dart';
 
@@ -29,6 +26,7 @@ class TasksOverviewScreen extends StatefulWidget {
 
 class _TasksOverviewScreenState extends State<TasksOverviewScreen>
     with AutomaticKeepAliveClientMixin {
+  @override
   bool get wantKeepAlive => true;
 
   final _hintTypeFuture = getHintTypeForMainScreen();

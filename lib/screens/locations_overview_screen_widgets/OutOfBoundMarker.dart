@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:apple_maps_flutter/apple_maps_flutter.dart' as AppleMaps;
+import 'package:apple_maps_flutter/apple_maps_flutter.dart' as apple_maps;
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -25,7 +25,7 @@ class OutOfBoundMarker extends StatefulWidget {
   final VoidCallback onTap;
 
   final MapController? flutterMapController;
-  final AppleMaps.AppleMapController? appleMapController;
+  final apple_maps.AppleMapController? appleMapController;
 
   // Stream that tells when to update
   final Stream<void> updateStream;

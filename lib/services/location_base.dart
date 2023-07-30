@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:locus/services/location_fetch_controller.dart';
 import 'package:locus/services/location_point_service.dart';
 
-import '../api/get-locations.dart' as getLocationsAPI;
+import '../api/get-locations.dart' as get_locations_api;
 
 mixin LocationBase {
   late final SecretKey _encryptionPassword;
@@ -16,7 +16,7 @@ mixin LocationBase {
     int? limit,
     DateTime? from,
   }) =>
-      getLocationsAPI.getLocations(
+      get_locations_api.getLocations(
         encryptionPassword: _encryptionPassword,
         nostrPublicKey: nostrPublicKey,
         relays: relays,

@@ -13,7 +13,6 @@ import 'package:locus/services/settings_service.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:locus/utils/PageRoute.dart';
-import 'package:locus/utils/platform.dart';
 import 'package:locus/widgets/PlatformFlavorWidget.dart';
 
 import '../../constants/spacing.dart';

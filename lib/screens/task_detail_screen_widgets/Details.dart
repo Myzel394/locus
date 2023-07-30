@@ -10,7 +10,6 @@ import 'package:locus/services/location_point_service.dart';
 import 'package:locus/services/log_service.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/utils/theme.dart';
-import 'package:locus/widgets/AddressFetcher.dart';
 import 'package:locus/widgets/DetailInformationBox.dart';
 import 'package:locus/widgets/RelaySelectSheet.dart';
 import 'package:locus/widgets/SimpleAddressFetcher.dart';
@@ -504,11 +503,11 @@ class _DetailsState extends State<Details> {
                   material: (_, __) => MaterialTextButtonData(
                     icon: Icon(context.platformIcons.delete),
                     style: TextButton.styleFrom(
-                      foregroundColor: Theme.of(context).errorColor,
+                      foregroundColor: Theme.of(context).colorScheme.error,
                     ),
                   ),
                   cupertino: (_, __) => CupertinoTextButtonData(
-                    color: Theme.of(context).errorColor,
+                    color: Theme.of(context).colorScheme.error,
                   ),
                   onPressed: () async {
                     final logService = context.read<LogService>();
@@ -529,7 +528,7 @@ class _DetailsState extends State<Details> {
                               onPressed: () => Navigator.of(context).pop(true),
                               material: (_, __) => MaterialDialogActionData(
                                 style: TextButton.styleFrom(
-                                  foregroundColor: Theme.of(context).errorColor,
+                                  foregroundColor: Theme.of(context).colorScheme.error,
                                 ),
                                 icon: const Icon(Icons.delete_forever_rounded),
                               ),

@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 
-import 'PlatformPopupMenuButton.dart' as PopupMenu;
+import 'PlatformPopupMenuButton.dart' as popup_menu;
 
 enum PlatformPopupType {
   longPress,
@@ -57,11 +57,11 @@ class _PlatformPopupState<T> extends State<PlatformPopup> {
 
   @override
   Widget build(BuildContext context) {
-    return PopupMenu.PlatformPopupMenuButton<int>(
+    return popup_menu.PlatformPopupMenuButton<int>(
       cupertinoButtonPadding: widget.cupertinoButtonPadding,
       itemBuilder: (context) => List.from(
         widget.items.mapIndexed(
-          (index, item) => PopupMenu.PlatformPopupMenuItem<int>(
+          (index, item) => popup_menu.PlatformPopupMenuItem<int>(
             value: index,
             child: item.label,
           ),

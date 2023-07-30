@@ -15,7 +15,7 @@ import 'package:locus/utils/location.dart';
 import 'package:nostr/nostr.dart';
 import 'package:uuid/uuid.dart';
 
-import '../api/get-locations.dart' as getLocationsAPI;
+import '../api/get-locations.dart' as get_locations_api;
 import 'location_point_service.dart';
 import 'timers_service.dart';
 
@@ -41,6 +41,7 @@ class Task extends ChangeNotifier with LocationBase {
   final SecretKey _encryptionPassword;
 
   final String nostrPrivateKey;
+  @override
   final List<String> relays;
   final List<TaskRuntimeTimer> timers;
   String name;
@@ -83,6 +84,7 @@ class Task extends ChangeNotifier with LocationBase {
 
   String get scheduleKey => "Task:$id:Schedule";
 
+  @override
   String get nostrPublicKey => Keychain(nostrPrivateKey).public;
 
   Future<Map<String, dynamic>> toJSON() async {
@@ -419,13 +421,14 @@ class Task extends ChangeNotifier with LocationBase {
     return locationPoint;
   }
 
+  @override
   VoidCallback getLocations({
     required void Function(LocationPointService) onLocationFetched,
     required void Function() onEnd,
     int? limit,
     DateTime? from,
   }) =>
-      getLocationsAPI.getLocations(
+      get_locations_api.getLocations(
         encryptionPassword: _encryptionPassword,
         nostrPublicKey: nostrPublicKey,
         relays: relays,
@@ -508,6 +511,10 @@ class TaskService extends ChangeNotifier {
     task.stopExecutionImmediately();
     _tasks.remove(task);
 
+    notifyListeners();
+  }
+
+  void forceListenerUpdate() {
     notifyListeners();
   }
 

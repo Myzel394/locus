@@ -48,16 +48,16 @@ enum PayloadStatus { NONE, SUCCESS, FAILURE, IN_PROGRESS, CANCELED }
 
 enum PayloadType { NONE, BYTES, FILE, STREAM }
 
-typedef void OnConnectionInitiated(String endpointId, ConnectionInfo connectionInfo);
-typedef void OnConnectionResult(String endpointId, Status status);
-typedef void OnDisconnected(String endpointId);
+typedef OnConnectionInitiated = void Function(String endpointId, ConnectionInfo connectionInfo);
+typedef OnConnectionResult = void Function(String endpointId, Status status);
+typedef OnDisconnected = void Function(String endpointId);
 
-typedef void OnEndpointFound(String endpointId, String endpointName, String serviceId);
-typedef void OnEndpointLost(String? endpointId);
+typedef OnEndpointFound = void Function(String endpointId, String endpointName, String serviceId);
+typedef OnEndpointLost = void Function(String? endpointId);
 
-typedef void OnPayloadReceived(String endpointId, Payload payload);
+typedef OnPayloadReceived = void Function(String endpointId, Payload payload);
 
-typedef void OnPayloadTransferUpdate(String endpointId, PayloadTransferUpdate payloadTransferUpdate);
+typedef OnPayloadTransferUpdate = void Function(String endpointId, PayloadTransferUpdate payloadTransferUpdate);
 
 class Nearby {
   Future<bool> checkLocationPermission() {

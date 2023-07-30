@@ -5,7 +5,6 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/colors.dart';
 import 'package:locus/screens/BiometricsRequiredStartupScreen.dart';
 import 'package:locus/screens/LocationsOverviewScreen.dart';
-import 'package:locus/screens/SharesOverviewScreen.dart';
 import 'package:locus/screens/WelcomeScreen.dart';
 import 'package:locus/services/settings_service.dart';
 import 'package:locus/utils/PageRoute.dart';

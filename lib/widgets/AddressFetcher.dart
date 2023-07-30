@@ -1,4 +1,6 @@
 import 'package:flutter/widgets.dart';
+import 'package:flutter_logs/flutter_logs.dart';
+import 'package:locus/constants/values.dart';
 import 'package:locus/services/settings_service.dart';
 import 'package:provider/provider.dart';
 
@@ -44,8 +46,15 @@ class _AddressFetcherState extends State<AddressFetcher> {
     });
 
     try {
-      final address =
-      await settings.getAddress(widget.latitude, widget.longitude);
+      FlutterLogs.logInfo(
+        LOG_TAG,
+        "AddressFetcher",
+        "Loading address",
+      );
+      final address = await settings.getAddress(
+        widget.latitude,
+        widget.longitude,
+      );
 
       if (!mounted) {
         return;
@@ -54,7 +63,13 @@ class _AddressFetcherState extends State<AddressFetcher> {
       setState(() {
         this.address = address;
       });
-    } catch (_) {} finally {
+    } catch (error) {
+      FlutterLogs.logError(
+        LOG_TAG,
+        "AddressFetcher",
+        "Failed to load address: $error",
+      );
+    } finally {
       if (!mounted) {
         return;
       }
