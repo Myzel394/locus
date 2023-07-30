@@ -164,11 +164,11 @@ class _ActiveSharesSheetState extends State<ActiveSharesSheet>
         .where((task) => task.deleteAfterRun && task.timers.length <= 1);
   }
 
-  Future<bool> getAreAllTasksRunning() async {
+  Future<bool> getAreSomeTasksRunning() async {
     final tasksRunning =
         await Future.wait(quickShareTasks.map((task) => task.isRunning()));
 
-    return tasksRunning.every((isRunning) => isRunning);
+    return tasksRunning.any((isRunning) => isRunning);
   }
 
   void updateLocation() async {
@@ -330,11 +330,11 @@ class _ActiveSharesSheetState extends State<ActiveSharesSheet>
     );
   }
 
-  Widget _buildToggleTasksStatusButton(final bool allTasksRunning) {
+  Widget _buildToggleTasksStatusButton(final bool someTasksRunning) {
     final l10n = AppLocalizations.of(context);
 
     return ElevatedButton(
-      onPressed: isTogglingTasks ? null : () => toggleTasks(!allTasksRunning),
+      onPressed: isTogglingTasks ? null : () => toggleTasks(!someTasksRunning),
       style: ElevatedButton.styleFrom(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(MEDIUM_SPACE),
@@ -355,7 +355,7 @@ class _ActiveSharesSheetState extends State<ActiveSharesSheet>
               ];
             }
 
-            if (allTasksRunning) {
+            if (someTasksRunning) {
               return <Widget>[
                 PlatformFlavorWidget(
                   material: (_, __) => const Icon(
@@ -488,7 +488,7 @@ class _ActiveSharesSheetState extends State<ActiveSharesSheet>
         _buildTitle(),
         const SizedBox(height: MEDIUM_SPACE),
         FutureBuilder<bool>(
-          future: getAreAllTasksRunning(),
+          future: getAreSomeTasksRunning(),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               final isRunning = snapshot.data as bool;
