@@ -103,7 +103,8 @@ android.applicationVariants.all { variant ->
     variant.outputs.each { output ->
         def abiVersionCode = project.ext.abiCodes.get(output.getFilter(OutputFile.ABI))
         if (abiVersionCode != null) {
-            output.versionCodeOverride = variant.versionCode * 10 + abiVersionCode
+            // Add `4024` as there was a conflict when upgrading from 10.2 to 10.3
+            output.versionCodeOverride = 4024 + (variant.versionCode * 10 + abiVersionCode)
         }
     }
 }
