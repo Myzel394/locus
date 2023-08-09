@@ -42,7 +42,7 @@
     <application
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
-        android:label="locus"
+        android:label="Locus"
         tools:replace="android:label">
         <activity
             android:name=".MainActivity"
