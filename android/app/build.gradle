@@ -59,7 +59,7 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         compileSdkVersion rootProject.ext.compileSdkVersion
         multiDexEnabled true
-        versionCode flutterVersionCode.toInteger()
+        versionCode = (flutterVersionCode.toInteger() * 10) + 5000
         versionName flutterVersionName
     }
 
@@ -104,7 +104,7 @@ android.applicationVariants.all { variant ->
         def abiVersionCode = project.ext.abiCodes.get(output.getFilter(OutputFile.ABI))
         if (abiVersionCode != null) {
             // Add `4024` as there was a conflict when upgrading from 10.2 to 10.3
-            output.versionCodeOverride = 4024 + (variant.versionCode * 10 + abiVersionCode)
+            output.versionCodeOverride = variant.versionCode + abiVersionCode
         }
     }
 }
