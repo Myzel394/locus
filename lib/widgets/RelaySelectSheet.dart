@@ -15,9 +15,11 @@ import 'package:locus/widgets/ModalSheet.dart';
 import '../api/nostr-relays.dart';
 import '../utils/cache.dart';
 
-String removeProtocol(final String url) => url.toLowerCase().replaceAll(RegExp(r'^wss://'), '');
+String removeProtocol(final String url) =>
+    url.toLowerCase().replaceAll(RegExp(r'^wss://'), '');
 
-String addProtocol(final String url) => url.toLowerCase().startsWith('wss://') ? url : 'wss://$url';
+String addProtocol(final String url) =>
+    url.toLowerCase().startsWith('wss://') ? url : 'wss://$url';
 
 class RelayController extends ChangeNotifier {
   late final List<String> _relays;
@@ -103,7 +105,8 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
         return;
       }
 
-      final normalizedSelectedRelays = widget.controller.relays.map(removeProtocol);
+      final normalizedSelectedRelays =
+          widget.controller.relays.map(removeProtocol);
 
       if (normalizedSelectedRelays.contains(value)) {
         setState(() {
@@ -201,8 +204,11 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
       },
       extractValue: (dynamic element) => element as String,
       builder: (_, List<dynamic> foundRelays) {
-        final uncheckedFoundRelays = foundRelays.where((element) => !checkedRelaysSet.contains(element)).toList();
-        final allRelays = List<String>.from([...widget.controller.relays, ...uncheckedFoundRelays]);
+        final uncheckedFoundRelays = foundRelays
+            .where((element) => !checkedRelaysSet.contains(element))
+            .toList();
+        final allRelays = List<String>.from(
+            [...widget.controller.relays, ...uncheckedFoundRelays]);
 
         final length = allRelays.length + (isValueNew ? 1 : 0);
 
