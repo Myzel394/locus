@@ -178,11 +178,10 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
         loadStatus = LoadStatus.success;
       });
     } catch (error) {
-      FlutterLogs.logErrorTrace(
+      FlutterLogs.logError(
         LOG_TAG,
         "Relay Select Sheet",
-        "Failed to fetch available relays",
-        error as Error,
+        "Failed to fetch available relays: $error",
       );
 
       setState(() {
