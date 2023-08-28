@@ -11,6 +11,7 @@ import 'package:intl/intl.dart';
 
 import 'package:latlong2/latlong.dart';
 import 'package:locus/services/settings_service.dart';
+import 'package:locus/utils/location/get-fallback-location.dart';
 import 'package:locus/utils/permission.dart';
 import 'package:locus/widgets/Paper.dart';
 import 'package:locus/utils/location/index.dart';
@@ -224,15 +225,13 @@ class _LocationsMapState extends State<LocationsMap> {
     }
   }
 
-  LatLng getInitialPosition() {
+  LatLng? getInitialPosition() {
     if (widget.controller.locations.isNotEmpty) {
       return LatLng(
         widget.controller.locations.last.latitude,
         widget.controller.locations.last.longitude,
       );
     }
-
-    return LatLng(40, 20);
   }
 
   @override
@@ -302,7 +301,9 @@ class _LocationsMapState extends State<LocationsMap> {
       case MapProvider.apple:
         return apple_maps.AppleMap(
           initialCameraPosition: apple_maps.CameraPosition(
-            target: toAppleCoordinate(getInitialPosition()),
+            target: toAppleCoordinate(
+              getInitialPosition() ?? getFallbackLocation(context),
+            ),
             zoom: widget.initialZoomLevel,
           ),
           onMapCreated: (controller) {
@@ -366,7 +367,7 @@ class _LocationsMapState extends State<LocationsMap> {
       case MapProvider.openStreetMap:
         return LocusFlutterMap(
           options: MapOptions(
-            center: getInitialPosition(),
+            center: getInitialPosition() ?? getFallbackLocation(context),
             zoom: widget.initialZoomLevel,
             maxZoom: 18,
           ),

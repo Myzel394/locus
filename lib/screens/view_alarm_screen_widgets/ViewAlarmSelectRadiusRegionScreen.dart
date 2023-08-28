@@ -8,13 +8,16 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:locus/constants/spacing.dart';
+import 'package:locus/constants/values.dart';
 import 'package:locus/screens/view_alarm_screen_widgets/RadiusRegionMetaDataSheet.dart';
 import 'package:locus/services/location_alarm_service.dart';
 import 'package:locus/services/settings_service.dart';
 import 'package:locus/utils/helper_sheet.dart';
+import 'package:locus/utils/location/get-fallback-location.dart';
 import 'package:locus/utils/location/index.dart';
 import 'package:locus/utils/permission.dart';
 import 'package:locus/utils/theme.dart';
+import 'package:locus/widgets/LocationsMap.dart';
 import 'package:locus/widgets/RequestNotificationPermissionMixin.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
@@ -208,9 +211,9 @@ class _ViewAlarmSelectRadiusRegionScreenState
 
     if (settings.mapProvider == MapProvider.apple) {
       return apple_maps.AppleMap(
-        initialCameraPosition: const apple_maps.CameraPosition(
-          target: apple_maps.LatLng(40, 20),
-          zoom: 13,
+        initialCameraPosition: apple_maps.CameraPosition(
+          target: toAppleMapsCoordinates(getFallbackLocation(context)),
+          zoom: FALLBACK_LOCATION_ZOOM_LEVEL,
         ),
         onMapCreated: (controller) {
           appleMapController = controller;
@@ -266,8 +269,8 @@ class _ViewAlarmSelectRadiusRegionScreenState
             isInScaleMode = true;
           });
         },
-        center: LatLng(40, 20),
-        zoom: 13,
+        center: getFallbackLocation(context),
+        zoom: FALLBACK_LOCATION_ZOOM_LEVEL,
         onTap: (tapPosition, location) {
           setState(() {
             alarmCenter = location;

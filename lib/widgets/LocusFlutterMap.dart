@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:locus/constants/values.dart';
+import 'package:locus/utils/location/get-fallback-location.dart';
 import 'package:locus/utils/theme.dart';
 
 import "package:latlong2/latlong.dart";
@@ -33,8 +35,8 @@ class LocusFlutterMap extends StatelessWidget {
           MapOptions(
             maxZoom: 18,
             minZoom: 2,
-            center: LatLng(40, 20),
-            zoom: 13.0,
+            center: getFallbackLocation(context),
+            zoom: FALLBACK_LOCATION_ZOOM_LEVEL,
           ),
       nonRotatedChildren: nonRotatedChildren,
       mapController: mapController,

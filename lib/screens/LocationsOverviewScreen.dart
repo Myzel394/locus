@@ -29,10 +29,12 @@ import 'package:locus/screens/locations_overview_screen_widgets/view_location_fe
 import 'package:locus/services/task_service.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:locus/utils/helpers.dart';
+import 'package:locus/utils/location/get-fallback-location.dart';
 import 'package:locus/utils/location/index.dart';
 import 'package:locus/utils/navigation.dart';
 import 'package:locus/utils/show_message.dart';
 import 'package:locus/widgets/FABOpenContainer.dart';
+import 'package:locus/widgets/LocationsMap.dart';
 import 'package:locus/widgets/LocusFlutterMap.dart';
 import 'package:locus/widgets/Paper.dart';
 import 'package:locus/widgets/PlatformFlavorWidget.dart';
@@ -719,9 +721,9 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
 
     if (settings.getMapProvider() == MapProvider.apple) {
       return apple_maps.AppleMap(
-        initialCameraPosition: const apple_maps.CameraPosition(
-          target: apple_maps.LatLng(40, 20),
-          zoom: 13.0,
+        initialCameraPosition: apple_maps.CameraPosition(
+          target: toAppleMapsCoordinates(getFallbackLocation(context)),
+          zoom: FALLBACK_LOCATION_ZOOM_LEVEL,
         ),
         myLocationButtonEnabled: true,
         myLocationEnabled: true,
