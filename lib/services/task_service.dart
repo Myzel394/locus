@@ -11,7 +11,7 @@ import 'package:locus/models/log.dart';
 import 'package:locus/services/location_base.dart';
 import 'package:locus/services/log_service.dart';
 import 'package:locus/utils/cryptography.dart';
-import 'package:locus/utils/location.dart';
+import 'package:locus/utils/location/index.dart';
 import 'package:nostr/nostr.dart';
 import 'package:uuid/uuid.dart';
 

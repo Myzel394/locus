@@ -11,10 +11,10 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:locus/utils/navigation.dart';
 import 'package:latlong2/latlong.dart';
 
+import 'package:locus/utils/location/index.dart';
 import '../../constants/spacing.dart';
 import '../../services/location_point_service.dart';
 import '../../utils/icon.dart';
-import '../../utils/location.dart';
 import '../../utils/permission.dart';
 import '../../utils/theme.dart';
 import '../../widgets/BentoGridElement.dart';

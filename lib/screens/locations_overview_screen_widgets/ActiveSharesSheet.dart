@@ -7,7 +7,7 @@ import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/values.dart';
 import 'package:locus/services/location_point_service.dart';
-import 'package:locus/utils/location.dart';
+import 'package:locus/utils/location/index.dart';
 import 'package:locus/widgets/PlatformFlavorWidget.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import "package:latlong2/latlong.dart";
-import 'package:locus/utils/location.dart';
+import 'package:locus/utils/location/index.dart';
 
 import '../constants/spacing.dart';
 import '../utils/theme.dart';

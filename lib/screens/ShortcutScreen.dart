@@ -6,7 +6,7 @@ import 'package:locus/constants/spacing.dart';
 import 'package:locus/init_quick_actions.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/services/timers_service.dart';
-import 'package:locus/utils/location.dart';
+import 'package:locus/utils/location/index.dart';
 import 'package:locus/utils/platform.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
@@ -102,10 +102,9 @@ class _ShortcutScreenState extends State<ShortcutScreen> {
           );
           await Future.wait(
             tasks.map(
-                  (task) =>
-                  task.publishLocation(
-                    locationPoint.copyWithDifferentId(),
-                  ),
+              (task) => task.publishLocation(
+                locationPoint.copyWithDifferentId(),
+              ),
             ),
           );
 
@@ -117,11 +116,10 @@ class _ShortcutScreenState extends State<ShortcutScreen> {
               accuracy: locationPoint.accuracy,
               tasks: List<UpdatedTaskData>.from(
                 tasks.map(
-                      (task) =>
-                      UpdatedTaskData(
-                        id: task.id,
-                        name: task.name,
-                      ),
+                  (task) => UpdatedTaskData(
+                    id: task.id,
+                    name: task.name,
+                  ),
                 ),
               ),
             ),

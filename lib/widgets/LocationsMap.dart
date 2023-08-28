@@ -13,11 +13,11 @@ import 'package:latlong2/latlong.dart';
 import 'package:locus/services/settings_service.dart';
 import 'package:locus/utils/permission.dart';
 import 'package:locus/widgets/Paper.dart';
+import 'package:locus/utils/location/index.dart';
 import 'package:provider/provider.dart';
 
 import '../constants/values.dart';
 import '../services/location_point_service.dart';
-import '../utils/location.dart';
 import 'LocusFlutterMap.dart';
 
 apple_maps.LatLng toAppleMapsCoordinates(final LatLng coordinates) =>

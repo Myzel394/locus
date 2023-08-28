@@ -11,7 +11,7 @@ import 'package:locus/constants/values.dart';
 import 'package:locus/services/settings_service.dart';
 import 'package:locus/utils/helper_sheet.dart';
 import 'package:locus/utils/load_status.dart';
-import 'package:locus/utils/location.dart';
+import 'package:locus/utils/location/index.dart';
 import 'package:locus/utils/show_message.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/RequestLocationPermissionMixin.dart';

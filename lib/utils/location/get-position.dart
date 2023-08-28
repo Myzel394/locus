@@ -2,22 +2,13 @@ import 'dart:async';
 
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:locus/constants/values.dart';
-import "package:latlong2/latlong.dart";
-import 'package:locus/services/location_point_service.dart';
 
-enum LocationMethod {
-  best,
-  worst,
-  androidLocationManagerBest,
-  androidLocationManagerWorst,
-}
-
-const TIMEOUT_DURATION = Duration(minutes: 1);
+import '../../constants/values.dart';
+import 'enums.dart';
 
 Future<Position?> _getLocationUsingMethod(
   final LocationMethod method, [
-  final Duration timeout = TIMEOUT_DURATION,
+  final Duration timeout = LOCATION_FETCH_TIMEOUT_DURATION,
 ]) async {
   FlutterLogs.logInfo(
     LOG_TAG,
@@ -70,7 +61,7 @@ Future<Position> getCurrentPosition({
   final void Function(LocationMethod, Duration)? onMethodCheck,
   final List<Duration> timeouts = const [
     Duration(seconds: 5),
-    TIMEOUT_DURATION,
+    LOCATION_FETCH_TIMEOUT_DURATION,
     Duration(minutes: 5)
   ],
 }) async {
@@ -114,58 +105,4 @@ Stream<Position> getLastAndCurrentPosition({
   }
 
   return controller.stream;
-}
-
-String formatRawAddress(final LatLng location) =>
-    "${location.latitude.toStringAsFixed(5)}, ${location.longitude.toStringAsFixed(5)}";
-
-List<LocationPointService> mergeLocations(
-  final List<LocationPointService> locations, {
-  final double distanceThreshold = LOCATION_MERGE_DISTANCE_THRESHOLD,
-}) {
-  if (locations.length <= 1) {
-    return locations;
-  }
-
-  final mergedLocations = <LocationPointService>[];
-
-  var hasAddedFirstLocation = false;
-
-  for (var index = 0; index < locations.length - 1; index++) {
-    final location = locations[index];
-    final nextLocation = locations[index + 1];
-
-    final distance = Geolocator.distanceBetween(
-      location.latitude,
-      location.longitude,
-      nextLocation.latitude,
-      nextLocation.longitude,
-    );
-
-    if (distance > distanceThreshold) {
-      hasAddedFirstLocation = false;
-      mergedLocations.add(location);
-      continue;
-    }
-
-    if (hasAddedFirstLocation) {
-      continue;
-    }
-
-    final vector = LatLng(
-      nextLocation.latitude - location.latitude,
-      nextLocation.longitude - location.longitude,
-    );
-
-    final newLocation = location.copyWith(
-      latitude: location.latitude + vector.latitude / 2,
-      longitude: location.longitude + vector.longitude / 2,
-      accuracy: (location.accuracy) + nextLocation.accuracy / 2,
-    );
-
-    mergedLocations.add(newLocation);
-    hasAddedFirstLocation = true;
-  }
-
-  return mergedLocations;
 }
