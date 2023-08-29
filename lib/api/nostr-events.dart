@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:flutter_logs/flutter_logs.dart';
+import 'package:locus/constants/values.dart';
 import 'package:nostr/nostr.dart';
 
 import '../services/task_service.dart';
@@ -13,7 +15,8 @@ class NostrEventsManager {
     required this.relays,
     required String privateKey,
     WebSocket? socket,
-  })  : _privateKey = privateKey,
+  })
+      : _privateKey = privateKey,
         _socket = socket;
 
   static NostrEventsManager fromTask(final Task task) {
@@ -44,8 +47,36 @@ class NostrEventsManager {
       privkey: _privateKey,
     );
 
+    FlutterLogs.logInfo(
+        LOG_TAG,
+        "NostrEventsManager",
+        "publishMessage: Publishing new event."
+    );
+
+    var failedRelaysNumber = 0;
+
     for (final relay in relays) {
-      await _sendEvent(event, relay);
+      try {
+        await _sendEvent(event, relay);
+      } catch (error) {
+        FlutterLogs.logError(
+          LOG_TAG,
+          "NostrEventsManager",
+          "publishMessage: Failed to publish event for relay $relay.",
+        );
+
+        failedRelaysNumber++;
+      }
+    }
+
+    if (failedRelaysNumber == relays.length) {
+      FlutterLogs.logError(
+        LOG_TAG,
+        "NostrEventsManager",
+        "publishMessage: Failed to publish event to all relays!",
+      );
+
+      throw Exception("Failed to publish event to all relays.");
     }
 
     return event;
