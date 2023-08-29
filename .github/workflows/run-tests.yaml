@@ -1,0 +1,37 @@
+name: Run Tests
+
+on:
+  push:
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Java ☕
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'adopt'
+          java-version: "17.x"
+          cache: 'gradle'
+
+      - name: Setup Flutter 📱
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          flutter-version: '3.10.0'
+
+      - name: Opt out of telemetry
+        run: flutter --disable-telemetry
+
+      - name: Install dependencies 📦
+        run: flutter pub get
+
+      - name: Generate Localizations 🌐
+        run: flutter gen-l10n
+
+      - name: Run Tests
+        run: flutter test
