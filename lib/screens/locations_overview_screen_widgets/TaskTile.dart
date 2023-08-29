@@ -113,6 +113,7 @@ class _TaskTileState extends State<TaskTile> with TaskLinkGenerationMixin {
                   }
 
                   taskService.forceListenerUpdate();
+                  taskService.save();
                 }
               : null,
         ),

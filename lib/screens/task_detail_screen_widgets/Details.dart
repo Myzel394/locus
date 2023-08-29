@@ -282,6 +282,7 @@ class _DetailsState extends State<Details> {
                                         .startExecutionImmediately();
 
                                     taskService.update(widget.task);
+                                    await taskService.save();
 
                                     await logService.addLog(
                                       Log.taskStatusChanged(
@@ -528,7 +529,8 @@ class _DetailsState extends State<Details> {
                               onPressed: () => Navigator.of(context).pop(true),
                               material: (_, __) => MaterialDialogActionData(
                                 style: TextButton.styleFrom(
-                                  foregroundColor: Theme.of(context).colorScheme.error,
+                                  foregroundColor:
+                                      Theme.of(context).colorScheme.error,
                                 ),
                                 icon: const Icon(Icons.delete_forever_rounded),
                               ),

@@ -82,9 +82,8 @@ class _ShareLocationSheetState extends State<ShareLocationSheet> {
         deleteAfterRun: true,
       );
       taskService.add(task);
-      await taskService.save();
-
       await task.startExecutionImmediately();
+      await taskService.save();
 
       FlutterLogs.logInfo(
         LOG_TAG,

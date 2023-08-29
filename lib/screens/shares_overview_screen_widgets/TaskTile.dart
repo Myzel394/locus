@@ -50,104 +50,108 @@ class _TaskTileState extends State<TaskTile> with TaskLinkGenerationMixin {
               onChanged: widget.disabled || isLoading
                   ? null
                   : (value) async {
-                      setState(() {
-                        isLoading = true;
-                      });
+                setState(() {
+                  isLoading = true;
+                });
 
-                      final logService = context.read<LogService>();
+                final logService = context.read<LogService>();
 
-                      try {
-                        if (value) {
-                          await widget.task.startExecutionImmediately();
-                          taskService.update(widget.task);
-                          await logService.addLog(
-                            Log.taskStatusChanged(
-                              initiator: LogInitiator.user,
-                              taskId: widget.task.id,
-                              taskName: widget.task.name,
-                              active: true,
-                            ),
-                          );
-                          final nextEndDate = widget.task.nextEndDate();
+                try {
+                  if (value) {
+                    await widget.task.startExecutionImmediately();
+                    taskService.update(widget.task);
+                    await taskService.save();
 
-                          widget.task.publishCurrentPosition();
+                    await logService.addLog(
+                      Log.taskStatusChanged(
+                        initiator: LogInitiator.user,
+                        taskId: widget.task.id,
+                        taskName: widget.task.name,
+                        active: true,
+                      ),
+                    );
+                    final nextEndDate = widget.task.nextEndDate();
 
-                          if (!mounted) {
-                            return;
-                          }
+                    widget.task.publishCurrentPosition();
 
-                          if (nextEndDate == null) {
-                            return;
-                          }
+                    if (!mounted) {
+                      return;
+                    }
 
-                          showPlatformDialog(
-                            context: context,
-                            builder: (_) => PlatformAlertDialog(
-                              title: Text(l10n.taskAction_started_title),
-                              content: Text(l10n
-                                  .taskAction_started_runsUntil(nextEndDate)),
-                              actions: <Widget>[
-                                PlatformDialogActionButton(
-                                  child: Text(l10n.closeNeutralAction),
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                )
-                              ],
-                            ),
-                          );
-                        } else {
-                          await widget.task.stopExecutionImmediately();
-                          await logService.addLog(
-                            Log.taskStatusChanged(
-                              initiator: LogInitiator.user,
-                              taskId: widget.task.id,
-                              taskName: widget.task.name,
-                              active: false,
-                            ),
-                          );
-                          final nextStartDate =
-                              await widget.task.startScheduleTomorrow();
+                    if (nextEndDate == null) {
+                      return;
+                    }
 
-                          taskService.update(widget.task);
+                    showPlatformDialog(
+                      context: context,
+                      builder: (_) =>
+                          PlatformAlertDialog(
+                            title: Text(l10n.taskAction_started_title),
+                            content: Text(l10n
+                                .taskAction_started_runsUntil(nextEndDate)),
+                            actions: <Widget>[
+                              PlatformDialogActionButton(
+                                child: Text(l10n.closeNeutralAction),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                              )
+                            ],
+                          ),
+                    );
+                  } else {
+                    await widget.task.stopExecutionImmediately();
+                    await logService.addLog(
+                      Log.taskStatusChanged(
+                        initiator: LogInitiator.user,
+                        taskId: widget.task.id,
+                        taskName: widget.task.name,
+                        active: false,
+                      ),
+                    );
+                    final nextStartDate =
+                    await widget.task.startScheduleTomorrow();
 
-                          if (!mounted) {
-                            return;
-                          }
+                    taskService.update(widget.task);
 
-                          if (nextStartDate == null) {
-                            return;
-                          }
+                    if (!mounted) {
+                      return;
+                    }
 
-                          showPlatformDialog(
-                            context: context,
-                            builder: (_) => PlatformAlertDialog(
-                              title: Text(l10n.taskAction_stopped_title),
-                              content: Text(l10n.taskAction_stopped_startsAgain(
-                                  nextStartDate)),
-                              actions: <Widget>[
-                                PlatformDialogActionButton(
-                                  child: Text(l10n.closeNeutralAction),
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                )
-                              ],
-                            ),
-                          );
-                        }
-                      } catch (error) {
-                        FlutterLogs.logError(
-                          LOG_TAG,
-                          "Task Tile",
-                          "Error while starting/stopping task: $error",
-                        );
-                      } finally {
-                        setState(() {
-                          isLoading = false;
-                        });
-                      }
-                    },
+                    if (nextStartDate == null) {
+                      return;
+                    }
+
+                    showPlatformDialog(
+                      context: context,
+                      builder: (_) =>
+                          PlatformAlertDialog(
+                            title: Text(l10n.taskAction_stopped_title),
+                            content: Text(l10n.taskAction_stopped_startsAgain(
+                                nextStartDate)),
+                            actions: <Widget>[
+                              PlatformDialogActionButton(
+                                child: Text(l10n.closeNeutralAction),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                              )
+                            ],
+                          ),
+                    );
+                  }
+                } catch (error) {
+                  FlutterLogs.logError(
+                    LOG_TAG,
+                    "Task Tile",
+                    "Error while starting/stopping task: $error",
+                  );
+                } finally {
+                  setState(() {
+                    isLoading = false;
+                  });
+                }
+              },
             );
           }
 
@@ -171,9 +175,10 @@ class _TaskTileState extends State<TaskTile> with TaskLinkGenerationMixin {
         Navigator.of(context).push(
           NativePageRoute(
             context: context,
-            builder: (context) => TaskDetailScreen(
-              task: widget.task,
-            ),
+            builder: (context) =>
+                TaskDetailScreen(
+                  task: widget.task,
+                ),
           ),
         );
       },
