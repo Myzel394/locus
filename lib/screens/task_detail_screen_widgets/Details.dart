@@ -258,6 +258,7 @@ class _DetailsState extends State<Details> {
                                         .stopExecutionImmediately();
 
                                     taskService.update(widget.task);
+                                    await taskService.save();
 
                                     await logService.addLog(
                                       Log.taskStatusChanged(

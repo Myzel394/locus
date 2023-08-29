@@ -537,39 +537,48 @@ class TaskService extends ChangeNotifier {
     for (final task in tasks) {
       final isRunning = await task.isRunning();
       final shouldRun = await task.shouldRunNow();
+      final isQuickShare = task.deleteAfterRun &&
+          task.timers.length == 1 &&
+          task.timers[0] is DurationTimer;
 
-      if ((!task.isInfinite() && task.nextEndDate() == null) ||
-          (task.deleteAfterRun &&
-              !task.isInfinite() &&
-              task.timers.isNotEmpty &&
-              !shouldRun)) {
-        FlutterLogs.logInfo(LOG_TAG, "Task Service", "Removing task.");
+      if (isQuickShare) {
+        final durationTimer = task.timers[0] as DurationTimer;
 
-        tasksToRemove.add(task);
-      } else if (!shouldRun && isRunning) {
-        FlutterLogs.logInfo(LOG_TAG, "Task Service", "Stopping task.");
-        await task.stopExecutionImmediately();
+        if (durationTimer.startDate != null && !shouldRun) {
+          FlutterLogs.logInfo(LOG_TAG, "Task Service", "Removing task.");
 
-        await logService.addLog(
-          Log.taskStatusChanged(
-            initiator: LogInitiator.system,
-            taskId: task.id,
-            taskName: task.name,
-            active: false,
-          ),
-        );
-      } else if (shouldRun && !isRunning) {
-        FlutterLogs.logInfo(LOG_TAG, "Task Service", "Start task.");
-        await task.startExecutionImmediately();
+          tasksToRemove.add(task);
+        }
+      } else {
+        if ((!task.isInfinite() && task.nextEndDate() == null)) {
+          FlutterLogs.logInfo(LOG_TAG, "Task Service", "Removing task.");
 
-        await logService.addLog(
-          Log.taskStatusChanged(
-            initiator: LogInitiator.system,
-            taskId: task.id,
-            taskName: task.name,
-            active: true,
-          ),
-        );
+          tasksToRemove.add(task);
+        } else if (!shouldRun && isRunning) {
+          FlutterLogs.logInfo(LOG_TAG, "Task Service", "Stopping task.");
+          await task.stopExecutionImmediately();
+
+          await logService.addLog(
+            Log.taskStatusChanged(
+              initiator: LogInitiator.system,
+              taskId: task.id,
+              taskName: task.name,
+              active: false,
+            ),
+          );
+        } else if (shouldRun && !isRunning) {
+          FlutterLogs.logInfo(LOG_TAG, "Task Service", "Start task.");
+          await task.startExecutionImmediately();
+
+          await logService.addLog(
+            Log.taskStatusChanged(
+              initiator: LogInitiator.system,
+              taskId: task.id,
+              taskName: task.name,
+              active: true,
+            ),
+          );
+        }
       }
     }
 

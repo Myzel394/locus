@@ -131,6 +131,7 @@ class _ShortcutScreenState extends State<ShortcutScreen> {
           await Future.wait(
             tasks.map((task) => task.stopExecutionImmediately()),
           );
+          await taskService.save();
           break;
       }
 
