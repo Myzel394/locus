@@ -20,7 +20,7 @@ void main() {
       // https://github.com/umair13adil/flutter_logs/issues/54
       //final selected = await selectRandomRelays(relays, AMOUNT);
 
-      expect(selected.length, AMOUNT);
+      //expect(selected.length, AMOUNT);
     });
   });
 }
