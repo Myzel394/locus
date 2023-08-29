@@ -12,10 +12,11 @@ import 'package:locus/utils/navigation.dart';
 import 'package:latlong2/latlong.dart';
 
 import 'package:locus/utils/location/index.dart';
+import 'package:locus/utils/permissions/has-granted.dart';
+import 'package:locus/utils/permissions/request.dart';
 import '../../constants/spacing.dart';
 import '../../services/location_point_service.dart';
 import '../../utils/icon.dart';
-import '../../utils/permission.dart';
 import '../../utils/theme.dart';
 import '../../widgets/BentoGridElement.dart';
 import '../../widgets/LocusFlutterMap.dart';

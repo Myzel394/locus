@@ -3,7 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
-import 'package:locus/utils/bluetooth.dart';
+import 'package:locus/utils/permissions/has-granted.dart';
+import 'package:locus/utils/permissions/mixins.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/PINView.dart';
 import 'package:lottie/lottie.dart';
@@ -57,7 +58,7 @@ class _TransferReceiverScreenState extends State<TransferReceiverScreen>
   startAdvertising() async {
     final serviceID = await getBluetoothServiceID();
 
-    final hasGranted = await checkIfHasBluetoothPermission();
+    final hasGranted = await hasGrantedAllBluetoothPermissions();
 
     if (!hasGranted) {
       return;
@@ -94,8 +95,8 @@ class _TransferReceiverScreenState extends State<TransferReceiverScreen>
     Nearby().acceptConnection(
       connectionID!,
       onPayLoadRecieved: (_, payload) async {
-        await Nearby().sendBytesPayload(
-            connectionID!, TRANSFER_SUCCESS_MESSAGE);
+        await Nearby()
+            .sendBytesPayload(connectionID!, TRANSFER_SUCCESS_MESSAGE);
 
         widget.onContentReceived(
           const Utf8Decoder().convert(payload.bytes!),

@@ -21,8 +21,9 @@ import 'package:locus/screens/settings_screen_widgets/TransferSenderScreen.dart'
 import 'package:locus/services/task_service.dart';
 import 'package:locus/utils/PageRoute.dart';
 import 'package:locus/utils/import_export_handler.dart';
-import 'package:locus/utils/show_message.dart';
 import 'package:locus/utils/theme.dart';
+import 'package:locus/utils/ui-message/enums.dart';
+import 'package:locus/utils/ui-message/show-message.dart';
 import 'package:locus/widgets/Paper.dart';
 import 'package:locus/widgets/PlatformFlavorWidget.dart';
 import 'package:locus/widgets/SettingsCaretIcon.dart';

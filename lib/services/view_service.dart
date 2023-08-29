@@ -9,7 +9,7 @@ import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:locus/api/nostr-fetch.dart';
 import 'package:locus/services/task_service.dart';
-import 'package:locus/utils/cryptography.dart';
+import 'package:locus/utils/cryptography/decrypt.dart';
 import 'package:nostr/nostr.dart';
 import 'package:uuid/uuid.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';

@@ -3,17 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 
+import 'constants.dart';
+import 'enums.dart';
+
 ScaffoldFeatureController<SnackBar, SnackBarClosedReason>? _oldSnackBar;
-
-enum MessageType {
-  success,
-  error,
-}
-
-final Map<MessageType, Color> MESSAGE_TYPE_COLOR_MAP = {
-  MessageType.success: Colors.green,
-  MessageType.error: Colors.red,
-};
 
 Future<void> showMessage(
   final BuildContext context,

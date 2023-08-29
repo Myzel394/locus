@@ -6,7 +6,7 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/constants/values.dart';
 import 'package:locus/extensions/string.dart';
-import 'package:locus/utils/bluetooth.dart';
+import 'package:locus/utils/permissions/mixins.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/BluetoothPermissionRequiredScreen.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -29,7 +29,8 @@ class ReceiveViewByBluetooth extends StatefulWidget {
   State<ReceiveViewByBluetooth> createState() => _ReceiveViewByBluetoothState();
 }
 
-class _ReceiveViewByBluetoothState extends State<ReceiveViewByBluetooth> with BluetoothPermissionMixin {
+class _ReceiveViewByBluetoothState extends State<ReceiveViewByBluetooth>
+    with BluetoothPermissionMixin {
   final String id = createIdentifier();
   String? connectionID;
 
@@ -80,14 +81,16 @@ class _ReceiveViewByBluetoothState extends State<ReceiveViewByBluetooth> with Bl
             barrierDismissible: false,
             builder: (context) => PlatformAlertDialog(
               title: Text(l10n.importTask_bluetooth_receive_request_title),
-              content: Text(l10n.importTask_bluetooth_receive_request_description),
+              content:
+                  Text(l10n.importTask_bluetooth_receive_request_description),
               actions: [
                 PlatformDialogAction(
                   onPressed: () => Navigator.of(context).pop(false),
                   material: (_, __) => MaterialDialogActionData(
                     icon: const Icon(Icons.close),
                   ),
-                  child: Text(l10n.importTask_bluetooth_receive_request_decline),
+                  child:
+                      Text(l10n.importTask_bluetooth_receive_request_decline),
                 ),
                 PlatformDialogAction(
                   onPressed: () => Navigator.of(context).pop(true),
@@ -111,7 +114,8 @@ class _ReceiveViewByBluetoothState extends State<ReceiveViewByBluetooth> with Bl
                 final rawData = const Utf8Decoder().convert(payload.bytes!);
                 final view = TaskView.fromJSON(jsonDecode(rawData));
 
-                await Nearby().sendBytesPayload(endPointID, TRANSFER_SUCCESS_MESSAGE);
+                await Nearby()
+                    .sendBytesPayload(endPointID, TRANSFER_SUCCESS_MESSAGE);
 
                 widget.onImport(view);
               },
@@ -141,7 +145,8 @@ class _ReceiveViewByBluetoothState extends State<ReceiveViewByBluetooth> with Bl
     final l10n = AppLocalizations.of(context);
 
     if (!hasGrantedBluetoothPermission) {
-      return BluetoothPermissionRequiredScreen(onRequest: checkBluetoothPermission);
+      return BluetoothPermissionRequiredScreen(
+          onRequest: checkBluetoothPermission);
     }
 
     if (connectionID == null) {

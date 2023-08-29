@@ -8,8 +8,8 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart'
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/services/location_point_service.dart';
 import 'package:locus/utils/icon.dart';
-import 'package:locus/utils/show_message.dart';
 import 'package:locus/utils/theme.dart';
+import 'package:locus/utils/ui-message/show-message.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:provider/provider.dart';
 

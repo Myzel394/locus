@@ -12,7 +12,7 @@ import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:locus/services/settings_service.dart';
 import 'package:locus/utils/location/get-fallback-location.dart';
-import 'package:locus/utils/permission.dart';
+import 'package:locus/utils/permissions/has-granted.dart';
 import 'package:locus/widgets/Paper.dart';
 import 'package:locus/utils/location/index.dart';
 import 'package:provider/provider.dart';
@@ -232,6 +232,7 @@ class _LocationsMapState extends State<LocationsMap> {
         widget.controller.locations.last.longitude,
       );
     }
+    return null;
   }
 
   @override

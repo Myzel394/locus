@@ -43,3 +43,13 @@ Future<dynamic> pushRoute(
     );
   }
 }
+
+VoidCallback Function(BuildContext context) withPopNavigation(
+    VoidCallback callback) {
+  return (BuildContext context) {
+    return () {
+      Navigator.of(context).pop();
+      callback();
+    };
+  };
+}

@@ -10,8 +10,8 @@ import 'package:locus/constants/spacing.dart';
 import 'package:locus/constants/values.dart';
 import 'package:locus/services/settings_service.dart';
 import 'package:locus/services/task_service.dart';
-import 'package:locus/utils/bluetooth.dart';
 import 'package:locus/utils/import_export_handler.dart';
+import 'package:locus/utils/permissions/mixins.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/BluetoothPermissionRequiredScreen.dart';
 import 'package:locus/widgets/PINView.dart';
@@ -29,7 +29,8 @@ class TransferSenderScreen extends StatefulWidget {
   State<TransferSenderScreen> createState() => _TransferSenderScreenState();
 }
 
-class _TransferSenderScreenState extends State<TransferSenderScreen> with BluetoothPermissionMixin {
+class _TransferSenderScreenState extends State<TransferSenderScreen>
+    with BluetoothPermissionMixin {
   final pin = Random().nextInt(90000) + 10000;
   String? connectionID;
   bool connectionEstablished = false;
@@ -147,7 +148,8 @@ class _TransferSenderScreenState extends State<TransferSenderScreen> with Blueto
           child: Center(
             child: (() {
               if (!hasGrantedBluetoothPermission) {
-                return BluetoothPermissionRequiredScreen(onRequest: checkBluetoothPermission);
+                return BluetoothPermissionRequiredScreen(
+                    onRequest: checkBluetoothPermission);
               }
 
               if (connectionEstablished) {
