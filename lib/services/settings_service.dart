@@ -11,6 +11,7 @@ import 'package:local_auth/local_auth.dart';
 import 'package:locus/api/nostr-relays.dart';
 import 'package:locus/constants/app.dart';
 import 'package:locus/constants/values.dart';
+import 'package:locus/utils/nostr/select-random-relays.dart';
 
 import '../api/get-address.dart';
 import '../utils/cache.dart';
@@ -70,7 +71,8 @@ class SettingsLastMapLocation {
         accuracy: data['accuracy'] as double,
       );
 
-  Map<String, dynamic> toJSON() => {
+  Map<String, dynamic> toJSON() =>
+      {
         'latitude': latitude,
         'longitude': longitude,
         'accuracy': accuracy,
@@ -119,7 +121,8 @@ class SettingsService extends ChangeNotifier {
     this.lastMapLocation,
     Set<String>? seenHelperSheets,
     List<String>? relays,
-  })  : _relays = relays ?? [],
+  })
+      : _relays = relays ?? [],
         _seenHelperSheets = seenHelperSheets ?? {};
 
   static Future<SettingsService> createDefault() async {
@@ -127,9 +130,9 @@ class SettingsService extends ChangeNotifier {
       automaticallyLookupAddresses: true,
       primaryColor: null,
       androidTheme:
-          await fetchIsMIUI() ? AndroidTheme.miui : AndroidTheme.materialYou,
+      await fetchIsMIUI() ? AndroidTheme.miui : AndroidTheme.materialYou,
       mapProvider:
-          isPlatformApple() ? MapProvider.apple : MapProvider.openStreetMap,
+      isPlatformApple() ? MapProvider.apple : MapProvider.openStreetMap,
       showHints: true,
       geocoderProvider: isSystemGeocoderAvailable()
           ? GeocoderProvider.system
@@ -153,7 +156,7 @@ class SettingsService extends ChangeNotifier {
     return SettingsService(
       automaticallyLookupAddresses: data['automaticallyLoadLocation'],
       primaryColor:
-          data['primaryColor'] != null ? Color(data['primaryColor']) : null,
+      data['primaryColor'] != null ? Color(data['primaryColor']) : null,
       mapProvider: MapProvider.values[data['mapProvider']],
       relays: List<String>.from(data['relays'] ?? []),
       showHints: data['showHints'],
@@ -163,7 +166,7 @@ class SettingsService extends ChangeNotifier {
       userHasSeenWelcomeScreen: data['userHasSeenWelcomeScreen'],
       seenHelperSheets: Set<String>.from(data['seenHelperSheets'] ?? {}),
       requireBiometricAuthenticationOnStart:
-          data['requireBiometricAuthenticationOnStart'],
+      data['requireBiometricAuthenticationOnStart'],
       alwaysUseBatterySaveMode: data['alwaysUseBatterySaveMode'],
       lastHeadlessRun: data['lastHeadlessRun'] != null
           ? DateTime.parse(data['lastHeadlessRun'])
@@ -208,7 +211,7 @@ class SettingsService extends ChangeNotifier {
       "userHasSeenWelcomeScreen": userHasSeenWelcomeScreen,
       "seenHelperSheets": _seenHelperSheets.toList(),
       "requireBiometricAuthenticationOnStart":
-          requireBiometricAuthenticationOnStart,
+      requireBiometricAuthenticationOnStart,
       "alwaysUseBatterySaveMode": alwaysUseBatterySaveMode,
       "lastHeadlessRun": lastHeadlessRun?.toIso8601String(),
       "serverOrigin": serverOrigin,
@@ -217,10 +220,8 @@ class SettingsService extends ChangeNotifier {
     };
   }
 
-  Future<String> getAddress(
-    final double latitude,
-    final double longitude,
-  ) async {
+  Future<String> getAddress(final double latitude,
+      final double longitude,) async {
     final providers = [
       getGeocoderProvider(),
       ...GeocoderProvider.values
@@ -252,7 +253,8 @@ class SettingsService extends ChangeNotifier {
     throw Exception("Failed to get address from any provider");
   }
 
-  Future<void> save() => storage.write(
+  Future<void> save() =>
+      storage.write(
         key: STORAGE_KEY,
         value: jsonEncode(toJSON()),
       );
@@ -273,9 +275,13 @@ class SettingsService extends ChangeNotifier {
 
     // Return system default
     if (isCupertino(context)) {
-      return CupertinoTheme.of(context).primaryColor;
+      return CupertinoTheme
+          .of(context)
+          .primaryColor;
     } else {
-      return Theme.of(context).primaryColor;
+      return Theme
+          .of(context)
+          .primaryColor;
     }
   }
 
@@ -307,11 +313,11 @@ class SettingsService extends ChangeNotifier {
     }
 
     final relaysData = await withCache(getNostrRelays, "relays")();
-    final relays = List<String>.from(relaysData["relays"] as List<dynamic>);
+    final availableRelays = List<String>.from(
+        relaysData["relays"] as List<dynamic>);
+    final relays = await selectRandomRelays(availableRelays);
 
-    relays.shuffle();
-
-    return relays.take(5);
+    return relays;
   }
 
   void setRelays(final List<String> value) {
