@@ -374,7 +374,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
         if (flutterMapController != null) {
           flutterMapController!.move(
             LatLng(position.latitude, position.longitude),
-            flutterMapController!.zoom,
+            INITIAL_LOCATION_FETCHED_ZOOM_LEVEL,
           );
         }
 
