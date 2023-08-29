@@ -1,7 +1,8 @@
 import 'package:collection/collection.dart';
 import 'package:locus/utils/nostr/check-connection.dart';
 
-Future<List<String>> selectRandomRelays(final List<String> relays, [
+Future<List<String>> selectRandomRelays(
+  final List<String> relays, [
   final int amount = 5,
 ]) async {
   final selectedRelays = <String>[];
@@ -9,18 +10,14 @@ Future<List<String>> selectRandomRelays(final List<String> relays, [
   while (selectedRelays.length != amount) {
     relays.shuffle();
 
-    final randomRelays = relays.take(selectedRelays.length - amount);
+    final randomRelays = relays.take(amount - selectedRelays.length);
 
     // Check for each relays if it is reachable
-    final response = await Future.wait(
-        randomRelays.map(checkNostrConnection)
-    );
+    final response = await Future.wait(randomRelays.map(checkNostrConnection));
 
-    selectedRelays.addAll(
-        response
-            .where((reachable) => reachable)
-            .mapIndexed((index, _) => randomRelays.elementAt(index))
-    );
+    selectedRelays.addAll(response
+        .where((reachable) => reachable)
+        .mapIndexed((index, _) => randomRelays.elementAt(index)));
   }
 
   return selectedRelays;
