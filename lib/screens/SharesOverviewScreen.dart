@@ -11,7 +11,7 @@ import 'package:locus/services/view_service.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:provider/provider.dart';
 
-import '../services/settings_service.dart';
+import 'package:locus/services/settings_service/index.dart';
 import 'CreateTaskScreen.dart';
 import 'shares_overview_screen_widgets/values.dart';
 

@@ -11,7 +11,7 @@ import 'package:geolocator/geolocator.dart';
 import "package:latlong2/latlong.dart";
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/services/location_point_service.dart';
-import 'package:locus/services/settings_service.dart';
+import 'package:locus/services/settings_service/index.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:provider/provider.dart';
 import 'package:simple_shadow/simple_shadow.dart';

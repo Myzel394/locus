@@ -16,7 +16,7 @@ import 'package:material_design_icons_flutter/material_design_icons_flutter.dart
 import 'package:provider/provider.dart';
 
 import '../constants/spacing.dart';
-import '../services/settings_service.dart';
+import 'package:locus/services/settings_service/index.dart';
 import '../utils/helper_sheet.dart';
 import '../utils/theme.dart';
 import '../widgets/LocationFetchEmpty.dart';

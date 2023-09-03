@@ -21,7 +21,7 @@ import 'package:provider/provider.dart';
 
 import '../models/log.dart';
 import '../services/log_service.dart';
-import '../services/settings_service.dart';
+import 'package:locus/services/settings_service/index.dart';
 import '../widgets/PlatformListTile.dart';
 import '../widgets/WarningText.dart';
 

@@ -6,7 +6,7 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 
-import '../services/settings_service.dart';
+import 'package:locus/services/settings_service/index.dart';
 import '../services/task_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 

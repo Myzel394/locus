@@ -5,7 +5,7 @@ import 'package:locus/utils/theme.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-import '../services/settings_service.dart';
+import 'package:locus/services/settings_service/index.dart';
 
 mixin RequestBatteryOptimizationsDisabledMixin {
   BuildContext get context;

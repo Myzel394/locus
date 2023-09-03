@@ -1,6 +1,6 @@
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
-import 'package:locus/services/settings_service.dart';
+import 'package:locus/services/settings_service/index.dart';
 import 'package:locus/utils/color.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:provider/provider.dart';

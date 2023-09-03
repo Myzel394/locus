@@ -14,7 +14,7 @@ import 'package:provider/provider.dart';
 import '../models/log.dart';
 import '../services/location_point_service.dart';
 import '../services/log_service.dart';
-import '../services/settings_service.dart';
+import 'package:locus/services/settings_service/index.dart';
 import '../utils/theme.dart';
 
 class ShortcutScreen extends StatefulWidget {

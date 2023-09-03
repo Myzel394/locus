@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:provider/provider.dart';
 
-import '../services/settings_service.dart';
+import 'package:locus/services/settings_service/index.dart';
 
 class NativePageRoute extends MaterialPageRoute {
   final BuildContext context;
