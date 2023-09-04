@@ -18,6 +18,7 @@ import 'package:locus/screens/settings_screen_widgets/ImportSheet.dart';
 import 'package:locus/screens/settings_screen_widgets/MentionTile.dart';
 import 'package:locus/screens/settings_screen_widgets/ServerOriginSheet.dart';
 import 'package:locus/screens/settings_screen_widgets/TransferSenderScreen.dart';
+import 'package:locus/screens/settings_screen_widgets/UseRealtimeUpdatesTile.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/utils/PageRoute.dart';
 import 'package:locus/utils/import_export_handler.dart';
@@ -43,6 +44,7 @@ import '../widgets/PlatformListTile.dart';
 import '../widgets/RelaySelectSheet.dart';
 
 const storage = FlutterSecureStorage();
+const OFF_OPACITY = 0.4;
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({
@@ -431,17 +433,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                           leading: Icon(context.platformIcons.info),
                         ),
+                        const UseRealtimeUpdatesTile(),
                         SettingsTile.switchTile(
                           initialValue: settings.alwaysUseBatterySaveMode,
-                          onToggle: (newValue) {
-                            settings.setAlwaysUseBatterySaveMode(newValue);
-                            settings.save();
-                          },
-                          title: Text(
-                            l10n.settingsScreen_settings_alwaysUseBatterySaveMode_label,
+                          onToggle: settings.useRealtimeUpdates
+                              ? null
+                              : (newValue) {
+                                  settings
+                                      .setAlwaysUseBatterySaveMode(newValue);
+                                  settings.save();
+                                },
+                          title: Opacity(
+                            opacity:
+                                settings.useRealtimeUpdates ? OFF_OPACITY : 1,
+                            child: Text(
+                              l10n.settingsScreen_settings_alwaysUseBatterySaveMode_label,
+                            ),
                           ),
-                          description: Text(
-                            l10n.settingsScreen_settings_alwaysUseBatterySaveMode_description,
+                          description: Opacity(
+                            opacity:
+                                settings.useRealtimeUpdates ? OFF_OPACITY : 1,
+                            child: Text(
+                              l10n.settingsScreen_settings_alwaysUseBatterySaveMode_description,
+                            ),
                           ),
                         ),
                         SettingsTile.navigation(
