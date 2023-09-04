@@ -33,6 +33,7 @@ class SettingsService extends ChangeNotifier {
   bool userHasSeenWelcomeScreen = false;
   bool requireBiometricAuthenticationOnStart = false;
   bool alwaysUseBatterySaveMode = false;
+  bool useRealtimeUpdates = false;
   String serverOrigin;
   List<String> _relays;
   AndroidTheme androidTheme;
@@ -64,6 +65,7 @@ class SettingsService extends ChangeNotifier {
     required this.alwaysUseBatterySaveMode,
     required this.serverOrigin,
     required this.currentAppVersion,
+    required this.useRealtimeUpdates,
     this.lastHeadlessRun,
     this.lastMapLocation,
     Set<String>? seenHelperSheets,
@@ -92,6 +94,7 @@ class SettingsService extends ChangeNotifier {
       serverOrigin: "https://locus.cfd",
       lastMapLocation: null,
       currentAppVersion: CURRENT_APP_VERSION,
+      useRealtimeUpdates: true,
     );
   }
 
@@ -122,6 +125,7 @@ class SettingsService extends ChangeNotifier {
           ? SettingsLastMapLocation.fromJSON(data['lastMapLocation'])
           : null,
       currentAppVersion: data['currentAppVersion'],
+      useRealtimeUpdates: data['useRealtimeUpdates'],
     );
   }
 
@@ -163,6 +167,7 @@ class SettingsService extends ChangeNotifier {
       "serverOrigin": serverOrigin,
       "lastMapLocation": lastMapLocation?.toJSON(),
       "currentAppVersion": currentAppVersion,
+      "useRealtimeUpdates": useRealtimeUpdates,
     };
   }
 
