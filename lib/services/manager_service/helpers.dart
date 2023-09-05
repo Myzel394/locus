@@ -1,25 +1,22 @@
 import 'dart:convert';
+import 'dart:ui';
 
-import 'package:background_fetch/background_fetch.dart';
 import 'package:basic_utils/basic_utils.dart';
-import 'package:battery_plus/battery_plus.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:locus/constants/notifications.dart';
 import 'package:locus/constants/values.dart';
+import 'package:locus/models/log.dart';
 import 'package:locus/services/location_alarm_service.dart';
 import 'package:locus/services/location_point_service.dart';
+import 'package:locus/services/log_service.dart';
 import 'package:locus/services/settings_service/index.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/services/view_service.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:locus/utils/location/index.dart';
-
-import '../models/log.dart';
-import 'log_service.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 Future<void> updateLocation() async {
   final taskService = await TaskService.restore();
@@ -28,8 +25,11 @@ Future<void> updateLocation() async {
   await taskService.checkup(logService);
   final runningTasks = await taskService.getRunningTasks().toList();
 
-  FlutterLogs.logInfo(LOG_TAG, "Headless Task; Update Location",
-      "Everything restored, now checking for running tasks.");
+  FlutterLogs.logInfo(
+    LOG_TAG,
+    "Headless Task; Update Location",
+    "Everything restored, now checking for running tasks.",
+  );
 
   if (runningTasks.isEmpty) {
     FlutterLogs.logInfo(
@@ -92,10 +92,11 @@ Future<void> updateLocation() async {
       accuracy: locationData.accuracy,
       tasks: List<UpdatedTaskData>.from(
         runningTasks.map(
-          (task) => UpdatedTaskData(
-            id: task.id,
-            name: task.name,
-          ),
+              (task) =>
+              UpdatedTaskData(
+                id: task.id,
+                name: task.name,
+              ),
         ),
       ),
     ),
@@ -112,11 +113,12 @@ Future<void> checkViewAlarms({
       onTrigger: (alarm, location, __) async {
         if (alarm is RadiusBasedRegionLocationAlarm) {
           final flutterLocalNotificationsPlugin =
-              FlutterLocalNotificationsPlugin();
+          FlutterLocalNotificationsPlugin();
 
           flutterLocalNotificationsPlugin.show(
             int.parse(
-                "${location.createdAt.millisecond}${location.createdAt.microsecond}"),
+                "${location.createdAt.millisecond}${location.createdAt
+                    .microsecond}"),
             StringUtils.truncate(
               l10n.locationAlarm_radiusBasedRegion_notificationTitle_whenEnter(
                 view.name,
@@ -130,7 +132,7 @@ Future<void> checkViewAlarms({
                 AndroidChannelIDs.locationAlarms.name,
                 l10n.androidNotificationChannel_locationAlarms_name,
                 channelDescription:
-                    l10n.androidNotificationChannel_locationAlarms_description,
+                l10n.androidNotificationChannel_locationAlarms_description,
                 importance: Importance.max,
                 priority: Priority.max,
               ),
@@ -151,11 +153,15 @@ Future<void> checkViewAlarms({
 
         if (alarm is RadiusBasedRegionLocationAlarm) {
           final flutterLocalNotificationsPlugin =
-              FlutterLocalNotificationsPlugin();
+          FlutterLocalNotificationsPlugin();
 
           flutterLocalNotificationsPlugin.show(
             int.parse(
-                "${DateTime.now().millisecond}${DateTime.now().microsecond}"),
+                "${DateTime
+                    .now()
+                    .millisecond}${DateTime
+                    .now()
+                    .microsecond}"),
             StringUtils.truncate(
               l10n.locationAlarm_radiusBasedRegion_notificationTitle_whenEnter(
                 view.name,
@@ -172,7 +178,7 @@ Future<void> checkViewAlarms({
                   alarm.zoneName,
                 ),
                 channelDescription:
-                    l10n.androidNotificationChannel_locationAlarms_description,
+                l10n.androidNotificationChannel_locationAlarms_description,
                 importance: Importance.max,
                 priority: Priority.max,
               ),
@@ -193,7 +199,7 @@ Future<void> checkViewAlarms({
   await viewService.save();
 }
 
-Future<void> _checkViewAlarms() async {
+Future<void> checkViewAlarmsFromBackground() async {
   final viewService = await ViewService.restore();
   final settings = await SettingsService.restore();
   final alarmsViews = viewService.viewsWithAlarms;
@@ -209,190 +215,4 @@ Future<void> _checkViewAlarms() async {
     views: alarmsViews,
     viewService: viewService,
   );
-}
-
-@pragma('vm:entry-point')
-void backgroundFetchHeadlessTask(HeadlessTask task) async {
-  String taskId = task.taskId;
-  bool isTimeout = task.timeout;
-
-  FlutterLogs.logInfo(
-    LOG_TAG,
-    "Headless Task",
-    "Running headless task with ID $taskId",
-  );
-
-  if (isTimeout) {
-    FlutterLogs.logInfo(
-      LOG_TAG,
-      "Headless Task",
-      "Task $taskId timed out.",
-    );
-
-    BackgroundFetch.finish(taskId);
-    return;
-  }
-
-  FlutterLogs.logInfo(
-    LOG_TAG,
-    "Headless Task",
-    "Starting headless task with ID $taskId now...",
-  );
-
-  await runHeadlessTask();
-
-  FlutterLogs.logInfo(
-    LOG_TAG,
-    "Headless Task",
-    "Starting headless task with ID $taskId now... Done!",
-  );
-
-  BackgroundFetch.finish(taskId);
-}
-
-Future<bool> isBatterySaveModeEnabled() async {
-  try {
-    final value = await Battery().isInBatterySaveMode;
-    return value;
-  } catch (_) {
-    return false;
-  }
-}
-
-Future<void> runHeadlessTask() async {
-  FlutterLogs.logInfo(
-    LOG_TAG,
-    "Headless Task",
-    "Restoring settings.",
-  );
-
-  final settings = await SettingsService.restore();
-  FlutterLogs.logInfo(
-    LOG_TAG,
-    "Headless Task",
-    "Checking battery saver.",
-  );
-  final isDeviceBatterySaverEnabled = await isBatterySaveModeEnabled();
-
-  if ((isDeviceBatterySaverEnabled || settings.alwaysUseBatterySaveMode) &&
-      settings.lastHeadlessRun != null &&
-      DateTime.now().difference(settings.lastHeadlessRun!).abs() <=
-          BATTERY_SAVER_ENABLED_MINIMUM_TIME_BETWEEN_HEADLESS_RUNS) {
-    // We don't want to run the headless task too often when the battery saver is enabled.
-    FlutterLogs.logInfo(
-      LOG_TAG,
-      "Headless Task",
-      "Battery saver mode is enabled and the last headless run was too recent. Skipping headless task.",
-    );
-    return;
-  }
-
-  FlutterLogs.logInfo(
-    LOG_TAG,
-    "Headless Task",
-    "Executing headless task now.",
-  );
-
-  FlutterLogs.logInfo(
-    LOG_TAG,
-    "Headless Task",
-    "Updating Location...",
-  );
-  await updateLocation();
-  FlutterLogs.logInfo(
-    LOG_TAG,
-    "Headless Task",
-    "Updating Location... Done!",
-  );
-
-  FlutterLogs.logInfo(
-    LOG_TAG,
-    "Headless Task",
-    "Checking View alarms...",
-  );
-  await _checkViewAlarms();
-  FlutterLogs.logInfo(
-    LOG_TAG,
-    "Headless Task",
-    "Checking View alarms... Done!",
-  );
-
-  FlutterLogs.logInfo(
-    LOG_TAG,
-    "Headless Task",
-    "Updating settings' lastRun.",
-  );
-
-  settings.lastHeadlessRun = DateTime.now();
-  await settings.save();
-
-  FlutterLogs.logInfo(
-    LOG_TAG,
-    "Headless Task",
-    "Finished headless task.",
-  );
-}
-
-void registerBackgroundFetch() {
-  FlutterLogs.logInfo(
-    LOG_TAG,
-    "Background Fetch",
-    "Registering headless task...",
-  );
-
-  BackgroundFetch.registerHeadlessTask(backgroundFetchHeadlessTask);
-
-  FlutterLogs.logInfo(
-    LOG_TAG,
-    "Background Fetch",
-    "Registering headless task... Done!",
-  );
-}
-
-Future<void> configureBackgroundFetch() async {
-  FlutterLogs.logInfo(
-    LOG_TAG,
-    "Background Fetch",
-    "Configuring background fetch...",
-  );
-
-  try {
-    BackgroundFetch.configure(
-      BackgroundFetchConfig(
-        minimumFetchInterval: 15,
-        requiresCharging: false,
-        enableHeadless: true,
-        requiredNetworkType: NetworkType.ANY,
-        requiresBatteryNotLow: false,
-        requiresDeviceIdle: false,
-        requiresStorageNotLow: false,
-        startOnBoot: true,
-        stopOnTerminate: false,
-      ),
-      (taskId) async {
-        // We only use one taskId to update the location for all tasks,
-        // so we don't need to check the taskId.
-        await runHeadlessTask();
-
-        BackgroundFetch.finish(taskId);
-      },
-      (taskId) {
-        // Timeout, we need to finish immediately.
-        BackgroundFetch.finish(taskId);
-      },
-    );
-
-    FlutterLogs.logInfo(
-      LOG_TAG,
-      "Background Fetch",
-      "Configuring background fetch. Configuring... Done!",
-    );
-  } catch (error) {
-    FlutterLogs.logError(
-      LOG_TAG,
-      "Background Fetch",
-      "Configuring background fetch. Configuring... Failed! $error",
-    );
-    return;
-  }
 }

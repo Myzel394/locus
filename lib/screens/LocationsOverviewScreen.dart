@@ -26,6 +26,7 @@ import 'package:locus/screens/locations_overview_screen_widgets/OutOfBoundMarker
 import 'package:locus/screens/locations_overview_screen_widgets/ShareLocationSheet.dart';
 import 'package:locus/screens/locations_overview_screen_widgets/ViewLocationPopup.dart';
 import 'package:locus/screens/locations_overview_screen_widgets/view_location_fetcher.dart';
+import 'package:locus/services/manager_service/helpers.dart';
 import 'package:locus/services/settings_service/SettingsMapLocation.dart';
 import 'package:locus/services/task_service.dart';
 import 'package:locus/services/view_service.dart';
@@ -53,7 +54,7 @@ import '../main.dart';
 import '../services/app_update_service.dart';
 import '../services/location_point_service.dart';
 import '../services/log_service.dart';
-import '../services/manager_service.dart';
+import '../services/manager_service/background_fetch.dart';
 import 'package:locus/services/settings_service/index.dart';
 import '../utils/PageRoute.dart';
 import '../utils/color.dart';
