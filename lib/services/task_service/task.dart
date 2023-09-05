@@ -36,7 +36,10 @@ class Task extends ChangeNotifier with LocationBase {
   bool deleteAfterRun;
 
   // List of location points that need to be published yet
-  final List<LocationPointService> _outstandingLocations = [];
+  // To avoid infinite retries, we only try to publish each location point a
+  // certain amount of time
+  // This ´Map` stores the amount of tries for each location point
+  late final Map<LocationPointService, int> _outstandingLocations;
 
   Task({
     required this.id,
@@ -46,11 +49,10 @@ class Task extends ChangeNotifier with LocationBase {
     required this.nostrPrivateKey,
     required this.relays,
     required this.timers,
-    List<LocationPointService> outstandingLocations = const [],
+    Map<LocationPointService, int>? outstandingLocations,
     this.deleteAfterRun = false,
-  }) : _encryptionPassword = encryptionPassword {
-    _outstandingLocations.addAll(outstandingLocations);
-  }
+  })  : _encryptionPassword = encryptionPassword,
+        _outstandingLocations = outstandingLocations ?? {};
 
   factory Task.fromJSON(Map<String, dynamic> json) {
     return Task(
@@ -71,8 +73,13 @@ class Task extends ChangeNotifier with LocationBase {
             throw Exception("Unknown timer type");
         }
       })),
-      outstandingLocations: List<LocationPointService>.from(
-        json["outstandingLocations"].map(LocationPointService.fromJSON),
+      outstandingLocations: Map<LocationPointService, int>.fromEntries(
+        json["outstandingLocations"].map(
+          (entry) => MapEntry(
+            LocationPointService.fromJSON(entry["key"]),
+            entry["value"],
+          ),
+        ),
       ),
     );
   }
@@ -94,16 +101,17 @@ class Task extends ChangeNotifier with LocationBase {
       "relays": relays,
       "timers": timers.map((timer) => timer.toJSON()).toList(),
       "deleteAfterRun": deleteAfterRun.toString(),
-      "outstandingLocations":
-      _outstandingLocations.map((location) => location.toJSON()).toList(),
+      "outstandingLocations": _outstandingLocations
+          .map((key, value) => MapEntry(key.toJSON(), value)),
     };
   }
 
-  static Future<Task> create(final String name,
-      final List<String> relays, {
-        List<TaskRuntimeTimer> timers = const [],
-        bool deleteAfterRun = false,
-      }) async {
+  static Future<Task> create(
+    final String name,
+    final List<String> relays, {
+    List<TaskRuntimeTimer> timers = const [],
+    bool deleteAfterRun = false,
+  }) async {
     FlutterLogs.logInfo(
       LOG_TAG,
       "Task",
@@ -116,9 +124,7 @@ class Task extends ChangeNotifier with LocationBase {
       id: uuid.v4(),
       name: name,
       encryptionPassword: secretKey,
-      nostrPrivateKey: Keychain
-          .generate()
-          .private,
+      nostrPrivateKey: Keychain.generate().private,
       relays: relays,
       createdAt: DateTime.now(),
       timers: timers,
@@ -179,7 +185,7 @@ class Task extends ChangeNotifier with LocationBase {
     }
 
     final shouldRunNowBasedOnTimers =
-    timers.any((timer) => timer.shouldRun(DateTime.now()));
+        timers.any((timer) => timer.shouldRun(DateTime.now()));
 
     if (shouldRunNowBasedOnTimers) {
       return true;
@@ -247,7 +253,7 @@ class Task extends ChangeNotifier with LocationBase {
   Future<DateTime?> startScheduleTomorrow() {
     final tomorrow = DateTime.now().add(const Duration(days: 1));
     final nextDate =
-    DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 6, 0, 0);
+        DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 6, 0, 0);
 
     return startSchedule(startDate: nextDate);
   }
@@ -352,7 +358,8 @@ class Task extends ChangeNotifier with LocationBase {
   // 2. Encrypt the task with the password
   // 3. Publish the encrypted task to a random Nostr relay
   // 4. Generate a link that contains the password and the Nostr relay ID
-  Future<String> generateLink(final String host, {
+  Future<String> generateLink(
+    final String host, {
     final void Function(TaskLinkPublishProgress progress)? onProgress,
   }) async {
     onProgress?.call(TaskLinkPublishProgress.startsSoon);
@@ -401,7 +408,8 @@ class Task extends ChangeNotifier with LocationBase {
   }
 
   Future<void> publishLocation(
-      final LocationPointService locationPoint,) async {
+    final LocationPointService locationPoint,
+  ) async {
     final eventManager = NostrEventsManager.fromTask(this);
 
     final rawMessage = jsonEncode(locationPoint.toJSON());
@@ -438,7 +446,23 @@ class Task extends ChangeNotifier with LocationBase {
       "Publishing outstanding locations...",
     );
 
-    for (final locationPoint in _outstandingLocations) {
+    // Iterate over point and tries
+    for (final entry in _outstandingLocations.entries) {
+      final locationPoint = entry.key;
+      final tries = entry.value;
+
+      if (tries >= LOCATION_PUBLISH_MAX_TRIES) {
+        FlutterLogs.logInfo(
+          LOG_TAG,
+          "Task $id",
+          "Skipping location point as it has been published too many times.",
+        );
+
+        _outstandingLocations.remove(locationPoint);
+
+        continue;
+      }
+
       try {
         await publishLocation(locationPoint);
 
@@ -454,8 +478,9 @@ class Task extends ChangeNotifier with LocationBase {
   }
 
   Future<void> addOutstandingLocation(
-      final LocationPointService locationPoint,) async {
-    _outstandingLocations.add(locationPoint);
+    final LocationPointService locationPoint,
+  ) async {
+    _outstandingLocations[locationPoint] = 0;
   }
 
   @override
