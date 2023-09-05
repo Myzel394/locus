@@ -555,6 +555,8 @@
   "@backgroundLocationFetch_text": {
     "description": "Keep this very short"
   },
+  "backgroundLocator_title": "Updating location in real-time",
+  "backgroundLocator_text": "Locus is updating your location in real-time.",
   "logs_createdAt": "{date}",
   "@logs_createdAt": {
     "placeholders": {

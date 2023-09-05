@@ -10,14 +10,14 @@ void backgroundFetchHeadlessTask(HeadlessTask task) async {
 
   FlutterLogs.logInfo(
     LOG_TAG,
-    "Headless Task",
+    "Background Fetch",
     "Running headless task with ID $taskId",
   );
 
   if (isTimeout) {
     FlutterLogs.logInfo(
       LOG_TAG,
-      "Headless Task",
+      "Background Fetch",
       "Task $taskId timed out.",
     );
 
@@ -27,7 +27,7 @@ void backgroundFetchHeadlessTask(HeadlessTask task) async {
 
   FlutterLogs.logInfo(
     LOG_TAG,
-    "Headless Task",
+    "Background Fetch",
     "Starting headless task with ID $taskId now...",
   );
 
@@ -35,27 +35,11 @@ void backgroundFetchHeadlessTask(HeadlessTask task) async {
 
   FlutterLogs.logInfo(
     LOG_TAG,
-    "Headless Task",
+    "Background Fetch",
     "Starting headless task with ID $taskId now... Done!",
   );
 
   BackgroundFetch.finish(taskId);
-}
-
-void registerBackgroundFetch() {
-  FlutterLogs.logInfo(
-    LOG_TAG,
-    "Background Fetch",
-    "Registering headless task...",
-  );
-
-  BackgroundFetch.registerHeadlessTask(backgroundFetchHeadlessTask);
-
-  FlutterLogs.logInfo(
-    LOG_TAG,
-    "Background Fetch",
-    "Registering headless task... Done!",
-  );
 }
 
 Future<void> configureBackgroundFetch() async {
@@ -104,4 +88,36 @@ Future<void> configureBackgroundFetch() async {
     );
     return;
   }
+}
+
+void registerBackgroundFetch() {
+  FlutterLogs.logInfo(
+    LOG_TAG,
+    "Background Fetch",
+    "Registering headless task...",
+  );
+
+  BackgroundFetch.registerHeadlessTask(backgroundFetchHeadlessTask);
+
+  FlutterLogs.logInfo(
+    LOG_TAG,
+    "Background Fetch",
+    "Registering headless task... Done!",
+  );
+}
+
+void removeBackgroundFetch() {
+  FlutterLogs.logInfo(
+    LOG_TAG,
+    "Background Fetch",
+    "Removing headless task...",
+  );
+
+  BackgroundFetch.stop();
+
+  FlutterLogs.logInfo(
+    LOG_TAG,
+    "Background Fetch",
+    "Removing headless task... Done!",
+  );
 }

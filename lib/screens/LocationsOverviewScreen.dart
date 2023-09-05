@@ -26,6 +26,7 @@ import 'package:locus/screens/locations_overview_screen_widgets/OutOfBoundMarker
 import 'package:locus/screens/locations_overview_screen_widgets/ShareLocationSheet.dart';
 import 'package:locus/screens/locations_overview_screen_widgets/ViewLocationPopup.dart';
 import 'package:locus/screens/locations_overview_screen_widgets/view_location_fetcher.dart';
+import 'package:locus/services/manager_service/background_locator.dart';
 import 'package:locus/services/manager_service/helpers.dart';
 import 'package:locus/services/settings_service/SettingsMapLocation.dart';
 import 'package:locus/services/task_service.dart';
@@ -139,21 +140,31 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
   void initState() {
     super.initState();
 
+    final taskService = context.read<TaskService>();
+    final viewService = context.read<ViewService>();
+    final logService = context.read<LogService>();
+    final settings = context.read<SettingsService>();
+    final appUpdateService = context.read<AppUpdateService>();
+
+    rotationController =
+        AnimationController(vsync: this, duration: Duration.zero);
+    rotationAnimation = Tween<double>(
+      begin: 0,
+      end: 2 * pi,
+    ).animate(rotationController);
+
     _createLocationFetcher();
+    _handleViewAlarmChecker();
+    _handleNotifications();
+
+    settings.addListener(_updateBackgroundListeners);
+    taskService.addListener(_updateBackgroundListeners);
 
     WidgetsBinding.instance
       ..addObserver(this)
       ..addPostFrameCallback((_) async {
         _setLocationFromSettings();
-        configureBackgroundFetch();
-
-        final taskService = context.read<TaskService>();
-        final viewService = context.read<ViewService>();
-        final logService = context.read<LogService>();
-        final appUpdateService = context.read<AppUpdateService>();
-        _fetchers.addListener(_rebuild);
-        appUpdateService.addListener(_rebuild);
-
+        _updateBackgroundListeners();
         initQuickActions(context);
         _initUniLinks();
         _updateLocaleToSettings();
@@ -161,19 +172,16 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
 
         taskService.checkup(logService);
 
+        _fetchers.addListener(_rebuild);
+        appUpdateService.addListener(_rebuild);
+        viewService.addListener(_handleViewServiceChange);
         hasGrantedLocationPermission().then((hasGranted) {
           if (hasGranted) {
             _initLiveLocationUpdate();
           }
         });
-
-        viewService.addListener(_handleViewServiceChange);
       });
 
-    _handleViewAlarmChecker();
-    _handleNotifications();
-
-    final settings = context.read<SettingsService>();
     if (settings.getMapProvider() == MapProvider.openStreetMap) {
       flutterMapController = MapController();
       flutterMapController!.mapEventStream.listen((event) {
@@ -202,13 +210,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
 
       flutterMapPopupController = PopupController();
     }
-
-    rotationController =
-        AnimationController(vsync: this, duration: Duration.zero);
-    rotationAnimation = Tween<double>(
-      begin: 0,
-      end: 2 * pi,
-    ).animate(rotationController);
   }
 
   @override
@@ -351,6 +352,27 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
       ),
     );
     await settings.save();
+  }
+
+  void _updateBackgroundListeners() async {
+    final settings = context.read<SettingsService>();
+    final taskService = context.read<TaskService>();
+
+    if (taskService.tasks.isEmpty) {
+      // Nothing needs to be updated
+      return;
+    }
+
+    if (settings.useRealtimeUpdates) {
+      removeBackgroundFetch();
+
+      await configureBackgroundLocator();
+      await initializeBackgroundLocator(context);
+    } else {
+      await configureBackgroundFetch();
+
+      registerBackgroundFetch();
+    }
   }
 
   void _initLiveLocationUpdate() {
