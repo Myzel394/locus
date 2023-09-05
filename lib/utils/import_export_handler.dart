@@ -1,6 +1,6 @@
 import 'package:locus/constants/values.dart';
 import 'package:locus/services/settings_service/index.dart';
-import 'package:locus/services/task_service.dart';
+import 'package:locus/services/task_service/index.dart';
 import 'package:locus/services/view_service.dart';
 
 Future<Map<String, dynamic>> exportToJSON(

@@ -1,36 +1,23 @@
-import 'dart:collection';
 import 'dart:convert';
 
 import 'package:cryptography/cryptography.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_logs/flutter_logs.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:locus/api/nostr-events.dart';
 import 'package:locus/constants/values.dart';
-import 'package:locus/models/log.dart';
-import 'package:locus/services/location_base.dart';
-import 'package:locus/services/log_service.dart';
+import 'package:locus/services/location_point_service.dart';
 import 'package:locus/utils/cryptography/encrypt.dart';
 import 'package:locus/utils/cryptography/utils.dart';
 import 'package:locus/utils/location/index.dart';
 import 'package:nostr/nostr.dart';
 import 'package:uuid/uuid.dart';
 
-import '../api/get-locations.dart' as get_locations_api;
-import 'location_point_service.dart';
-import 'timers_service.dart';
-
-const storage = FlutterSecureStorage();
-const KEY = "tasks_settings";
-const SAME_TIME_THRESHOLD = Duration(minutes: 15);
-
-enum TaskLinkPublishProgress {
-  startsSoon,
-  encrypting,
-  publishing,
-  creatingURI,
-  done,
-}
+import '../../api/get-locations.dart' as get_locations_api;
+import '../timers_service.dart';
+import 'constants.dart';
+import 'enums.dart';
+import 'helpers.dart';
+import 'mixins.dart';
 
 const uuid = Uuid();
 
@@ -445,216 +432,4 @@ class Task extends ChangeNotifier with LocationBase {
 
     super.dispose();
   }
-}
-
-class TaskService extends ChangeNotifier {
-  final List<Task> _tasks;
-
-  TaskService({
-    required List<Task> tasks,
-  }) : _tasks = tasks;
-
-  UnmodifiableListView<Task> get tasks => UnmodifiableListView(_tasks);
-
-  static Future<TaskService> restore() async {
-    final rawTasks = await storage.read(key: KEY);
-
-    if (rawTasks == null) {
-      return TaskService(
-        tasks: [],
-      );
-    }
-
-    return TaskService(
-      tasks: List<Task>.from(
-        List<Map<String, dynamic>>.from(
-          jsonDecode(rawTasks),
-        ).map(
-          Task.fromJSON,
-        ),
-      ).toList(),
-    );
-  }
-
-  Future<void> save() async {
-    FlutterLogs.logInfo(
-      LOG_TAG,
-      "Task Service",
-      "Saving tasks...",
-    );
-
-    // await all `toJson` functions
-    final data = await Future.wait<Map<String, dynamic>>(
-      _tasks.map(
-        (task) => task.toJSON(),
-      ),
-    );
-
-    await storage.write(key: KEY, value: jsonEncode(data));
-    FlutterLogs.logInfo(
-      LOG_TAG,
-      "Task Service",
-      "Saved tasks successfully!",
-    );
-  }
-
-  Task getByID(final String id) {
-    return _tasks.firstWhere((task) => task.id == id);
-  }
-
-  void add(Task task) {
-    _tasks.add(task);
-
-    notifyListeners();
-  }
-
-  void remove(final Task task) {
-    task.stopExecutionImmediately();
-    _tasks.remove(task);
-
-    notifyListeners();
-  }
-
-  void forceListenerUpdate() {
-    notifyListeners();
-  }
-
-  void update(final Task task) {
-    final index = _tasks.indexWhere((element) => element.id == task.id);
-
-    _tasks[index] = task;
-
-    notifyListeners();
-    save();
-  }
-
-  // Does a general check up state of the task.
-  // Checks if the task should be running / should be deleted etc.
-  Future<void> checkup(final LogService logService) async {
-    FlutterLogs.logInfo(LOG_TAG, "Task Service", "Doing checkup...");
-
-    final tasksToRemove = <Task>{};
-
-    for (final task in tasks) {
-      final isRunning = await task.isRunning();
-      final shouldRun = await task.shouldRunNow();
-      final isQuickShare = task.deleteAfterRun &&
-          task.timers.length == 1 &&
-          task.timers[0] is DurationTimer;
-
-      if (isQuickShare) {
-        final durationTimer = task.timers[0] as DurationTimer;
-
-        if (durationTimer.startDate != null && !shouldRun) {
-          FlutterLogs.logInfo(LOG_TAG, "Task Service", "Removing task.");
-
-          tasksToRemove.add(task);
-        }
-      } else {
-        if ((!task.isInfinite() && task.nextEndDate() == null)) {
-          FlutterLogs.logInfo(LOG_TAG, "Task Service", "Removing task.");
-
-          tasksToRemove.add(task);
-        } else if (!shouldRun && isRunning) {
-          FlutterLogs.logInfo(LOG_TAG, "Task Service", "Stopping task.");
-          await task.stopExecutionImmediately();
-
-          await logService.addLog(
-            Log.taskStatusChanged(
-              initiator: LogInitiator.system,
-              taskId: task.id,
-              taskName: task.name,
-              active: false,
-            ),
-          );
-        } else if (shouldRun && !isRunning) {
-          FlutterLogs.logInfo(LOG_TAG, "Task Service", "Start task.");
-          await task.startExecutionImmediately();
-
-          await logService.addLog(
-            Log.taskStatusChanged(
-              initiator: LogInitiator.system,
-              taskId: task.id,
-              taskName: task.name,
-              active: true,
-            ),
-          );
-        }
-      }
-    }
-
-    for (final task in tasksToRemove) {
-      remove(task);
-    }
-
-    await save();
-
-    FlutterLogs.logInfo(LOG_TAG, "Task Service", "Checkup done.");
-  }
-
-  Stream<Task> getRunningTasks() async* {
-    for (final task in tasks) {
-      if (await task.isRunning()) {
-        yield task;
-      }
-    }
-  }
-}
-
-class TaskExample {
-  final String name;
-  final List<TaskRuntimeTimer> timers;
-  final bool realtime;
-
-  const TaskExample({
-    required this.name,
-    required this.timers,
-    this.realtime = false,
-  });
-}
-
-DateTime? findNextStartDate(final List<TaskRuntimeTimer> timers,
-    {final DateTime? startDate, final bool onlyFuture = true}) {
-  final now = startDate ?? DateTime.now();
-
-  final nextDates = timers
-      .map((timer) => timer.nextStartDate(now))
-      .where((date) => date != null && (date.isAfter(now) || date == now))
-      .toList(growable: false);
-
-  if (nextDates.isEmpty) {
-    return null;
-  }
-
-  // Find earliest date
-  nextDates.sort();
-  return nextDates.first;
-}
-
-DateTime? findNextEndDate(
-  final List<TaskRuntimeTimer> timers, {
-  final DateTime? startDate,
-}) {
-  final now = startDate ?? DateTime.now();
-  final nextDates = List<DateTime>.from(
-    timers.map((timer) => timer.nextEndDate(now)).where((date) => date != null),
-  )..sort();
-
-  if (nextDates.isEmpty) {
-    return null;
-  }
-
-  DateTime endDate = nextDates.first;
-
-  for (final date in nextDates.sublist(1)) {
-    final nextStartDate = findNextStartDate(timers, startDate: date);
-    if (nextStartDate == null ||
-        nextStartDate.difference(date).inMinutes.abs() > 15) {
-      // No next start date found or the difference is more than 15 minutes, so this is the last date
-      break;
-    }
-    endDate = date;
-  }
-
-  return endDate;
 }

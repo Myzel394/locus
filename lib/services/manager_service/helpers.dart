@@ -13,7 +13,7 @@ import 'package:locus/services/location_alarm_service.dart';
 import 'package:locus/services/location_point_service.dart';
 import 'package:locus/services/log_service.dart';
 import 'package:locus/services/settings_service/index.dart';
-import 'package:locus/services/task_service.dart';
+import 'package:locus/services/task_service/index.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:locus/utils/location/index.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -92,11 +92,10 @@ Future<void> updateLocation() async {
       accuracy: locationData.accuracy,
       tasks: List<UpdatedTaskData>.from(
         runningTasks.map(
-              (task) =>
-              UpdatedTaskData(
-                id: task.id,
-                name: task.name,
-              ),
+          (task) => UpdatedTaskData(
+            id: task.id,
+            name: task.name,
+          ),
         ),
       ),
     ),
@@ -113,12 +112,11 @@ Future<void> checkViewAlarms({
       onTrigger: (alarm, location, __) async {
         if (alarm is RadiusBasedRegionLocationAlarm) {
           final flutterLocalNotificationsPlugin =
-          FlutterLocalNotificationsPlugin();
+              FlutterLocalNotificationsPlugin();
 
           flutterLocalNotificationsPlugin.show(
             int.parse(
-                "${location.createdAt.millisecond}${location.createdAt
-                    .microsecond}"),
+                "${location.createdAt.millisecond}${location.createdAt.microsecond}"),
             StringUtils.truncate(
               l10n.locationAlarm_radiusBasedRegion_notificationTitle_whenEnter(
                 view.name,
@@ -132,7 +130,7 @@ Future<void> checkViewAlarms({
                 AndroidChannelIDs.locationAlarms.name,
                 l10n.androidNotificationChannel_locationAlarms_name,
                 channelDescription:
-                l10n.androidNotificationChannel_locationAlarms_description,
+                    l10n.androidNotificationChannel_locationAlarms_description,
                 importance: Importance.max,
                 priority: Priority.max,
               ),
@@ -153,15 +151,11 @@ Future<void> checkViewAlarms({
 
         if (alarm is RadiusBasedRegionLocationAlarm) {
           final flutterLocalNotificationsPlugin =
-          FlutterLocalNotificationsPlugin();
+              FlutterLocalNotificationsPlugin();
 
           flutterLocalNotificationsPlugin.show(
             int.parse(
-                "${DateTime
-                    .now()
-                    .millisecond}${DateTime
-                    .now()
-                    .microsecond}"),
+                "${DateTime.now().millisecond}${DateTime.now().microsecond}"),
             StringUtils.truncate(
               l10n.locationAlarm_radiusBasedRegion_notificationTitle_whenEnter(
                 view.name,
@@ -178,7 +172,7 @@ Future<void> checkViewAlarms({
                   alarm.zoneName,
                 ),
                 channelDescription:
-                l10n.androidNotificationChannel_locationAlarms_description,
+                    l10n.androidNotificationChannel_locationAlarms_description,
                 importance: Importance.max,
                 priority: Priority.max,
               ),

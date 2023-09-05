@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 
 import '../widgets/LocationsMap.dart';
-import 'location_base.dart';
+import 'task_service/mixins.dart';
 import 'location_point_service.dart';
 
 const INITIAL_LOAD_AMOUNT = 10;

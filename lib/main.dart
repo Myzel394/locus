@@ -11,7 +11,7 @@ import 'package:locus/services/app_update_service.dart';
 import 'package:locus/services/log_service.dart';
 import 'package:locus/services/manager_service/background_fetch.dart';
 import 'package:locus/services/settings_service/index.dart';
-import 'package:locus/services/task_service.dart';
+import 'package:locus/services/task_service/index.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:provider/provider.dart';
 

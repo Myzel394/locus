@@ -2,9 +2,8 @@ import 'dart:io';
 
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:locus/constants/values.dart';
+import 'package:locus/services/task_service/index.dart';
 import 'package:nostr/nostr.dart';
-
-import '../services/task_service.dart';
 
 class NostrEventsManager {
   final List<String> relays;
@@ -15,8 +14,7 @@ class NostrEventsManager {
     required this.relays,
     required String privateKey,
     WebSocket? socket,
-  })
-      : _privateKey = privateKey,
+  })  : _privateKey = privateKey,
         _socket = socket;
 
   static NostrEventsManager fromTask(final Task task) {
@@ -48,10 +46,7 @@ class NostrEventsManager {
     );
 
     FlutterLogs.logInfo(
-        LOG_TAG,
-        "NostrEventsManager",
-        "publishMessage: Publishing new event."
-    );
+        LOG_TAG, "NostrEventsManager", "publishMessage: Publishing new event.");
 
     var failedRelaysNumber = 0;
 

@@ -6,7 +6,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/screens/shares_overview_screen_widgets/screens/EmptyScreen.dart';
 import 'package:locus/screens/shares_overview_screen_widgets/screens/TasksOverviewScreen.dart';
-import 'package:locus/services/task_service.dart';
+import 'package:locus/services/task_service/index.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:provider/provider.dart';

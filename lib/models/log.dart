@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:locus/services/location_alarm_service.dart';
-import 'package:locus/services/task_service.dart';
+import 'package:locus/services/task_service/index.dart';
 import 'package:uuid/uuid.dart';
 
 const uuid = Uuid();
@@ -226,8 +226,7 @@ class Log {
     return CreateAlarmData.fromJSON(jsonDecode(payload));
   }
 
-  factory Log.fromJSON(Map<String, dynamic> json) =>
-      Log(
+  factory Log.fromJSON(Map<String, dynamic> json) => Log(
         id: json["i"],
         createdAt: DateTime.parse(json["c"]),
         type: LogType.values[json["t"]],
@@ -235,8 +234,7 @@ class Log {
         payload: json["p"],
       );
 
-  Map<String, dynamic> toJSON() =>
-      {
+  Map<String, dynamic> toJSON() => {
         "i": id,
         "c": createdAt.toIso8601String(),
         "t": type.index,
@@ -275,24 +273,21 @@ class UpdateLocationData {
         accuracy: json["c"],
         tasks: List<UpdatedTaskData>.from(
           List<Map<String, dynamic>>.from(json["t"]).map(
-                (task) =>
-                UpdatedTaskData(
-                  id: task["i"]!,
-                  name: task["n"]!,
-                ),
+            (task) => UpdatedTaskData(
+              id: task["i"]!,
+              name: task["n"]!,
+            ),
           ),
         ),
       );
 
-  Map<String, dynamic> toJSON() =>
-      {
+  Map<String, dynamic> toJSON() => {
         "o": latitude,
         "a": longitude,
         "c": accuracy,
         "t": List<Map<String, String>>.from(
           tasks.map(
-                (task) =>
-            {
+            (task) => {
               "i": task.id,
               "n": task.name,
             },
@@ -317,15 +312,13 @@ class CreateTaskData {
     required this.creationContext,
   });
 
-  factory CreateTaskData.fromJSON(Map<String, dynamic> json) =>
-      CreateTaskData(
+  factory CreateTaskData.fromJSON(Map<String, dynamic> json) => CreateTaskData(
         id: json["i"],
         name: json["n"],
         creationContext: TaskCreationContext.values[json["c"]],
       );
 
-  Map<String, dynamic> toJSON() =>
-      {
+  Map<String, dynamic> toJSON() => {
         "i": id,
         "n": name,
         "c": creationContext.index,
@@ -341,13 +334,11 @@ class DeleteTaskData {
     required this.name,
   });
 
-  factory DeleteTaskData.fromJSON(Map<String, dynamic> json) =>
-      DeleteTaskData(
+  factory DeleteTaskData.fromJSON(Map<String, dynamic> json) => DeleteTaskData(
         name: json["n"],
       );
 
-  Map<String, dynamic> toJSON() =>
-      {
+  Map<String, dynamic> toJSON() => {
         "n": name,
       };
 }
@@ -370,8 +361,7 @@ class TaskStatusChangeData {
         active: json["s"],
       );
 
-  Map<String, dynamic> toJSON() =>
-      {
+  Map<String, dynamic> toJSON() => {
         "i": id,
         "n": name,
         "s": active,
@@ -389,14 +379,12 @@ class StopTaskData {
     required this.name,
   });
 
-  factory StopTaskData.fromJSON(Map<String, dynamic> json) =>
-      StopTaskData(
+  factory StopTaskData.fromJSON(Map<String, dynamic> json) => StopTaskData(
         id: json["i"],
         name: json["n"],
       );
 
-  Map<String, dynamic> toJSON() =>
-      {
+  Map<String, dynamic> toJSON() => {
         "i": id,
         "n": name,
       };
@@ -425,8 +413,7 @@ class CreateAlarmData {
         viewName: json["n"],
       );
 
-  Map<String, dynamic> toJSON() =>
-      {
+  Map<String, dynamic> toJSON() => {
         "i": id,
         "v": viewID,
         "t": type.index,
@@ -449,8 +436,7 @@ class DeleteAlarmData {
         viewName: json["n"],
       );
 
-  Map<String, dynamic> toJSON() =>
-      {
+  Map<String, dynamic> toJSON() => {
         "v": viewID,
         "n": viewName,
       };

@@ -9,7 +9,7 @@ import 'package:locus/constants/app.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/constants/values.dart';
 import 'package:locus/services/settings_service/index.dart';
-import 'package:locus/services/task_service.dart';
+import 'package:locus/services/task_service/index.dart';
 import 'package:locus/utils/import_export_handler.dart';
 import 'package:locus/utils/permissions/mixins.dart';
 import 'package:locus/utils/theme.dart';

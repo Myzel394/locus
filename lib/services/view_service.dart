@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:locus/api/nostr-fetch.dart';
-import 'package:locus/services/task_service.dart';
+import 'package:locus/services/task_service/index.dart';
 import 'package:locus/utils/cryptography/decrypt.dart';
 import 'package:nostr/nostr.dart';
 import 'package:uuid/uuid.dart';
@@ -17,7 +17,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../api/get-locations.dart' as get_locations_api;
 import '../constants/values.dart';
 import 'location_alarm_service.dart';
-import 'location_base.dart';
+import 'task_service/mixins.dart';
 import 'location_point_service.dart';
 
 const storage = FlutterSecureStorage();

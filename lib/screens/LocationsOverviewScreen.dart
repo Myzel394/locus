@@ -29,7 +29,7 @@ import 'package:locus/screens/locations_overview_screen_widgets/view_location_fe
 import 'package:locus/services/manager_service/background_locator.dart';
 import 'package:locus/services/manager_service/helpers.dart';
 import 'package:locus/services/settings_service/SettingsMapLocation.dart';
-import 'package:locus/services/task_service.dart';
+import 'package:locus/services/task_service/index.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:locus/utils/location/get-fallback-location.dart';
 import 'package:locus/utils/location/index.dart';

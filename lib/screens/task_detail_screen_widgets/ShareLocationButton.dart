@@ -11,7 +11,7 @@ import 'package:locus/constants/spacing.dart';
 import 'package:locus/constants/values.dart';
 import 'package:locus/screens/task_detail_screen_widgets/SendViewByBluetooth.dart';
 import 'package:locus/services/settings_service/index.dart';
-import 'package:locus/services/task_service.dart';
+import 'package:locus/services/task_service/index.dart';
 import 'package:locus/widgets/SingularElementDialog.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';

@@ -18,7 +18,7 @@ import 'package:locus/widgets/ModalSheetContent.dart';
 import 'package:locus/widgets/PlatformRadioTile.dart';
 import 'package:provider/provider.dart';
 
-import '../../services/task_service.dart';
+import '../../services/task_service/index.dart';
 
 enum ShareType {
   untilTurnOff,
