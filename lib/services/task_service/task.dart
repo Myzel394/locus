@@ -35,6 +35,9 @@ class Task extends ChangeNotifier with LocationBase {
   String name;
   bool deleteAfterRun;
 
+  // List of location points that need to be published yet
+  final List<LocationPointService> _outstandingLocations = [];
+
   Task({
     required this.id,
     required this.name,
@@ -43,8 +46,11 @@ class Task extends ChangeNotifier with LocationBase {
     required this.nostrPrivateKey,
     required this.relays,
     required this.timers,
+    List<LocationPointService> outstandingLocations = const [],
     this.deleteAfterRun = false,
-  }) : _encryptionPassword = encryptionPassword;
+  }) : _encryptionPassword = encryptionPassword {
+    _outstandingLocations.addAll(outstandingLocations);
+  }
 
   factory Task.fromJSON(Map<String, dynamic> json) {
     return Task(
@@ -65,6 +71,9 @@ class Task extends ChangeNotifier with LocationBase {
             throw Exception("Unknown timer type");
         }
       })),
+      outstandingLocations: List<LocationPointService>.from(
+        json["outstandingLocations"].map(LocationPointService.fromJSON),
+      ),
     );
   }
 
@@ -85,6 +94,8 @@ class Task extends ChangeNotifier with LocationBase {
       "relays": relays,
       "timers": timers.map((timer) => timer.toJSON()).toList(),
       "deleteAfterRun": deleteAfterRun.toString(),
+      "outstandingLocations":
+          _outstandingLocations.map((location) => location.toJSON()).toList(),
     };
   }
 
@@ -407,6 +418,12 @@ class Task extends ChangeNotifier with LocationBase {
     await publishLocation(locationPoint);
 
     return locationPoint;
+  }
+
+  Future<void> addOutstandingLocation(
+    final LocationPointService locationPoint,
+  ) async {
+    _outstandingLocations.add(locationPoint);
   }
 
   @override
