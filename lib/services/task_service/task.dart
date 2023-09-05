@@ -95,16 +95,15 @@ class Task extends ChangeNotifier with LocationBase {
       "timers": timers.map((timer) => timer.toJSON()).toList(),
       "deleteAfterRun": deleteAfterRun.toString(),
       "outstandingLocations":
-          _outstandingLocations.map((location) => location.toJSON()).toList(),
+      _outstandingLocations.map((location) => location.toJSON()).toList(),
     };
   }
 
-  static Future<Task> create(
-    final String name,
-    final List<String> relays, {
-    List<TaskRuntimeTimer> timers = const [],
-    bool deleteAfterRun = false,
-  }) async {
+  static Future<Task> create(final String name,
+      final List<String> relays, {
+        List<TaskRuntimeTimer> timers = const [],
+        bool deleteAfterRun = false,
+      }) async {
     FlutterLogs.logInfo(
       LOG_TAG,
       "Task",
@@ -117,7 +116,9 @@ class Task extends ChangeNotifier with LocationBase {
       id: uuid.v4(),
       name: name,
       encryptionPassword: secretKey,
-      nostrPrivateKey: Keychain.generate().private,
+      nostrPrivateKey: Keychain
+          .generate()
+          .private,
       relays: relays,
       createdAt: DateTime.now(),
       timers: timers,
@@ -178,7 +179,7 @@ class Task extends ChangeNotifier with LocationBase {
     }
 
     final shouldRunNowBasedOnTimers =
-        timers.any((timer) => timer.shouldRun(DateTime.now()));
+    timers.any((timer) => timer.shouldRun(DateTime.now()));
 
     if (shouldRunNowBasedOnTimers) {
       return true;
@@ -246,7 +247,7 @@ class Task extends ChangeNotifier with LocationBase {
   Future<DateTime?> startScheduleTomorrow() {
     final tomorrow = DateTime.now().add(const Duration(days: 1));
     final nextDate =
-        DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 6, 0, 0);
+    DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 6, 0, 0);
 
     return startSchedule(startDate: nextDate);
   }
@@ -351,8 +352,7 @@ class Task extends ChangeNotifier with LocationBase {
   // 2. Encrypt the task with the password
   // 3. Publish the encrypted task to a random Nostr relay
   // 4. Generate a link that contains the password and the Nostr relay ID
-  Future<String> generateLink(
-    final String host, {
+  Future<String> generateLink(final String host, {
     final void Function(TaskLinkPublishProgress progress)? onProgress,
   }) async {
     onProgress?.call(TaskLinkPublishProgress.startsSoon);
@@ -401,14 +401,25 @@ class Task extends ChangeNotifier with LocationBase {
   }
 
   Future<void> publishLocation(
-    final LocationPointService locationPoint,
-  ) async {
+      final LocationPointService locationPoint,) async {
     final eventManager = NostrEventsManager.fromTask(this);
 
     final rawMessage = jsonEncode(locationPoint.toJSON());
     final message = await encryptUsingAES(rawMessage, _encryptionPassword);
 
-    await eventManager.publishMessage(message);
+    try {
+      await eventManager.publishMessage(message);
+    } catch (error) {
+      FlutterLogs.logError(
+        LOG_TAG,
+        "Task $id",
+        "Failed to publish location: $error",
+      );
+
+      addOutstandingLocation(locationPoint);
+
+      rethrow;
+    }
   }
 
   Future<LocationPointService> publishCurrentPosition() async {
@@ -420,9 +431,30 @@ class Task extends ChangeNotifier with LocationBase {
     return locationPoint;
   }
 
+  Future<void> publishOutstandingPositions() async {
+    FlutterLogs.logInfo(
+      LOG_TAG,
+      "Task $id",
+      "Publishing outstanding locations...",
+    );
+
+    for (final locationPoint in _outstandingLocations) {
+      try {
+        await publishLocation(locationPoint);
+
+        _outstandingLocations.remove(locationPoint);
+      } catch (error) {
+        FlutterLogs.logError(
+          LOG_TAG,
+          "Task $id",
+          "Failed to publish outstanding location: $error",
+        );
+      }
+    }
+  }
+
   Future<void> addOutstandingLocation(
-    final LocationPointService locationPoint,
-  ) async {
+      final LocationPointService locationPoint,) async {
     _outstandingLocations.add(locationPoint);
   }
 

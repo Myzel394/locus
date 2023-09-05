@@ -438,6 +438,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
       final locationData = await LocationPointService.fromPosition(position);
 
       for (final task in runningTasks) {
+        await task.publishOutstandingPositions();
         await task.publishLocation(
           locationData.copyWithDifferentId(),
         );
