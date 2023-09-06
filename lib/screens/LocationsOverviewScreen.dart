@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import "package:apple_maps_flutter/apple_maps_flutter.dart" as apple_maps;
 import 'package:collection/collection.dart';
@@ -39,9 +40,10 @@ import 'package:locus/utils/permissions/request.dart';
 import 'package:locus/utils/ui-message/enums.dart';
 import 'package:locus/utils/ui-message/show-message.dart';
 import 'package:locus/widgets/FABOpenContainer.dart';
+import 'package:locus/widgets/GoToMyLocationMapAction.dart';
 import 'package:locus/widgets/LocationsMap.dart';
 import 'package:locus/widgets/LocusFlutterMap.dart';
-import 'package:locus/widgets/MapCompass.dart';
+import 'package:locus/widgets/CompassMapAction.dart';
 import 'package:locus/widgets/Paper.dart';
 import 'package:locus/widgets/PlatformFlavorWidget.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
@@ -629,19 +631,31 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
 
     if (lastPosition != null) {
       if (flutterMapController != null) {
+        final zoom = max(13, flutterMapController!.zoom).toDouble();
+
         flutterMapController?.move(
-          LatLng(lastPosition!.latitude, lastPosition!.longitude),
-          13,
+          LatLng(
+            lastPosition!.latitude,
+            lastPosition!.longitude,
+          ),
+          zoom,
         );
       }
 
       if (appleMapController != null) {
+        final zoom = max(
+          13,
+          (await appleMapController!.getZoomLevel())!,
+        ).toDouble();
+
         appleMapController?.animateCamera(
           apple_maps.CameraUpdate.newCameraPosition(
             apple_maps.CameraPosition(
               target: apple_maps.LatLng(
-                  lastPosition!.latitude, lastPosition!.longitude),
-              zoom: 13,
+                lastPosition!.latitude,
+                lastPosition!.longitude,
+              ),
+              zoom: zoom,
             ),
           ),
         );
