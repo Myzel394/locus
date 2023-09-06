@@ -1320,42 +1320,17 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
               ),
             ),
             const SizedBox(height: SMALL_SPACE),
-            MapCompass(
+            CompassMapAction(
               onAlignNorth: () {
                 flutterMapController!.rotate(0);
               },
               mapController: flutterMapController!,
             ),
             const SizedBox(height: SMALL_SPACE),
-            Tooltip(
-              message: l10n.locationsOverview_mapAction_goToCurrentPosition,
-              preferBelow: false,
-              margin: const EdgeInsets.only(bottom: margin),
-              child: SizedBox.square(
-                dimension: dimension,
-                child: Center(
-                  child: PlatformWidget(
-                    material: (context, _) => Paper(
-                      width: null,
-                      borderRadius: BorderRadius.circular(HUGE_SPACE),
-                      padding: EdgeInsets.zero,
-                      child: IconButton(
-                        color: shades[400],
-                        icon: const Icon(Icons.my_location),
-                        onPressed: () =>
-                            goToCurrentPosition(askPermissions: true),
-                      ),
-                    ),
-                    cupertino: (context, _) => CupertinoButton(
-                      color: shades[400],
-                      padding: EdgeInsets.zero,
-                      onPressed: () =>
-                          goToCurrentPosition(askPermissions: true),
-                      child: const Icon(Icons.my_location),
-                    ),
-                  ),
-                ),
-              ),
+            GoToMyLocationMapAction(
+              onGoToMyLocation: () {
+                goToCurrentPosition(askPermissions: true);
+              },
             ),
           ],
         ),
