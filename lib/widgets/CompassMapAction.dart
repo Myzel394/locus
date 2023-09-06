@@ -13,13 +13,13 @@ import '../constants/spacing.dart';
 import 'Paper.dart';
 import 'PlatformFlavorWidget.dart';
 
-class MapCompass extends StatefulWidget {
+class CompassMapAction extends StatefulWidget {
   final double dimension;
   final double tooltipSpacing;
   final VoidCallback onAlignNorth;
   final MapController mapController;
 
-  const MapCompass({
+  const CompassMapAction({
     super.key,
     this.dimension = 50.0,
     this.tooltipSpacing = 10.0,
@@ -28,10 +28,11 @@ class MapCompass extends StatefulWidget {
   });
 
   @override
-  State<MapCompass> createState() => _MapCompassState();
+  State<CompassMapAction> createState() => _CompassMapActionState();
 }
 
-class _MapCompassState extends State<MapCompass> with TickerProviderStateMixin {
+class _CompassMapActionState extends State<CompassMapAction>
+    with TickerProviderStateMixin {
   late final AnimationController rotationController;
   late Animation<double> rotationAnimation;
 
