@@ -15,12 +15,14 @@ import 'PlatformFlavorWidget.dart';
 
 class MapCompass extends StatefulWidget {
   final double dimension;
+  final double tooltipSpacing;
   final VoidCallback onAlignNorth;
   final MapController mapController;
 
   const MapCompass({
     super.key,
     this.dimension = 50.0,
+    this.tooltipSpacing = 10.0,
     required this.onAlignNorth,
     required this.mapController,
   });
@@ -74,6 +76,7 @@ class _MapCompassState extends State<MapCompass> with TickerProviderStateMixin {
     return Tooltip(
       message: l10n.mapAction_alignNorth,
       preferBelow: false,
+      margin: EdgeInsets.only(bottom: widget.tooltipSpacing),
       child: SizedBox.square(
         dimension: widget.dimension,
         child: Center(
