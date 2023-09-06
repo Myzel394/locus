@@ -41,6 +41,7 @@ import 'package:locus/utils/ui-message/show-message.dart';
 import 'package:locus/widgets/FABOpenContainer.dart';
 import 'package:locus/widgets/LocationsMap.dart';
 import 'package:locus/widgets/LocusFlutterMap.dart';
+import 'package:locus/widgets/MapCompass.dart';
 import 'package:locus/widgets/Paper.dart';
 import 'package:locus/widgets/PlatformFlavorWidget.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
@@ -91,9 +92,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
   MapController? flutterMapController;
   PopupController? flutterMapPopupController;
   apple_maps.AppleMapController? appleMapController;
-
-  late final AnimationController rotationController;
-  late Animation<double> rotationAnimation;
 
   bool showFAB = true;
   bool isNorth = true;
@@ -146,13 +144,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     final settings = context.read<SettingsService>();
     final appUpdateService = context.read<AppUpdateService>();
 
-    rotationController =
-        AnimationController(vsync: this, duration: Duration.zero);
-    rotationAnimation = Tween<double>(
-      begin: 0,
-      end: 2 * pi,
-    ).animate(rotationController);
-
     _createLocationFetcher();
     _handleViewAlarmChecker();
     _handleNotifications();
@@ -185,17 +176,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     if (settings.getMapProvider() == MapProvider.openStreetMap) {
       flutterMapController = MapController();
       flutterMapController!.mapEventStream.listen((event) {
-        if (event is MapEventRotate) {
-          rotationController.animateTo(
-            ((event.targetRotation % 360) / 360),
-            duration: Duration.zero,
-          );
-
-          setState(() {
-            isNorth = (event.targetRotation % 360).abs() < 1;
-          });
-        }
-
         if (event is MapEventWithMove ||
             event is MapEventDoubleTapZoom ||
             event is MapEventScrollWheelZoom) {
@@ -1340,63 +1320,11 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
               ),
             ),
             const SizedBox(height: SMALL_SPACE),
-            Tooltip(
-              message: l10n.locationsOverview_mapAction_alignNorth,
-              preferBelow: false,
-              margin: const EdgeInsets.only(bottom: margin),
-              child: SizedBox.square(
-                dimension: dimension,
-                child: Center(
-                  child: PlatformWidget(
-                    material: (context, _) => Paper(
-                      width: null,
-                      borderRadius: BorderRadius.circular(HUGE_SPACE),
-                      padding: EdgeInsets.zero,
-                      child: IconButton(
-                        color: isNorth ? shades[200] : shades[400],
-                        icon: AnimatedBuilder(
-                          animation: rotationAnimation,
-                          builder: (context, child) => Transform.rotate(
-                            angle: rotationAnimation.value,
-                            child: child,
-                          ),
-                          child: PlatformFlavorWidget(
-                            material: (context, _) => Transform.rotate(
-                              angle: -pi / 4,
-                              child: const Icon(MdiIcons.compass),
-                            ),
-                            cupertino: (context, _) =>
-                                const Icon(CupertinoIcons.location_north_fill),
-                          ),
-                        ),
-                        onPressed: () {
-                          if (flutterMapController != null) {
-                            flutterMapController!.rotate(0);
-                          }
-                        },
-                      ),
-                    ),
-                    cupertino: (context, _) => CupertinoButton(
-                      color: isNorth ? shades[200] : shades[400],
-                      padding: EdgeInsets.zero,
-                      borderRadius: BorderRadius.circular(HUGE_SPACE),
-                      onPressed: () {
-                        if (flutterMapController != null) {
-                          flutterMapController!.rotate(0);
-                        }
-                      },
-                      child: AnimatedBuilder(
-                        animation: rotationAnimation,
-                        builder: (context, child) => Transform.rotate(
-                          angle: rotationAnimation.value,
-                          child: child,
-                        ),
-                        child: const Icon(CupertinoIcons.location_north_fill),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+            MapCompass(
+              onAlignNorth: () {
+                flutterMapController!.rotate(0);
+              },
+              mapController: flutterMapController!,
             ),
             const SizedBox(height: SMALL_SPACE),
             Tooltip(
