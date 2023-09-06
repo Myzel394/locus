@@ -5,9 +5,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:locus/constants/values.dart';
 import 'package:locus/models/log.dart';
-import 'package:locus/services/log_service.dart';
+import 'package:locus/services/log_service.dart' hide KEY, storage;
 import 'package:locus/services/task_service/task.dart';
 import 'package:locus/services/timers_service.dart';
+
+import 'constants.dart';
 
 class TaskService extends ChangeNotifier {
   final List<Task> _tasks;

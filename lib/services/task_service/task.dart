@@ -75,12 +75,11 @@ class Task extends ChangeNotifier with LocationBase {
             throw Exception("Unknown timer type");
         }
       })),
-      outstandingLocations: Map<LocationPointService, int>.fromEntries(
-        json["outstandingLocations"].map(
-          (entry) => MapEntry(
-            LocationPointService.fromJSON(entry["key"]),
-            entry["value"],
-          ),
+      outstandingLocations: Map<String, int>.from(json["outstandingLocations"])
+          .map<LocationPointService, int>(
+        (rawLocationData, tries) => MapEntry(
+          LocationPointService.fromJSON(jsonDecode(rawLocationData)),
+          tries,
         ),
       ),
     );
@@ -103,8 +102,12 @@ class Task extends ChangeNotifier with LocationBase {
       "relays": relays,
       "timers": timers.map((timer) => timer.toJSON()).toList(),
       "deleteAfterRun": deleteAfterRun.toString(),
-      "outstandingLocations": outstandingLocations
-          .map((key, value) => MapEntry(key.toJSON(), value)),
+      "outstandingLocations": outstandingLocations.map(
+        (locationData, tries) => MapEntry(
+          locationData.toJSON(),
+          tries,
+        ),
+      ),
     };
   }
 
