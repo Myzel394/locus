@@ -72,7 +72,7 @@ class _TaskTileState extends State<TaskTile> with TaskLinkGenerationMixin {
                           );
                           final nextEndDate = widget.task.nextEndDate();
 
-                          widget.task.publishCurrentPosition();
+                          widget.task.publisher.publishCurrentPosition();
 
                           if (!mounted) {
                             return;

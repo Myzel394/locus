@@ -35,7 +35,7 @@ mixin TaskLinkGenerationMixin {
     final l10n = AppLocalizations.of(context);
     final settings = context.read<SettingsService>();
 
-    final url = await task.generateLink(
+    final url = await task.publisher.generateLink(
       settings.getServerHost(),
       onProgress: (progress) {
         if (taskLinkGenerationSnackbar != null) {

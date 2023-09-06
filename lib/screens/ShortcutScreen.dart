@@ -76,7 +76,7 @@ class _ShortcutScreenState extends State<ShortcutScreen> {
 
           await task.startSchedule(startNowIfNextRunIsUnknown: true);
 
-          final locationPoint = await task.publishCurrentPosition();
+          final locationPoint = await task.publisher.publishCurrentPosition();
 
           await logService.addLog(
             Log.updateLocation(
@@ -102,7 +102,7 @@ class _ShortcutScreenState extends State<ShortcutScreen> {
           );
           await Future.wait(
             tasks.map(
-              (task) => task.publishLocation(
+              (task) => task.publisher.publishLocation(
                 locationPoint.copyWithDifferentId(),
               ),
             ),

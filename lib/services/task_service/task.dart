@@ -6,6 +6,8 @@ import 'package:flutter_logs/flutter_logs.dart';
 import 'package:locus/api/nostr-events.dart';
 import 'package:locus/constants/values.dart';
 import 'package:locus/services/location_point_service.dart';
+import 'package:locus/services/task_service/task_cryptography.dart';
+import 'package:locus/services/task_service/task_publisher.dart';
 import 'package:locus/utils/cryptography/encrypt.dart';
 import 'package:locus/utils/cryptography/utils.dart';
 import 'package:locus/utils/location/index.dart';
@@ -39,7 +41,7 @@ class Task extends ChangeNotifier with LocationBase {
   // To avoid infinite retries, we only try to publish each location point a
   // certain amount of time
   // This ´Map` stores the amount of tries for each location point
-  late final Map<LocationPointService, int> _outstandingLocations;
+  late final Map<LocationPointService, int> outstandingLocations;
 
   Task({
     required this.id,
@@ -52,7 +54,7 @@ class Task extends ChangeNotifier with LocationBase {
     Map<LocationPointService, int>? outstandingLocations,
     this.deleteAfterRun = false,
   })  : _encryptionPassword = encryptionPassword,
-        _outstandingLocations = outstandingLocations ?? {};
+        outstandingLocations = outstandingLocations ?? {};
 
   factory Task.fromJSON(Map<String, dynamic> json) {
     return Task(
@@ -101,7 +103,7 @@ class Task extends ChangeNotifier with LocationBase {
       "relays": relays,
       "timers": timers.map((timer) => timer.toJSON()).toList(),
       "deleteAfterRun": deleteAfterRun.toString(),
-      "outstandingLocations": _outstandingLocations
+      "outstandingLocations": outstandingLocations
           .map((key, value) => MapEntry(key.toJSON(), value)),
     };
   }
@@ -131,6 +133,13 @@ class Task extends ChangeNotifier with LocationBase {
       deleteAfterRun: deleteAfterRun,
     );
   }
+
+  TaskCryptography get cryptography => TaskCryptography(
+        this,
+        _encryptionPassword,
+      );
+
+  TaskPublisher get publisher => TaskPublisher(this);
 
   Future<bool> isRunning() async {
     final status = await getExecutionStatus();
@@ -341,146 +350,6 @@ class Task extends ChangeNotifier with LocationBase {
     }
 
     notifyListeners();
-  }
-
-  Future<String> generateViewKeyContent() async {
-    return jsonEncode({
-      "encryptionPassword": await _encryptionPassword.extractBytes(),
-      "nostrPublicKey": nostrPublicKey,
-      "relays": relays,
-    });
-  }
-
-  // Generates a link that can be used to retrieve the task
-  // This link is primarily used for sharing the task to the web app
-  // Here's the process:
-  // 1. Generate a random password
-  // 2. Encrypt the task with the password
-  // 3. Publish the encrypted task to a random Nostr relay
-  // 4. Generate a link that contains the password and the Nostr relay ID
-  Future<String> generateLink(
-    final String host, {
-    final void Function(TaskLinkPublishProgress progress)? onProgress,
-  }) async {
-    onProgress?.call(TaskLinkPublishProgress.startsSoon);
-
-    final message = await generateViewKeyContent();
-
-    onProgress?.call(TaskLinkPublishProgress.encrypting);
-
-    final passwordSecretKey = await generateSecretKey();
-    final password = await passwordSecretKey.extractBytes();
-    final cipherText = await encryptUsingAES(message, passwordSecretKey);
-
-    onProgress?.call(TaskLinkPublishProgress.publishing);
-
-    final manager = NostrEventsManager(
-      relays: relays,
-      privateKey: nostrPrivateKey,
-    );
-    final publishedEvent = await manager.publishMessage(cipherText, kind: 1001);
-
-    onProgress?.call(TaskLinkPublishProgress.creatingURI);
-
-    final parameters = {
-      // Password
-      "p": password,
-      // Key
-      "k": nostrPublicKey,
-      // ID
-      "i": publishedEvent.id,
-      // Relay
-      "r": relays,
-    };
-
-    final fragment = base64Url.encode(jsonEncode(parameters).codeUnits);
-    final uri = Uri(
-      scheme: "https",
-      host: host,
-      path: "/",
-      fragment: fragment,
-    );
-
-    onProgress?.call(TaskLinkPublishProgress.done);
-    passwordSecretKey.destroy();
-
-    return uri.toString();
-  }
-
-  Future<void> publishLocation(
-    final LocationPointService locationPoint,
-  ) async {
-    final eventManager = NostrEventsManager.fromTask(this);
-
-    final rawMessage = jsonEncode(locationPoint.toJSON());
-    final message = await encryptUsingAES(rawMessage, _encryptionPassword);
-
-    try {
-      await eventManager.publishMessage(message);
-    } catch (error) {
-      FlutterLogs.logError(
-        LOG_TAG,
-        "Task $id",
-        "Failed to publish location: $error",
-      );
-
-      addOutstandingLocation(locationPoint);
-
-      rethrow;
-    }
-  }
-
-  Future<LocationPointService> publishCurrentPosition() async {
-    final position = await getCurrentPosition();
-    final locationPoint = await LocationPointService.fromPosition(position);
-
-    await publishLocation(locationPoint);
-
-    return locationPoint;
-  }
-
-  Future<void> publishOutstandingPositions() async {
-    FlutterLogs.logInfo(
-      LOG_TAG,
-      "Task $id",
-      "Publishing outstanding locations...",
-    );
-
-    // Iterate over point and tries
-    for (final entry in _outstandingLocations.entries) {
-      final locationPoint = entry.key;
-      final tries = entry.value;
-
-      if (tries >= LOCATION_PUBLISH_MAX_TRIES) {
-        FlutterLogs.logInfo(
-          LOG_TAG,
-          "Task $id",
-          "Skipping location point as it has been published too many times.",
-        );
-
-        _outstandingLocations.remove(locationPoint);
-
-        continue;
-      }
-
-      try {
-        await publishLocation(locationPoint);
-
-        _outstandingLocations.remove(locationPoint);
-      } catch (error) {
-        FlutterLogs.logError(
-          LOG_TAG,
-          "Task $id",
-          "Failed to publish outstanding location: $error",
-        );
-      }
-    }
-  }
-
-  Future<void> addOutstandingLocation(
-    final LocationPointService locationPoint,
-  ) async {
-    _outstandingLocations[locationPoint] = 0;
   }
 
   @override

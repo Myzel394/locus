@@ -77,8 +77,8 @@ Future<void> updateLocation() async {
   );
 
   for (final task in runningTasks) {
-    await task.publishOutstandingPositions();
-    await task.publishLocation(locationData.copyWithDifferentId());
+    await task.publisher.publishOutstandingPositions();
+    await task.publisher.publishLocation(locationData.copyWithDifferentId());
   }
 
   FlutterLogs.logInfo(

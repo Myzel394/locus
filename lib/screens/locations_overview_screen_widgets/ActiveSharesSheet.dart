@@ -188,7 +188,7 @@ class _ActiveSharesSheetState extends State<ActiveSharesSheet>
 
       await Future.wait(
         quickShareTasks.map(
-          (task) => task.publishLocation(
+          (task) => task.publisher.publishLocation(
             locationData.copyWithDifferentId(),
           ),
         ),

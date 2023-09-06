@@ -438,8 +438,8 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
       final locationData = await LocationPointService.fromPosition(position);
 
       for (final task in runningTasks) {
-        await task.publishOutstandingPositions();
-        await task.publishLocation(
+        await task.publisher.publishOutstandingPositions();
+        await task.publisher.publishLocation(
           locationData.copyWithDifferentId(),
         );
       }
@@ -1269,7 +1269,8 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     }
 
     final settings = context.read<SettingsService>();
-    final link = await (task as Task).generateLink(settings.getServerHost());
+    final link =
+        await (task as Task).publisher.generateLink(settings.getServerHost());
 
     // Copy to clipboard
     await Clipboard.setData(ClipboardData(text: link));
