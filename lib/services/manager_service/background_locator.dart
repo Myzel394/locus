@@ -9,8 +9,24 @@ import 'package:locus/constants/app.dart';
 import 'package:locus/constants/values.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
+import 'task.dart';
+
 @pragma('vm:entry-point')
-void runBackgroundLocatorTask(final LocationDto location,) {}
+void runBackgroundLocatorTask(final LocationDto location,) async {
+  FlutterLogs.logInfo(
+    LOG_TAG,
+    "Background Locator",
+    "Running background locator",
+  );
+
+  await runBackgroundTask();
+
+  FlutterLogs.logInfo(
+    LOG_TAG,
+    "Background Locator",
+    "Running background locator... Done!",
+  );
+}
 
 Future<void> configureBackgroundLocator() {
   FlutterLogs.logInfo(
@@ -42,6 +58,9 @@ Future<void> initializeBackgroundLocator(final BuildContext context,) {
       androidNotificationSettings: AndroidNotificationSettings(
         notificationTitle: l10n.backgroundLocator_title,
         notificationMsg: l10n.backgroundLocator_text,
+        notificationBigMsg: l10n.backgroundLocator_text,
+        notificationChannelName: l10n.backgroundLocator_channelName,
+        notificationIcon: "ic_quick_actions_share_now",
       ),
     ),
     iosSettings: IOSSettings(
