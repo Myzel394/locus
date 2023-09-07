@@ -253,9 +253,9 @@
   "sharesOverviewScreen_importTask_importLabel": "Import",
   "locationsOverview_viewSelection_all": "Show all locations",
   "locationsOverview_activeShares_amount": "{count, plural, =0{No active shares} =1{One share active} other{{count} shares active}}",
-  "locationsOverview_mapAction_goToCurrentPosition": "Go to current position",
   "locationsOverview_mapAction_detailedLocations_show": "Show detailed locations",
   "locationsOverview_mapAction_detailedLocations_hide": "Merge nearby locations",
+  "mapAction_goToCurrentPosition": "Go to current position",
   "mapAction_alignNorth": "Align North",
   "createTask_title": "Define a name for your Share",
   "createTask_fields_name_label": "Name",
@@ -557,6 +557,7 @@
   },
   "backgroundLocator_title": "Updating location in real-time",
   "backgroundLocator_text": "Locus is updating your location in real-time.",
+  "backgroundLocator_channelName": "Location Updater",
   "logs_createdAt": "{date}",
   "@logs_createdAt": {
     "placeholders": {

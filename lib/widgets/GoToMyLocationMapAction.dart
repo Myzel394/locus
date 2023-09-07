@@ -7,7 +7,6 @@ import 'package:locus/utils/theme.dart';
 import '../constants/spacing.dart';
 import 'Paper.dart';
 
-
 class GoToMyLocationMapAction extends StatelessWidget {
   final double dimension;
   final double tooltipSpacing;
@@ -26,31 +25,29 @@ class GoToMyLocationMapAction extends StatelessWidget {
     final shades = getPrimaryColorShades(context);
 
     return Tooltip(
-      message: l10n.locationsOverview_mapAction_goToCurrentPosition,
+      message: l10n.mapAction_goToCurrentPosition,
       preferBelow: false,
       margin: EdgeInsets.only(bottom: tooltipSpacing),
       child: SizedBox.square(
         dimension: dimension,
         child: Center(
           child: PlatformWidget(
-            material: (context, _) =>
-                Paper(
-                  width: null,
-                  borderRadius: BorderRadius.circular(HUGE_SPACE),
-                  padding: EdgeInsets.zero,
-                  child: IconButton(
-                    color: shades[400],
-                    icon: const Icon(Icons.my_location),
-                    onPressed: onGoToMyLocation,
-                  ),
-                ),
-            cupertino: (context, _) =>
-                CupertinoButton(
-                  color: shades[400],
-                  padding: EdgeInsets.zero,
-                  onPressed: onGoToMyLocation,
-                  child: const Icon(Icons.my_location),
-                ),
+            material: (context, _) => Paper(
+              width: null,
+              borderRadius: BorderRadius.circular(HUGE_SPACE),
+              padding: EdgeInsets.zero,
+              child: IconButton(
+                color: shades[400],
+                icon: const Icon(Icons.my_location),
+                onPressed: onGoToMyLocation,
+              ),
+            ),
+            cupertino: (context, _) => CupertinoButton(
+              color: shades[400],
+              padding: EdgeInsets.zero,
+              onPressed: onGoToMyLocation,
+              child: const Icon(Icons.my_location),
+            ),
           ),
         ),
       ),
