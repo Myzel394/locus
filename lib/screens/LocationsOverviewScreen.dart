@@ -45,7 +45,6 @@ import 'package:locus/widgets/LocationsMap.dart';
 import 'package:locus/widgets/LocusFlutterMap.dart';
 import 'package:locus/widgets/CompassMapAction.dart';
 import 'package:locus/widgets/Paper.dart';
-import 'package:locus/widgets/PlatformFlavorWidget.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:provider/provider.dart';
@@ -607,6 +606,41 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     }
   }
 
+  Future<void> _animateToPosition(
+    final Position position,
+  ) async {
+    if (flutterMapController != null) {
+      final zoom = max(13, flutterMapController!.zoom).toDouble();
+
+      flutterMapController?.move(
+        LatLng(
+          position.latitude,
+          position.longitude,
+        ),
+        zoom,
+      );
+    }
+
+    if (appleMapController != null) {
+      final zoom = max(
+        13,
+        (await appleMapController!.getZoomLevel())!,
+      ).toDouble();
+
+      appleMapController?.animateCamera(
+        apple_maps.CameraUpdate.newCameraPosition(
+          apple_maps.CameraPosition(
+            target: apple_maps.LatLng(
+              position!.latitude,
+              position!.longitude,
+            ),
+            zoom: zoom,
+          ),
+        ),
+      );
+    }
+  }
+
   void goToCurrentPosition({
     final bool askPermissions = false,
     final bool showErrorMessage = true,
@@ -637,39 +671,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
 
     _initLiveLocationUpdate();
 
-    if (lastPosition != null) {
-      if (flutterMapController != null) {
-        final zoom = max(13, flutterMapController!.zoom).toDouble();
-
-        flutterMapController?.move(
-          LatLng(
-            lastPosition!.latitude,
-            lastPosition!.longitude,
-          ),
-          zoom,
-        );
-      }
-
-      if (appleMapController != null) {
-        final zoom = max(
-          13,
-          (await appleMapController!.getZoomLevel())!,
-        ).toDouble();
-
-        appleMapController?.animateCamera(
-          apple_maps.CameraUpdate.newCameraPosition(
-            apple_maps.CameraPosition(
-              target: apple_maps.LatLng(
-                lastPosition!.latitude,
-                lastPosition!.longitude,
-              ),
-              zoom: zoom,
-            ),
-          ),
-        );
-      }
-    }
-
     FlutterLogs.logInfo(
       LOG_TAG,
       "LocationOverviewScreen",
@@ -686,6 +687,8 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
           accuracy: latestPosition.accuracy,
         ),
       );
+
+      _animateToPosition(latestPosition);
 
       setState(() {
         lastPosition = latestPosition;
@@ -768,18 +771,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
           appleMapController = controller;
 
           if (lastPosition != null) {
-            appleMapController?.moveCamera(
-              apple_maps.CameraUpdate.newCameraPosition(
-                apple_maps.CameraPosition(
-                  target: apple_maps.LatLng(
-                    lastPosition!.latitude,
-                    lastPosition!.longitude,
-                  ),
-                  zoom: 13,
-                ),
-              ),
-            );
-
+            _animateToPosition(lastPosition!);
             _hasGoneToInitialPosition = true;
           }
         },
@@ -1350,6 +1342,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
             ),
             const SizedBox(height: SMALL_SPACE),
             GoToMyLocationMapAction(
+              animate: locationStatus == LocationStatus.fetching,
               onGoToMyLocation: () {
                 goToCurrentPosition(askPermissions: true);
               },
