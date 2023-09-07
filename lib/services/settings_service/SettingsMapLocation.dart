@@ -1,3 +1,5 @@
+import 'package:latlong2/latlong.dart';
+
 class SettingsLastMapLocation {
   final double latitude;
   final double longitude;
@@ -16,9 +18,12 @@ class SettingsLastMapLocation {
         accuracy: data['accuracy'] as double,
       );
 
-  Map<String, dynamic> toJSON() => {
+  Map<String, dynamic> toJSON() =>
+      {
         'latitude': latitude,
         'longitude': longitude,
         'accuracy': accuracy,
       };
+
+  LatLng toLatLng() => LatLng(latitude, longitude);
 }

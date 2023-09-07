@@ -120,8 +120,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
   // Null = all views
   String? selectedViewID;
 
-  bool _hasGoneToInitialPosition = false;
-
   final Map<TaskView, List<LocationPointService>> _cachedMergedLocations = {};
 
   TaskView? get selectedView {
@@ -167,11 +165,12 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
         _fetchers.addListener(_rebuild);
         appUpdateService.addListener(_rebuild);
         viewService.addListener(_handleViewServiceChange);
-        hasGrantedLocationPermission().then((hasGranted) {
-          if (hasGranted) {
-            _initLiveLocationUpdate();
-          }
-        });
+
+        updateCurrentPosition(
+          askPermissions: false,
+          showErrorMessage: false,
+          goToPosition: true,
+        );
       });
 
     if (settings.getMapProvider() == MapProvider.openStreetMap) {
@@ -217,7 +216,11 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     super.didChangeAppLifecycleState(state);
 
     if (state == AppLifecycleState.resumed) {
-      goToCurrentPosition(showErrorMessage: false);
+      updateCurrentPosition(
+        askPermissions: false,
+        goToPosition: false,
+        showErrorMessage: false,
+      );
     }
   }
 
@@ -244,7 +247,8 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
       LocationMarkerPosition(
         latitude: position.latitude,
         longitude: position.longitude,
-        accuracy: position.accuracy,
+        // Always use a high accuracy, since we are using a cached location
+        accuracy: max(100, position.accuracy),
       ),
     );
   }
@@ -383,34 +387,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
       );
 
       _updateLocationToSettings(position);
-
-      if (!_hasGoneToInitialPosition) {
-        if (flutterMapController != null) {
-          flutterMapController!.move(
-            LatLng(position.latitude, position.longitude),
-            INITIAL_LOCATION_FETCHED_ZOOM_LEVEL,
-          );
-        }
-
-        // Print statement is required to work
-        print(appleMapController);
-        if (appleMapController != null) {
-          if (_hasGoneToInitialPosition) {
-            appleMapController!.animateCamera(
-              apple_maps.CameraUpdate.newLatLng(
-                apple_maps.LatLng(position.latitude, position.longitude),
-              ),
-            );
-          } else {
-            appleMapController!.moveCamera(
-              apple_maps.CameraUpdate.newLatLng(
-                apple_maps.LatLng(position.latitude, position.longitude),
-              ),
-            );
-          }
-        }
-        _hasGoneToInitialPosition = true;
-      }
 
       setState(() {
         lastPosition = position;
@@ -610,7 +586,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     final Position position,
   ) async {
     if (flutterMapController != null) {
-      final zoom = max(13, flutterMapController!.zoom).toDouble();
+      final zoom = max(15, flutterMapController!.zoom).toDouble();
 
       flutterMapController?.move(
         LatLng(
@@ -623,7 +599,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
 
     if (appleMapController != null) {
       final zoom = max(
-        13,
+        15,
         (await appleMapController!.getZoomLevel())!,
       ).toDouble();
 
@@ -631,8 +607,8 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
         apple_maps.CameraUpdate.newCameraPosition(
           apple_maps.CameraPosition(
             target: apple_maps.LatLng(
-              position!.latitude,
-              position!.longitude,
+              position.latitude,
+              position.longitude,
             ),
             zoom: zoom,
           ),
@@ -641,9 +617,10 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     }
   }
 
-  void goToCurrentPosition({
-    final bool askPermissions = false,
-    final bool showErrorMessage = true,
+  void updateCurrentPosition({
+    required final bool askPermissions,
+    required final bool goToPosition,
+    required final bool showErrorMessage,
   }) async {
     final previousValue = locationStatus;
 
@@ -688,7 +665,9 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
         ),
       );
 
-      _animateToPosition(latestPosition);
+      if (goToPosition) {
+        _animateToPosition(latestPosition);
+      }
 
       setState(() {
         lastPosition = latestPosition;
@@ -711,12 +690,13 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
 
       final l10n = AppLocalizations.of(context);
 
-      showMessage(
-        context,
-        l10n.unknownError,
-        type: MessageType.error,
-      );
-      return;
+      if (showErrorMessage) {
+        showMessage(
+          context,
+          l10n.unknownError,
+          type: MessageType.error,
+        );
+      }
     }
   }
 
@@ -735,7 +715,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
 
     return CurrentLocationLayer(
       positionStream: _currentLocationPositionStream.stream,
-      followOnLocationUpdate: FollowOnLocationUpdate.always,
+      followOnLocationUpdate: FollowOnLocationUpdate.never,
       style: LocationMarkerStyle(
         marker: DefaultLocationMarker(
           color: color,
@@ -772,7 +752,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
 
           if (lastPosition != null) {
             _animateToPosition(lastPosition!);
-            _hasGoneToInitialPosition = true;
           }
         },
         circles: viewService.views
@@ -833,8 +812,15 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
       );
     }
 
+    final lastCenter = settings.getLastMapLocation()?.toLatLng();
     return LocusFlutterMap(
       mapController: flutterMapController,
+      options: MapOptions(
+        maxZoom: 18,
+        minZoom: 2,
+        center: lastCenter ?? getFallbackLocation(context),
+        zoom: lastCenter == null ? FALLBACK_LOCATION_ZOOM_LEVEL : 13,
+      ),
       children: [
         CircleLayer(
           circles: viewService.views.reversed
@@ -999,7 +985,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
               latestLocation.latitude,
               latestLocation.longitude,
             ),
-            zoom: (await appleMapController!.getZoomLevel()) ?? 13.0,
+            zoom: (await appleMapController!.getZoomLevel()) ?? 15.0,
           ),
         ),
       );
@@ -1344,7 +1330,11 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
             GoToMyLocationMapAction(
               animate: locationStatus == LocationStatus.fetching,
               onGoToMyLocation: () {
-                goToCurrentPosition(askPermissions: true);
+                updateCurrentPosition(
+                  askPermissions: true,
+                  goToPosition: true,
+                  showErrorMessage: true,
+                );
               },
             ),
           ],
