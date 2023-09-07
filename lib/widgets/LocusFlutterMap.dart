@@ -4,8 +4,6 @@ import 'package:locus/constants/values.dart';
 import 'package:locus/utils/location/get-fallback-location.dart';
 import 'package:locus/utils/theme.dart';
 
-import "package:latlong2/latlong.dart";
-
 class LocusFlutterMap extends StatelessWidget {
   final List<Widget> children;
   final List<Widget> nonRotatedChildren;

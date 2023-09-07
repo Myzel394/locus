@@ -341,7 +341,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     final settings = context.read<SettingsService>();
     final taskService = context.read<TaskService>();
 
-    if (!(await taskService.hasRunningTasks()) ||
+    if (!(await taskService.hasRunningTasks()) &&
         !(await taskService.hasScheduledTasks())) {
       // Nothing needs to be updated
       return;
