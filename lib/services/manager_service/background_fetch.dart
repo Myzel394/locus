@@ -1,6 +1,7 @@
 import 'package:background_fetch/background_fetch.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:locus/constants/values.dart';
+import 'package:locus/services/manager_service/helpers.dart';
 import 'package:locus/services/manager_service/task.dart';
 
 @pragma('vm:entry-point')
@@ -62,14 +63,14 @@ Future<void> configureBackgroundFetch() async {
         startOnBoot: true,
         stopOnTerminate: false,
       ),
-      (taskId) async {
+          (taskId) async {
         // We only use one taskId to update the location for all tasks,
         // so we don't need to check the taskId.
         await runBackgroundTask();
 
         BackgroundFetch.finish(taskId);
       },
-      (taskId) {
+          (taskId) {
         // Timeout, we need to finish immediately.
         BackgroundFetch.finish(taskId);
       },

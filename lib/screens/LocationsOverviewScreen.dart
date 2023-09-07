@@ -198,11 +198,9 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
   dispose() {
     flutterMapController?.dispose();
     _fetchers.dispose();
-    _positionStream?.drain();
 
     _viewsAlarmCheckerTimer?.cancel();
     _uniLinksStream?.cancel();
-    _positionStream?.drain();
     mapEventStream.close();
 
     _removeLiveLocationUpdate();
@@ -340,10 +338,13 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     final settings = context.read<SettingsService>();
     final taskService = context.read<TaskService>();
 
-    if (taskService.tasks.isEmpty) {
+    if (!(await taskService.hasRunningTasks()) ||
+        !(await taskService.hasScheduledTasks())) {
       // Nothing needs to be updated
       return;
     }
+
+    _initLiveLocationUpdate();
 
     if (settings.useRealtimeUpdates) {
       removeBackgroundFetch();
@@ -359,6 +360,13 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
 
   void _initLiveLocationUpdate() {
     if (_positionStream != null) {
+      return;
+    }
+
+    final settings = context.read<SettingsService>();
+
+    if (settings.useRealtimeUpdates) {
+      // Live location updates are handled by the background locator already
       return;
     }
 

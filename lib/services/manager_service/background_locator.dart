@@ -8,18 +8,46 @@ import 'package:flutter_logs/flutter_logs.dart';
 import 'package:locus/constants/app.dart';
 import 'package:locus/constants/values.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:locus/services/location_point_service.dart';
 
 import 'task.dart';
 
 @pragma('vm:entry-point')
-void runBackgroundLocatorTask(final LocationDto location,) async {
+void runBackgroundLocatorTask(final LocationDto location) async {
   FlutterLogs.logInfo(
     LOG_TAG,
     "Background Locator",
     "Running background locator",
   );
 
-  await runBackgroundTask();
+  FlutterLogs.logInfo(
+    LOG_TAG,
+    "Background Locator",
+    "Parsing location...",
+  );
+  LocationPointService? locationData;
+
+  try {
+    locationData = await LocationPointService.fromLocationDto(location);
+    FlutterLogs.logInfo(
+      LOG_TAG,
+      "Background Locator",
+      "Parsing location... Done!",
+    );
+  } catch (error) {
+    FlutterLogs.logError(
+      LOG_TAG,
+      "Background Locator",
+      "Error while parsing location: $error",
+    );
+    FlutterLogs.logInfo(
+      LOG_TAG,
+      "Background Locator",
+      "Will try continuing without location data.",
+    );
+  }
+
+  await runBackgroundTask(locationData);
 
   FlutterLogs.logInfo(
     LOG_TAG,

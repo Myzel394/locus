@@ -15,10 +15,40 @@ import 'package:locus/services/log_service.dart';
 import 'package:locus/services/settings_service/index.dart';
 import 'package:locus/services/task_service/index.dart';
 import 'package:locus/services/view_service.dart';
-import 'package:locus/utils/location/index.dart';
+import 'package:locus/utils/location/index.dart' as location;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-Future<void> updateLocation() async {
+Future<LocationPointService> getLocationData() async {
+  FlutterLogs.logInfo(
+    LOG_TAG,
+    "Headless Task; Update Location",
+    "Fetching position now...",
+  );
+  late final Position position;
+
+  try {
+    position = await location.getCurrentPosition();
+  } catch (error) {
+    FlutterLogs.logError(
+      LOG_TAG,
+      "Headless Task; Update Location",
+      "Error while fetching position: $error",
+    );
+    throw error;
+  }
+
+  FlutterLogs.logInfo(
+    LOG_TAG,
+    "Headless Task; Update Location",
+    "Fetching position now... Done!",
+  );
+
+  return LocationPointService.fromPosition(
+    position,
+  );
+}
+
+Future<void> updateLocation(final LocationPointService locationData,) async {
   final taskService = await TaskService.restore();
   final logService = await LogService.restore();
 
@@ -39,36 +69,6 @@ Future<void> updateLocation() async {
     );
     return;
   }
-
-  FlutterLogs.logInfo(
-    LOG_TAG,
-    "Headless Task; Update Location",
-    "Fetching position now...",
-  );
-  late final Position position;
-
-  try {
-    position = await getCurrentPosition(timeouts: [
-      3.minutes,
-    ]);
-  } catch (error) {
-    FlutterLogs.logError(
-      LOG_TAG,
-      "Headless Task; Update Location",
-      "Error while fetching position: $error",
-    );
-    return;
-  }
-
-  FlutterLogs.logInfo(
-    LOG_TAG,
-    "Headless Task; Update Location",
-    "Fetching position now... Done!",
-  );
-
-  final locationData = await LocationPointService.fromPosition(
-    position,
-  );
 
   FlutterLogs.logInfo(
     LOG_TAG,

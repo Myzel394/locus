@@ -50,7 +50,7 @@ class TaskService extends ChangeNotifier {
     // await all `toJson` functions
     final data = await Future.wait<Map<String, dynamic>>(
       _tasks.map(
-        (task) => task.toJSON(),
+            (task) => task.toJSON(),
       ),
     );
 
@@ -162,5 +162,25 @@ class TaskService extends ChangeNotifier {
         yield task;
       }
     }
+  }
+
+  Future<bool> hasRunningTasks() async {
+    for (final task in tasks) {
+      if (await task.isRunning()) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  Future<bool> hasScheduledTasks() async {
+    for (final task in tasks) {
+      if (task.timers.isNotEmpty && !task.deleteAfterRun) {
+        return true;
+      }
+    }
+
+    return false;
   }
 }

@@ -1,10 +1,13 @@
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:locus/constants/values.dart';
+import 'package:locus/services/location_point_service.dart';
 import 'package:locus/services/manager_service/helpers.dart';
 import 'package:locus/services/settings_service/index.dart';
 import 'package:locus/utils/device/index.dart';
 
-Future<void> runBackgroundTask() async {
+Future<void> runBackgroundTask([
+  final LocationPointService? locationData,
+]) async {
   FlutterLogs.logInfo(
     LOG_TAG,
     "Headless Task",
@@ -38,12 +41,14 @@ Future<void> runBackgroundTask() async {
     "Executing headless task now.",
   );
 
+  final location = locationData ?? await getLocationData();
+
   FlutterLogs.logInfo(
     LOG_TAG,
     "Headless Task",
     "Updating Location...",
   );
-  await updateLocation();
+  await updateLocation(location);
   FlutterLogs.logInfo(
     LOG_TAG,
     "Headless Task",
