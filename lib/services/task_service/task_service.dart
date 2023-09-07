@@ -50,7 +50,7 @@ class TaskService extends ChangeNotifier {
     // await all `toJson` functions
     final data = await Future.wait<Map<String, dynamic>>(
       _tasks.map(
-            (task) => task.toJSON(),
+        (task) => task.toJSON(),
       ),
     );
 
@@ -102,13 +102,14 @@ class TaskService extends ChangeNotifier {
     for (final task in tasks) {
       final isRunning = await task.isRunning();
       final shouldRun = await task.shouldRunNow();
-      final isQuickShare = task.deleteAfterRun &&
-          task.timers.length == 1 &&
-          task.timers[0] is DurationTimer;
 
-      if (isQuickShare) {
+      if (task.isInfiniteQuickShare) {
+        // Infinite quick shares are completely user controlled.
+        // Nothing to do here.
+      } else if (task.isFiniteQuickShare) {
         final durationTimer = task.timers[0] as DurationTimer;
 
+        // Time is over, remove task.
         if (durationTimer.startDate != null && !shouldRun) {
           FlutterLogs.logInfo(LOG_TAG, "Task Service", "Removing task.");
 

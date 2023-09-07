@@ -76,8 +76,7 @@ class _TaskTileState extends State<TaskTile> with TaskLinkGenerationMixin {
 
     return PlatformListTile(
       title: Text(widget.task.name),
-      subtitle: widget.task.timers.length == 1 &&
-              widget.task.timers[0] is DurationTimer &&
+      subtitle: widget.task.isFiniteQuickShare &&
               (widget.task.timers[0] as DurationTimer).startDate != null
           ? Text(
               formatStartDate(

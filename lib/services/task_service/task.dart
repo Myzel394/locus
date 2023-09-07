@@ -137,10 +137,8 @@ class Task extends ChangeNotifier with LocationBase {
     );
   }
 
-  TaskCryptography get cryptography => TaskCryptography(
-        this,
-        _encryptionPassword,
-      );
+  TaskCryptography get cryptography =>
+      TaskCryptography(this, _encryptionPassword);
 
   TaskPublisher get publisher => TaskPublisher(this);
 
@@ -371,6 +369,13 @@ class Task extends ChangeNotifier with LocationBase {
         from: from,
         limit: limit,
       );
+
+  bool get isQuickShare => isInfiniteQuickShare || isFiniteQuickShare;
+
+  bool get isInfiniteQuickShare => deleteAfterRun && timers.isEmpty;
+
+  bool get isFiniteQuickShare =>
+      deleteAfterRun && timers.length == 1 && timers[0] is DurationTimer;
 
   @override
   void dispose() {

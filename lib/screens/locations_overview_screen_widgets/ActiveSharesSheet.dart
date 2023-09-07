@@ -160,8 +160,7 @@ class _ActiveSharesSheetState extends State<ActiveSharesSheet>
   Iterable<Task> get quickShareTasks {
     final taskService = context.read<TaskService>();
 
-    return taskService.tasks
-        .where((task) => task.deleteAfterRun && task.timers.length <= 1);
+    return taskService.tasks.where((task) => task.isQuickShare);
   }
 
   Future<bool> getAreSomeTasksRunning() async {
