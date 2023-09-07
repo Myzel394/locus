@@ -47,7 +47,9 @@ void runBackgroundLocatorTask(final LocationDto location) async {
     );
   }
 
-  await runBackgroundTask(locationData);
+  await runBackgroundTask(
+    locationData: locationData,
+  );
 
   FlutterLogs.logInfo(
     LOG_TAG,

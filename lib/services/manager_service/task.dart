@@ -5,9 +5,10 @@ import 'package:locus/services/manager_service/helpers.dart';
 import 'package:locus/services/settings_service/index.dart';
 import 'package:locus/utils/device/index.dart';
 
-Future<void> runBackgroundTask([
+Future<void> runBackgroundTask({
   final LocationPointService? locationData,
-]) async {
+  final bool force = false,
+}) async {
   FlutterLogs.logInfo(
     LOG_TAG,
     "Headless Task",
@@ -15,24 +16,29 @@ Future<void> runBackgroundTask([
   );
 
   final settings = await SettingsService.restore();
-  FlutterLogs.logInfo(
-    LOG_TAG,
-    "Headless Task",
-    "Checking battery saver.",
-  );
-  final isDeviceBatterySaverEnabled = await isBatterySaveModeEnabled();
 
-  if ((isDeviceBatterySaverEnabled || settings.alwaysUseBatterySaveMode) &&
-      settings.lastHeadlessRun != null &&
-      DateTime.now().difference(settings.lastHeadlessRun!).abs() <=
-          BATTERY_SAVER_ENABLED_MINIMUM_TIME_BETWEEN_HEADLESS_RUNS) {
-    // We don't want to run the headless task too often when the battery saver is enabled.
+  if (!force) {
     FlutterLogs.logInfo(
       LOG_TAG,
       "Headless Task",
-      "Battery saver mode is enabled and the last headless run was too recent. Skipping headless task.",
+      "Checking battery saver.",
     );
-    return;
+    final isDeviceBatterySaverEnabled = await isBatterySaveModeEnabled();
+
+    if ((isDeviceBatterySaverEnabled || settings.alwaysUseBatterySaveMode) &&
+        settings.lastHeadlessRun != null &&
+        DateTime.now().difference(settings.lastHeadlessRun!).abs() <=
+            BATTERY_SAVER_ENABLED_MINIMUM_TIME_BETWEEN_HEADLESS_RUNS) {
+      // We don't want to run the headless task too often when the battery saver is enabled.
+      FlutterLogs.logInfo(
+        LOG_TAG,
+        "Headless Task",
+        "Battery saver mode is enabled and the last headless run was too recent. Skipping headless task.",
+      );
+      return;
+    }
+  } else {
+    FlutterLogs.logInfo(LOG_TAG, "Headless Task", "Execution is being forced.");
   }
 
   FlutterLogs.logInfo(
