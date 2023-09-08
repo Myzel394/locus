@@ -23,10 +23,10 @@ import 'package:locus/screens/ImportTaskSheet.dart';
 import 'package:locus/screens/SettingsScreen.dart';
 import 'package:locus/screens/SharesOverviewScreen.dart';
 import 'package:locus/screens/locations_overview_screen_widgets/ActiveSharesSheet.dart';
+import 'package:locus/screens/locations_overview_screen_widgets/LocationFetchers.dart';
 import 'package:locus/screens/locations_overview_screen_widgets/OutOfBoundMarker.dart';
 import 'package:locus/screens/locations_overview_screen_widgets/ShareLocationSheet.dart';
 import 'package:locus/screens/locations_overview_screen_widgets/ViewLocationPopup.dart';
-import 'package:locus/screens/locations_overview_screen_widgets/view_location_fetcher.dart';
 import 'package:locus/services/manager_service/background_locator.dart';
 import 'package:locus/services/manager_service/helpers.dart';
 import 'package:locus/services/settings_service/SettingsMapLocation.dart';
@@ -89,7 +89,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
         AutomaticKeepAliveClientMixin,
         WidgetsBindingObserver,
         TickerProviderStateMixin {
-  late final ViewLocationFetcher _fetchers;
+  final _fetchers = LocationFetchers()..enableLocationsUpdates();
   MapController? flutterMapController;
   PopupController? flutterMapPopupController;
   apple_maps.AppleMapController? appleMapController;
@@ -143,7 +143,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     final settings = context.read<SettingsService>();
     final appUpdateService = context.read<AppUpdateService>();
 
-    _createLocationFetcher();
     _handleViewAlarmChecker();
     _handleNotifications();
 
@@ -152,25 +151,30 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
 
     WidgetsBinding.instance
       ..addObserver(this)
-      ..addPostFrameCallback((_) async {
+      ..addPostFrameCallback((_) {
         _setLocationFromSettings();
         _updateBackgroundListeners();
         initQuickActions(context);
         _initUniLinks();
         _updateLocaleToSettings();
         _showUpdateDialogIfRequired();
+        _initFetchers();
 
         taskService.checkup(logService);
 
-        _fetchers.addListener(_rebuild);
         appUpdateService.addListener(_rebuild);
         viewService.addListener(_handleViewServiceChange);
 
-        updateCurrentPosition(
-          askPermissions: false,
-          showErrorMessage: false,
-          goToPosition: true,
-        );
+        Geolocator.checkPermission().then((status) {
+          if ({LocationPermission.always, LocationPermission.whileInUse}
+              .contains(status)) {
+            updateCurrentPosition(
+              askPermissions: false,
+              showErrorMessage: false,
+              goToPosition: true,
+            );
+          }
+        });
       });
 
     if (settings.getMapProvider() == MapProvider.openStreetMap) {
@@ -224,11 +228,21 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     }
   }
 
+  void _initFetchers() {
+    final viewService = context.read<ViewService>();
+
+    _fetchers.addListener(_rebuild);
+
+    _fetchers.addAll(viewService.views);
+    _fetchers.fetchPreviewLocations();
+  }
+
   void _handleViewServiceChange() {
     final viewService = context.read<ViewService>();
     final newView = viewService.views.last;
 
-    _fetchers.addView(newView);
+    _fetchers.add(newView);
+    _fetchers.fetchPreviewLocations();
   }
 
   void _setLocationFromSettings() async {
@@ -253,10 +267,12 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     );
   }
 
-  List<LocationPointService> mergeLocationsIfRequired(
-    final TaskView view,
-  ) {
-    final locations = _fetchers.locations[view] ?? [];
+  List<LocationPointService> mergeLocationsIfRequired(final TaskView view) {
+    final locations = _fetchers.getLocations(view);
+
+    if (locations.isEmpty) {
+      return locations;
+    }
 
     if (showDetailedLocations && !disableShowDetailedLocations) {
       return locations;
@@ -271,15 +287,11 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
       distanceThreshold: LOCATION_MERGE_DISTANCE_THRESHOLD,
     );
 
+    return mergedLocations;
+
     _cachedMergedLocations[view] = mergedLocations;
 
     return mergedLocations;
-  }
-
-  void _createLocationFetcher() {
-    final viewService = context.read<ViewService>();
-
-    _fetchers = ViewLocationFetcher(viewService.views)..fetchLocations();
   }
 
   void _rebuild() {
@@ -776,16 +788,16 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
             .expand((element) => element)
             .toSet(),
         polylines: Set<apple_maps.Polyline>.from(
-          _fetchers.locations.entries
-              .where((entry) =>
-                  selectedViewID == null || entry.key.id == selectedViewID)
+          _fetchers.fetchers
+              .where((fetcher) =>
+                  selectedViewID == null || fetcher.view.id == selectedViewID)
               .map(
-            (entry) {
-              final view = entry.key;
+            (fetcher) {
+              final view = fetcher.view;
 
               return apple_maps.Polyline(
                 polylineId: apple_maps.PolylineId(view.id),
-                color: entry.key.color.withOpacity(0.9),
+                color: view.color.withOpacity(0.9),
                 width: 10,
                 jointType: apple_maps.JointType.round,
                 polylineCap: apple_maps.Cap.roundCap,
@@ -796,7 +808,8 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
                     selectedViewID = view.id;
                   });
                 },
-                points: mergeLocationsIfRequired(entry.key)
+                // TODO
+                points: mergeLocationsIfRequired(view)
                     .reversed
                     .map(
                       (location) => apple_maps.LatLng(
@@ -845,13 +858,13 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
         ),
         PolylineLayer(
           polylines: List<Polyline>.from(
-            _fetchers.locations.entries
-                .where((entry) =>
-                    selectedViewID == null || entry.key.id == selectedViewID)
+            _fetchers.fetchers
+                .where((fetcher) =>
+                    selectedViewID == null || fetcher.view.id == selectedViewID)
                 .map(
-              (entry) {
-                final view = entry.key;
-                final locations = mergeLocationsIfRequired(entry.key);
+              (fetcher) {
+                final view = fetcher.view;
+                final locations = mergeLocationsIfRequired(view);
 
                 return Polyline(
                   color: view.color.withOpacity(0.9),
@@ -901,9 +914,9 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
             markers: viewService.views
                 .where((view) =>
                     (selectedViewID == null || view.id == selectedViewID) &&
-                    _fetchers.locations[view]?.last != null)
+                    _fetchers.getLocations(view).isNotEmpty)
                 .map((view) {
-              final latestLocation = _fetchers.locations[view]!.last;
+              final latestLocation = _fetchers.getLocations(view).last;
 
               return Marker(
                 key: Key(view.id),
@@ -934,17 +947,17 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
 
   Widget buildOutOfBoundsMarkers() {
     return Stack(
-      children: _fetchers.views
-          .where((view) =>
-              (_fetchers.locations[view]?.isNotEmpty ?? false) &&
-              (selectedViewID == null || selectedViewID == view.id))
+      children: _fetchers.fetchers
+          .where((fetcher) =>
+              (selectedViewID == null || fetcher.view.id == selectedViewID) &&
+              fetcher.locations.isNotEmpty)
           .map(
-            (view) => OutOfBoundMarker(
-              lastViewLocation: _fetchers.locations[view]!.last,
+            (fetcher) => OutOfBoundMarker(
+              lastViewLocation: fetcher.locations.last,
               onTap: () {
-                showViewLocations(view);
+                showViewLocations(fetcher.view);
               },
-              view: view,
+              view: fetcher.view,
               updateStream: mapEventStream.stream,
               appleMapController: appleMapController,
               flutterMapController: flutterMapController,
@@ -965,12 +978,13 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
       return;
     }
 
-    final latestLocation = _fetchers.locations[view]?.last;
+    final locations = _fetchers.getLocations(view);
 
-    if (latestLocation == null) {
+    if (locations.isEmpty) {
       return;
     }
 
+    final latestLocation = locations.last;
     if (flutterMapController != null) {
       flutterMapController!.move(
         LatLng(latestLocation.latitude, latestLocation.longitude),
@@ -1208,15 +1222,12 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
       return null;
     }
 
-    if (_fetchers.locations[selectedView!] == null) {
+    final locations = _fetchers.getLocations(selectedView!);
+    if (locations.isEmpty) {
       return null;
     }
 
-    if (_fetchers.locations[selectedView!]!.isEmpty) {
-      return null;
-    }
-
-    return _fetchers.locations[selectedView!]!.last;
+    return locations.last;
   }
 
   void importLocation() {
@@ -1434,7 +1445,9 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
           buildMapActions(),
           ViewDetailsSheet(
             view: selectedView,
-            locations: _fetchers.locations[selectedView],
+            locations: selectedViewID == null
+                ? []
+                : _fetchers.getLocations(selectedView!),
             onGoToPosition: (position) {
               if (flutterMapController != null) {
                 flutterMapController!
