@@ -4,7 +4,7 @@ import 'package:locus/utils/theme.dart';
 import 'package:provider/provider.dart';
 
 import '../constants/spacing.dart';
-import '../services/settings_service.dart';
+import 'package:locus/services/settings_service/index.dart';
 
 class ModalSheetContent extends StatelessWidget {
   final String title;

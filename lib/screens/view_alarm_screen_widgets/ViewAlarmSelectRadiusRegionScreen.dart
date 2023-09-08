@@ -11,7 +11,7 @@ import 'package:locus/constants/spacing.dart';
 import 'package:locus/constants/values.dart';
 import 'package:locus/screens/view_alarm_screen_widgets/RadiusRegionMetaDataSheet.dart';
 import 'package:locus/services/location_alarm_service.dart';
-import 'package:locus/services/settings_service.dart';
+import 'package:locus/services/settings_service/index.dart';
 import 'package:locus/utils/helper_sheet.dart';
 import 'package:locus/utils/location/get-fallback-location.dart';
 import 'package:locus/utils/location/index.dart';

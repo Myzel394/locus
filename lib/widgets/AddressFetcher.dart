@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:locus/constants/values.dart';
-import 'package:locus/services/settings_service.dart';
+import 'package:locus/services/settings_service/index.dart';
 import 'package:provider/provider.dart';
 
 class AddressFetcher extends StatefulWidget {

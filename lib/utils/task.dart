@@ -3,11 +3,11 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+import 'package:locus/services/task_service/index.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 
-import '../services/settings_service.dart';
-import '../services/task_service.dart';
+import 'package:locus/services/settings_service/index.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 mixin TaskLinkGenerationMixin {
@@ -35,7 +35,7 @@ mixin TaskLinkGenerationMixin {
     final l10n = AppLocalizations.of(context);
     final settings = context.read<SettingsService>();
 
-    final url = await task.generateLink(
+    final url = await task.publisher.generateLink(
       settings.getServerHost(),
       onProgress: (progress) {
         if (taskLinkGenerationSnackbar != null) {

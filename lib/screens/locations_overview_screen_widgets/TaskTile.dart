@@ -3,7 +3,7 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart'
     hide PlatformListTile;
 import 'package:intl/intl.dart';
 import 'package:locus/screens/TaskDetailScreen.dart';
-import 'package:locus/services/task_service.dart';
+import 'package:locus/services/task_service/index.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:locus/services/timers_service.dart';
 import 'package:locus/utils/date.dart';
@@ -76,8 +76,7 @@ class _TaskTileState extends State<TaskTile> with TaskLinkGenerationMixin {
 
     return PlatformListTile(
       title: Text(widget.task.name),
-      subtitle: widget.task.timers.length == 1 &&
-              widget.task.timers[0] is DurationTimer &&
+      subtitle: widget.task.isFiniteQuickShare &&
               (widget.task.timers[0] as DurationTimer).startDate != null
           ? Text(
               formatStartDate(

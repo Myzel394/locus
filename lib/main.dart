@@ -9,17 +9,16 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:locus/App.dart';
 import 'package:locus/services/app_update_service.dart';
 import 'package:locus/services/log_service.dart';
-import 'package:locus/services/manager_service.dart';
-import 'package:locus/services/settings_service.dart';
-import 'package:locus/services/task_service.dart';
+import 'package:locus/services/manager_service/background_fetch.dart';
+import 'package:locus/services/settings_service/index.dart';
+import 'package:locus/services/task_service/index.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:provider/provider.dart';
 
 const storage = FlutterSecureStorage();
 
-final StreamController<
-    NotificationResponse> selectedNotificationsStream = StreamController
-    .broadcast();
+final StreamController<NotificationResponse> selectedNotificationsStream =
+    StreamController.broadcast();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -46,7 +45,8 @@ void main() async {
     isDebuggable: kDebugMode,
   );
 
-  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
   const initializationSettings = InitializationSettings(
     android: AndroidInitializationSettings("ic_launcher_foreground"),
     iOS: DarwinInitializationSettings(),

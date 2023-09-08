@@ -1,83 +1,29 @@
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:local_auth/local_auth.dart';
+import 'package:locus/api/get-address.dart';
 import 'package:locus/api/nostr-relays.dart';
 import 'package:locus/constants/app.dart';
 import 'package:locus/constants/values.dart';
+import 'package:locus/utils/cache.dart';
+import 'package:locus/utils/device/index.dart';
 import 'package:locus/utils/nostr/select-random-relays.dart';
+import 'package:locus/utils/platform.dart';
 
-import '../api/get-address.dart';
-import '../utils/cache.dart';
-import '../utils/device.dart';
-import '../utils/platform.dart';
+import 'SettingsMapLocation.dart';
+import 'enums.dart';
+import 'utils.dart';
 
 const STORAGE_KEY = "_app_settings";
 
 const storage = FlutterSecureStorage();
-
-enum MapProvider {
-  openStreetMap,
-  apple,
-}
-
-enum GeocoderProvider {
-  system,
-  geocodeMapsCo,
-  nominatim,
-}
-
-enum AndroidTheme {
-  materialYou,
-  miui,
-}
-
-enum HelperSheet {
-  radiusBasedAlarms,
-  taskShare,
-}
-
-// Selects a random provider from the list of available providers, not including
-// the system provider.
-GeocoderProvider selectRandomProvider() {
-  final providers = GeocoderProvider.values
-      .where((element) => element != GeocoderProvider.system)
-      .toList();
-
-  return providers[Random().nextInt(providers.length)];
-}
-
-class SettingsLastMapLocation {
-  final double latitude;
-  final double longitude;
-  final double accuracy;
-
-  const SettingsLastMapLocation({
-    required this.latitude,
-    required this.longitude,
-    required this.accuracy,
-  });
-
-  factory SettingsLastMapLocation.fromJSON(final Map<String, dynamic> data) =>
-      SettingsLastMapLocation(
-        latitude: data['latitude'] as double,
-        longitude: data['longitude'] as double,
-        accuracy: data['accuracy'] as double,
-      );
-
-  Map<String, dynamic> toJSON() =>
-      {
-        'latitude': latitude,
-        'longitude': longitude,
-        'accuracy': accuracy,
-      };
-}
 
 class SettingsService extends ChangeNotifier {
   String localeName;
@@ -86,6 +32,7 @@ class SettingsService extends ChangeNotifier {
   bool userHasSeenWelcomeScreen = false;
   bool requireBiometricAuthenticationOnStart = false;
   bool alwaysUseBatterySaveMode = false;
+  bool useRealtimeUpdates = false;
   String serverOrigin;
   List<String> _relays;
   AndroidTheme androidTheme;
@@ -117,12 +64,12 @@ class SettingsService extends ChangeNotifier {
     required this.alwaysUseBatterySaveMode,
     required this.serverOrigin,
     required this.currentAppVersion,
+    required this.useRealtimeUpdates,
     this.lastHeadlessRun,
     this.lastMapLocation,
     Set<String>? seenHelperSheets,
     List<String>? relays,
-  })
-      : _relays = relays ?? [],
+  })  : _relays = relays ?? [],
         _seenHelperSheets = seenHelperSheets ?? {};
 
   static Future<SettingsService> createDefault() async {
@@ -130,9 +77,9 @@ class SettingsService extends ChangeNotifier {
       automaticallyLookupAddresses: true,
       primaryColor: null,
       androidTheme:
-      await fetchIsMIUI() ? AndroidTheme.miui : AndroidTheme.materialYou,
+          await fetchIsMIUI() ? AndroidTheme.miui : AndroidTheme.materialYou,
       mapProvider:
-      isPlatformApple() ? MapProvider.apple : MapProvider.openStreetMap,
+          isPlatformApple() ? MapProvider.apple : MapProvider.openStreetMap,
       showHints: true,
       geocoderProvider: isSystemGeocoderAvailable()
           ? GeocoderProvider.system
@@ -146,6 +93,7 @@ class SettingsService extends ChangeNotifier {
       serverOrigin: "https://locus.cfd",
       lastMapLocation: null,
       currentAppVersion: CURRENT_APP_VERSION,
+      useRealtimeUpdates: true,
     );
   }
 
@@ -156,7 +104,7 @@ class SettingsService extends ChangeNotifier {
     return SettingsService(
       automaticallyLookupAddresses: data['automaticallyLoadLocation'],
       primaryColor:
-      data['primaryColor'] != null ? Color(data['primaryColor']) : null,
+          data['primaryColor'] != null ? Color(data['primaryColor']) : null,
       mapProvider: MapProvider.values[data['mapProvider']],
       relays: List<String>.from(data['relays'] ?? []),
       showHints: data['showHints'],
@@ -166,7 +114,7 @@ class SettingsService extends ChangeNotifier {
       userHasSeenWelcomeScreen: data['userHasSeenWelcomeScreen'],
       seenHelperSheets: Set<String>.from(data['seenHelperSheets'] ?? {}),
       requireBiometricAuthenticationOnStart:
-      data['requireBiometricAuthenticationOnStart'],
+          data['requireBiometricAuthenticationOnStart'],
       alwaysUseBatterySaveMode: data['alwaysUseBatterySaveMode'],
       lastHeadlessRun: data['lastHeadlessRun'] != null
           ? DateTime.parse(data['lastHeadlessRun'])
@@ -176,6 +124,7 @@ class SettingsService extends ChangeNotifier {
           ? SettingsLastMapLocation.fromJSON(data['lastMapLocation'])
           : null,
       currentAppVersion: data['currentAppVersion'],
+      useRealtimeUpdates: data['useRealtimeUpdates'],
     );
   }
 
@@ -211,17 +160,20 @@ class SettingsService extends ChangeNotifier {
       "userHasSeenWelcomeScreen": userHasSeenWelcomeScreen,
       "seenHelperSheets": _seenHelperSheets.toList(),
       "requireBiometricAuthenticationOnStart":
-      requireBiometricAuthenticationOnStart,
+          requireBiometricAuthenticationOnStart,
       "alwaysUseBatterySaveMode": alwaysUseBatterySaveMode,
       "lastHeadlessRun": lastHeadlessRun?.toIso8601String(),
       "serverOrigin": serverOrigin,
       "lastMapLocation": lastMapLocation?.toJSON(),
       "currentAppVersion": currentAppVersion,
+      "useRealtimeUpdates": useRealtimeUpdates,
     };
   }
 
-  Future<String> getAddress(final double latitude,
-      final double longitude,) async {
+  Future<String> getAddress(
+    final double latitude,
+    final double longitude,
+  ) async {
     final providers = [
       getGeocoderProvider(),
       ...GeocoderProvider.values
@@ -245,16 +197,19 @@ class SettingsService extends ChangeNotifier {
           case GeocoderProvider.nominatim:
             return await getAddressNominatim(latitude, longitude);
         }
-      } catch (e) {
-        print("Failed to get address from $provider: $e");
+      } catch (error) {
+        FlutterLogs.logError(
+          LOG_TAG,
+          "SettingsService",
+          "Failed to get address from $provider: $error",
+        );
       }
     }
 
     throw Exception("Failed to get address from any provider");
   }
 
-  Future<void> save() =>
-      storage.write(
+  Future<void> save() => storage.write(
         key: STORAGE_KEY,
         value: jsonEncode(toJSON()),
       );
@@ -275,13 +230,9 @@ class SettingsService extends ChangeNotifier {
 
     // Return system default
     if (isCupertino(context)) {
-      return CupertinoTheme
-          .of(context)
-          .primaryColor;
+      return CupertinoTheme.of(context).primaryColor;
     } else {
-      return Theme
-          .of(context)
-          .primaryColor;
+      return Theme.of(context).primaryColor;
     }
   }
 
@@ -313,8 +264,8 @@ class SettingsService extends ChangeNotifier {
     }
 
     final relaysData = await withCache(getNostrRelays, "relays")();
-    final availableRelays = List<String>.from(
-        relaysData["relays"] as List<dynamic>);
+    final availableRelays =
+        List<String>.from(relaysData["relays"] as List<dynamic>);
     final relays = await selectRandomRelays(availableRelays);
 
     return relays;
@@ -365,6 +316,13 @@ class SettingsService extends ChangeNotifier {
 
   void setAlwaysUseBatterySaveMode(final bool value) {
     alwaysUseBatterySaveMode = value;
+    notifyListeners();
+  }
+
+  bool getUseRealtimeUpdates() => useRealtimeUpdates;
+
+  void setUseRealtimeUpdates(final bool value) {
+    useRealtimeUpdates = value;
     notifyListeners();
   }
 

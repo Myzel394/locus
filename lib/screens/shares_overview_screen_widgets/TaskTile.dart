@@ -4,7 +4,7 @@ import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart'
     hide PlatformListTile;
 import 'package:locus/constants/values.dart';
-import 'package:locus/services/task_service.dart';
+import 'package:locus/services/task_service/index.dart';
 import 'package:locus/utils/PageRoute.dart';
 import 'package:provider/provider.dart';
 
@@ -72,7 +72,7 @@ class _TaskTileState extends State<TaskTile> with TaskLinkGenerationMixin {
                           );
                           final nextEndDate = widget.task.nextEndDate();
 
-                          widget.task.publishCurrentPosition();
+                          widget.task.publisher.publishCurrentPosition();
 
                           if (!mounted) {
                             return;

@@ -9,7 +9,7 @@ import 'package:locus/constants/spacing.dart';
 import 'package:locus/init_quick_actions.dart';
 import 'package:locus/screens/LocationsOverviewScreen.dart';
 import 'package:locus/screens/welcome_screen_widgets/SimpleContinuePage.dart';
-import 'package:locus/services/settings_service.dart';
+import 'package:locus/services/settings_service/index.dart';
 import 'package:locus/utils/PageRoute.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';

@@ -10,7 +10,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 
 import 'package:latlong2/latlong.dart';
-import 'package:locus/services/settings_service.dart';
+import 'package:locus/services/settings_service/index.dart';
 import 'package:locus/utils/location/get-fallback-location.dart';
 import 'package:locus/utils/permissions/has-granted.dart';
 import 'package:locus/widgets/Paper.dart';

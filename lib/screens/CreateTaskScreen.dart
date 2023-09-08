@@ -9,7 +9,7 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart'
     hide PlatformListTile;
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/screens/create_task_screen_widgets/ExampleTasksRoulette.dart';
-import 'package:locus/services/task_service.dart';
+import 'package:locus/services/task_service/index.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/MIUISelectField.dart';
 import 'package:locus/widgets/RelaySelectSheet.dart';
@@ -21,7 +21,7 @@ import 'package:provider/provider.dart';
 
 import '../models/log.dart';
 import '../services/log_service.dart';
-import '../services/settings_service.dart';
+import 'package:locus/services/settings_service/index.dart';
 import '../widgets/PlatformListTile.dart';
 import '../widgets/WarningText.dart';
 

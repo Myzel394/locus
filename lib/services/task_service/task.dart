@@ -1,36 +1,25 @@
-import 'dart:collection';
 import 'dart:convert';
 
 import 'package:cryptography/cryptography.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_logs/flutter_logs.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:locus/api/nostr-events.dart';
 import 'package:locus/constants/values.dart';
-import 'package:locus/models/log.dart';
-import 'package:locus/services/location_base.dart';
-import 'package:locus/services/log_service.dart';
+import 'package:locus/services/location_point_service.dart';
+import 'package:locus/services/task_service/task_cryptography.dart';
+import 'package:locus/services/task_service/task_publisher.dart';
 import 'package:locus/utils/cryptography/encrypt.dart';
 import 'package:locus/utils/cryptography/utils.dart';
 import 'package:locus/utils/location/index.dart';
 import 'package:nostr/nostr.dart';
 import 'package:uuid/uuid.dart';
 
-import '../api/get-locations.dart' as get_locations_api;
-import 'location_point_service.dart';
-import 'timers_service.dart';
-
-const storage = FlutterSecureStorage();
-const KEY = "tasks_settings";
-const SAME_TIME_THRESHOLD = Duration(minutes: 15);
-
-enum TaskLinkPublishProgress {
-  startsSoon,
-  encrypting,
-  publishing,
-  creatingURI,
-  done,
-}
+import '../../api/get-locations.dart' as get_locations_api;
+import '../timers_service.dart';
+import 'constants.dart';
+import 'enums.dart';
+import 'helpers.dart';
+import 'mixins.dart';
 
 const uuid = Uuid();
 
@@ -48,6 +37,12 @@ class Task extends ChangeNotifier with LocationBase {
   String name;
   bool deleteAfterRun;
 
+  // List of location points that need to be published yet
+  // To avoid infinite retries, we only try to publish each location point a
+  // certain amount of time
+  // This ´Map` stores the amount of tries for each location point
+  late final Map<LocationPointService, int> outstandingLocations;
+
   Task({
     required this.id,
     required this.name,
@@ -56,8 +51,10 @@ class Task extends ChangeNotifier with LocationBase {
     required this.nostrPrivateKey,
     required this.relays,
     required this.timers,
+    Map<LocationPointService, int>? outstandingLocations,
     this.deleteAfterRun = false,
-  }) : _encryptionPassword = encryptionPassword;
+  })  : _encryptionPassword = encryptionPassword,
+        outstandingLocations = outstandingLocations ?? {};
 
   factory Task.fromJSON(Map<String, dynamic> json) {
     return Task(
@@ -78,6 +75,13 @@ class Task extends ChangeNotifier with LocationBase {
             throw Exception("Unknown timer type");
         }
       })),
+      outstandingLocations: Map<String, int>.from(json["outstandingLocations"])
+          .map<LocationPointService, int>(
+        (rawLocationData, tries) => MapEntry(
+          LocationPointService.fromJSON(jsonDecode(rawLocationData)),
+          tries,
+        ),
+      ),
     );
   }
 
@@ -98,6 +102,12 @@ class Task extends ChangeNotifier with LocationBase {
       "relays": relays,
       "timers": timers.map((timer) => timer.toJSON()).toList(),
       "deleteAfterRun": deleteAfterRun.toString(),
+      "outstandingLocations": outstandingLocations.map(
+        (locationData, tries) => MapEntry(
+          locationData.toJSON(),
+          tries,
+        ),
+      ),
     };
   }
 
@@ -126,6 +136,11 @@ class Task extends ChangeNotifier with LocationBase {
       deleteAfterRun: deleteAfterRun,
     );
   }
+
+  TaskCryptography get cryptography =>
+      TaskCryptography(this, _encryptionPassword);
+
+  TaskPublisher get publisher => TaskPublisher(this);
 
   Future<bool> isRunning() async {
     final status = await getExecutionStatus();
@@ -338,90 +353,6 @@ class Task extends ChangeNotifier with LocationBase {
     notifyListeners();
   }
 
-  Future<String> generateViewKeyContent() async {
-    return jsonEncode({
-      "encryptionPassword": await _encryptionPassword.extractBytes(),
-      "nostrPublicKey": nostrPublicKey,
-      "relays": relays,
-    });
-  }
-
-  // Generates a link that can be used to retrieve the task
-  // This link is primarily used for sharing the task to the web app
-  // Here's the process:
-  // 1. Generate a random password
-  // 2. Encrypt the task with the password
-  // 3. Publish the encrypted task to a random Nostr relay
-  // 4. Generate a link that contains the password and the Nostr relay ID
-  Future<String> generateLink(
-    final String host, {
-    final void Function(TaskLinkPublishProgress progress)? onProgress,
-  }) async {
-    onProgress?.call(TaskLinkPublishProgress.startsSoon);
-
-    final message = await generateViewKeyContent();
-
-    onProgress?.call(TaskLinkPublishProgress.encrypting);
-
-    final passwordSecretKey = await generateSecretKey();
-    final password = await passwordSecretKey.extractBytes();
-    final cipherText = await encryptUsingAES(message, passwordSecretKey);
-
-    onProgress?.call(TaskLinkPublishProgress.publishing);
-
-    final manager = NostrEventsManager(
-      relays: relays,
-      privateKey: nostrPrivateKey,
-    );
-    final publishedEvent = await manager.publishMessage(cipherText, kind: 1001);
-
-    onProgress?.call(TaskLinkPublishProgress.creatingURI);
-
-    final parameters = {
-      // Password
-      "p": password,
-      // Key
-      "k": nostrPublicKey,
-      // ID
-      "i": publishedEvent.id,
-      // Relay
-      "r": relays,
-    };
-
-    final fragment = base64Url.encode(jsonEncode(parameters).codeUnits);
-    final uri = Uri(
-      scheme: "https",
-      host: host,
-      path: "/",
-      fragment: fragment,
-    );
-
-    onProgress?.call(TaskLinkPublishProgress.done);
-    passwordSecretKey.destroy();
-
-    return uri.toString();
-  }
-
-  Future<void> publishLocation(
-    final LocationPointService locationPoint,
-  ) async {
-    final eventManager = NostrEventsManager.fromTask(this);
-
-    final rawMessage = jsonEncode(locationPoint.toJSON());
-    final message = await encryptUsingAES(rawMessage, _encryptionPassword);
-
-    await eventManager.publishMessage(message);
-  }
-
-  Future<LocationPointService> publishCurrentPosition() async {
-    final position = await getCurrentPosition();
-    final locationPoint = await LocationPointService.fromPosition(position);
-
-    await publishLocation(locationPoint);
-
-    return locationPoint;
-  }
-
   @override
   VoidCallback getLocations({
     required void Function(LocationPointService) onLocationFetched,
@@ -439,222 +370,17 @@ class Task extends ChangeNotifier with LocationBase {
         limit: limit,
       );
 
+  bool get isQuickShare => isInfiniteQuickShare || isFiniteQuickShare;
+
+  bool get isInfiniteQuickShare => deleteAfterRun && timers.isEmpty;
+
+  bool get isFiniteQuickShare =>
+      deleteAfterRun && timers.length == 1 && timers[0] is DurationTimer;
+
   @override
   void dispose() {
     _encryptionPassword.destroy();
 
     super.dispose();
   }
-}
-
-class TaskService extends ChangeNotifier {
-  final List<Task> _tasks;
-
-  TaskService({
-    required List<Task> tasks,
-  }) : _tasks = tasks;
-
-  UnmodifiableListView<Task> get tasks => UnmodifiableListView(_tasks);
-
-  static Future<TaskService> restore() async {
-    final rawTasks = await storage.read(key: KEY);
-
-    if (rawTasks == null) {
-      return TaskService(
-        tasks: [],
-      );
-    }
-
-    return TaskService(
-      tasks: List<Task>.from(
-        List<Map<String, dynamic>>.from(
-          jsonDecode(rawTasks),
-        ).map(
-          Task.fromJSON,
-        ),
-      ).toList(),
-    );
-  }
-
-  Future<void> save() async {
-    FlutterLogs.logInfo(
-      LOG_TAG,
-      "Task Service",
-      "Saving tasks...",
-    );
-
-    // await all `toJson` functions
-    final data = await Future.wait<Map<String, dynamic>>(
-      _tasks.map(
-        (task) => task.toJSON(),
-      ),
-    );
-
-    await storage.write(key: KEY, value: jsonEncode(data));
-    FlutterLogs.logInfo(
-      LOG_TAG,
-      "Task Service",
-      "Saved tasks successfully!",
-    );
-  }
-
-  Task getByID(final String id) {
-    return _tasks.firstWhere((task) => task.id == id);
-  }
-
-  void add(Task task) {
-    _tasks.add(task);
-
-    notifyListeners();
-  }
-
-  void remove(final Task task) {
-    task.stopExecutionImmediately();
-    _tasks.remove(task);
-
-    notifyListeners();
-  }
-
-  void forceListenerUpdate() {
-    notifyListeners();
-  }
-
-  void update(final Task task) {
-    final index = _tasks.indexWhere((element) => element.id == task.id);
-
-    _tasks[index] = task;
-
-    notifyListeners();
-    save();
-  }
-
-  // Does a general check up state of the task.
-  // Checks if the task should be running / should be deleted etc.
-  Future<void> checkup(final LogService logService) async {
-    FlutterLogs.logInfo(LOG_TAG, "Task Service", "Doing checkup...");
-
-    final tasksToRemove = <Task>{};
-
-    for (final task in tasks) {
-      final isRunning = await task.isRunning();
-      final shouldRun = await task.shouldRunNow();
-      final isQuickShare = task.deleteAfterRun &&
-          task.timers.length == 1 &&
-          task.timers[0] is DurationTimer;
-
-      if (isQuickShare) {
-        final durationTimer = task.timers[0] as DurationTimer;
-
-        if (durationTimer.startDate != null && !shouldRun) {
-          FlutterLogs.logInfo(LOG_TAG, "Task Service", "Removing task.");
-
-          tasksToRemove.add(task);
-        }
-      } else {
-        if ((!task.isInfinite() && task.nextEndDate() == null)) {
-          FlutterLogs.logInfo(LOG_TAG, "Task Service", "Removing task.");
-
-          tasksToRemove.add(task);
-        } else if (!shouldRun && isRunning) {
-          FlutterLogs.logInfo(LOG_TAG, "Task Service", "Stopping task.");
-          await task.stopExecutionImmediately();
-
-          await logService.addLog(
-            Log.taskStatusChanged(
-              initiator: LogInitiator.system,
-              taskId: task.id,
-              taskName: task.name,
-              active: false,
-            ),
-          );
-        } else if (shouldRun && !isRunning) {
-          FlutterLogs.logInfo(LOG_TAG, "Task Service", "Start task.");
-          await task.startExecutionImmediately();
-
-          await logService.addLog(
-            Log.taskStatusChanged(
-              initiator: LogInitiator.system,
-              taskId: task.id,
-              taskName: task.name,
-              active: true,
-            ),
-          );
-        }
-      }
-    }
-
-    for (final task in tasksToRemove) {
-      remove(task);
-    }
-
-    await save();
-
-    FlutterLogs.logInfo(LOG_TAG, "Task Service", "Checkup done.");
-  }
-
-  Stream<Task> getRunningTasks() async* {
-    for (final task in tasks) {
-      if (await task.isRunning()) {
-        yield task;
-      }
-    }
-  }
-}
-
-class TaskExample {
-  final String name;
-  final List<TaskRuntimeTimer> timers;
-  final bool realtime;
-
-  const TaskExample({
-    required this.name,
-    required this.timers,
-    this.realtime = false,
-  });
-}
-
-DateTime? findNextStartDate(final List<TaskRuntimeTimer> timers,
-    {final DateTime? startDate, final bool onlyFuture = true}) {
-  final now = startDate ?? DateTime.now();
-
-  final nextDates = timers
-      .map((timer) => timer.nextStartDate(now))
-      .where((date) => date != null && (date.isAfter(now) || date == now))
-      .toList(growable: false);
-
-  if (nextDates.isEmpty) {
-    return null;
-  }
-
-  // Find earliest date
-  nextDates.sort();
-  return nextDates.first;
-}
-
-DateTime? findNextEndDate(
-  final List<TaskRuntimeTimer> timers, {
-  final DateTime? startDate,
-}) {
-  final now = startDate ?? DateTime.now();
-  final nextDates = List<DateTime>.from(
-    timers.map((timer) => timer.nextEndDate(now)).where((date) => date != null),
-  )..sort();
-
-  if (nextDates.isEmpty) {
-    return null;
-  }
-
-  DateTime endDate = nextDates.first;
-
-  for (final date in nextDates.sublist(1)) {
-    final nextStartDate = findNextStartDate(timers, startDate: date);
-    if (nextStartDate == null ||
-        nextStartDate.difference(date).inMinutes.abs() > 15) {
-      // No next start date found or the difference is more than 15 minutes, so this is the last date
-      break;
-    }
-    endDate = date;
-  }
-
-  return endDate;
 }

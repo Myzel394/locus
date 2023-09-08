@@ -6,6 +6,7 @@ import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:locus/constants/values.dart';
+import 'package:locus/services/settings_service/index.dart';
 import 'package:locus/services/timers_service.dart';
 import 'package:locus/utils/date.dart';
 import 'package:locus/utils/theme.dart';
@@ -17,8 +18,7 @@ import 'package:locus/widgets/ModalSheetContent.dart';
 import 'package:locus/widgets/PlatformRadioTile.dart';
 import 'package:provider/provider.dart';
 
-import '../../services/settings_service.dart';
-import '../../services/task_service.dart';
+import '../../services/task_service/index.dart';
 
 enum ShareType {
   untilTurnOff,

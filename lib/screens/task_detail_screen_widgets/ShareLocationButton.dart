@@ -10,13 +10,13 @@ import 'package:locus/constants/app.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/constants/values.dart';
 import 'package:locus/screens/task_detail_screen_widgets/SendViewByBluetooth.dart';
-import 'package:locus/services/task_service.dart';
+import 'package:locus/services/settings_service/index.dart';
+import 'package:locus/services/task_service/index.dart';
 import 'package:locus/widgets/SingularElementDialog.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
 
-import '../../services/settings_service.dart';
 import '../../utils/file.dart';
 import '../../utils/theme.dart';
 
@@ -37,7 +37,8 @@ class _ShareLocationButtonState extends State<ShareLocationButton> {
 
   Future<File> _createTempViewKeyFile() async {
     return createTempFile(
-      const Utf8Encoder().convert(await widget.task.generateViewKeyContent()),
+      const Utf8Encoder()
+          .convert(await widget.task.cryptography.generateViewKeyContent()),
       name: "viewkey.locus.json",
     );
   }
@@ -114,7 +115,8 @@ class _ShareLocationButtonState extends State<ShareLocationButton> {
     try {
       switch (shouldShare) {
         case "qr":
-          final url = await widget.task.generateLink(settings.getServerHost());
+          final url = await widget.task.publisher
+              .generateLink(settings.getServerHost());
 
           if (!mounted) {
             return;
@@ -156,7 +158,8 @@ class _ShareLocationButtonState extends State<ShareLocationButton> {
           );
           break;
         case "link":
-          final url = await widget.task.generateLink(settings.getServerHost());
+          final url = await widget.task.publisher
+              .generateLink(settings.getServerHost());
 
           await Share.share(
             url,
@@ -164,7 +167,7 @@ class _ShareLocationButtonState extends State<ShareLocationButton> {
           );
           break;
         case "bluetooth":
-          final data = await widget.task.generateViewKeyContent();
+          final data = await widget.task.cryptography.generateViewKeyContent();
 
           if (mounted) {
             await showPlatformModalSheet(

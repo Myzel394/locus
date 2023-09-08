@@ -9,7 +9,7 @@ import 'package:locus/utils/permissions/has-granted.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
-import '../services/settings_service.dart';
+import 'package:locus/services/settings_service/index.dart';
 import '../utils/theme.dart';
 
 mixin RequestNotificationPermissionMixin {
@@ -34,60 +34,64 @@ mixin RequestNotificationPermissionMixin {
     final hasGranted = await showPlatformDialog(
       context: context,
       barrierDismissible: true,
-      builder: (context) => PlatformAlertDialog(
-        title: Text(l10n.permissions_notification_askPermission_title),
-        material: (_, __) => MaterialAlertDialogData(
-          icon: settings.isMIUI()
-              ? const Icon(CupertinoIcons.bell_fill)
-              : const Icon(Icons.notifications_rounded),
-        ),
-        content: Text(l10n.permissions_notification_askPermission_message),
-        actions: createCancellableDialogActions(
-          context,
-          [
-            PlatformDialogAction(
-              material: (_, __) => MaterialDialogActionData(
-                icon: settings.isMIUI()
-                    ? null
-                    : const Icon(Icons.check_circle_outline_rounded),
-              ),
-              child: Text(
-                  l10n.permissions_location_askPermission_action_grant_label),
-              onPressed: () async {
-                late final bool? success;
+      builder: (context) =>
+          PlatformAlertDialog(
+            title: Text(l10n.permissions_notification_askPermission_title),
+            material: (_, __) =>
+                MaterialAlertDialogData(
+                  icon: settings.isMIUI()
+                      ? const Icon(CupertinoIcons.bell_fill)
+                      : const Icon(Icons.notifications_rounded),
+                ),
+            content: Text(l10n.permissions_notification_askPermission_message),
+            actions: createCancellableDialogActions(
+              context,
+              [
+                PlatformDialogAction(
+                  material: (_, __) =>
+                      MaterialDialogActionData(
+                        icon: settings.isMIUI()
+                            ? null
+                            : const Icon(Icons.check_circle_outline_rounded),
+                      ),
+                  child: Text(
+                      l10n
+                          .permissions_location_askPermission_action_grant_label),
+                  onPressed: () async {
+                    late final bool? success;
 
-                if (Platform.isAndroid) {
-                  success = await notificationsPlugins
-                      .resolvePlatformSpecificImplementation<
+                    if (Platform.isAndroid) {
+                      success = await notificationsPlugins
+                          .resolvePlatformSpecificImplementation<
                           AndroidFlutterLocalNotificationsPlugin>()
-                      ?.requestPermission();
-                } else {
-                  success = await notificationsPlugins
-                      .resolvePlatformSpecificImplementation<
+                          ?.requestPermission();
+                    } else {
+                      success = await notificationsPlugins
+                          .resolvePlatformSpecificImplementation<
                           IOSFlutterLocalNotificationsPlugin>()
-                      ?.requestPermissions(
+                          ?.requestPermissions(
                         alert: true,
                         badge: true,
                         sound: true,
                       );
-                }
+                    }
 
-                if (!context.mounted) {
-                  return;
-                }
+                    if (!context.mounted) {
+                      return;
+                    }
 
-                if (success == true) {
-                  Navigator.of(context).pop(true);
-                  return;
-                } else {
-                  Navigator.of(context).pop(false);
-                  return;
-                }
-              },
-            )
-          ],
-        ),
-      ),
+                    if (success == true) {
+                      Navigator.of(context).pop(true);
+                      return;
+                    } else {
+                      Navigator.of(context).pop(false);
+                      return;
+                    }
+                  },
+                )
+              ],
+            ),
+          ),
     );
 
     if (hasGranted == true) {
@@ -107,35 +111,40 @@ mixin RequestNotificationPermissionMixin {
     final settingsResult = await showPlatformDialog(
       context: context,
       barrierDismissible: true,
-      builder: (context) => PlatformAlertDialog(
-        material: (_, __) => MaterialAlertDialogData(
-          icon: settings.getAndroidTheme() == AndroidTheme.miui
-              ? const Icon(CupertinoIcons.exclamationmark_triangle_fill)
-              : const Icon(Icons.warning_rounded),
-        ),
-        title: Text(l10n.permissions_openSettings_failed_title),
-        content: Text(l10n.permissions_notification_permissionDenied_message),
-        actions: createCancellableDialogActions(
-          context,
-          [
-            PlatformDialogAction(
-              material: (_, __) => MaterialDialogActionData(
-                icon: settings.isMIUI() ? null : const Icon(Icons.settings),
-              ),
-              child: Text(l10n.permissions_openSettings_label),
-              onPressed: () async {
-                final openedSettingsSuccessfully = await openAppSettings();
+      builder: (context) =>
+          PlatformAlertDialog(
+            material: (_, __) =>
+                MaterialAlertDialogData(
+                  icon: settings.getAndroidTheme() == AndroidTheme.miui
+                      ? const Icon(CupertinoIcons.exclamationmark_triangle_fill)
+                      : const Icon(Icons.warning_rounded),
+                ),
+            title: Text(l10n.permissions_openSettings_failed_title),
+            content: Text(
+                l10n.permissions_notification_permissionDenied_message),
+            actions: createCancellableDialogActions(
+              context,
+              [
+                PlatformDialogAction(
+                  material: (_, __) =>
+                      MaterialDialogActionData(
+                        icon: settings.isMIUI() ? null : const Icon(
+                            Icons.settings),
+                      ),
+                  child: Text(l10n.permissions_openSettings_label),
+                  onPressed: () async {
+                    final openedSettingsSuccessfully = await openAppSettings();
 
-                if (!context.mounted) {
-                  return;
-                }
+                    if (!context.mounted) {
+                      return;
+                    }
 
-                Navigator.of(context).pop(openedSettingsSuccessfully);
-              },
-            )
-          ],
-        ),
-      ),
+                    Navigator.of(context).pop(openedSettingsSuccessfully);
+                  },
+                )
+              ],
+            ),
+          ),
     );
 
     if (!mounted) {
@@ -151,17 +160,18 @@ mixin RequestNotificationPermissionMixin {
     if (settingsResult == false) {
       await showPlatformDialog(
         context: context,
-        builder: (context) => PlatformAlertDialog(
-          title: Text(l10n.permissions_openSettings_failed_title),
-          content: Text(l10n
-              .permissions_notification_permissionDenied_settingsNotOpened_message),
-          actions: [
-            PlatformDialogAction(
-              child: Text(l10n.closeNeutralAction),
-              onPressed: () => Navigator.of(context).pop(),
-            )
-          ],
-        ),
+        builder: (context) =>
+            PlatformAlertDialog(
+              title: Text(l10n.permissions_openSettings_failed_title),
+              content: Text(l10n
+                  .permissions_notification_permissionDenied_settingsNotOpened_message),
+              actions: [
+                PlatformDialogAction(
+                  child: Text(l10n.closeNeutralAction),
+                  onPressed: () => Navigator.of(context).pop(),
+                )
+              ],
+            ),
       );
     }
 

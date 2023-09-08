@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:background_locator_2/location_dto.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:battery_plus/battery_plus.dart';
 import 'package:cryptography/cryptography.dart';
@@ -59,6 +60,41 @@ class LocationPointService {
         accuracy: accuracy,
       );
 
+  static Future<LocationPointService> fromLocationDto(
+    final LocationDto locationDto, [
+    final bool addBatteryInfo = true,
+  ]) async {
+    BatteryInfo? batteryInfo;
+
+    if (addBatteryInfo) {
+      try {
+        batteryInfo = await BatteryInfo.fromCurrent();
+      } catch (error) {
+        if (error is PlatformException) {
+          // Battery level is unavailable (probably iOS simulator)
+        } else {
+          rethrow;
+        }
+      }
+    }
+
+    return LocationPointService(
+      id: uuid.v4(),
+      // unix time to DateTime
+      createdAt: DateTime.fromMillisecondsSinceEpoch(locationDto.time.toInt()),
+      accuracy: locationDto.accuracy,
+      latitude: locationDto.latitude,
+      longitude: locationDto.longitude,
+      altitude: locationDto.altitude,
+      speed: locationDto.speed,
+      speedAccuracy: locationDto.speedAccuracy,
+      heading: locationDto.heading,
+      headingAccuracy: null,
+      batteryLevel: batteryInfo?.batteryLevel,
+      batteryState: batteryInfo?.batteryState,
+    );
+  }
+
   static LocationPointService fromJSON(Map<String, dynamic> json) {
     return LocationPointService(
       id: json["id"],
@@ -100,14 +136,10 @@ class LocationPointService {
   static Future<LocationPointService> fromPosition(
     final Position position,
   ) async {
-    double? batteryLevel;
-    BatteryState? batteryState;
+    BatteryInfo? batteryInfo;
 
     try {
-      final battery = Battery();
-
-      batteryLevel = (await battery.batteryLevel) / 100;
-      batteryState = await battery.batteryState;
+      batteryInfo = await BatteryInfo.fromCurrent();
     } catch (error) {
       if (error is PlatformException) {
         // Battery level is unavailable (probably iOS simulator)
@@ -126,8 +158,8 @@ class LocationPointService {
       speed: position.speed,
       speedAccuracy: position.speedAccuracy,
       heading: position.heading,
-      batteryLevel: batteryLevel,
-      batteryState: batteryState,
+      batteryLevel: batteryInfo?.batteryLevel,
+      batteryState: batteryInfo?.batteryState,
     );
   }
 
@@ -199,4 +231,23 @@ class LocationPointService {
         batteryState: batteryState ?? this.batteryState,
         isCopy: true,
       );
+}
+
+class BatteryInfo {
+  final double batteryLevel;
+  final BatteryState batteryState;
+
+  const BatteryInfo({
+    required this.batteryLevel,
+    required this.batteryState,
+  });
+
+  static Future<BatteryInfo> fromCurrent() async {
+    final battery = Battery();
+
+    return BatteryInfo(
+      batteryLevel: (await battery.batteryLevel) / 100,
+      batteryState: (await battery.batteryState),
+    );
+  }
 }

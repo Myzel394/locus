@@ -253,10 +253,10 @@
   "sharesOverviewScreen_importTask_importLabel": "Import",
   "locationsOverview_viewSelection_all": "Show all locations",
   "locationsOverview_activeShares_amount": "{count, plural, =0{No active shares} =1{One share active} other{{count} shares active}}",
-  "locationsOverview_mapAction_goToCurrentPosition": "Go to current position",
-  "locationsOverview_mapAction_alignNorth": "Align North",
   "locationsOverview_mapAction_detailedLocations_show": "Show detailed locations",
   "locationsOverview_mapAction_detailedLocations_hide": "Merge nearby locations",
+  "mapAction_goToCurrentPosition": "Go to current position",
+  "mapAction_alignNorth": "Align North",
   "createTask_title": "Define a name for your Share",
   "createTask_fields_name_label": "Name",
   "createTask_sameTaskNameAlreadyExists": "A Share with this name already exists. You can create the Share, but you will have two Shares with the same name.",
@@ -439,6 +439,11 @@
   "settingsScreen_settings_mapProvider_label": "Map Provider",
   "settingsScreen_settings_mapProvider_apple": "Apple Maps",
   "settingsScreen_settings_mapProvider_openStreetMap": "OpenStreetMap",
+  "settingsScreen_settings_useRealtimeUpdates_label": "Update in real-time",
+  "settingsScreen_settings_useRealtimeUpdates_description": "If enabled, Locus will always update your location in real-time. This means that your location will be updated even if you don't have the app open. This will use more battery. However, as a location sharing app, this is strongly recommended. Setting this off, Locus will only occasionally update your location in the background. This setting is only recommended for people who regularly share their location, experience battery drain and only need to know occasional location updates.",
+  "settingsScreen_settings_useRealtimeUpdates_dialog_title": "Are you sure you want to disable real-time updates?",
+  "settingsScreen_settings_useRealtimeUpdates_dialog_message": "It is strongly recommended to keep this setting enabled! Your location will only be occasionally updated if you disable real-time updates!",
+  "settingsScreen_settings_useRealtimeUpdates_dialog_confirm": "Disable",
   "settingsScreen_settings_showHints_label": "Show Hints",
   "settingsScreen_settings_showHints_description": "Show occasional hints on how to get the most out of Locus",
   "settingsScreen_settings_relays_label": "Default Relays",
@@ -550,6 +555,9 @@
   "@backgroundLocationFetch_text": {
     "description": "Keep this very short"
   },
+  "backgroundLocator_title": "Updating location in real-time",
+  "backgroundLocator_text": "Locus is updating your location in real-time.",
+  "backgroundLocator_channelName": "Location Updater",
   "logs_createdAt": "{date}",
   "@logs_createdAt": {
     "placeholders": {

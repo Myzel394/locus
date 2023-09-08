@@ -7,6 +7,7 @@ import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/values.dart';
 import 'package:locus/services/location_point_service.dart';
+import 'package:locus/services/task_service/index.dart';
 import 'package:locus/utils/location/index.dart';
 import 'package:locus/widgets/PlatformFlavorWidget.dart';
 import 'package:lottie/lottie.dart';
@@ -15,7 +16,6 @@ import 'package:visibility_detector/visibility_detector.dart';
 
 import './TaskTile.dart';
 import '../../constants/spacing.dart';
-import '../../services/task_service.dart';
 import '../../utils/theme.dart';
 import '../../widgets/ModalSheet.dart';
 
@@ -160,13 +160,12 @@ class _ActiveSharesSheetState extends State<ActiveSharesSheet>
   Iterable<Task> get quickShareTasks {
     final taskService = context.read<TaskService>();
 
-    return taskService.tasks
-        .where((task) => task.deleteAfterRun && task.timers.length <= 1);
+    return taskService.tasks.where((task) => task.isQuickShare);
   }
 
   Future<bool> getAreSomeTasksRunning() async {
     final tasksRunning =
-    await Future.wait(quickShareTasks.map((task) => task.isRunning()));
+        await Future.wait(quickShareTasks.map((task) => task.isRunning()));
 
     return tasksRunning.any((isRunning) => isRunning);
   }
@@ -188,10 +187,9 @@ class _ActiveSharesSheetState extends State<ActiveSharesSheet>
 
       await Future.wait(
         quickShareTasks.map(
-              (task) =>
-              task.publishLocation(
-                locationData.copyWithDifferentId(),
-              ),
+          (task) => task.publisher.publishLocation(
+            locationData.copyWithDifferentId(),
+          ),
         ),
       );
 
@@ -204,8 +202,7 @@ class _ActiveSharesSheetState extends State<ActiveSharesSheet>
       FlutterLogs.logError(
         LOG_TAG,
         "ActiveSharesSheet",
-        "Error while updating location for ${quickShareTasks
-            .length} tasks: $error",
+        "Error while updating location for ${quickShareTasks.length} tasks: $error",
       );
     } finally {
       setState(() {
@@ -263,15 +260,9 @@ class _ActiveSharesSheetState extends State<ActiveSharesSheet>
     final shades = getPrimaryColorShades(context);
 
     return SizedBox(
-      height: MediaQuery
-          .of(context)
-          .size
-          .height -
+      height: MediaQuery.of(context).size.height -
           kToolbarHeight -
-          MediaQuery
-              .of(context)
-              .viewPadding
-              .top,
+          MediaQuery.of(context).viewPadding.top,
       child: Column(
         key: wrapperKey,
         mainAxisSize: MainAxisSize.max,
@@ -323,10 +314,9 @@ class _ActiveSharesSheetState extends State<ActiveSharesSheet>
             ],
           ),
           PlatformElevatedButton(
-            material: (_, __) =>
-                MaterialElevatedButtonData(
-                  icon: const Icon(Icons.share_location_rounded),
-                ),
+            material: (_, __) => MaterialElevatedButtonData(
+              icon: const Icon(Icons.share_location_rounded),
+            ),
             onPressed: () {
               sheetController.animateTo(
                 MIN_SIZE,
@@ -371,13 +361,11 @@ class _ActiveSharesSheetState extends State<ActiveSharesSheet>
             if (someTasksRunning) {
               return <Widget>[
                 PlatformFlavorWidget(
-                  material: (_, __) =>
-                  const Icon(
+                  material: (_, __) => const Icon(
                     Icons.stop_circle_rounded,
                     size: 42,
                   ),
-                  cupertino: (_, __) =>
-                  const Icon(
+                  cupertino: (_, __) => const Icon(
                     CupertinoIcons.stop_circle_fill,
                     size: 42,
                   ),
@@ -392,13 +380,11 @@ class _ActiveSharesSheetState extends State<ActiveSharesSheet>
 
             return <Widget>[
               PlatformFlavorWidget(
-                material: (_, __) =>
-                const Icon(
+                material: (_, __) => const Icon(
                   Icons.play_circle_rounded,
                   size: 42,
                 ),
-                cupertino: (_, __) =>
-                const Icon(
+                cupertino: (_, __) => const Icon(
                   CupertinoIcons.play_circle_fill,
                   size: 42,
                 ),
@@ -436,13 +422,11 @@ class _ActiveSharesSheetState extends State<ActiveSharesSheet>
 
               if (!allTasksRunning) {
                 return PlatformFlavorWidget(
-                  material: (_, __) =>
-                  const Icon(
+                  material: (_, __) => const Icon(
                     Icons.location_disabled_rounded,
                     size: 42,
                   ),
-                  cupertino: (_, __) =>
-                  const Icon(
+                  cupertino: (_, __) => const Icon(
                     CupertinoIcons.location_slash_fill,
                     size: 42,
                   ),
@@ -554,64 +538,58 @@ class _ActiveSharesSheetState extends State<ActiveSharesSheet>
     return Opacity(
       opacity: isInitializing ? 0 : 1,
       child: PlatformWidget(
-        material: (context, _) =>
-            AnimatedBuilder(
-              animation: offsetProgress,
-              builder: (context, child) =>
-                  Transform.translate(
-                    offset: Offset(-_xOffset * (1 - offsetProgress.value), 0),
-                    child: child,
-                  ),
-              child: DraggableScrollableSheet(
-                snap: true,
-                snapSizes: const [MIN_SIZE, 1],
-                minChildSize: 0.0,
-                initialChildSize: MIN_SIZE,
-                controller: sheetController,
-                builder: (context, controller) =>
-                    ModalSheet(
-                      miuiIsGapless: true,
-                      child: SingleChildScrollView(
-                        controller: controller,
-                        child: quickShareTasks.isEmpty
-                            ? buildEmptyState()
-                            : buildActiveSharesList(),
-                      ),
-                    ),
+        material: (context, _) => AnimatedBuilder(
+          animation: offsetProgress,
+          builder: (context, child) => Transform.translate(
+            offset: Offset(-_xOffset * (1 - offsetProgress.value), 0),
+            child: child,
+          ),
+          child: DraggableScrollableSheet(
+            snap: true,
+            snapSizes: const [MIN_SIZE, 1],
+            minChildSize: 0.0,
+            initialChildSize: MIN_SIZE,
+            controller: sheetController,
+            builder: (context, controller) => ModalSheet(
+              miuiIsGapless: true,
+              child: SingleChildScrollView(
+                controller: controller,
+                child: quickShareTasks.isEmpty
+                    ? buildEmptyState()
+                    : buildActiveSharesList(),
               ),
             ),
-        cupertino: (context, _) =>
-            DraggableScrollableSheet(
-              snap: true,
-              snapSizes: const [MIN_SIZE, 1],
-              minChildSize: 0.0,
-              initialChildSize: MIN_SIZE,
-              controller: sheetController,
-              builder: (context, controller) =>
-                  AnimatedBuilder(
-                    animation: offsetProgress,
-                    child: SingleChildScrollView(
-                      controller: controller,
-                      child: quickShareTasks.isEmpty
-                          ? buildEmptyState()
-                          : buildActiveSharesList(),
-                    ),
-                    builder: (context, child) =>
-                        ModalSheet(
-                          cupertinoPadding: EdgeInsets.only(
-                            top: lerpDouble(
-                              MEDIUM_SPACE,
-                              HUGE_SPACE,
-                              offsetProgress.value,
-                            ) ??
-                                0,
-                            left: MEDIUM_SPACE,
-                            right: MEDIUM_SPACE,
-                          ),
-                          child: child ?? const SizedBox.shrink(),
-                        ),
-                  ),
+          ),
+        ),
+        cupertino: (context, _) => DraggableScrollableSheet(
+          snap: true,
+          snapSizes: const [MIN_SIZE, 1],
+          minChildSize: 0.0,
+          initialChildSize: MIN_SIZE,
+          controller: sheetController,
+          builder: (context, controller) => AnimatedBuilder(
+            animation: offsetProgress,
+            child: SingleChildScrollView(
+              controller: controller,
+              child: quickShareTasks.isEmpty
+                  ? buildEmptyState()
+                  : buildActiveSharesList(),
             ),
+            builder: (context, child) => ModalSheet(
+              cupertinoPadding: EdgeInsets.only(
+                top: lerpDouble(
+                      MEDIUM_SPACE,
+                      HUGE_SPACE,
+                      offsetProgress.value,
+                    ) ??
+                    0,
+                left: MEDIUM_SPACE,
+                right: MEDIUM_SPACE,
+              ),
+              child: child ?? const SizedBox.shrink(),
+            ),
+          ),
+        ),
       ),
     );
   }
