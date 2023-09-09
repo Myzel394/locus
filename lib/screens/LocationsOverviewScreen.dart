@@ -742,8 +742,8 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     final Iterable<(TaskView, LocationPointService)> circleLocations =
         selectedViewID == null
             ? locationFetchers.fetchers
-                .where((fetcher) => fetcher.locations.isNotEmpty)
-                .map((fetcher) => (fetcher.view, fetcher.locations.last))
+                .where((fetcher) => fetcher.sortedLocations.isNotEmpty)
+                .map((fetcher) => (fetcher.view, fetcher.sortedLocations.last))
             : viewService.views
                 .map(
                   (view) => mergeLocationsIfRequired(
@@ -983,10 +983,10 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
       children: locationFetchers.fetchers
           .where((fetcher) =>
               (selectedViewID == null || fetcher.view.id == selectedViewID) &&
-              fetcher.locations.isNotEmpty)
+              fetcher.sortedLocations.isNotEmpty)
           .map(
             (fetcher) => OutOfBoundMarker(
-              lastViewLocation: fetcher.locations.last,
+              lastViewLocation: fetcher.sortedLocations.last,
               onTap: () {
                 showViewLocations(fetcher.view);
               },

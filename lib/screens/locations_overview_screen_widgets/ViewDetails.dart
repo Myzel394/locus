@@ -54,9 +54,7 @@ class _ViewDetailsState extends State<ViewDetails> {
     oldLastLocation = oldWidget.location;
   }
 
-  Widget buildHeadingMap(
-    final LocationPointService lastLocation,
-  ) {
+  Widget buildHeadingMap(final LocationPointService lastLocation,) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(LARGE_SPACE),
       child: SizedBox(
@@ -77,14 +75,15 @@ class _ViewDetailsState extends State<ViewDetails> {
                     lastLocation.latitude,
                     lastLocation.longitude,
                   ),
-                  builder: (context) => Transform.rotate(
-                    angle: lastLocation.heading!,
-                    child: Icon(
-                      CupertinoIcons.location_north_fill,
-                      color: getPrimaryColorShades(context)[0],
-                      size: 30,
-                    ),
-                  ),
+                  builder: (context) =>
+                      Transform.rotate(
+                        angle: lastLocation.heading!,
+                        child: Icon(
+                          CupertinoIcons.location_north_fill,
+                          color: getPrimaryColorShades(context)[0],
+                          size: 30,
+                        ),
+                      ),
                 ),
               ],
             )
@@ -123,8 +122,8 @@ class _ViewDetailsState extends State<ViewDetails> {
               title: lastLocation.altitude == null
                   ? l10n.unknownValue
                   : l10n.locations_values_altitude_m(
-                      lastLocation.altitude!.round(),
-                    ),
+                lastLocation.altitude!.round(),
+              ),
               icon: platformThemeData(
                 context,
                 material: (_) => Icons.height_rounded,
@@ -137,8 +136,8 @@ class _ViewDetailsState extends State<ViewDetails> {
               title: lastLocation.speed == null
                   ? l10n.unknownValue
                   : l10n.locations_values_speed_kmh(
-                      (lastLocation.speed! * 3.6).round(),
-                    ),
+                (lastLocation.speed! * 3.6).round(),
+              ),
               icon: platformThemeData(
                 context,
                 material: (_) => Icons.speed,
@@ -151,8 +150,8 @@ class _ViewDetailsState extends State<ViewDetails> {
               title: lastLocation.batteryLevel == null
                   ? l10n.unknownValue
                   : l10n.locations_values_battery_value(
-                      (lastLocation.batteryLevel! * 100).round(),
-                    ),
+                (lastLocation.batteryLevel! * 100).round(),
+              ),
               icon: getIconDataForBatteryLevel(
                 context,
                 lastLocation.batteryLevel,
@@ -164,8 +163,8 @@ class _ViewDetailsState extends State<ViewDetails> {
               title: lastLocation.batteryState == null
                   ? l10n.unknownValue
                   : l10n.locations_values_batteryState_value(
-                      lastLocation.batteryState!.name,
-                    ),
+                lastLocation.batteryState!.name,
+              ),
               icon: Icons.cable_rounded,
               type: BentoType.tertiary,
               description: l10n.locations_values_batteryState_description,
@@ -202,6 +201,10 @@ class _DistanceBentoElementState extends State<DistanceBentoElement>
   void fetchCurrentPosition() async {
     _positionStream = getLastAndCurrentPosition(updateLocation: true)
       ..listen((position) {
+        if (!mounted) {
+          return;
+        }
+
         setState(() {
           currentPosition = position;
         });
@@ -239,9 +242,10 @@ class _DistanceBentoElementState extends State<DistanceBentoElement>
         showPlatformModalSheet(
           context: context,
           material: MaterialModalSheetData(),
-          builder: (context) => OpenInMaps(
-            destination: widget.lastLocation.asCoords(),
-          ),
+          builder: (context) =>
+              OpenInMaps(
+                destination: widget.lastLocation.asCoords(),
+              ),
         );
       },
       title: (() {
@@ -338,10 +342,10 @@ class _LastLocationBentoElementState extends State<LastLocationBentoElement> {
       title: showAbsolute
           ? formatDateTimeHumanReadable(widget.lastLocation.createdAt)
           : GetTimeAgo.parse(
-              DateTime.now().subtract(
-                DateTime.now().difference(widget.lastLocation.createdAt),
-              ),
-            ),
+        DateTime.now().subtract(
+          DateTime.now().difference(widget.lastLocation.createdAt),
+        ),
+      ),
       icon: Icons.location_on_rounded,
       description: l10n.locations_values_lastLocation_description,
     );

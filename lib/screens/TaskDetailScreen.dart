@@ -104,8 +104,6 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-
     return PlatformScaffold(
       appBar: PlatformAppBar(
         title: Text(widget.task.name),

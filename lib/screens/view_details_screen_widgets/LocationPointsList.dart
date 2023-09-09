@@ -40,6 +40,10 @@ class _LocationPointsListState extends State<LocationPointsList> {
         }
       }
     });
+
+    if (!fetcher.hasFetchedAllLocations) {
+      fetcher.fetchMoreLocations();
+    }
   }
 
   @override
@@ -60,7 +64,9 @@ class _LocationPointsListState extends State<LocationPointsList> {
   Widget build(BuildContext context) {
     final locationFetchers = context.watch<LocationFetchers>();
     final fetcher = locationFetchers.findFetcher(widget.view)!;
-    final locations = fetcher.locations;
+    final locations = fetcher.isLoading
+        ? fetcher.sortedLocations
+        : fetcher.locations.toList();
 
     return ListView.builder(
       shrinkWrap: true,

@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:flutter/foundation.dart';
 import 'package:locus/services/location_fetcher_service/Locations.dart';
 import 'package:locus/services/location_point_service.dart';
@@ -14,7 +16,10 @@ class Fetcher extends ChangeNotifier {
   bool _hasFetchedPreviewLocations = false;
   bool _hasFetchedAllLocations = false;
 
-  List<LocationPointService> get locations => _locations.locations;
+  UnmodifiableSetView<LocationPointService> get locations =>
+      _locations.locations;
+
+  List<LocationPointService> get sortedLocations => _locations.sortedLocations;
 
   bool get isLoading => _isLoading;
 
@@ -47,7 +52,6 @@ class Fetcher extends ChangeNotifier {
 
         _locations.add(location);
         onLocationFetched?.call(location);
-        notifyListeners();
       },
       onEnd: () {
         if (!_isMounted) {
@@ -101,9 +105,9 @@ class Fetcher extends ChangeNotifier {
   }
 
   void fetchMoreLocations([
-    int limit = 100,
+    int limit = 50,
   ]) {
-    final earliestLocation = _locations.locations.first;
+    final earliestLocation = _locations.sortedLocations.first;
 
     _getLocations(
       limit: limit,

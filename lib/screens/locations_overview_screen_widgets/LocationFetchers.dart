@@ -63,6 +63,6 @@ class LocationFetchers extends ChangeNotifier {
   }
 
   List<LocationPointService> getLocations(final TaskView view) {
-    return findFetcher(view)?.locations ?? [];
+    return findFetcher(view)?.sortedLocations ?? [];
   }
 }
