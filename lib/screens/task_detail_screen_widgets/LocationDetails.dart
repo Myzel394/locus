@@ -8,6 +8,7 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart'
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/services/location_point_service.dart';
 import 'package:locus/services/settings_service/index.dart';
+import 'package:locus/utils/date.dart';
 import 'package:locus/utils/icon.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/utils/ui-message/show-message.dart';
@@ -90,9 +91,7 @@ class _LocationDetailsState extends State<LocationDetails> {
           child: Align(
             alignment: Alignment.centerLeft,
             child: Text(
-              l10n.taskDetails_locationDetails_createdAt_value(
-                widget.location.createdAt,
-              ),
+              formatDateTimeHumanReadable(widget.location.createdAt),
               textAlign: TextAlign.start,
               style: getBodyTextTextStyle(context),
             ),

@@ -4,7 +4,7 @@ import 'package:nearby_connections/nearby_connections.dart';
 
 import 'has-granted.dart';
 
-abstract class BluetoothPermissionMixin {
+mixin BluetoothPermissionMixin {
   bool hasGrantedBluetoothPermission = false;
 
   setState(VoidCallback fn);

@@ -7,6 +7,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:locus/App.dart';
+import 'package:locus/screens/locations_overview_screen_widgets/LocationFetchers.dart';
 import 'package:locus/services/app_update_service.dart';
 import 'package:locus/services/log_service.dart';
 import 'package:locus/services/manager_service/background_fetch.dart';
@@ -84,6 +85,8 @@ void main() async {
         ChangeNotifierProvider<LogService>(create: (_) => logService),
         ChangeNotifierProvider<AppUpdateService>(
             create: (_) => appUpdateService),
+        ChangeNotifierProvider<LocationFetchers>(
+            create: (_) => LocationFetchers()),
       ],
       child: const App(),
     ),

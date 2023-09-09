@@ -167,6 +167,7 @@
   "taskAction_generateLink_process_publishing": "Publishing encrypted data...",
   "taskAction_generateLink_process_creatingURI": "Creating link...",
   "taskAction_generateLink_shareTextSubject": "Here's the link to see my location",
+  "taskAction_showDetails": "Show Details",
   "tasks_action_stopAll": "Stop tasks",
   "tasks_action_startAll": "Start tasks",
   "tasks_examples_weekend": "Weekend Getaway",
@@ -766,6 +767,15 @@
   "locations_values_lastLocation_description": "Last location update",
   "locations_values_distance_description": "Distance",
   "locations_values_distance_permissionRequired": "Grant permission",
+  "locations_values_distance_nearby": "<10 m",
+  "locations_values_distance_m": "{distance} m",
+  "@locations_values_distance_m": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
   "locations_values_distance_km": "{distance, select, 0 {<1 km} 1 {one km} other {{distance} km}}",
   "@locations_values_distance_km": {
     "placeholders": {
