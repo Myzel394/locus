@@ -8,6 +8,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:get_time_ago/get_time_ago.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:locus/utils/date.dart';
 import 'package:locus/utils/navigation.dart';
 import 'package:latlong2/latlong.dart';
 
@@ -304,6 +305,7 @@ class LastLocationBentoElement extends StatefulWidget {
 
 class _LastLocationBentoElementState extends State<LastLocationBentoElement> {
   late final Timer _timer;
+  bool showAbsolute = false;
 
   @override
   void initState() {
@@ -327,16 +329,17 @@ class _LastLocationBentoElementState extends State<LastLocationBentoElement> {
 
     return BentoGridElement(
       onTap: () {
-        pushRoute(
-          context,
-          (context) => ViewDetailScreen(view: widget.view),
-        );
+        setState(() {
+          showAbsolute = !showAbsolute;
+        });
       },
-      title: GetTimeAgo.parse(
-        DateTime.now().subtract(
-          DateTime.now().difference(widget.lastLocation.createdAt),
-        ),
-      ),
+      title: showAbsolute
+          ? formatDateTimeHumanReadable(widget.lastLocation.createdAt)
+          : GetTimeAgo.parse(
+              DateTime.now().subtract(
+                DateTime.now().difference(widget.lastLocation.createdAt),
+              ),
+            ),
       icon: Icons.location_on_rounded,
       description: l10n.locations_values_lastLocation_description,
     );
