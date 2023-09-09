@@ -1,5 +1,3 @@
-import 'dart:collection';
-
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:locus/services/location_fetcher_service/Fetcher.dart';
@@ -13,9 +11,19 @@ class LocationFetchers extends ChangeNotifier {
 
   LocationFetchers();
 
-  void enableLocationsUpdates() {
+  void addLocationUpdatesListener(
+    final VoidCallback callback,
+  ) {
     for (final fetcher in _fetchers) {
-      fetcher.addListener(notifyListeners);
+      fetcher.addListener(callback);
+    }
+  }
+
+  void removeLocationUpdatesListener(
+    final VoidCallback callback,
+  ) {
+    for (final fetcher in _fetchers) {
+      fetcher.removeListener(callback);
     }
   }
 
@@ -25,6 +33,15 @@ class LocationFetchers extends ChangeNotifier {
     }
 
     _fetchers.add(Fetcher(view));
+  }
+
+  void remove(final TaskView view) {
+    final fetcher = _findFetcher(view);
+
+    if (fetcher != null) {
+      fetcher.dispose();
+      _fetchers.remove(fetcher);
+    }
   }
 
   void addAll(final List<TaskView> views) {

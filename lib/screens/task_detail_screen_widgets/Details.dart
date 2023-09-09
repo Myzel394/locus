@@ -20,14 +20,10 @@ import '../../widgets/PlatformListTile.dart';
 import '../../widgets/TimerWidgetSheet.dart';
 
 class Details extends StatefulWidget {
-  final List<LocationPointService> locations;
   final Task task;
-  final void Function() onGoBack;
 
   const Details({
-    required this.locations,
     required this.task,
-    required this.onGoBack,
     Key? key,
   }) : super(key: key);
 
@@ -70,24 +66,6 @@ class _DetailsState extends State<Details> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        PlatformTextButton(
-          material: (_, __) => MaterialTextButtonData(
-            style: ButtonStyle(
-              // Not rounded, but square
-              shape: MaterialStateProperty.all(
-                const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.zero,
-                ),
-              ),
-              padding: MaterialStateProperty.all(
-                const EdgeInsets.all(MEDIUM_SPACE),
-              ),
-            ),
-            icon: const Icon(Icons.arrow_upward_rounded),
-          ),
-          onPressed: widget.onGoBack,
-          child: Text(l10n.goBack),
-        ),
         Padding(
           padding: const EdgeInsets.all(MEDIUM_SPACE),
           child: Wrap(
@@ -97,75 +75,6 @@ class _DetailsState extends State<Details> {
               Center(
                 child: ShareLocationButton(
                   task: widget.task,
-                ),
-              ),
-              DetailInformationBox(
-                title: l10n.taskDetails_lastKnownLocation,
-                child: widget.locations.isEmpty
-                    ? Text(l10n.taskDetails_noLocations)
-                    : Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: <Widget>[
-                          SimpleAddressFetcher(
-                            location: widget.locations.last.asLatLng(),
-                          ),
-                          const SizedBox(height: MEDIUM_SPACE),
-                          Tooltip(
-                            message:
-                                l10n.taskDetails_mostRecentLocationExplanation,
-                            textAlign: TextAlign.center,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: <Widget>[
-                                Icon(
-                                  context.platformIcons.time,
-                                  size: getIconSizeForBodyText(context),
-                                ),
-                                const SizedBox(width: TINY_SPACE),
-                                Text(
-                                  widget.locations.last.createdAt.toString(),
-                                  style: getBodyTextTextStyle(context),
-                                  textAlign: TextAlign.start,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-              ),
-              GestureDetector(
-                onTap: widget.locations.isEmpty
-                    ? null
-                    : () {
-                        Navigator.of(context).push(
-                          PageRouteBuilder(
-                            opaque: true,
-                            fullscreenDialog: true,
-                            barrierColor: Colors.black.withOpacity(0.7),
-                            barrierDismissible: true,
-                            pageBuilder: (context, _, __) =>
-                                LocationPointsDetailsScreen(
-                              locations: widget.locations,
-                              isPreview: false,
-                            ),
-                          ),
-                        );
-                      },
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      l10n.taskDetails_locationDetails,
-                      textAlign: TextAlign.start,
-                      style: getSubTitleTextStyle(context),
-                    ),
-                    const SizedBox(height: MEDIUM_SPACE),
-                    LocationPointsDetailsScreen(
-                      locations: widget.locations,
-                      isPreview: true,
-                    ),
-                  ],
                 ),
               ),
               DetailInformationBox(
