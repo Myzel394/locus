@@ -26,7 +26,7 @@ import '../ViewDetailScreen.dart';
 class ViewDetails extends StatefulWidget {
   final TaskView? view;
   final LocationPointService? location;
-  final void Function(LatLng position) onGoToPosition;
+  final void Function(LocationPointService position) onGoToPosition;
 
   const ViewDetails({
     required this.view,
@@ -116,12 +116,7 @@ class _ViewDetailsState extends State<ViewDetails> {
             DistanceBentoElement(
               lastLocation: lastLocation,
               onTap: () {
-                widget.onGoToPosition(
-                  LatLng(
-                    lastLocation.latitude,
-                    lastLocation.longitude,
-                  ),
-                );
+                widget.onGoToPosition(lastLocation);
               },
             ),
             BentoGridElement(
