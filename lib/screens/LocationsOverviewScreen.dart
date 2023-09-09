@@ -737,8 +737,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     final viewService = context.read<ViewService>();
     final locationFetchers = context.read<LocationFetchers>();
 
-    final shades = getPrimaryColorShades(context);
-
     final Iterable<(TaskView, LocationPointService)> circleLocations =
         selectedViewID == null
             ? locationFetchers.fetchers
@@ -842,6 +840,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     }
 
     final lastCenter = settings.getLastMapLocation()?.toLatLng();
+    final colorOpacityMultiplier = selectedViewID == null ? 1.0 : .1;
     return LocusFlutterMap(
       mapController: flutterMapController,
       options: MapOptions(
@@ -862,8 +861,8 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
                   useRadiusInMeter: true,
                   point: LatLng(location.latitude, location.longitude),
                   borderStrokeWidth: 1,
-                  color: view.color.withOpacity(.1),
-                  borderColor: view.color,
+                  color: view.color.withOpacity(.1 * colorOpacityMultiplier),
+                  borderColor: view.color.withOpacity(colorOpacityMultiplier),
                 );
               })
               .toList()
@@ -879,9 +878,9 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
                   visibleLocation!.latitude,
                   visibleLocation!.longitude,
                 ),
-                borderStrokeWidth: 3,
-                color: shades[500]!.withOpacity(.3),
-                borderColor: shades[500]!,
+                borderStrokeWidth: 5,
+                color: selectedView!.color.withOpacity(.2),
+                borderColor: selectedView!.color,
               )
             ],
           ),
