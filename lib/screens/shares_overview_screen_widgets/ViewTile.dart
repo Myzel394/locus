@@ -9,7 +9,7 @@ import 'package:locus/widgets/PlatformPopup.dart';
 import 'package:provider/provider.dart';
 
 import '../../widgets/PlatformListTile.dart';
-import '../ViewDetailScreen.dart';
+import '../ViewDetailsScreen.dart';
 
 class ViewTile extends StatelessWidget {
   final TaskView view;
@@ -76,7 +76,7 @@ class ViewTile extends StatelessWidget {
         Navigator.of(context).push(
           NativePageRoute(
             context: context,
-            builder: (context) => ViewDetailScreen(
+            builder: (context) => ViewDetailsScreen(
               view: view,
             ),
           ),

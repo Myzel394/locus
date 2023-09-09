@@ -239,6 +239,7 @@ class TaskView extends ChangeNotifier with LocationBase {
     final VoidCallback? onEmptyEnd,
     int? limit,
     DateTime? from,
+    DateTime? until,
   }) =>
       get_locations_api.getLocations(
         encryptionPassword: _encryptionPassword,
@@ -249,6 +250,7 @@ class TaskView extends ChangeNotifier with LocationBase {
         onEmptyEnd: onEmptyEnd,
         from: from,
         limit: limit,
+        until: until,
       );
 
   Future<List<LocationPointService>> getLocationsAsFuture({

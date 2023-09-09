@@ -36,7 +36,7 @@ class LocationFetchers extends ChangeNotifier {
   }
 
   void remove(final TaskView view) {
-    final fetcher = _findFetcher(view);
+    final fetcher = findFetcher(view);
 
     if (fetcher != null) {
       fetcher.dispose();
@@ -58,11 +58,11 @@ class LocationFetchers extends ChangeNotifier {
     }
   }
 
-  Fetcher? _findFetcher(final TaskView view) {
+  Fetcher? findFetcher(final TaskView view) {
     return _fetchers.firstWhereOrNull((fetcher) => fetcher.view == view);
   }
 
   List<LocationPointService> getLocations(final TaskView view) {
-    return _findFetcher(view)?.locations ?? [];
+    return findFetcher(view)?.locations ?? [];
   }
 }

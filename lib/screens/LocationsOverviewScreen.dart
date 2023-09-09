@@ -64,7 +64,7 @@ import '../utils/PageRoute.dart';
 import '../utils/color.dart';
 import '../utils/platform.dart';
 import '../utils/theme.dart';
-import 'ViewDetailScreen.dart';
+import 'ViewDetailsScreen.dart';
 import 'locations_overview_screen_widgets/ViewDetailsSheet.dart';
 import 'locations_overview_screen_widgets/constants.dart';
 
@@ -513,7 +513,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
             Navigator.of(context).push(
               NativePageRoute(
                 context: context,
-                builder: (_) => ViewDetailScreen(
+                builder: (_) => ViewDetailsScreen(
                   view: viewService.getViewById(data["taskViewID"]),
                 ),
               ),

@@ -24,7 +24,7 @@ import '../../utils/theme.dart';
 import '../../widgets/BentoGridElement.dart';
 import '../../widgets/LocusFlutterMap.dart';
 import '../../widgets/RequestLocationPermissionMixin.dart';
-import '../ViewDetailScreen.dart';
+import '../ViewDetailsScreen.dart';
 
 class ViewDetails extends StatefulWidget {
   final TaskView? view;

@@ -12,6 +12,7 @@ class Fetcher extends ChangeNotifier {
   bool _isMounted = true;
   bool _isLoading = false;
   bool _hasFetchedPreviewLocations = false;
+  bool _hasFetchedAllLocations = false;
 
   List<LocationPointService> get locations => _locations.locations;
 
@@ -19,10 +20,13 @@ class Fetcher extends ChangeNotifier {
 
   bool get hasFetchedPreviewLocations => _hasFetchedPreviewLocations;
 
+  bool get hasFetchedAllLocations => _hasFetchedAllLocations;
+
   Fetcher(this.view);
 
   void _getLocations({
     final DateTime? from,
+    final DateTime? until,
     final int? limit,
     final VoidCallback? onEmptyEnd,
     final VoidCallback? onEnd,
@@ -34,6 +38,7 @@ class Fetcher extends ChangeNotifier {
 
     final unsubscriber = view.getLocations(
       limit: limit,
+      until: until,
       from: from,
       onLocationFetched: (location) {
         if (!_isMounted) {
@@ -71,9 +76,17 @@ class Fetcher extends ChangeNotifier {
     _getLocations(
       from: DateTime.now().subtract(const Duration(hours: 24)),
       onEnd: () {
+        if (!_isMounted) {
+          return;
+        }
+
         _hasFetchedPreviewLocations = true;
       },
       onEmptyEnd: () {
+        if (!_isMounted) {
+          return;
+        }
+
         _getLocations(
           limit: 1,
           onEnd: () {
@@ -83,6 +96,24 @@ class Fetcher extends ChangeNotifier {
             _hasFetchedPreviewLocations = true;
           },
         );
+      },
+    );
+  }
+
+  void fetchMoreLocations([
+    int limit = 100,
+  ]) {
+    final earliestLocation = _locations.locations.first;
+
+    _getLocations(
+      limit: limit,
+      until: earliestLocation.createdAt,
+      onEmptyEnd: () {
+        if (!_isMounted) {
+          return;
+        }
+
+        _hasFetchedAllLocations = true;
       },
     );
   }
