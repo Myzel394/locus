@@ -1,5 +1,6 @@
 import 'dart:collection';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:locus/services/location_fetcher_service/Fetcher.dart';
 import 'package:locus/services/location_point_service.dart';
@@ -40,11 +41,11 @@ class LocationFetchers extends ChangeNotifier {
     }
   }
 
-  Fetcher _findFetcher(final TaskView view) {
-    return _fetchers.firstWhere((fetcher) => fetcher.view == view);
+  Fetcher? _findFetcher(final TaskView view) {
+    return _fetchers.firstWhereOrNull((fetcher) => fetcher.view == view);
   }
 
   List<LocationPointService> getLocations(final TaskView view) {
-    return _findFetcher(view).locations;
+    return _findFetcher(view)?.locations ?? [];
   }
 }
