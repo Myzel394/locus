@@ -66,7 +66,7 @@ Future<void> runBackgroundTask({
     "Headless Task",
     "Checking View alarms...",
   );
-  await checkViewAlarmsFromBackground();
+  await checkViewAlarmsFromBackground(location);
   FlutterLogs.logInfo(
     LOG_TAG,
     "Headless Task",

@@ -5,7 +5,7 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart'
     hide PlatformListTile;
 import 'package:latlong2/latlong.dart';
 import 'package:locus/constants/spacing.dart';
-import 'package:locus/services/location_alarm_service.dart';
+import 'package:locus/services/location_alarm_service/index.dart';
 import 'package:locus/utils/theme.dart';
 
 import '../../widgets/ModalSheet.dart';

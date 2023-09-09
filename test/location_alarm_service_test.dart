@@ -1,6 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:locus/services/location_alarm_service.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:locus/services/location_alarm_service/enums.dart';
+import 'package:locus/services/location_alarm_service/index.dart';
 import 'package:locus/services/location_point_service.dart';
 
 // DuckDuckGo's headquarter

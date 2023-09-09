@@ -16,7 +16,9 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../api/get-locations.dart' as get_locations_api;
 import '../constants/values.dart';
-import 'location_alarm_service.dart';
+import 'location_alarm_service/LocationAlarmServiceBase.dart';
+import 'location_alarm_service/RadiusBasedRegionLocationAlarm.dart';
+import 'location_alarm_service/enums.dart';
 import 'task_service/mixins.dart';
 import 'location_point_service.dart';
 
@@ -283,6 +285,7 @@ class TaskView extends ChangeNotifier with LocationBase {
             LocationPointService previousLocation,
             LocationPointService nextLocation)
         onMaybeTrigger,
+    required final LocationPointService userLocation,
   }) async {
     final locations = await getLocationsAsFuture(
       from: lastAlarmCheck,
@@ -301,7 +304,11 @@ class TaskView extends ChangeNotifier with LocationBase {
     // Iterate over each location but the first one
     for (final location in locations.skip(1)) {
       for (final alarm in alarms) {
-        final checkResult = alarm.check(oldLocation, location);
+        final checkResult = alarm.check(
+          oldLocation,
+          location,
+          userLocation: userLocation,
+        );
 
         if (checkResult == LocationAlarmTriggerType.yes) {
           onTrigger(alarm, oldLocation, location);

@@ -112,8 +112,8 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
   // manually to `current_location_layer` to avoid it also registering
   // extra listeners.
   final StreamController<LocationMarkerPosition?>
-      _currentLocationPositionStream =
-      StreamController<LocationMarkerPosition?>.broadcast();
+  _currentLocationPositionStream =
+  StreamController<LocationMarkerPosition?>.broadcast();
 
   Position? lastPosition;
   StreamSubscription<String?>? _uniLinksStream;
@@ -270,8 +270,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
   }
 
   List<LocationPointService> mergeLocationsIfRequired(
-    final List<LocationPointService> locations,
-  ) {
+      final List<LocationPointService> locations,) {
     if (locations.isEmpty) {
       return locations;
     }
@@ -308,7 +307,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
           notificationText: l10n.backgroundLocationFetch_text,
           notificationTitle: l10n.backgroundLocationFetch_title,
           notificationIcon:
-              const AndroidResource(name: "ic_quick_actions_share_now"),
+          const AndroidResource(name: "ic_quick_actions_share_now"),
         ),
       );
     } else if (isPlatformApple()) {
@@ -367,12 +366,29 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     }
   }
 
-  void _initLiveLocationUpdate() {
-    if (_positionStream != null) {
+  void _checkViewAlarms(final Position position,) async {
+    final l10n = AppLocalizations.of(context);
+    final viewService = context.read<ViewService>();
+    final userLocation = await LocationPointService.fromPosition(position);
+
+    if (!mounted) {
       return;
     }
 
+    checkViewAlarms(
+      l10n: l10n,
+      views: viewService.viewsWithAlarms,
+      viewService: viewService,
+      userLocation: userLocation,
+    );
+  }
+
+  void _initLiveLocationUpdate() {
     final settings = context.read<SettingsService>();
+
+    if (_positionStream != null) {
+      return;
+    }
 
     if (settings.useRealtimeUpdates) {
       // Live location updates are handled by the background locator already
@@ -384,6 +400,8 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     );
 
     _positionStream!.listen((position) async {
+      final taskService = context.read<TaskService>();
+
       _currentLocationPositionStream.add(
         LocationMarkerPosition(
           latitude: position.latitude,
@@ -392,6 +410,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
         ),
       );
 
+      _checkViewAlarms(position);
       _updateLocationToSettings(position);
 
       setState(() {
@@ -399,7 +418,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
         locationStatus = LocationStatus.active;
       });
 
-      final taskService = context.read<TaskService>();
       final runningTasks = await taskService.getRunningTasks().toList();
 
       if (runningTasks.isEmpty) {
@@ -422,7 +440,8 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     _positionStream = null;
   }
 
-  Future<void> _importUniLink(final String url) => showPlatformModalSheet(
+  Future<void> _importUniLink(final String url) =>
+      showPlatformModalSheet(
         context: context,
         material: MaterialModalSheetData(
           isScrollControlled: true,
@@ -459,18 +478,19 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
 
       showPlatformDialog(
         context: context,
-        builder: (_) => PlatformAlertDialog(
-          title: Text(l10n.uniLinksOpenError),
-          content: Text(error.message ?? l10n.unknownError),
-          actions: [
-            PlatformDialogAction(
-              child: Text(l10n.closeNeutralAction),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+        builder: (_) =>
+            PlatformAlertDialog(
+              title: Text(l10n.uniLinksOpenError),
+              content: Text(error.message ?? l10n.unknownError),
+              actions: [
+                PlatformDialogAction(
+                  child: Text(l10n.closeNeutralAction),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
             ),
-          ],
-        ),
       );
     }
   }
@@ -478,19 +498,13 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
   void _handleViewAlarmChecker() {
     _viewsAlarmCheckerTimer = Timer.periodic(
       const Duration(minutes: 1),
-      (_) {
+          (_) {
         final viewService = context.read<ViewService>();
         final l10n = AppLocalizations.of(context);
 
         if (viewService.viewsWithAlarms.isEmpty) {
           return;
         }
-
-        checkViewAlarms(
-          l10n: l10n,
-          views: viewService.viewsWithAlarms,
-          viewService: viewService,
-        );
       },
     );
   }
@@ -514,9 +528,10 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
             Navigator.of(context).push(
               NativePageRoute(
                 context: context,
-                builder: (_) => ViewDetailsScreen(
-                  view: viewService.getViewById(data["taskViewID"]),
-                ),
+                builder: (_) =>
+                    ViewDetailsScreen(
+                      view: viewService.getViewById(data["taskViewID"]),
+                    ),
               ),
             );
             break;
@@ -535,7 +550,9 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
   void _updateLocaleToSettings() {
     final settingsService = context.read<SettingsService>();
 
-    settingsService.localeName = AppLocalizations.of(context).localeName;
+    settingsService.localeName = AppLocalizations
+        .of(context)
+        .localeName;
     settingsService.save();
   }
 
@@ -552,45 +569,46 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
         material: MaterialDialogData(
           barrierColor: Colors.black,
         ),
-        builder: (context) => PlatformAlertDialog(
-          title: Text(l10n.updateAvailable_android_title),
-          content: Text(l10n.updateAvailable_android_description),
-          actions: [
-            PlatformDialogAction(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              material: (context, _) => MaterialDialogActionData(
-                  icon: const Icon(Icons.watch_later_rounded)),
-              child: Text(l10n.updateAvailable_android_remindLater),
-            ),
-            PlatformDialogAction(
-              onPressed: () {
-                appUpdateService.doNotShowDialogueAgain();
+        builder: (context) =>
+            PlatformAlertDialog(
+              title: Text(l10n.updateAvailable_android_title),
+              content: Text(l10n.updateAvailable_android_description),
+              actions: [
+                PlatformDialogAction(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  material: (context, _) =>
+                      MaterialDialogActionData(
+                          icon: const Icon(Icons.watch_later_rounded)),
+                  child: Text(l10n.updateAvailable_android_remindLater),
+                ),
+                PlatformDialogAction(
+                  onPressed: () {
+                    appUpdateService.doNotShowDialogueAgain();
 
-                Navigator.of(context).pop();
-              },
-              material: (context, _) =>
-                  MaterialDialogActionData(icon: const Icon(Icons.block)),
-              child: Text(l10n.updateAvailable_android_ignore),
+                    Navigator.of(context).pop();
+                  },
+                  material: (context, _) =>
+                      MaterialDialogActionData(icon: const Icon(Icons.block)),
+                  child: Text(l10n.updateAvailable_android_ignore),
+                ),
+                PlatformDialogAction(
+                  onPressed: appUpdateService.openStoreForUpdate,
+                  material: (context, _) =>
+                      MaterialDialogActionData(
+                          icon: const Icon(Icons.download)),
+                  child: Text(l10n.updateAvailable_android_download),
+                ),
+              ],
             ),
-            PlatformDialogAction(
-              onPressed: appUpdateService.openStoreForUpdate,
-              material: (context, _) =>
-                  MaterialDialogActionData(icon: const Icon(Icons.download)),
-              child: Text(l10n.updateAvailable_android_download),
-            ),
-          ],
-        ),
       );
 
       appUpdateService.setHasShownDialogue();
     }
   }
 
-  Future<void> _animateToPosition(
-    final Position position,
-  ) async {
+  Future<void> _animateToPosition(final Position position,) async {
     if (flutterMapController != null) {
       final zoom = max(15, flutterMapController!.zoom).toDouble();
 
@@ -738,21 +756,22 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     final locationFetchers = context.read<LocationFetchers>();
 
     final Iterable<(TaskView, LocationPointService)> circleLocations =
-        selectedViewID == null
-            ? locationFetchers.fetchers
-                .where((fetcher) => fetcher.sortedLocations.isNotEmpty)
-                .map((fetcher) => (fetcher.view, fetcher.sortedLocations.last))
-            : viewService.views
-                .map(
-                  (view) => mergeLocationsIfRequired(
-                    locationFetchers
-                        .getLocations(view)
-                        .whereNot((location) => location == visibleLocation)
-                        .toList(),
-                  ),
-                )
-                .expand((element) => element)
-                .map((location) => (selectedView!, location));
+    selectedViewID == null
+        ? locationFetchers.fetchers
+        .where((fetcher) => fetcher.sortedLocations.isNotEmpty)
+        .map((fetcher) => (fetcher.view, fetcher.sortedLocations.last))
+        : viewService.views
+        .map(
+          (view) =>
+          mergeLocationsIfRequired(
+            locationFetchers
+                .getLocations(view)
+                .whereNot((location) => location == visibleLocation)
+                .toList(),
+          ),
+    )
+        .expand((element) => element)
+        .map((location) => (selectedView!, location));
 
     if (settings.getMapProvider() == MapProvider.apple) {
       return apple_maps.AppleMap(
@@ -783,29 +802,30 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
                 (view) => selectedViewID == null || view.id == selectedViewID)
             .map(
               (view) =>
-                  mergeLocationsIfRequired(locationFetchers.getLocations(view))
-                      .map(
-                        (location) => apple_maps.Circle(
-                            circleId: apple_maps.CircleId(location.id),
-                            center: apple_maps.LatLng(
-                              location.latitude,
-                              location.longitude,
-                            ),
-                            radius: location.accuracy,
-                            fillColor: view.color.withOpacity(0.2),
-                            strokeColor: view.color,
-                            strokeWidth: location.accuracy < 10 ? 1 : 3),
-                      )
-                      .toList(),
-            )
+              mergeLocationsIfRequired(locationFetchers.getLocations(view))
+                  .map(
+                    (location) =>
+                    apple_maps.Circle(
+                        circleId: apple_maps.CircleId(location.id),
+                        center: apple_maps.LatLng(
+                          location.latitude,
+                          location.longitude,
+                        ),
+                        radius: location.accuracy,
+                        fillColor: view.color.withOpacity(0.2),
+                        strokeColor: view.color,
+                        strokeWidth: location.accuracy < 10 ? 1 : 3),
+              )
+                  .toList(),
+        )
             .expand((element) => element)
             .toSet(),
         polylines: Set<apple_maps.Polyline>.from(
           locationFetchers.fetchers
               .where((fetcher) =>
-                  selectedViewID == null || fetcher.view.id == selectedViewID)
+          selectedViewID == null || fetcher.view.id == selectedViewID)
               .map(
-            (fetcher) {
+                (fetcher) {
               final view = fetcher.view;
 
               return apple_maps.Polyline(
@@ -823,14 +843,15 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
                 },
                 // TODO
                 points: mergeLocationsIfRequired(
-                        locationFetchers.getLocations(view))
+                    locationFetchers.getLocations(view))
                     .reversed
                     .map(
-                      (location) => apple_maps.LatLng(
+                      (location) =>
+                      apple_maps.LatLng(
                         location.latitude,
                         location.longitude,
                       ),
-                    )
+                )
                     .toList(),
               );
             },
@@ -853,18 +874,18 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
         CircleLayer(
           circles: circleLocations
               .map((data) {
-                final view = data.$1;
-                final location = data.$2;
+            final view = data.$1;
+            final location = data.$2;
 
-                return CircleMarker(
-                  radius: location.accuracy,
-                  useRadiusInMeter: true,
-                  point: LatLng(location.latitude, location.longitude),
-                  borderStrokeWidth: 1,
-                  color: view.color.withOpacity(.1 * colorOpacityMultiplier),
-                  borderColor: view.color.withOpacity(colorOpacityMultiplier),
-                );
-              })
+            return CircleMarker(
+              radius: location.accuracy,
+              useRadiusInMeter: true,
+              point: LatLng(location.latitude, location.longitude),
+              borderStrokeWidth: 1,
+              color: view.color.withOpacity(.1 * colorOpacityMultiplier),
+              borderColor: view.color.withOpacity(colorOpacityMultiplier),
+            );
+          })
               .toList()
               .cast<CircleMarker>(),
         ),
@@ -888,9 +909,9 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
           polylines: List<Polyline>.from(
             locationFetchers.fetchers
                 .where((fetcher) =>
-                    selectedViewID == null || fetcher.view.id == selectedViewID)
+            selectedViewID == null || fetcher.view.id == selectedViewID)
                 .map(
-              (fetcher) {
+                  (fetcher) {
                 final view = fetcher.view;
                 final locations = mergeLocationsIfRequired(
                   locationFetchers.getLocations(view),
@@ -901,16 +922,16 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
                   strokeWidth: 10,
                   strokeJoin: StrokeJoin.round,
                   gradientColors: locations.length <=
-                          LOCATION_POLYLINE_OPAQUE_AMOUNT_THRESHOLD
+                      LOCATION_POLYLINE_OPAQUE_AMOUNT_THRESHOLD
                       ? null
                       : List<Color>.generate(
-                              9, (index) => view.color.withOpacity(0.9)) +
-                          [view.color.withOpacity(.3)],
+                      9, (index) => view.color.withOpacity(0.9)) +
+                      [view.color.withOpacity(.3)],
                   points: locations.reversed
                       .map(
                         (location) =>
-                            LatLng(location.latitude, location.longitude),
-                      )
+                        LatLng(location.latitude, location.longitude),
+                  )
                       .toList(),
                 );
               },
@@ -925,7 +946,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
             popupDisplayOptions: PopupDisplayOptions(
               builder: (context, marker) {
                 final view = viewService.views.firstWhere(
-                  (view) => Key(view.id) == marker.key,
+                      (view) => Key(view.id) == marker.key,
                 );
 
                 return ViewLocationPopup(
@@ -943,10 +964,14 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
             ),
             markers: viewService.views
                 .where((view) =>
-                    (selectedViewID == null || view.id == selectedViewID) &&
-                    locationFetchers.getLocations(view).isNotEmpty)
+            (selectedViewID == null || view.id == selectedViewID) &&
+                locationFetchers
+                    .getLocations(view)
+                    .isNotEmpty)
                 .map((view) {
-              final latestLocation = locationFetchers.getLocations(view).last;
+              final latestLocation = locationFetchers
+                  .getLocations(view)
+                  .last;
 
               return Marker(
                 key: Key(view.id),
@@ -955,18 +980,19 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
                   latestLocation.longitude,
                 ),
                 anchorPos: AnchorPos.align(AnchorAlign.top),
-                builder: (context) => Icon(
-                  Icons.location_on,
-                  size: 40,
-                  color: view.color,
-                  shadows: const [
-                    Shadow(
-                      blurRadius: 10,
-                      color: Colors.black,
-                      offset: Offset(0, 0),
+                builder: (context) =>
+                    Icon(
+                      Icons.location_on,
+                      size: 40,
+                      color: view.color,
+                      shadows: const [
+                        Shadow(
+                          blurRadius: 10,
+                          color: Colors.black,
+                          offset: Offset(0, 0),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
               );
             }).toList(),
           ),
@@ -981,10 +1007,11 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     return Stack(
       children: locationFetchers.fetchers
           .where((fetcher) =>
-              (selectedViewID == null || fetcher.view.id == selectedViewID) &&
-              fetcher.sortedLocations.isNotEmpty)
+      (selectedViewID == null || fetcher.view.id == selectedViewID) &&
+          fetcher.sortedLocations.isNotEmpty)
           .map(
-            (fetcher) => OutOfBoundMarker(
+            (fetcher) =>
+            OutOfBoundMarker(
               lastViewLocation: fetcher.sortedLocations.last,
               onTap: () {
                 showViewLocations(fetcher.view);
@@ -994,13 +1021,12 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
               appleMapController: appleMapController,
               flutterMapController: flutterMapController,
             ),
-          )
+      )
           .toList(),
     );
   }
 
-  void showViewLocations(
-    final TaskView view, {
+  void showViewLocations(final TaskView view, {
     final bool jumpToLatestLocation = true,
   }) async {
     final locationFetchers = context.read<LocationFetchers>();
@@ -1042,8 +1068,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     }
   }
 
-  Widget buildViewTile(
-    final TaskView? view, {
+  Widget buildViewTile(final TaskView? view, {
     final MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start,
   }) {
     final l10n = AppLocalizations.of(context);
@@ -1098,14 +1123,15 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
                 showCupertinoModalPopup(
                   context: context,
                   barrierDismissible: true,
-                  builder: (cupertino) => CupertinoActionSheet(
-                    cancelButton: CupertinoActionSheetAction(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: Text(l10n.cancelLabel),
-                    ),
-                    actions: [
+                  builder: (cupertino) =>
+                      CupertinoActionSheet(
+                        cancelButton: CupertinoActionSheetAction(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: Text(l10n.cancelLabel),
+                        ),
+                        actions: [
                           CupertinoActionSheetAction(
                             child: buildViewTile(
                               null,
@@ -1120,32 +1146,34 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
                             },
                           )
                         ] +
-                        viewService.views
-                            .map(
-                              (view) => CupertinoActionSheetAction(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                  showViewLocations(view);
-                                },
-                                child: buildViewTile(
-                                  view,
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                ),
-                              ),
+                            viewService.views
+                                .map(
+                                  (view) =>
+                                  CupertinoActionSheetAction(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                      showViewLocations(view);
+                                    },
+                                    child: buildViewTile(
+                                      view,
+                                      mainAxisAlignment: MainAxisAlignment
+                                          .center,
+                                    ),
+                                  ),
                             )
-                            .toList(),
-                  ),
+                                .toList(),
+                      ),
                 );
               },
               child: selectedViewID == null
                   ? Icon(
-                      Icons.location_on_rounded,
-                      color: settings.getPrimaryColor(context),
-                    )
+                Icons.location_on_rounded,
+                color: settings.getPrimaryColor(context),
+              )
                   : Icon(
-                      Icons.circle_rounded,
-                      color: selectedView!.color,
-                    ),
+                Icons.circle_rounded,
+                color: selectedView!.color,
+              ),
             ),
           ),
         ),
@@ -1166,88 +1194,93 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
                 vertical: SMALL_SPACE,
               ),
               child: PlatformWidget(
-                material: (context, _) => DropdownButton<String?>(
-                  isDense: true,
-                  value: selectedViewID,
-                  onChanged: (selection) {
-                    if (selection == null) {
-                      setState(() {
-                        showFAB = true;
-                        selectedViewID = null;
-                        visibleLocation = null;
-                      });
-                      return;
-                    }
+                material: (context, _) =>
+                    DropdownButton<String?>(
+                      isDense: true,
+                      value: selectedViewID,
+                      onChanged: (selection) {
+                        if (selection == null) {
+                          setState(() {
+                            showFAB = true;
+                            selectedViewID = null;
+                            visibleLocation = null;
+                          });
+                          return;
+                        }
 
-                    final view = viewService.views.firstWhere(
-                      (view) => view.id == selection,
-                    );
+                        final view = viewService.views.firstWhere(
+                              (view) => view.id == selection,
+                        );
 
-                    showViewLocations(view);
-                  },
-                  underline: Container(),
-                  alignment: Alignment.center,
-                  isExpanded: true,
-                  items: [
-                    DropdownMenuItem(
-                      value: null,
-                      child: buildViewTile(null),
-                    ),
-                    for (final view in viewService.views) ...[
-                      DropdownMenuItem(
-                        value: view.id,
-                        child: buildViewTile(view),
-                      ),
-                    ],
-                  ],
-                ),
-                cupertino: (context, _) => CupertinoButton(
-                  onPressed: () {
-                    showCupertinoModalPopup(
-                      context: context,
-                      barrierDismissible: true,
-                      builder: (cupertino) => CupertinoActionSheet(
-                        cancelButton: CupertinoActionSheetAction(
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
-                          child: Text(l10n.cancelLabel),
+                        showViewLocations(view);
+                      },
+                      underline: Container(),
+                      alignment: Alignment.center,
+                      isExpanded: true,
+                      items: [
+                        DropdownMenuItem(
+                          value: null,
+                          child: buildViewTile(null),
                         ),
-                        actions: [
-                              CupertinoActionSheetAction(
-                                child: buildViewTile(
-                                  null,
-                                  mainAxisAlignment: MainAxisAlignment.center,
+                        for (final view in viewService.views) ...[
+                          DropdownMenuItem(
+                            value: view.id,
+                            child: buildViewTile(view),
+                          ),
+                        ],
+                      ],
+                    ),
+                cupertino: (context, _) =>
+                    CupertinoButton(
+                      onPressed: () {
+                        showCupertinoModalPopup(
+                          context: context,
+                          barrierDismissible: true,
+                          builder: (cupertino) =>
+                              CupertinoActionSheet(
+                                cancelButton: CupertinoActionSheetAction(
+                                  onPressed: () {
+                                    Navigator.pop(context);
+                                  },
+                                  child: Text(l10n.cancelLabel),
                                 ),
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                  setState(() {
-                                    selectedViewID = null;
-                                    visibleLocation = null;
-                                  });
-                                },
-                              )
-                            ] +
-                            viewService.views
-                                .map(
-                                  (view) => CupertinoActionSheetAction(
+                                actions: [
+                                  CupertinoActionSheetAction(
+                                    child: buildViewTile(
+                                      null,
+                                      mainAxisAlignment: MainAxisAlignment
+                                          .center,
+                                    ),
                                     onPressed: () {
                                       Navigator.pop(context);
-                                      showViewLocations(view);
+                                      setState(() {
+                                        selectedViewID = null;
+                                        visibleLocation = null;
+                                      });
                                     },
-                                    child: buildViewTile(
-                                      view,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                    ),
-                                  ),
-                                )
-                                .toList(),
-                      ),
-                    );
-                  },
-                  child: buildViewTile(selectedView),
-                ),
+                                  )
+                                ] +
+                                    viewService.views
+                                        .map(
+                                          (view) =>
+                                          CupertinoActionSheetAction(
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                              showViewLocations(view);
+                                            },
+                                            child: buildViewTile(
+                                              view,
+                                              mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                            ),
+                                          ),
+                                    )
+                                        .toList(),
+                              ),
+                        );
+                      },
+                      child: buildViewTile(selectedView),
+                    ),
               ),
             ),
           ),
@@ -1302,7 +1335,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
 
     final settings = context.read<SettingsService>();
     final link =
-        await (task as Task).publisher.generateLink(settings.getServerHost());
+    await (task as Task).publisher.generateLink(settings.getServerHost());
 
     // Copy to clipboard
     await Clipboard.setData(ClipboardData(text: link));
@@ -1333,7 +1366,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
           AnimatedScale(
             scale: showDetailedLocations ? 1 : 0,
             duration:
-                showDetailedLocations ? 1200.milliseconds : 100.milliseconds,
+            showDetailedLocations ? 1200.milliseconds : 100.milliseconds,
             curve: showDetailedLocations ? Curves.elasticOut : Curves.easeIn,
             child: Tooltip(
               message: disableShowDetailedLocations
@@ -1356,7 +1389,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
                       onPressed: () {
                         setState(() {
                           disableShowDetailedLocations =
-                              !disableShowDetailedLocations;
+                          !disableShowDetailedLocations;
                         });
                       },
                     ),
@@ -1453,7 +1486,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
                   onPressed: importLocation,
                   icon: const Icon(Icons.download_rounded),
                   label:
-                      Text(l10n.sharesOverviewScreen_importTask_action_import),
+                  Text(l10n.sharesOverviewScreen_importTask_action_import),
                   backgroundColor: background,
                   foregroundColor: foreground,
                 ),
@@ -1535,58 +1568,62 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
               showCupertinoModalPopup(
                 context: context,
                 barrierDismissible: true,
-                builder: (cupertino) => CupertinoActionSheet(
-                  cancelButton: CupertinoActionSheetAction(
-                    onPressed: () => Navigator.pop(context),
-                    child: Text(l10n.cancelLabel),
-                  ),
-                  actions: [
-                    CupertinoActionSheetAction(
-                      onPressed: withPopNavigation(createNewQuickLocationShare)(
-                          context),
-                      child: CupertinoListTile(
-                        leading: const Icon(Icons.share_location_rounded),
-                        title: Text(l10n.shareLocation_title),
+                builder: (cupertino) =>
+                    CupertinoActionSheet(
+                      cancelButton: CupertinoActionSheetAction(
+                        onPressed: () => Navigator.pop(context),
+                        child: Text(l10n.cancelLabel),
                       ),
-                    ),
-                    CupertinoActionSheetAction(
-                      onPressed: withPopNavigation(importLocation)(context),
-                      child: CupertinoListTile(
-                        leading:
-                            const Icon(CupertinoIcons.square_arrow_down_fill),
-                        title: Text(
-                            l10n.sharesOverviewScreen_importTask_action_import),
-                      ),
-                    ),
-                    CupertinoActionSheetAction(
-                      onPressed: () {
-                        Navigator.pop(context);
-
-                        Navigator.push(
-                          context,
-                          MaterialWithModalsPageRoute(
-                            builder: (context) => const SharesOverviewScreen(),
+                      actions: [
+                        CupertinoActionSheetAction(
+                          onPressed: withPopNavigation(
+                              createNewQuickLocationShare)(
+                              context),
+                          child: CupertinoListTile(
+                            leading: const Icon(Icons.share_location_rounded),
+                            title: Text(l10n.shareLocation_title),
                           ),
-                        );
-                      },
-                      child: CupertinoListTile(
-                        leading: const Icon(CupertinoIcons.list_bullet),
-                        title: Text(l10n.sharesOverviewScreen_title),
-                      ),
-                    ),
-                    CupertinoActionSheetAction(
-                      onPressed: () {
-                        Navigator.pop(context);
+                        ),
+                        CupertinoActionSheetAction(
+                          onPressed: withPopNavigation(importLocation)(context),
+                          child: CupertinoListTile(
+                            leading:
+                            const Icon(CupertinoIcons.square_arrow_down_fill),
+                            title: Text(
+                                l10n
+                                    .sharesOverviewScreen_importTask_action_import),
+                          ),
+                        ),
+                        CupertinoActionSheetAction(
+                          onPressed: () {
+                            Navigator.pop(context);
 
-                        showSettings(context);
-                      },
-                      child: CupertinoListTile(
-                        leading: Icon(context.platformIcons.settings),
-                        title: Text(l10n.settingsScreen_title),
-                      ),
+                            Navigator.push(
+                              context,
+                              MaterialWithModalsPageRoute(
+                                builder: (
+                                    context) => const SharesOverviewScreen(),
+                              ),
+                            );
+                          },
+                          child: CupertinoListTile(
+                            leading: const Icon(CupertinoIcons.list_bullet),
+                            title: Text(l10n.sharesOverviewScreen_title),
+                          ),
+                        ),
+                        CupertinoActionSheetAction(
+                          onPressed: () {
+                            Navigator.pop(context);
+
+                            showSettings(context);
+                          },
+                          child: CupertinoListTile(
+                            leading: Icon(context.platformIcons.settings),
+                            title: Text(l10n.settingsScreen_title),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
               );
             },
           ),
