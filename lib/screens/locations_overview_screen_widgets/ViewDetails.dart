@@ -15,6 +15,8 @@ import 'package:latlong2/latlong.dart';
 import 'package:locus/utils/location/index.dart';
 import 'package:locus/utils/permissions/has-granted.dart';
 import 'package:locus/utils/permissions/request.dart';
+import 'package:locus/widgets/OpenInMaps.dart';
+import 'package:map_launcher/map_launcher.dart';
 import '../../constants/spacing.dart';
 import '../../services/location_point_service.dart';
 import '../../utils/icon.dart';
@@ -116,9 +118,6 @@ class _ViewDetailsState extends State<ViewDetails> {
             ),
             DistanceBentoElement(
               lastLocation: lastLocation,
-              onTap: () {
-                widget.onGoToPosition(lastLocation);
-              },
             ),
             BentoGridElement(
               title: lastLocation.altitude == null
@@ -184,10 +183,8 @@ class _ViewDetailsState extends State<ViewDetails> {
 
 class DistanceBentoElement extends StatefulWidget {
   final LocationPointService lastLocation;
-  final VoidCallback onTap;
 
   const DistanceBentoElement({
-    required this.onTap,
     required this.lastLocation,
     super.key,
   });
@@ -238,19 +235,15 @@ class _DistanceBentoElementState extends State<DistanceBentoElement>
     final l10n = AppLocalizations.of(context);
 
     return BentoGridElement(
-      onTap: hasGrantedPermission == false
-          ? () async {
-              final hasGranted = await requestBasicLocationPermission();
-
-              if (hasGranted) {
-                fetchCurrentPosition();
-
-                setState(() {
-                  hasGrantedPermission = true;
-                });
-              }
-            }
-          : widget.onTap,
+      onTap: () {
+        showPlatformModalSheet(
+          context: context,
+          material: MaterialModalSheetData(),
+          builder: (context) => OpenInMaps(
+            destination: widget.lastLocation.asCoords(),
+          ),
+        );
+      },
       title: (() {
         if (!hasGrantedPermission) {
           return l10n.locations_values_distance_permissionRequired;
@@ -260,16 +253,25 @@ class _DistanceBentoElementState extends State<DistanceBentoElement>
           return l10n.loading;
         }
 
+        final distanceInMeters = Geolocator.distanceBetween(
+          currentPosition!.latitude,
+          currentPosition!.longitude,
+          widget.lastLocation.latitude,
+          widget.lastLocation.longitude,
+        );
+
+        if (distanceInMeters < 10) {
+          return l10n.locations_values_distance_nearby;
+        }
+
+        if (distanceInMeters < 1000) {
+          return l10n.locations_values_distance_m(
+            distanceInMeters.toStringAsFixed(0).toString(),
+          );
+        }
+
         return l10n.locations_values_distance_km(
-          (Geolocator.distanceBetween(
-                    currentPosition!.latitude,
-                    currentPosition!.longitude,
-                    widget.lastLocation.latitude,
-                    widget.lastLocation.longitude,
-                  ) /
-                  1000)
-              .floor()
-              .toString(),
+          (distanceInMeters / 1000).toStringAsFixed(0),
         );
       })(),
       type: hasGrantedPermission && currentPosition != null

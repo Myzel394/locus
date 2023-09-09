@@ -7,6 +7,7 @@ import 'package:cryptography/cryptography.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:locus/utils/cryptography/decrypt.dart';
+import 'package:map_launcher/map_launcher.dart';
 import 'package:uuid/uuid.dart';
 
 const uuid = Uuid();
@@ -203,6 +204,8 @@ class LocationPointService {
       );
 
   LatLng asLatLng() => LatLng(latitude, longitude);
+
+  Coords asCoords() => Coords(latitude, longitude);
 
   LocationPointService copyWith({
     final double? latitude,
