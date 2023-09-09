@@ -17,6 +17,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../api/get-locations.dart' as get_locations_api;
 import '../constants/values.dart';
 import 'location_alarm_service/LocationAlarmServiceBase.dart';
+import 'location_alarm_service/ProximityLocationAlarm.dart';
 import 'location_alarm_service/RadiusBasedRegionLocationAlarm.dart';
 import 'location_alarm_service/enums.dart';
 import 'task_service/mixins.dart';
@@ -102,6 +103,8 @@ class TaskView extends ChangeNotifier with LocationBase {
             switch (identifier) {
               case LocationAlarmType.radiusBasedRegion:
                 return RadiusBasedRegionLocationAlarm.fromJSON(alarm);
+              case LocationAlarmType.proximityLocation:
+                return ProximityLocationAlarm.fromJSON(alarm);
             }
           }),
         ),

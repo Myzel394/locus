@@ -34,7 +34,8 @@ class RadiusBasedRegionLocationAlarm extends LocationAlarmServiceBase {
   LocationAlarmType get IDENTIFIER => LocationAlarmType.radiusBasedRegion;
 
   factory RadiusBasedRegionLocationAlarm.fromJSON(
-          final Map<String, dynamic> data) =>
+    final Map<String, dynamic> data,
+  ) =>
       RadiusBasedRegionLocationAlarm(
         center: LatLng.fromJson(data["center"]),
         radius: data["radius"],
@@ -74,10 +75,14 @@ class RadiusBasedRegionLocationAlarm extends LocationAlarmServiceBase {
     switch (type) {
       case RadiusBasedRegionLocationAlarmType.whenEnter:
         return l10n.locationAlarm_radiusBasedRegion_notificationTitle_whenEnter(
-            viewName, zoneName);
+          viewName,
+          zoneName,
+        );
       case RadiusBasedRegionLocationAlarmType.whenLeave:
         return l10n.locationAlarm_radiusBasedRegion_notificationTitle_whenLeave(
-            viewName, zoneName);
+          viewName,
+          zoneName,
+        );
     }
   }
 

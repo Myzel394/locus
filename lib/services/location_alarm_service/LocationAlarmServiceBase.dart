@@ -18,7 +18,7 @@ abstract class LocationAlarmServiceBase {
   LocationAlarmTriggerType check(
     final LocationPointService previousLocation,
     final LocationPointService nextLocation, {
-    final LocationPointService userLocation,
+    required final LocationPointService userLocation,
   });
 
   String getStorageKey() => "location_alarm_service:$IDENTIFIER:$id";

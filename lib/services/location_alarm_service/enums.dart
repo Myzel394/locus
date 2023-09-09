@@ -6,4 +6,5 @@ enum LocationAlarmTriggerType {
 
 enum LocationAlarmType {
   radiusBasedRegion,
+  proximityLocation,
 }
