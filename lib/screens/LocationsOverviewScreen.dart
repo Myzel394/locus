@@ -45,6 +45,7 @@ import 'package:locus/widgets/GoToMyLocationMapAction.dart';
 import 'package:locus/widgets/LocationsMap.dart';
 import 'package:locus/widgets/LocusFlutterMap.dart';
 import 'package:locus/widgets/CompassMapAction.dart';
+import 'package:locus/widgets/MapActionsContainer.dart';
 import 'package:locus/widgets/Paper.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
@@ -1328,69 +1329,62 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     final shades = getPrimaryColorShades(context);
 
     if (settings.getMapProvider() == MapProvider.openStreetMap) {
-      return Positioned(
-        // Add half the difference to center the button
-        right: FAB_MARGIN + diff / 2,
-        bottom: FAB_SIZE +
-            FAB_MARGIN +
-            (isCupertino(context) ? LARGE_SPACE : SMALL_SPACE),
-        child: Column(
-          children: [
-            AnimatedScale(
-              scale: showDetailedLocations ? 1 : 0,
-              duration:
-                  showDetailedLocations ? 1200.milliseconds : 100.milliseconds,
-              curve: showDetailedLocations ? Curves.elasticOut : Curves.easeIn,
-              child: Tooltip(
-                message: disableShowDetailedLocations
-                    ? l10n.locationsOverview_mapAction_detailedLocations_show
-                    : l10n.locationsOverview_mapAction_detailedLocations_hide,
-                preferBelow: false,
-                margin: const EdgeInsets.only(bottom: margin),
-                child: SizedBox.square(
-                  dimension: dimension,
-                  child: Center(
-                    child: Paper(
-                      width: null,
-                      borderRadius: BorderRadius.circular(HUGE_SPACE),
-                      padding: EdgeInsets.zero,
-                      child: IconButton(
-                        color: shades[400],
-                        icon: Icon(disableShowDetailedLocations
-                            ? MdiIcons.mapMarkerMultipleOutline
-                            : MdiIcons.mapMarkerMultiple),
-                        onPressed: () {
-                          setState(() {
-                            disableShowDetailedLocations =
-                                !disableShowDetailedLocations;
-                          });
-                        },
-                      ),
+      return MapActionsContainer(
+        children: [
+          AnimatedScale(
+            scale: showDetailedLocations ? 1 : 0,
+            duration:
+                showDetailedLocations ? 1200.milliseconds : 100.milliseconds,
+            curve: showDetailedLocations ? Curves.elasticOut : Curves.easeIn,
+            child: Tooltip(
+              message: disableShowDetailedLocations
+                  ? l10n.locationsOverview_mapAction_detailedLocations_show
+                  : l10n.locationsOverview_mapAction_detailedLocations_hide,
+              preferBelow: false,
+              margin: const EdgeInsets.only(bottom: margin),
+              child: SizedBox.square(
+                dimension: dimension,
+                child: Center(
+                  child: Paper(
+                    width: null,
+                    borderRadius: BorderRadius.circular(HUGE_SPACE),
+                    padding: EdgeInsets.zero,
+                    child: IconButton(
+                      color: shades[400],
+                      icon: Icon(disableShowDetailedLocations
+                          ? MdiIcons.mapMarkerMultipleOutline
+                          : MdiIcons.mapMarkerMultiple),
+                      onPressed: () {
+                        setState(() {
+                          disableShowDetailedLocations =
+                              !disableShowDetailedLocations;
+                        });
+                      },
                     ),
                   ),
                 ),
               ),
             ),
-            const SizedBox(height: SMALL_SPACE),
-            CompassMapAction(
-              onAlignNorth: () {
-                flutterMapController!.rotate(0);
-              },
-              mapController: flutterMapController!,
-            ),
-            const SizedBox(height: SMALL_SPACE),
-            GoToMyLocationMapAction(
-              animate: locationStatus == LocationStatus.fetching,
-              onGoToMyLocation: () {
-                updateCurrentPosition(
-                  askPermissions: true,
-                  goToPosition: true,
-                  showErrorMessage: true,
-                );
-              },
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(height: SMALL_SPACE),
+          CompassMapAction(
+            onAlignNorth: () {
+              flutterMapController!.rotate(0);
+            },
+            mapController: flutterMapController!,
+          ),
+          const SizedBox(height: SMALL_SPACE),
+          GoToMyLocationMapAction(
+            animate: locationStatus == LocationStatus.fetching,
+            onGoToMyLocation: () {
+              updateCurrentPosition(
+                askPermissions: true,
+                goToPosition: true,
+                showErrorMessage: true,
+              );
+            },
+          ),
+        ],
       );
     }
 
