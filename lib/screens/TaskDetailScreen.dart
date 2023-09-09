@@ -108,7 +108,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
 
     return PlatformScaffold(
       appBar: PlatformAppBar(
-        title: Text(l10n.taskDetails_title),
+        title: Text(widget.task.name),
         material: (_, __) => MaterialAppBarData(
           centerTitle: true,
         ),
