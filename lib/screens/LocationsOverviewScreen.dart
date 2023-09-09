@@ -836,25 +836,39 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
       ),
       children: [
         CircleLayer(
-          circles: viewService.views.reversed
-              .where(
-                  (view) => selectedViewID == null || view.id == selectedViewID)
-              .map(
-                (view) => mergeLocationsIfRequired(view)
-                    .mapIndexed(
-                      (index, location) => CircleMarker(
-                        radius: location.accuracy,
-                        useRadiusInMeter: true,
-                        point: LatLng(location.latitude, location.longitude),
-                        borderStrokeWidth: 1,
-                        color: view.color.withOpacity(.1),
-                        borderColor: view.color,
-                      ),
-                    )
-                    .toList(),
-              )
-              .expand((element) => element)
-              .toList(),
+          circles: selectedViewID == null
+              ? _fetchers.fetchers
+                  .where((fetcher) => fetcher.locations.isNotEmpty)
+                  .map((fetcher) {
+                  final location = fetcher.locations.last;
+
+                  return CircleMarker(
+                    radius: location.accuracy,
+                    useRadiusInMeter: true,
+                    point: LatLng(location.latitude, location.longitude),
+                    borderStrokeWidth: 1,
+                    color: fetcher.view.color.withOpacity(.1),
+                    borderColor: fetcher.view.color,
+                  );
+                }).toList()
+              : viewService.views
+                  .map(
+                    (view) => mergeLocationsIfRequired(view)
+                        .mapIndexed(
+                          (index, location) => CircleMarker(
+                            radius: location.accuracy,
+                            useRadiusInMeter: true,
+                            point:
+                                LatLng(location.latitude, location.longitude),
+                            borderStrokeWidth: 1,
+                            color: view.color.withOpacity(.1),
+                            borderColor: view.color,
+                          ),
+                        )
+                        .toList(),
+                  )
+                  .expand((element) => element)
+                  .toList(),
         ),
         PolylineLayer(
           polylines: List<Polyline>.from(
