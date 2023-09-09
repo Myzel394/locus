@@ -95,6 +95,20 @@ class _TaskTileState extends State<TaskTile> with TaskLinkGenerationMixin {
                   ),
                   onPressed: generateLink,
                 ),
+                PlatformPopupMenuItem(
+                  label: PlatformListTile(
+                    leading: Icon(context.platformIcons.info),
+                    title: Text(l10n.taskAction_showDetails),
+                  ),
+                  onPressed: () {
+                    pushRoute(
+                      context,
+                      (context) => TaskDetailScreen(
+                        task: widget.task,
+                      ),
+                    );
+                  },
+                )
               ],
             ),
       leading: FutureBuilder<bool>(
@@ -117,14 +131,6 @@ class _TaskTileState extends State<TaskTile> with TaskLinkGenerationMixin {
               : null,
         ),
       ),
-      onTap: () {
-        pushRoute(
-          context,
-          (context) => TaskDetailScreen(
-            task: widget.task,
-          ),
-        );
-      },
     );
   }
 }
