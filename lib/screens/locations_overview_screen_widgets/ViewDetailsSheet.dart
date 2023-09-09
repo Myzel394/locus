@@ -13,12 +13,14 @@ import '../../widgets/SimpleAddressFetcher.dart';
 class ViewDetailsSheet extends StatefulWidget {
   final TaskView? view;
   final List<LocationPointService>? locations;
-  final void Function(LatLng position) onGoToPosition;
+  final void Function(LocationPointService position) onGoToPosition;
+  final void Function(LocationPointService location) onVisibleLocationChange;
 
   const ViewDetailsSheet({
     required this.view,
     required this.locations,
     required this.onGoToPosition,
+    required this.onVisibleLocationChange,
     super.key,
   });
 
@@ -139,10 +141,16 @@ class _ViewDetailsSheetState extends State<ViewDetailsSheet> {
                 SizedBox(
                   height: 120,
                   child: PageView.builder(
-                    physics: isExpanded
-                        ? null
-                        : const NeverScrollableScrollPhysics(),
+                    physics: null,
                     onPageChanged: (index) {
+                      final location = widget.locations![index];
+
+                      widget.onVisibleLocationChange(location);
+
+                      if (!isExpanded) {
+                        widget.onGoToPosition(location);
+                      }
+
                       setState(() {
                         locationIndex = index;
                       });
