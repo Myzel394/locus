@@ -75,7 +75,7 @@ class _RadiusRegionMetaDataSheetState extends State<RadiusRegionMetaDataSheet> {
               ]
             : [
                 Text(
-                  l10n.location_addAlarm_radiusBased_name_description,
+                  l10n.location_addAlarm_geo_name_description,
                   style: getSubTitleTextStyle(context),
                 ),
                 const SizedBox(height: MEDIUM_SPACE),

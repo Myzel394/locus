@@ -709,18 +709,38 @@
       }
     }
   },
-  "location_addAlarm_radiusBased_title": "Add radius-based Alarm",
+  "location_addAlarm_geo_title": "Add geo-based alarm",
+  "location_addAlarm_geo_name_description": "Please enter a name for this region",
+  "location_addAlarm_geo_help_tapDescription": "Tap on the map to mark the center of your region",
+  "location_addAlarm_proximity_title": "Add proximity alarm",
+  "location_addAlarm_proximity_description": "Proximity alarms are triggered when you are within a certain distance of your friend.",
+  "location_addAlarm_radiusBased_radius_meters": "Radius: {value} meters",
+  "@location_addAlarm_radiusBased_radius_meters": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "location_addAlarm_radiusBased_radius_kilometers": "Radius: {value} km",
+  "@location_addAlarm_radiusBased_radius_kilometers": {
+    "placeholders": {
+      "value": {
+        "type": "double"
+      }
+    }
+  },
   "location_addAlarm_radiusBased_isInScaleMode": "You can now scale the radius by pinching and zooming into the map. Tap on the screen to go back to normal mode.",
   "location_addAlarm_radiusBased_addLabel": "Select region",
   "location_addAlarm_radiusBased_help_title": "Radius-based Alarms",
   "location_addAlarm_radiusBased_help_description": "Radius-based alarms are triggered either when leaving or entering a region. After defining your region, you can decide when your alarm should trigger.",
-  "location_addAlarm_radiusBased_help_tapDescription": "Tap on the map to mark the center of your region",
   "location_addAlarm_radiusBased_help_pinchDescription": "Press and hold to enter into scale mode. You can then change the radius by pinching and zooming into the map.",
   "location_addAlarm_radiusBased_trigger_title": "When should your alarm trigger?",
   "location_addAlarm_radiusBased_trigger_whenEnter": "Trigger when entering",
   "location_addAlarm_radiusBased_trigger_whenLeave": "Trigger when leaving",
-  "location_addAlarm_radiusBased_name_description": "Please enter a name for this region",
   "location_addAlarm_actionLabel": "Add Alarm",
+  "location_addAlarm_selectType_title": "Select Alarm Type",
+  "location_addAlarm_selectType_description": "What kind of alarm do you want to add?",
   "permissions_openSettings_label": "Open settings",
   "permissions_openSettings_failed_title": "Settings could not be opened",
   "permissions_location_askPermission_title": "Grant access to your location",

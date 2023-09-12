@@ -7,13 +7,15 @@ import 'package:flutter_map/plugin_api.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:locus/constants/spacing.dart';
-import 'package:locus/screens/view_alarm_screen_widgets/ViewAlarmSelectRadiusRegionScreen.dart';
+import 'package:locus/screens/view_alarm_screen_widgets/ViewAlarmSelectGeoBasedScreen.dart';
 import 'package:locus/services/location_alarm_service/enums.dart';
 import 'package:locus/services/location_alarm_service/index.dart';
 import 'package:locus/services/location_point_service.dart';
 import 'package:locus/services/log_service.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:locus/utils/theme.dart';
+import 'package:locus/widgets/ModalSheet.dart';
+import 'package:locus/widgets/ModalSheetContent.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:provider/provider.dart';
 
@@ -38,6 +40,48 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
   LocationPointService? lastLocation;
 
   void _addNewAlarm() async {
+    final l10n = AppLocalizations.of(context);
+
+    final alarmType = await showPlatformModalSheet(
+      context: context,
+      material: MaterialModalSheetData(
+        backgroundColor: Colors.transparent,
+        isScrollControlled: true,
+        isDismissible: true,
+      ),
+      builder: (context) => ModalSheet(
+        child: ModalSheetContent(
+          icon: Icons.alarm_rounded,
+          title: l10n.location_addAlarm_selectType_title,
+          description: l10n.location_addAlarm_selectType_description,
+          children: [
+            PlatformListTile(
+              title: Text(l10n.location_addAlarm_geo_title),
+              leading: const Icon(Icons.location_on_rounded),
+              onTap: () {
+                Navigator.of(context).pop(
+                  LocationAlarmType.radiusBasedRegion,
+                );
+              },
+            ),
+            PlatformListTile(
+              title: Text(l10n.location_addAlarm_proximity_title),
+              leading: const Icon(Icons.location_searching_rounded),
+              onTap: () {
+                Navigator.of(context).pop(
+                  LocationAlarmType.proximityLocation,
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (!mounted || alarmType == null) {
+      return;
+    }
+
     final logService = context.read<LogService>();
     final viewService = context.read<ViewService>();
     final RadiusBasedRegionLocationAlarm? alarm = (await (() {
@@ -45,14 +89,18 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
         return showCupertinoModalBottomSheet(
           context: context,
           backgroundColor: Colors.transparent,
-          builder: (_) => const ViewAlarmSelectRadiusRegionScreen(),
+          builder: (_) => ViewAlarmSelectGeoBasedScreen(
+            type: alarmType,
+          ),
         );
       }
 
       return Navigator.of(context).push(
         NativePageRoute(
           context: context,
-          builder: (context) => const ViewAlarmSelectRadiusRegionScreen(),
+          builder: (context) => ViewAlarmSelectGeoBasedScreen(
+            type: alarmType,
+          ),
         ),
       );
     })()) as RadiusBasedRegionLocationAlarm?;
