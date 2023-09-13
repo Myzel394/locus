@@ -1,6 +1,8 @@
 import 'dart:math';
 
+import 'package:apple_maps_flutter/apple_maps_flutter.dart' as apple_maps;
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:latlong2/latlong.dart';
@@ -8,11 +10,9 @@ import 'package:locus/constants/spacing.dart';
 import 'package:locus/constants/values.dart';
 import 'package:locus/utils/location/get-fallback-location.dart';
 import 'package:locus/widgets/LocusFlutterMap.dart';
-import 'package:apple_maps_flutter/apple_maps_flutter.dart' as apple_maps;
 import 'package:locus/widgets/MapBanner.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:vibration/vibration.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 const INITIAL_RADIUS = 50.0;
 
@@ -22,6 +22,7 @@ class LocationRadiusSelectorMap extends StatefulWidget {
   final LatLng? center;
   final double? radius;
   final void Function(LatLng, double)? onLocationSelected;
+  final List<Widget> children;
 
   const LocationRadiusSelectorMap({
     super.key,
@@ -30,6 +31,7 @@ class LocationRadiusSelectorMap extends StatefulWidget {
     this.onLocationSelected,
     this.center,
     this.radius,
+    this.children = const [],
   });
 
   @override
@@ -102,112 +104,116 @@ class _LocationRadiusSelectorMapState extends State<LocationRadiusSelectorMap> {
     previousScale = scaleUpdateDetails.scale;
   }
 
+  void leaveScaleMode() {
+    Vibration.vibrate(duration: 50);
+
+    setState(() {
+      isInScaleMode = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
 
     return GestureDetector(
       onScaleUpdate: isInScaleMode ? updateZoom : null,
-      onTap: isInScaleMode
-          ? () {
-              Vibration.vibrate(duration: 50);
+      onTap: isInScaleMode ? leaveScaleMode : null,
+      child: Stack(
+        children: <Widget>[
+          Positioned.fill(
+            child: IgnorePointer(
+              ignoring: isInScaleMode,
+              child: LocusFlutterMap(
+                mapController: widget.flutterMapController!,
+                options: MapOptions(
+                  onLongPress: (_, __) {
+                    Vibration.vibrate(duration: 100);
 
-              setState(() {
-                isInScaleMode = false;
-              });
-            }
-          : null,
-      child: Expanded(
-        flex: 10,
-        child: Stack(
-          children: <Widget>[
-            Positioned.fill(
-              child: Stack(
-                children: <Widget>[
-                  IgnorePointer(
-                    ignoring: isInScaleMode,
-                    child: LocusFlutterMap(
-                      mapController: widget.flutterMapController!,
-                      options: MapOptions(
-                        onLongPress: (_, __) {
-                          Vibration.vibrate(duration: 100);
+                    setState(() {
+                      isInScaleMode = true;
+                    });
+                  },
+                  center: getFallbackLocation(context),
+                  zoom: FALLBACK_LOCATION_ZOOM_LEVEL,
+                  onTap: (tapPosition, location) {
+                    location = LatLng(
+                      location.latitude,
+                      location.longitude,
+                    );
 
-                          setState(() {
-                            isInScaleMode = true;
-                          });
-                        },
-                        center: getFallbackLocation(context),
-                        zoom: FALLBACK_LOCATION_ZOOM_LEVEL,
-                        onTap: (tapPosition, location) {
-                          location = LatLng(
-                            location.latitude,
-                            location.longitude,
-                          );
+                    if (radius == null) {
+                      setState(() {
+                        radius = INITIAL_RADIUS;
+                        center = location;
+                      });
+                    }
 
-                          if (radius == null) {
-                            setState(() {
-                              radius = INITIAL_RADIUS;
-                              center = location;
-                            });
-                          }
-
-                          widget.onLocationSelected
-                              ?.call(location, radius ?? INITIAL_RADIUS);
-                        },
-                        maxZoom: 18,
-                      ),
-                      children: [
-                        if (isInScaleMode)
-                          Shimmer.fromColors(
-                            baseColor: Colors.red,
-                            highlightColor: Colors.red.withOpacity(.2),
-                            child: getFlutterMapCircleLayer(),
-                          )
-                        else
-                          getFlutterMapCircleLayer(),
-                        CurrentLocationLayer(
-                          followOnLocationUpdate: FollowOnLocationUpdate.always,
-                        )
-                      ],
-                    ),
-                  ),
+                    widget.onLocationSelected
+                        ?.call(location, radius ?? INITIAL_RADIUS);
+                  },
+                  maxZoom: 18,
+                ),
+                children: [
                   if (isInScaleMode)
-                    MapBanner(
-                      child: Row(
-                        children: <Widget>[
-                          const Icon(Icons.pinch_rounded),
-                          const SizedBox(width: MEDIUM_SPACE),
-                          Flexible(
-                            child: Text(
-                              l10n.location_addAlarm_radiusBased_isInScaleMode,
-                              style: const TextStyle(
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  if (widget.center != null && widget.radius != null)
-                    Positioned(
-                      bottom: LARGE_SPACE,
-                      left: 0,
-                      right: 0,
-                      child: Text(
-                        widget.radius! > 10000
-                            ? l10n
-                                .location_addAlarm_radiusBased_radius_kilometers(
-                                    widget.radius! / 1000)
-                            : l10n.location_addAlarm_radiusBased_radius_meters(
-                                widget.radius!.round()),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
+                    Shimmer.fromColors(
+                      baseColor: Colors.red,
+                      highlightColor: Colors.red.withOpacity(.2),
+                      child: getFlutterMapCircleLayer(),
+                    )
+                  else
+                    getFlutterMapCircleLayer(),
+                  CurrentLocationLayer(
+                    followOnLocationUpdate: FollowOnLocationUpdate.always,
+                  )
                 ],
               ),
-            )
+            ),
+          ),
+          // If the map is deactivated via the `IgnorePointer`
+          // widget, we need some other widget to handle taps
+          // For this, we use an empty `Container`
+          if (isInScaleMode) ...[
+            Positioned.fill(
+              child: Container(
+                color: Colors.transparent,
+                width: double.infinity,
+                height: double.infinity,
+              ),
+            ),
+            MapBanner(
+              child: Row(
+                children: <Widget>[
+                  const Icon(Icons.pinch_rounded),
+                  const SizedBox(width: MEDIUM_SPACE),
+                  Flexible(
+                    child: Text(
+                      l10n.location_addAlarm_radiusBased_isInScaleMode,
+                      style: const TextStyle(
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
-        ),
+          if (widget.center != null && widget.radius != null)
+            Positioned(
+              bottom: LARGE_SPACE,
+              left: 0,
+              right: 0,
+              child: Text(
+                widget.radius! > 10000
+                    ? l10n.location_addAlarm_radiusBased_radius_kilometers(
+                        widget.radius! / 1000)
+                    : l10n.location_addAlarm_radiusBased_radius_meters(
+                        widget.radius!.round()),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ...widget.children,
+        ],
       ),
     );
   }

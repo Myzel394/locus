@@ -22,8 +22,6 @@ import 'package:locus/widgets/MapActionsContainer.dart';
 import 'package:locus/widgets/RequestNotificationPermissionMixin.dart';
 import 'package:provider/provider.dart';
 
-import '../../widgets/MapBanner.dart';
-
 class ViewAlarmSelectGeoBasedScreen extends StatefulWidget {
   final LocationAlarmType type;
 
@@ -241,29 +239,18 @@ class _ViewAlarmSelectGeoBasedScreenState
         children: <Widget>[
           Expanded(
             flex: 10,
-            child: Stack(
-              children: <Widget>[
-                Positioned.fill(
-                  child: IgnorePointer(
-                    ignoring: isInScaleMode,
-                    child: Stack(
-                      children: <Widget>[
-                        LocationRadiusSelectorMap(
-                          center: alarmCenter,
-                          radius: radius,
-                          flutterMapController: flutterMapController,
-                          onLocationSelected: (location, radius) {
-                            setState(() {
-                              alarmCenter = location;
-                              this.radius = radius;
-                            });
-                          },
-                        ),
-                        buildMapActions(),
-                      ],
-                    ),
-                  ),
-                ),
+            child: LocationRadiusSelectorMap(
+              center: alarmCenter,
+              radius: radius,
+              flutterMapController: flutterMapController,
+              onLocationSelected: (location, radius) {
+                setState(() {
+                  alarmCenter = location;
+                  this.radius = radius;
+                });
+              },
+              children: [
+                buildMapActions(),
               ],
             ),
           ),
