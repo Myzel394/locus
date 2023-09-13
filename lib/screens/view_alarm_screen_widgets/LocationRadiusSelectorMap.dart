@@ -177,7 +177,7 @@ class _LocationRadiusSelectorMapState extends State<LocationRadiusSelectorMap> {
                   else
                     getFlutterMapCircleLayer(),
                   CurrentLocationLayer(
-                    followOnLocationUpdate: FollowOnLocationUpdate.always,
+                    followOnLocationUpdate: FollowOnLocationUpdate.once,
                   )
                 ],
               ),
