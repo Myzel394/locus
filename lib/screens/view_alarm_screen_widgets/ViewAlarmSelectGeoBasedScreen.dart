@@ -83,38 +83,39 @@ class _ViewAlarmSelectGeoBasedScreenState
 
     showHelperSheet(
       context: context,
-      builder: (context) => Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Text(l10n.location_addAlarm_radiusBased_help_description),
-          const SizedBox(height: MEDIUM_SPACE),
-          if (widget.type == LocationAlarmType.radiusBasedRegion) ...[
-            Row(
-              children: <Widget>[
-                const Icon(Icons.touch_app_rounded),
-                const SizedBox(width: MEDIUM_SPACE),
-                Flexible(
-                  child: Text(
-                    l10n.location_addAlarm_geo_help_tapDescription,
-                  ),
+      builder: (context) =>
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Text(l10n.location_addAlarm_radiusBased_help_description),
+              const SizedBox(height: MEDIUM_SPACE),
+              if (widget.type == LocationAlarmType.radiusBasedRegion) ...[
+                Row(
+                  children: <Widget>[
+                    const Icon(Icons.touch_app_rounded),
+                    const SizedBox(width: MEDIUM_SPACE),
+                    Flexible(
+                      child: Text(
+                        l10n.location_addAlarm_geo_help_tapDescription,
+                      ),
+                    ),
+                  ],
                 ),
               ],
-            ),
-          ],
-          const SizedBox(height: MEDIUM_SPACE),
-          Row(
-            children: <Widget>[
-              const Icon(Icons.pinch_rounded),
-              const SizedBox(width: MEDIUM_SPACE),
-              Flexible(
-                child: Text(
-                  l10n.location_addAlarm_radiusBased_help_pinchDescription,
-                ),
+              const SizedBox(height: MEDIUM_SPACE),
+              Row(
+                children: <Widget>[
+                  const Icon(Icons.pinch_rounded),
+                  const SizedBox(width: MEDIUM_SPACE),
+                  Flexible(
+                    child: Text(
+                      l10n.location_addAlarm_radiusBased_help_pinchDescription,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-        ],
-      ),
       title: l10n.location_addAlarm_radiusBased_help_title,
       sheetName: HelperSheet.radiusBasedAlarms,
     );
@@ -138,8 +139,8 @@ class _ViewAlarmSelectGeoBasedScreenState
         final zoom = _hasSetInitialPosition
             ? (16 - log(position.accuracy / 200) / log(2)).toDouble()
             : flutterMapController?.zoom ??
-                (await appleMapController?.getZoomLevel()) ??
-                16.0;
+            (await appleMapController?.getZoomLevel()) ??
+            16.0;
 
         flutterMapController?.move(
           LatLng(position.latitude, position.longitude),
@@ -176,14 +177,15 @@ class _ViewAlarmSelectGeoBasedScreenState
         isDismissible: true,
         isScrollControlled: true,
       ),
-      builder: (_) => RadiusRegionMetaDataSheet(
-        center: alarmCenter!,
-        radius: radius.toDouble(),
-      ),
+      builder: (_) =>
+          RadiusRegionMetaDataSheet(
+            center: alarmCenter!,
+            radius: radius.toDouble(),
+          ),
     );
 
     final hasGrantedNotificationAccess =
-        await showNotificationPermissionDialog();
+    await showNotificationPermissionDialog();
 
     if (!hasGrantedNotificationAccess) {
       return;
@@ -214,25 +216,28 @@ class _ViewAlarmSelectGeoBasedScreenState
     final l10n = AppLocalizations.of(context);
 
     return PlatformScaffold(
-      material: (_, __) => MaterialScaffoldData(
-        resizeToAvoidBottomInset: false,
-      ),
+      material: (_, __) =>
+          MaterialScaffoldData(
+            resizeToAvoidBottomInset: false,
+          ),
       appBar: PlatformAppBar(
         title: Text(l10n.location_addAlarm_geo_title),
         trailingActions: [
           PlatformIconButton(
-            cupertino: (_, __) => CupertinoIconButtonData(
-              padding: EdgeInsets.zero,
-            ),
+            cupertino: (_, __) =>
+                CupertinoIconButtonData(
+                  padding: EdgeInsets.zero,
+                ),
             icon: Icon(context.platformIcons.help),
             onPressed: showHelp,
           ),
         ],
-        cupertino: (_, __) => CupertinoNavigationBarData(
-          backgroundColor: isInScaleMode
-              ? null
-              : getCupertinoAppBarColorForMapScreen(context),
-        ),
+        cupertino: (_, __) =>
+            CupertinoNavigationBarData(
+              backgroundColor: isInScaleMode
+                  ? null
+                  : getCupertinoAppBarColorForMapScreen(context),
+            ),
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -244,6 +249,11 @@ class _ViewAlarmSelectGeoBasedScreenState
               radius: radius,
               flutterMapController: flutterMapController,
               onLocationChange: (location) {
+                // Proximity does not need a center
+                if (widget.type == LocationAlarmType.proximityLocation) {
+                  return;
+                }
+
                 setState(() {
                   alarmCenter = location;
                 });
