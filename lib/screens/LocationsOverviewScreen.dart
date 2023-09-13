@@ -28,9 +28,11 @@ import 'package:locus/screens/locations_overview_screen_widgets/LocationFetchers
 import 'package:locus/screens/locations_overview_screen_widgets/OutOfBoundMarker.dart';
 import 'package:locus/screens/locations_overview_screen_widgets/ShareLocationSheet.dart';
 import 'package:locus/screens/locations_overview_screen_widgets/ViewLocationPopup.dart';
+import 'package:locus/services/current_location_service.dart';
 import 'package:locus/services/manager_service/background_locator.dart';
 import 'package:locus/services/manager_service/helpers.dart';
 import 'package:locus/services/settings_service/SettingsMapLocation.dart';
+import 'package:locus/services/settings_service/index.dart';
 import 'package:locus/services/task_service/index.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:locus/utils/location/get-fallback-location.dart';
@@ -40,11 +42,11 @@ import 'package:locus/utils/permissions/has-granted.dart';
 import 'package:locus/utils/permissions/request.dart';
 import 'package:locus/utils/ui-message/enums.dart';
 import 'package:locus/utils/ui-message/show-message.dart';
+import 'package:locus/widgets/CompassMapAction.dart';
 import 'package:locus/widgets/FABOpenContainer.dart';
 import 'package:locus/widgets/GoToMyLocationMapAction.dart';
 import 'package:locus/widgets/LocationsMap.dart';
 import 'package:locus/widgets/LocusFlutterMap.dart';
-import 'package:locus/widgets/CompassMapAction.dart';
 import 'package:locus/widgets/MapActionsContainer.dart';
 import 'package:locus/widgets/Paper.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
@@ -60,7 +62,6 @@ import '../services/app_update_service.dart';
 import '../services/location_point_service.dart';
 import '../services/log_service.dart';
 import '../services/manager_service/background_fetch.dart';
-import 'package:locus/services/settings_service/index.dart';
 import '../utils/PageRoute.dart';
 import '../utils/color.dart';
 import '../utils/platform.dart';
@@ -146,6 +147,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     final settings = context.read<SettingsService>();
     final appUpdateService = context.read<AppUpdateService>();
     final locationFetchers = context.read<LocationFetchers>();
+    final currentLocation = context.read<CurrentLocationService>();
 
     _handleViewAlarmChecker();
     _handleNotifications();
@@ -171,6 +173,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
 
         appUpdateService.addListener(_rebuild);
         viewService.addListener(_handleViewServiceChange);
+        currentLocation.addListener(_updatePosition);
 
         Geolocator.checkPermission().then((status) {
           if ({LocationPermission.always, LocationPermission.whileInUse}
@@ -207,6 +210,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
   dispose() {
     final appUpdateService = context.read<AppUpdateService>();
     final locationFetchers = context.read<LocationFetchers>();
+    final currentLocation = context.read<CurrentLocationService>();
 
     flutterMapController?.dispose();
 
@@ -220,6 +224,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
 
     appUpdateService.removeListener(_rebuild);
     locationFetchers.removeLocationUpdatesListener(_rebuild);
+    currentLocation.removeListener(_updatePosition);
 
     super.dispose();
   }
@@ -237,6 +242,24 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     }
   }
 
+  void _updatePosition() {
+    final location = context
+        .read<CurrentLocationService>()
+        .currentPosition;
+
+    if (location == null) {
+      return;
+    }
+
+    _currentLocationPositionStream.add(
+      LocationMarkerPosition(
+        latitude: location.latitude,
+        longitude: location.longitude,
+        accuracy: location.accuracy,
+      ),
+    );
+  }
+
   void _handleViewServiceChange() {
     final viewService = context.read<ViewService>();
     final locationFetchers = context.read<LocationFetchers>();
@@ -250,6 +273,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
   void _setLocationFromSettings() async {
     final settings = context.read<SettingsService>();
     final position = settings.getLastMapLocation();
+    final currentLocation = context.read<CurrentLocationService>();
 
     if (position == null) {
       return;
@@ -259,12 +283,17 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
       locationStatus = LocationStatus.stale;
     });
 
-    _currentLocationPositionStream.add(
-      LocationMarkerPosition(
+    currentLocation.updateCurrentPosition(
+      Position(
         latitude: position.latitude,
         longitude: position.longitude,
         // Always use a high accuracy, since we are using a cached location
         accuracy: max(100, position.accuracy),
+        timestamp: DateTime.now(),
+        altitude: 0,
+        heading: 0,
+        speed: 0,
+        speedAccuracy: 0,
       ),
     );
   }
@@ -401,14 +430,9 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
 
     _positionStream!.listen((position) async {
       final taskService = context.read<TaskService>();
+      final currentLocation = context.read<CurrentLocationService>();
 
-      _currentLocationPositionStream.add(
-        LocationMarkerPosition(
-          latitude: position.latitude,
-          longitude: position.longitude,
-          accuracy: position.accuracy,
-        ),
-      );
+      currentLocation.updateCurrentPosition(position);
 
       _checkViewAlarms(position);
       _updateLocationToSettings(position);
@@ -646,6 +670,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     required final bool goToPosition,
     required final bool showErrorMessage,
   }) async {
+    final currentLocation = context.read<CurrentLocationService>();
     final previousValue = locationStatus;
 
     setState(() {
@@ -681,13 +706,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     try {
       final latestPosition = await getCurrentPosition();
 
-      _currentLocationPositionStream.add(
-        LocationMarkerPosition(
-          latitude: latestPosition.latitude,
-          longitude: latestPosition.longitude,
-          accuracy: latestPosition.accuracy,
-        ),
-      );
+      currentLocation.updateCurrentPosition(latestPosition);
 
       if (goToPosition) {
         _animateToPosition(latestPosition);

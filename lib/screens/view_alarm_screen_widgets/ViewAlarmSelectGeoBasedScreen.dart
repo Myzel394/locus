@@ -10,6 +10,7 @@ import 'package:latlong2/latlong.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/screens/view_alarm_screen_widgets/LocationRadiusSelectorMap.dart';
 import 'package:locus/screens/view_alarm_screen_widgets/RadiusRegionMetaDataSheet.dart';
+import 'package:locus/services/current_location_service.dart';
 import 'package:locus/services/location_alarm_service/enums.dart';
 import 'package:locus/services/location_alarm_service/index.dart';
 import 'package:locus/services/settings_service/index.dart';
@@ -57,25 +58,64 @@ class _ViewAlarmSelectGeoBasedScreenState
     super.initState();
 
     final settings = context.read<SettingsService>();
+
     if (settings.mapProvider == MapProvider.openStreetMap) {
       flutterMapController = MapController();
     }
 
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       goToCurrentPosition();
 
-      final settings = context.read<SettingsService>();
-
-      if (!settings.hasSeenHelperSheet(HelperSheet.radiusBasedAlarms)) {
-        await Future.delayed(const Duration(seconds: 1));
-
-        if (!mounted) {
-          return;
-        }
-
-        showHelp();
-      }
+      _setPositionFromCurrentLocationService();
+      _showHelperSheetIfRequired();
     });
+  }
+
+  void _setPositionFromCurrentLocationService() {
+    final currentLocation = context.read<CurrentLocationService>();
+
+    if (currentLocation.currentPosition != null) {
+      _animateToPosition(currentLocation.currentPosition!);
+    }
+  }
+
+  void _showHelperSheetIfRequired() async {
+    final settings = context.read<SettingsService>();
+
+    if (!settings.hasSeenHelperSheet(HelperSheet.radiusBasedAlarms)) {
+      await Future.delayed(const Duration(seconds: 1));
+
+      if (!mounted) {
+        return;
+      }
+
+      showHelp();
+    }
+  }
+
+  void _animateToPosition(final Position position) async {
+    final zoom = _hasSetInitialPosition
+        ? (16 - log(position.accuracy / 200) / log(2)).toDouble()
+        : flutterMapController?.zoom ??
+        (await appleMapController?.getZoomLevel()) ??
+        16.0;
+
+    flutterMapController?.move(
+      LatLng(position.latitude, position.longitude),
+      zoom,
+    );
+    appleMapController?.moveCamera(
+      apple_maps.CameraUpdate.newLatLng(
+        apple_maps.LatLng(position.latitude, position.longitude),
+      ),
+    );
+
+    if (!_hasSetInitialPosition) {
+      _hasSetInitialPosition = true;
+      setState(() {
+        alarmCenter = LatLng(position.latitude, position.longitude);
+      });
+    }
   }
 
   void showHelp() {
@@ -132,32 +172,15 @@ class _ViewAlarmSelectGeoBasedScreenState
 
     _positionStream = getLastAndCurrentPosition()
       ..listen((position) async {
+        final currentLocation = context.read<CurrentLocationService>();
+
+        currentLocation.updateCurrentPosition(position);
+
         setState(() {
           isGoingToCurrentPosition = false;
         });
 
-        final zoom = _hasSetInitialPosition
-            ? (16 - log(position.accuracy / 200) / log(2)).toDouble()
-            : flutterMapController?.zoom ??
-            (await appleMapController?.getZoomLevel()) ??
-            16.0;
-
-        flutterMapController?.move(
-          LatLng(position.latitude, position.longitude),
-          zoom,
-        );
-        appleMapController?.moveCamera(
-          apple_maps.CameraUpdate.newLatLng(
-            apple_maps.LatLng(position.latitude, position.longitude),
-          ),
-        );
-
-        if (!_hasSetInitialPosition) {
-          _hasSetInitialPosition = true;
-          setState(() {
-            alarmCenter = LatLng(position.latitude, position.longitude);
-          });
-        }
+        _animateToPosition(position);
       });
   }
 
