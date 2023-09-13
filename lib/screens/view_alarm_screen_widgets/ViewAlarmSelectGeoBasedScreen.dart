@@ -243,10 +243,14 @@ class _ViewAlarmSelectGeoBasedScreenState
               center: alarmCenter,
               radius: radius,
               flutterMapController: flutterMapController,
-              onLocationSelected: (location, radius) {
+              onLocationChange: (location) {
                 setState(() {
                   alarmCenter = location;
-                  this.radius = radius;
+                });
+              },
+              onRadiusChange: (newRadius) {
+                setState(() {
+                  radius = newRadius;
                 });
               },
               children: [

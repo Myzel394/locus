@@ -21,14 +21,18 @@ class LocationRadiusSelectorMap extends StatefulWidget {
   final apple_maps.AppleMapController? appleMapController;
   final LatLng? center;
   final double? radius;
-  final void Function(LatLng, double)? onLocationSelected;
+  final void Function(LatLng)? onLocationChange;
+  final void Function(double)? onRadiusChange;
+  final bool enableRealTimeRadiusUpdate;
   final List<Widget> children;
 
   const LocationRadiusSelectorMap({
     super.key,
     this.flutterMapController,
     this.appleMapController,
-    this.onLocationSelected,
+    this.onLocationChange,
+    this.onRadiusChange,
+    this.enableRealTimeRadiusUpdate = false,
     this.center,
     this.radius,
     this.children = const [],
@@ -97,9 +101,13 @@ class _LocationRadiusSelectorMapState extends State<LocationRadiusSelectorMap> {
       difference > 0 ? radius! + multiplier : radius! - multiplier,
     );
 
-    setState(() {
-      radius = newRadius;
-    });
+    if (widget.enableRealTimeRadiusUpdate) {
+      widget.onRadiusChange?.call(newRadius);
+    } else {
+      setState(() {
+        radius = newRadius;
+      });
+    }
 
     previousScale = scaleUpdateDetails.scale;
   }
@@ -110,6 +118,10 @@ class _LocationRadiusSelectorMapState extends State<LocationRadiusSelectorMap> {
     setState(() {
       isInScaleMode = false;
     });
+
+    if (!widget.enableRealTimeRadiusUpdate) {
+      widget.onRadiusChange?.call(radius!);
+    }
   }
 
   @override
@@ -142,15 +154,16 @@ class _LocationRadiusSelectorMapState extends State<LocationRadiusSelectorMap> {
                       location.longitude,
                     );
 
+                    widget.onLocationChange?.call(location);
+
                     if (radius == null) {
                       setState(() {
                         radius = INITIAL_RADIUS;
                         center = location;
                       });
-                    }
 
-                    widget.onLocationSelected
-                        ?.call(location, radius ?? INITIAL_RADIUS);
+                      widget.onRadiusChange?.call(INITIAL_RADIUS);
+                    }
                   },
                   maxZoom: 18,
                 ),
@@ -198,17 +211,20 @@ class _LocationRadiusSelectorMapState extends State<LocationRadiusSelectorMap> {
               ),
             ),
           ],
-          if (widget.center != null && widget.radius != null)
+          if (widget.center != null && radius != null)
             Positioned(
               bottom: LARGE_SPACE,
               left: 0,
               right: 0,
               child: Text(
-                widget.radius! > 10000
+                radius! > 10000
                     ? l10n.location_addAlarm_radiusBased_radius_kilometers(
-                        widget.radius! / 1000)
+                        double.parse(
+                          (radius! / 1000).toStringAsFixed(1),
+                        ),
+                      )
                     : l10n.location_addAlarm_radiusBased_radius_meters(
-                        widget.radius!.round()),
+                        radius!.round()),
                 textAlign: TextAlign.center,
               ),
             ),
