@@ -7,7 +7,7 @@ import 'package:flutter_map/plugin_api.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:locus/constants/spacing.dart';
-import 'package:locus/screens/view_alarm_screen_widgets/ViewAlarmSelectGeoBasedScreen.dart';
+import 'package:locus/screens/view_alarm_screen_widgets/ViewAlarmSelectRadiusBasedScreen.dart';
 import 'package:locus/services/location_alarm_service/enums.dart';
 import 'package:locus/services/location_alarm_service/index.dart';
 import 'package:locus/services/location_point_service.dart';
@@ -57,19 +57,21 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
           children: [
             PlatformListTile(
               title: Text(l10n.location_addAlarm_geo_title),
-              leading: const Icon(Icons.location_on_rounded),
+              subtitle: Text(l10n.location_addAlarm_geo_description),
+              leading: const Icon(Icons.circle),
               onTap: () {
                 Navigator.of(context).pop(
-                  LocationAlarmType.radiusBasedRegion,
+                  LocationAlarmType.geo,
                 );
               },
             ),
             PlatformListTile(
               title: Text(l10n.location_addAlarm_proximity_title),
+              subtitle: Text(l10n.location_addAlarm_proximity_description),
               leading: const Icon(Icons.location_searching_rounded),
               onTap: () {
                 Navigator.of(context).pop(
-                  LocationAlarmType.proximityLocation,
+                  LocationAlarmType.proximity,
                 );
               },
             ),
@@ -84,12 +86,12 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
 
     final logService = context.read<LogService>();
     final viewService = context.read<ViewService>();
-    final RadiusBasedRegionLocationAlarm? alarm = (await (() {
+    final GeoLocationAlarm? alarm = (await (() {
       if (isCupertino(context)) {
         return showCupertinoModalBottomSheet(
           context: context,
           backgroundColor: Colors.transparent,
-          builder: (_) => ViewAlarmSelectGeoBasedScreen(
+          builder: (_) => ViewAlarmSelectRadiusBasedScreen(
             type: alarmType,
           ),
         );
@@ -98,12 +100,12 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
       return Navigator.of(context).push(
         NativePageRoute(
           context: context,
-          builder: (context) => ViewAlarmSelectGeoBasedScreen(
+          builder: (context) => ViewAlarmSelectRadiusBasedScreen(
             type: alarmType,
           ),
         ),
       );
-    })()) as RadiusBasedRegionLocationAlarm?;
+    })()) as GeoLocationAlarm?;
 
     if (!mounted) {
       return;
@@ -120,7 +122,7 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
       Log.createAlarm(
         initiator: LogInitiator.user,
         id: alarm.id,
-        alarmType: LocationAlarmType.radiusBasedRegion,
+        alarmType: LocationAlarmType.geo,
         viewID: widget.view.id,
         viewName: widget.view.name,
       ),
@@ -192,7 +194,7 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
     setState(() {});
   }
 
-  Widget buildMap(final RadiusBasedRegionLocationAlarm alarm) {
+  Widget buildMap(final GeoLocationAlarm alarm) {
     // Apple Maps doesn't seem to be working with multiple maps
     // see https://github.com/LuisThein/apple_maps_flutter/issues/44
     /*
@@ -286,55 +288,15 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
                           shrinkWrap: true,
                           itemCount: widget.view.alarms.length,
                           itemBuilder: (context, index) {
-                            final RadiusBasedRegionLocationAlarm alarm =
+                            final GeoLocationAlarm alarm =
                                 widget.view.alarms[index]
-                                    as RadiusBasedRegionLocationAlarm;
+                                    as GeoLocationAlarm;
 
                             return Padding(
                               padding: const EdgeInsets.only(
                                 bottom: MEDIUM_SPACE,
                               ),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: <Widget>[
-                                  PlatformListTile(
-                                    title: Text(alarm.zoneName),
-                                    leading: alarm.getIcon(context),
-                                    trailing: PlatformIconButton(
-                                      icon: Icon(context.platformIcons.delete),
-                                      onPressed: () async {
-                                        final viewService =
-                                            context.read<ViewService>();
-                                        final logService =
-                                            context.read<LogService>();
-
-                                        widget.view.removeAlarm(alarm);
-                                        await viewService.update(widget.view);
-
-                                        await logService.addLog(
-                                          Log.deleteAlarm(
-                                            initiator: LogInitiator.user,
-                                            viewID: widget.view.id,
-                                            viewName: widget.view.name,
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                  ClipRRect(
-                                    borderRadius:
-                                        BorderRadius.circular(LARGE_SPACE),
-                                    child: SizedBox(
-                                      width: double.infinity,
-                                      height: 200,
-                                      child: IgnorePointer(
-                                        ignoring: true,
-                                        child: buildMap(alarm),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
+                              child: ,
                             );
                           },
                         ),

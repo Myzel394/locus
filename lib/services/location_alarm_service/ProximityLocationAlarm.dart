@@ -1,22 +1,14 @@
-import 'package:apple_maps_flutter/apple_maps_flutter.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:geolocator/geolocator.dart';
-
 import 'package:locus/services/location_alarm_service/enums.dart';
-
 import 'package:locus/services/location_point_service.dart';
 
 import 'LocationAlarmServiceBase.dart';
 
-enum ProximityLocationAlarmType {
-  whenEnter,
-  whenLeave,
-}
-
 class ProximityLocationAlarm extends LocationAlarmServiceBase {
   // Radius in meters
-  final int radius;
-  final ProximityLocationAlarmType type;
+  final double radius;
+  final LocationRadiusBasedTriggerType type;
 
   const ProximityLocationAlarm({
     required this.radius,
@@ -25,20 +17,20 @@ class ProximityLocationAlarm extends LocationAlarmServiceBase {
   }) : super(id);
 
   @override
-  LocationAlarmType get IDENTIFIER => LocationAlarmType.proximityLocation;
+  LocationAlarmType get IDENTIFIER => LocationAlarmType.proximity;
 
   factory ProximityLocationAlarm.fromJSON(
     final Map<String, dynamic> data,
   ) =>
       ProximityLocationAlarm(
         radius: data["radius"],
-        type: ProximityLocationAlarmType.values[data["alarmType"]],
+        type: LocationRadiusBasedTriggerType.values[data["alarmType"]],
         id: data["id"],
       );
 
   factory ProximityLocationAlarm.create({
-    required final int radius,
-    required final ProximityLocationAlarmType type,
+    required final double radius,
+    required final LocationRadiusBasedTriggerType type,
   }) =>
       ProximityLocationAlarm(
         radius: radius,
@@ -78,7 +70,7 @@ class ProximityLocationAlarm extends LocationAlarmServiceBase {
     final nextInside = _wasInside(nextLocation, userLocation);
 
     switch (type) {
-      case ProximityLocationAlarmType.whenEnter:
+      case LocationRadiusBasedTriggerType.whenEnter:
         if (previousInside == LocationAlarmTriggerType.no &&
             nextInside == LocationAlarmTriggerType.yes) {
           return LocationAlarmTriggerType.yes;
@@ -99,7 +91,7 @@ class ProximityLocationAlarm extends LocationAlarmServiceBase {
           return LocationAlarmTriggerType.maybe;
         }
         break;
-      case ProximityLocationAlarmType.whenLeave:
+      case LocationRadiusBasedTriggerType.whenLeave:
         if (previousInside == LocationAlarmTriggerType.yes &&
             nextInside == LocationAlarmTriggerType.no) {
           return LocationAlarmTriggerType.yes;
@@ -128,15 +120,15 @@ class ProximityLocationAlarm extends LocationAlarmServiceBase {
   @override
   String createNotificationTitle(AppLocalizations l10n, String viewName) {
     switch (type) {
-      case ProximityLocationAlarmType.whenEnter:
+      case LocationRadiusBasedTriggerType.whenEnter:
         return l10n.locationAlarm_proximityLocation_notificationTitle_whenEnter(
           viewName,
-          radius,
+          radius.round(),
         );
-      case ProximityLocationAlarmType.whenLeave:
+      case LocationRadiusBasedTriggerType.whenLeave:
         return l10n.locationAlarm_proximityLocation_notificationTitle_whenLeave(
           viewName,
-          radius,
+          radius.round(),
         );
     }
   }

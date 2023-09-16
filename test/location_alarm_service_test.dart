@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:locus/services/location_alarm_service.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:locus/services/location_alarm_service/enums.dart';
 import 'package:locus/services/location_alarm_service/index.dart';
@@ -15,7 +14,7 @@ final MAYBE_POINT = LatLng(40.04136, -75.48662);
 
 void main() {
   group("Radius based location with whenEnter", () {
-    final alarm = RadiusBasedRegionLocationAlarm.create(
+    final alarm = GeoLocationAlarm.create(
       type: RadiusBasedRegionLocationAlarmType.whenEnter,
       center: CENTER,
       radius: RADIUS,
@@ -64,7 +63,7 @@ void main() {
   });
 
   group("Radius based location with whenLeave", () {
-    final alarm = RadiusBasedRegionLocationAlarm.create(
+    final alarm = GeoLocationAlarm.create(
       type: RadiusBasedRegionLocationAlarmType.whenLeave,
       center: CENTER,
       radius: RADIUS,

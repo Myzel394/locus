@@ -9,20 +9,15 @@ import 'enums.dart';
 
 const uuid = Uuid();
 
-enum RadiusBasedRegionLocationAlarmType {
-  whenEnter,
-  whenLeave,
-}
-
-class RadiusBasedRegionLocationAlarm extends LocationAlarmServiceBase {
+class GeoLocationAlarm extends LocationAlarmServiceBase {
   final String zoneName;
   final LatLng center;
 
   // Radius in meters
   final double radius;
-  final RadiusBasedRegionLocationAlarmType type;
+  final LocationRadiusBasedTriggerType type;
 
-  const RadiusBasedRegionLocationAlarm({
+  const GeoLocationAlarm({
     required this.center,
     required this.radius,
     required this.type,
@@ -31,26 +26,26 @@ class RadiusBasedRegionLocationAlarm extends LocationAlarmServiceBase {
   }) : super(id);
 
   @override
-  LocationAlarmType get IDENTIFIER => LocationAlarmType.radiusBasedRegion;
+  LocationAlarmType get IDENTIFIER => LocationAlarmType.geo;
 
-  factory RadiusBasedRegionLocationAlarm.fromJSON(
+  factory GeoLocationAlarm.fromJSON(
     final Map<String, dynamic> data,
   ) =>
-      RadiusBasedRegionLocationAlarm(
+      GeoLocationAlarm(
         center: LatLng.fromJson(data["center"]),
         radius: data["radius"],
-        type: RadiusBasedRegionLocationAlarmType.values[data["alarmType"]],
+        type: LocationRadiusBasedTriggerType.values[data["alarmType"]],
         zoneName: data["zoneName"],
         id: data["id"],
       );
 
-  factory RadiusBasedRegionLocationAlarm.create({
+  factory GeoLocationAlarm.create({
     required final LatLng center,
     required final double radius,
-    required final RadiusBasedRegionLocationAlarmType type,
+    required final LocationRadiusBasedTriggerType type,
     required final String zoneName,
   }) =>
-      RadiusBasedRegionLocationAlarm(
+      GeoLocationAlarm(
         center: center,
         radius: radius,
         type: type,
@@ -73,12 +68,12 @@ class RadiusBasedRegionLocationAlarm extends LocationAlarmServiceBase {
   @override
   String createNotificationTitle(final l10n, final viewName) {
     switch (type) {
-      case RadiusBasedRegionLocationAlarmType.whenEnter:
+      case LocationAlarmTriggerType.whenEnter:
         return l10n.locationAlarm_radiusBasedRegion_notificationTitle_whenEnter(
           viewName,
           zoneName,
         );
-      case RadiusBasedRegionLocationAlarmType.whenLeave:
+      case LocationAlarmTriggerType.whenLeave:
         return l10n.locationAlarm_radiusBasedRegion_notificationTitle_whenLeave(
           viewName,
           zoneName,
@@ -116,7 +111,7 @@ class RadiusBasedRegionLocationAlarm extends LocationAlarmServiceBase {
     final nextInside = _wasInside(nextLocation);
 
     switch (type) {
-      case RadiusBasedRegionLocationAlarmType.whenEnter:
+      case LocationAlarmTriggerType.whenEnter:
         if (previousInside == LocationAlarmTriggerType.no &&
             nextInside == LocationAlarmTriggerType.yes) {
           return LocationAlarmTriggerType.yes;
@@ -137,7 +132,7 @@ class RadiusBasedRegionLocationAlarm extends LocationAlarmServiceBase {
           return LocationAlarmTriggerType.maybe;
         }
         break;
-      case RadiusBasedRegionLocationAlarmType.whenLeave:
+      case LocationAlarmTriggerType.whenLeave:
         if (previousInside == LocationAlarmTriggerType.yes &&
             nextInside == LocationAlarmTriggerType.no) {
           return LocationAlarmTriggerType.yes;
@@ -165,9 +160,9 @@ class RadiusBasedRegionLocationAlarm extends LocationAlarmServiceBase {
 
   Icon getIcon(final BuildContext context) {
     switch (type) {
-      case RadiusBasedRegionLocationAlarmType.whenEnter:
+      case LocationAlarmTriggerType.whenEnter:
         return const Icon(Icons.arrow_circle_right_rounded);
-      case RadiusBasedRegionLocationAlarmType.whenLeave:
+      case LocationAlarmTriggerType.whenLeave:
         return const Icon(Icons.arrow_circle_left_rounded);
     }
   }

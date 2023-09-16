@@ -2,14 +2,13 @@ import 'dart:convert';
 import 'dart:ui';
 
 import 'package:basic_utils/basic_utils.dart';
-import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:locus/constants/notifications.dart';
 import 'package:locus/constants/values.dart';
 import 'package:locus/models/log.dart';
-import 'package:locus/services/location_alarm_service.dart';
 import 'package:locus/services/location_alarm_service/index.dart';
 import 'package:locus/services/location_point_service.dart';
 import 'package:locus/services/log_service.dart';
@@ -17,7 +16,6 @@ import 'package:locus/services/settings_service/index.dart';
 import 'package:locus/services/task_service/index.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:locus/utils/location/index.dart' as location;
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 Future<LocationPointService> getLocationData() async {
   FlutterLogs.logInfo(
@@ -118,7 +116,7 @@ Future<void> checkViewAlarms({
     await view.checkAlarm(
       userLocation: userLocation,
       onTrigger: (alarm, location, __) async {
-        if (alarm is RadiusBasedRegionLocationAlarm) {
+        if (alarm is GeoLocationAlarm) {
           final flutterLocalNotificationsPlugin =
               FlutterLocalNotificationsPlugin();
 
@@ -157,7 +155,7 @@ Future<void> checkViewAlarms({
           return;
         }
 
-        if (alarm is RadiusBasedRegionLocationAlarm) {
+        if (alarm is GeoLocationAlarm) {
           final flutterLocalNotificationsPlugin =
               FlutterLocalNotificationsPlugin();
 

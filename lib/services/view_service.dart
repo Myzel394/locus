@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:cryptography/cryptography.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:locus/api/nostr-fetch.dart';
@@ -12,16 +13,15 @@ import 'package:locus/services/task_service/index.dart';
 import 'package:locus/utils/cryptography/decrypt.dart';
 import 'package:nostr/nostr.dart';
 import 'package:uuid/uuid.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../api/get-locations.dart' as get_locations_api;
 import '../constants/values.dart';
+import 'location_alarm_service/GeoLocationAlarm.dart';
 import 'location_alarm_service/LocationAlarmServiceBase.dart';
 import 'location_alarm_service/ProximityLocationAlarm.dart';
-import 'location_alarm_service/RadiusBasedRegionLocationAlarm.dart';
 import 'location_alarm_service/enums.dart';
-import 'task_service/mixins.dart';
 import 'location_point_service.dart';
+import 'task_service/mixins.dart';
 
 const storage = FlutterSecureStorage();
 const KEY = "view_service";
@@ -101,9 +101,9 @@ class TaskView extends ChangeNotifier with LocationBase {
                 .firstWhere((element) => element.name == alarm["_IDENTIFIER"]);
 
             switch (identifier) {
-              case LocationAlarmType.radiusBasedRegion:
-                return RadiusBasedRegionLocationAlarm.fromJSON(alarm);
-              case LocationAlarmType.proximityLocation:
+              case LocationAlarmType.geo:
+                return GeoLocationAlarm.fromJSON(alarm);
+              case LocationAlarmType.proximity:
                 return ProximityLocationAlarm.fromJSON(alarm);
             }
           }),

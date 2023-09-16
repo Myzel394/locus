@@ -697,7 +697,7 @@
   "androidNotificationChannel_locationAlarms_description": "Receive notifications for location alarms",
   "location_manageAlarms_title": "Manage Alarms",
   "location_manageAlarms_empty_title": "No Alarms",
-  "location_manageAlarms_empty_description": "Add alarms to be notified when certain conditions are met (e.g. when this person enters a certain area).",
+  "location_manageAlarms_empty_description": "Add alarms to be notified when certain conditions are met",
   "location_manageAlarms_addNewAlarm_actionLabel": "Add Alarm",
   "location_manageAlarms_lastCheck_description": "Last checked at {date}",
   "@location_manageAlarms_lastCheck_description": {
@@ -710,10 +710,11 @@
     }
   },
   "location_addAlarm_geo_title": "Add geo-based alarm",
+  "location_addAlarm_geo_description": "Define a region and get notified when your friend enters or leaves this region",
   "location_addAlarm_geo_name_description": "Please enter a name for this region",
   "location_addAlarm_geo_help_tapDescription": "Tap on the map to mark the center of your region",
   "location_addAlarm_proximity_title": "Add proximity alarm",
-  "location_addAlarm_proximity_description": "Proximity alarms are triggered when you are within a certain distance of your friend.",
+  "location_addAlarm_proximity_description": "Get notified when your friend is within a certain distance of you",
   "location_addAlarm_radiusBased_radius_meters": "Radius: {value} meters",
   "@location_addAlarm_radiusBased_radius_meters": {
     "placeholders": {

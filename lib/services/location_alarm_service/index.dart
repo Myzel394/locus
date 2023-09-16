@@ -1,1 +1,1 @@
-export "RadiusBasedRegionLocationAlarm.dart";
+export "GeoLocationAlarm.dart";

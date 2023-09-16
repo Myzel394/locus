@@ -8,11 +8,12 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:locus/constants/spacing.dart';
+import 'package:locus/screens/view_alarm_screen_widgets/GeoAlarmMetaDataSheet.dart';
 import 'package:locus/screens/view_alarm_screen_widgets/LocationRadiusSelectorMap.dart';
-import 'package:locus/screens/view_alarm_screen_widgets/RadiusRegionMetaDataSheet.dart';
+import 'package:locus/screens/view_alarm_screen_widgets/ProximityAlarmMetaDataSheet.dart';
 import 'package:locus/services/current_location_service.dart';
+import 'package:locus/services/location_alarm_service/LocationAlarmServiceBase.dart';
 import 'package:locus/services/location_alarm_service/enums.dart';
-import 'package:locus/services/location_alarm_service/index.dart';
 import 'package:locus/services/settings_service/index.dart';
 import 'package:locus/utils/helper_sheet.dart';
 import 'package:locus/utils/location/index.dart';
@@ -23,21 +24,21 @@ import 'package:locus/widgets/MapActionsContainer.dart';
 import 'package:locus/widgets/RequestNotificationPermissionMixin.dart';
 import 'package:provider/provider.dart';
 
-class ViewAlarmSelectGeoBasedScreen extends StatefulWidget {
+class ViewAlarmSelectRadiusBasedScreen extends StatefulWidget {
   final LocationAlarmType type;
 
-  const ViewAlarmSelectGeoBasedScreen({
+  const ViewAlarmSelectRadiusBasedScreen({
     super.key,
     required this.type,
   });
 
   @override
-  State<ViewAlarmSelectGeoBasedScreen> createState() =>
-      _ViewAlarmSelectGeoBasedScreenState();
+  State<ViewAlarmSelectRadiusBasedScreen> createState() =>
+      _ViewAlarmSelectRadiusBasedScreenState();
 }
 
-class _ViewAlarmSelectGeoBasedScreenState
-    extends State<ViewAlarmSelectGeoBasedScreen>
+class _ViewAlarmSelectRadiusBasedScreenState
+    extends State<ViewAlarmSelectRadiusBasedScreen>
     with RequestNotificationPermissionMixin {
   MapController? flutterMapController;
   apple_maps.AppleMapController? appleMapController;
@@ -97,8 +98,7 @@ class _ViewAlarmSelectGeoBasedScreenState
 
     _animateToPosition(currentLocation.currentPosition!);
 
-    if (updateAlarmCenter ||
-        widget.type == LocationAlarmType.proximityLocation) {
+    if (updateAlarmCenter || widget.type == LocationAlarmType.proximity) {
       setState(() {
         alarmCenter = LatLng(
           currentLocation.currentPosition!.latitude,
@@ -157,7 +157,7 @@ class _ViewAlarmSelectGeoBasedScreenState
         children: <Widget>[
           Text(l10n.location_addAlarm_radiusBased_help_description),
           const SizedBox(height: MEDIUM_SPACE),
-          if (widget.type == LocationAlarmType.radiusBasedRegion) ...[
+          if (widget.type == LocationAlarmType.geo) ...[
             Row(
               children: <Widget>[
                 const Icon(Icons.touch_app_rounded),
@@ -213,18 +213,36 @@ class _ViewAlarmSelectGeoBasedScreenState
   }
 
   Future<void> _selectRegion() async {
-    final RadiusBasedRegionLocationAlarm? alarm = await showPlatformModalSheet(
-      context: context,
-      material: MaterialModalSheetData(
-        backgroundColor: Colors.transparent,
-        isDismissible: true,
-        isScrollControlled: true,
-      ),
-      builder: (_) => RadiusRegionMetaDataSheet(
-        center: alarmCenter!,
-        radius: radius.toDouble(),
-      ),
-    );
+    LocationAlarmServiceBase? alarm;
+
+    switch (widget.type) {
+      case LocationAlarmType.geo:
+        alarm = await showPlatformModalSheet(
+          context: context,
+          material: MaterialModalSheetData(
+            backgroundColor: Colors.transparent,
+            isDismissible: true,
+            isScrollControlled: true,
+          ),
+          builder: (_) => GeoAlarmMetaDataSheet(
+            center: alarmCenter!,
+            radius: radius.toDouble(),
+          ),
+        );
+        break;
+      case LocationAlarmType.proximity:
+        alarm = await showPlatformModalSheet(
+          context: context,
+          material: MaterialModalSheetData(
+            backgroundColor: Colors.transparent,
+            isDismissible: true,
+            isScrollControlled: true,
+          ),
+          builder: (_) => ProximityAlarmMetaDataSheet(
+            radius: radius!,
+          ),
+        );
+    }
 
     final hasGrantedNotificationAccess =
         await showNotificationPermissionDialog();
@@ -257,12 +275,17 @@ class _ViewAlarmSelectGeoBasedScreenState
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
 
+    final TYPE_TITLE_MAP = {
+      LocationAlarmType.geo: l10n.location_addAlarm_geo_title,
+      LocationAlarmType.proximity: l10n.location_addAlarm_proximity_title,
+    };
+
     return PlatformScaffold(
       material: (_, __) => MaterialScaffoldData(
         resizeToAvoidBottomInset: false,
       ),
       appBar: PlatformAppBar(
-        title: Text(l10n.location_addAlarm_geo_title),
+        title: Text(TYPE_TITLE_MAP[widget.type]!),
         trailingActions: [
           PlatformIconButton(
             cupertino: (_, __) => CupertinoIconButtonData(
@@ -289,7 +312,7 @@ class _ViewAlarmSelectGeoBasedScreenState
               flutterMapController: flutterMapController,
               onLocationChange: (location) {
                 // Proximity does not need a center
-                if (widget.type == LocationAlarmType.proximityLocation) {
+                if (widget.type == LocationAlarmType.proximity) {
                   return;
                 }
 
