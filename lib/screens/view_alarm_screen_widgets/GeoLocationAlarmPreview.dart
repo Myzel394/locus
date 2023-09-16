@@ -55,12 +55,6 @@ class GeoLocationAlarmPreview extends StatelessWidget {
                 children: [
                   CircleLayer(
                     circles: [
-                      if (lastLocation != null)
-                        CircleMarker(
-                          point: lastLocation,
-                          radius: 5,
-                          color: Colors.blue,
-                        ),
                       CircleMarker(
                         point: alarm.center,
                         useRadiusInMeter: true,
@@ -69,6 +63,20 @@ class GeoLocationAlarmPreview extends StatelessWidget {
                         borderColor: Colors.red,
                         radius: alarm.radius,
                       ),
+                      if (lastLocation != null) ...[
+                        CircleMarker(
+                          point: lastLocation,
+                          useRadiusInMeter: false,
+                          color: Colors.white,
+                          radius: 7,
+                        ),
+                        CircleMarker(
+                          point: lastLocation,
+                          useRadiusInMeter: false,
+                          color: Colors.cyan,
+                          radius: 5,
+                        ),
+                      ],
                     ],
                   ),
                 ],
