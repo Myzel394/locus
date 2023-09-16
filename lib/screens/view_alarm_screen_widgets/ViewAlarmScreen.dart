@@ -272,6 +272,36 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
 
   VoidCallback _deleteAlarm(final LocationAlarmServiceBase alarm) {
     return () async {
+      final l10n = AppLocalizations.of(context);
+      final shouldDelete = await showPlatformDialog(
+        context: context,
+        builder: (context) => PlatformAlertDialog(
+          material: (context, __) => MaterialAlertDialogData(
+            icon: const Icon(Icons.delete_forever_rounded),
+          ),
+          title: Text(l10n.location_removeAlarm_title),
+          content: Text(l10n.location_removeAlarm_description),
+          actions: createCancellableDialogActions(
+            context,
+            [
+              PlatformDialogAction(
+                material: (context, _) => MaterialDialogActionData(
+                  icon: const Icon(Icons.delete_forever_rounded),
+                ),
+                child: Text(l10n.location_removeAlarm_confirm),
+                onPressed: () => Navigator.pop(context, true),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      print("test: $shouldDelete");
+
+      if (!mounted || shouldDelete != true) {
+        return;
+      }
+
       final viewService = context.read<ViewService>();
       final logService = context.read<LogService>();
 

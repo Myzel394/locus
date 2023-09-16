@@ -716,6 +716,9 @@
   "location_addAlarm_proximity_title": "Add proximity alarm",
   "location_addAlarm_proximity_description": "Get notified when your friend is within a certain distance of you",
   "location_addAlarm_radiusBased_radius_meters": "Radius: {value} meters",
+  "location_removeAlarm_title": "Remove Alarm",
+  "location_removeAlarm_description": "Are you sure you want to remove this alarm?",
+  "location_removeAlarm_confirm": "Remove",
   "@location_addAlarm_radiusBased_radius_meters": {
     "placeholders": {
       "value": {
