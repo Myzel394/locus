@@ -296,8 +296,6 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
         ),
       );
 
-      print("test: $shouldDelete");
-
       if (!mounted || shouldDelete != true) {
         return;
       }
