@@ -15,7 +15,7 @@ final MAYBE_POINT = LatLng(40.04136, -75.48662);
 void main() {
   group("Radius based location with whenEnter", () {
     final alarm = GeoLocationAlarm.create(
-      type: RadiusBasedRegionLocationAlarmType.whenEnter,
+      type: LocationRadiusBasedTriggerType.whenEnter,
       center: CENTER,
       radius: RADIUS,
       zoneName: "Test",
@@ -64,7 +64,7 @@ void main() {
 
   group("Radius based location with whenLeave", () {
     final alarm = GeoLocationAlarm.create(
-      type: RadiusBasedRegionLocationAlarmType.whenLeave,
+      type: LocationRadiusBasedTriggerType.whenLeave,
       center: CENTER,
       radius: RADIUS,
       zoneName: "Test",

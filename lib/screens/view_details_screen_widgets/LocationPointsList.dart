@@ -41,9 +41,11 @@ class _LocationPointsListState extends State<LocationPointsList> {
       }
     });
 
-    if (!fetcher.hasFetchedAllLocations) {
-      fetcher.fetchMoreLocations();
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!fetcher.hasFetchedAllLocations) {
+        fetcher.fetchMoreLocations();
+      }
+    });
   }
 
   @override

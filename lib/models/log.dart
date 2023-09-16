@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:locus/services/location_alarm_service.dart';
 import 'package:locus/services/location_alarm_service/enums.dart';
 import 'package:locus/services/task_service/index.dart';
 import 'package:uuid/uuid.dart';

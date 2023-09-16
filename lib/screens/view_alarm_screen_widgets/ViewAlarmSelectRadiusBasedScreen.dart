@@ -54,12 +54,14 @@ class _ViewAlarmSelectRadiusBasedScreenState
 
   bool _hasSetInitialPosition = false;
 
+  late CurrentLocationService _currentLocationService;
+
   @override
   void initState() {
     super.initState();
 
     final settings = context.read<SettingsService>();
-    final currentLocation = context.read<CurrentLocationService>();
+    _currentLocationService = context.read<CurrentLocationService>();
 
     if (settings.mapProvider == MapProvider.openStreetMap) {
       flutterMapController = MapController();
@@ -72,17 +74,16 @@ class _ViewAlarmSelectRadiusBasedScreenState
       _showHelperSheetIfRequired();
     });
 
-    currentLocation.addListener(_setPositionFromCurrentLocationService);
+    _currentLocationService.addListener(_setPositionFromCurrentLocationService);
   }
 
   @override
   void dispose() {
-    final currentLocation = context.read<CurrentLocationService>();
-
     flutterMapController?.dispose();
     _positionStream?.drain();
 
-    currentLocation.removeListener(_setPositionFromCurrentLocationService);
+    _currentLocationService
+        .removeListener(_setPositionFromCurrentLocationService);
 
     super.dispose();
   }
@@ -90,19 +91,17 @@ class _ViewAlarmSelectRadiusBasedScreenState
   void _setPositionFromCurrentLocationService({
     final updateAlarmCenter = false,
   }) {
-    final currentLocation = context.read<CurrentLocationService>();
-
-    if (currentLocation.currentPosition == null) {
+    if (_currentLocationService.currentPosition == null) {
       return;
     }
 
-    _animateToPosition(currentLocation.currentPosition!);
+    _animateToPosition(_currentLocationService.currentPosition!);
 
     if (updateAlarmCenter || widget.type == LocationAlarmType.proximity) {
       setState(() {
         alarmCenter = LatLng(
-          currentLocation.currentPosition!.latitude,
-          currentLocation.currentPosition!.longitude,
+          _currentLocationService.currentPosition!.latitude,
+          _currentLocationService.currentPosition!.longitude,
         );
       });
     }

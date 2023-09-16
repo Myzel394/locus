@@ -32,7 +32,7 @@ class GeoLocationAlarmPreview extends StatelessWidget {
       children: <Widget>[
         PlatformListTile(
           title: Text(alarm.zoneName),
-          leading: alarm.getIcon(context),
+          leading: getIconForLocationRadiusBasedTrigger(context, alarm.type),
           trailing: PlatformIconButton(
             icon: Icon(context.platformIcons.delete),
             onPressed: onDelete,

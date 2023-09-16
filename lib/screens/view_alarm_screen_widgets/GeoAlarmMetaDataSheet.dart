@@ -5,6 +5,7 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart'
     hide PlatformListTile;
 import 'package:latlong2/latlong.dart';
 import 'package:locus/constants/spacing.dart';
+import 'package:locus/services/location_alarm_service/enums.dart';
 import 'package:locus/services/location_alarm_service/index.dart';
 import 'package:locus/utils/theme.dart';
 
@@ -28,7 +29,7 @@ class GeoAlarmMetaDataSheet extends StatefulWidget {
 class _GeoAlarmMetaDataSheetState extends State<GeoAlarmMetaDataSheet> {
   final _nameController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  RadiusBasedRegionLocationAlarmType? _type;
+  LocationRadiusBasedTriggerType? _type;
 
   @override
   void dispose() {
@@ -54,7 +55,7 @@ class _GeoAlarmMetaDataSheetState extends State<GeoAlarmMetaDataSheet> {
                 PlatformListTile(
                   onTap: () {
                     setState(() {
-                      _type = RadiusBasedRegionLocationAlarmType.whenEnter;
+                      _type = LocationRadiusBasedTriggerType.whenEnter;
                     });
                   },
                   leading: const Icon(Icons.arrow_circle_right_rounded),
@@ -64,7 +65,7 @@ class _GeoAlarmMetaDataSheetState extends State<GeoAlarmMetaDataSheet> {
                 PlatformListTile(
                   onTap: () {
                     setState(() {
-                      _type = RadiusBasedRegionLocationAlarmType.whenLeave;
+                      _type = LocationRadiusBasedTriggerType.whenLeave;
                     });
                   },
                   leading: const Icon(Icons.arrow_circle_left_rounded),

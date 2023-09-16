@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/services/location_alarm_service/ProximityLocationAlarm.dart';
+import 'package:locus/services/location_alarm_service/enums.dart';
 import 'package:locus/utils/theme.dart';
 
 import '../../widgets/ModalSheet.dart';
@@ -17,7 +18,7 @@ class ProximityAlarmMetaDataSheet extends StatelessWidget {
 
   void _createAlarm(
     final BuildContext context,
-    final ProximityLocationAlarmType type,
+    final LocationRadiusBasedTriggerType type,
   ) {
     final alarm = ProximityLocationAlarm.create(
       radius: radius,
@@ -45,14 +46,14 @@ class ProximityAlarmMetaDataSheet extends StatelessWidget {
           const SizedBox(height: MEDIUM_SPACE),
           PlatformListTile(
             onTap: () {
-              _createAlarm(context, ProximityLocationAlarmType.whenEnter);
+              _createAlarm(context, LocationRadiusBasedTriggerType.whenEnter);
             },
             leading: const Icon(Icons.arrow_circle_right_rounded),
             title: Text(l10n.location_addAlarm_radiusBased_trigger_whenEnter),
           ),
           PlatformListTile(
             onTap: () {
-              _createAlarm(context, ProximityLocationAlarmType.whenLeave);
+              _createAlarm(context, LocationRadiusBasedTriggerType.whenLeave);
             },
             leading: const Icon(Icons.arrow_circle_left_rounded),
             title: Text(l10n.location_addAlarm_radiusBased_trigger_whenLeave),

@@ -7,6 +7,7 @@ import 'package:locus/constants/spacing.dart';
 import 'package:locus/screens/locations_overview_screen_widgets/LocationFetchers.dart';
 import 'package:locus/services/current_location_service.dart';
 import 'package:locus/services/location_alarm_service/ProximityLocationAlarm.dart';
+import 'package:locus/services/location_alarm_service/index.dart';
 import 'package:locus/services/view_service.dart';
 import 'package:locus/utils/location/get-fallback-location.dart';
 import 'package:locus/utils/map.dart';
@@ -48,7 +49,7 @@ class ProximityAlarmPreview extends StatelessWidget {
                 : l10n.location_addAlarm_radiusBased_radius_meters(
                     alarm.radius.round()),
           ),
-          leading: alarm.getIcon(context),
+          leading: getIconForLocationRadiusBasedTrigger(context, alarm.type),
           trailing: PlatformIconButton(
             icon: Icon(context.platformIcons.delete),
             onPressed: onDelete,

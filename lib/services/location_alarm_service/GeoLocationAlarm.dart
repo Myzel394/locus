@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:locus/services/location_point_service.dart';
@@ -68,12 +67,12 @@ class GeoLocationAlarm extends LocationAlarmServiceBase {
   @override
   String createNotificationTitle(final l10n, final viewName) {
     switch (type) {
-      case LocationAlarmTriggerType.whenEnter:
+      case LocationRadiusBasedTriggerType.whenEnter:
         return l10n.locationAlarm_radiusBasedRegion_notificationTitle_whenEnter(
           viewName,
           zoneName,
         );
-      case LocationAlarmTriggerType.whenLeave:
+      case LocationRadiusBasedTriggerType.whenLeave:
         return l10n.locationAlarm_radiusBasedRegion_notificationTitle_whenLeave(
           viewName,
           zoneName,
@@ -111,7 +110,7 @@ class GeoLocationAlarm extends LocationAlarmServiceBase {
     final nextInside = _wasInside(nextLocation);
 
     switch (type) {
-      case LocationAlarmTriggerType.whenEnter:
+      case LocationRadiusBasedTriggerType.whenEnter:
         if (previousInside == LocationAlarmTriggerType.no &&
             nextInside == LocationAlarmTriggerType.yes) {
           return LocationAlarmTriggerType.yes;
@@ -132,7 +131,7 @@ class GeoLocationAlarm extends LocationAlarmServiceBase {
           return LocationAlarmTriggerType.maybe;
         }
         break;
-      case LocationAlarmTriggerType.whenLeave:
+      case LocationRadiusBasedTriggerType.whenLeave:
         if (previousInside == LocationAlarmTriggerType.yes &&
             nextInside == LocationAlarmTriggerType.no) {
           return LocationAlarmTriggerType.yes;
@@ -156,14 +155,5 @@ class GeoLocationAlarm extends LocationAlarmServiceBase {
     }
 
     return LocationAlarmTriggerType.no;
-  }
-
-  Icon getIcon(final BuildContext context) {
-    switch (type) {
-      case LocationAlarmTriggerType.whenEnter:
-        return const Icon(Icons.arrow_circle_right_rounded);
-      case LocationAlarmTriggerType.whenLeave:
-        return const Icon(Icons.arrow_circle_left_rounded);
-    }
   }
 }

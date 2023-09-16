@@ -7,7 +7,11 @@ import 'package:flutter_map/plugin_api.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:locus/constants/spacing.dart';
+import 'package:locus/screens/view_alarm_screen_widgets/GeoLocationAlarmPreview.dart';
+import 'package:locus/screens/view_alarm_screen_widgets/ProximityAlarmPreview.dart';
 import 'package:locus/screens/view_alarm_screen_widgets/ViewAlarmSelectRadiusBasedScreen.dart';
+import 'package:locus/services/location_alarm_service/LocationAlarmServiceBase.dart';
+import 'package:locus/services/location_alarm_service/ProximityLocationAlarm.dart';
 import 'package:locus/services/location_alarm_service/enums.dart';
 import 'package:locus/services/location_alarm_service/index.dart';
 import 'package:locus/services/location_point_service.dart';
@@ -86,7 +90,7 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
 
     final logService = context.read<LogService>();
     final viewService = context.read<ViewService>();
-    final GeoLocationAlarm? alarm = (await (() {
+    final LocationAlarmServiceBase? alarm = (await (() {
       if (isCupertino(context)) {
         return showCupertinoModalBottomSheet(
           context: context,
@@ -105,7 +109,7 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
           ),
         ),
       );
-    })()) as GeoLocationAlarm?;
+    })()) as LocationAlarmServiceBase?;
 
     if (!mounted) {
       return;
@@ -266,6 +270,83 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
     );
   }
 
+  VoidCallback _deleteAlarm(final LocationAlarmServiceBase alarm) {
+    return () async {
+      final viewService = context.read<ViewService>();
+      final logService = context.read<LogService>();
+
+      widget.view.removeAlarm(alarm);
+      await viewService.update(widget.view);
+
+      await logService.addLog(
+        Log.deleteAlarm(
+          initiator: LogInitiator.user,
+          viewID: widget.view.id,
+          viewName: widget.view.name,
+        ),
+      );
+    };
+  }
+
+  Widget getList() {
+    final l10n = AppLocalizations.of(context);
+
+    return SingleChildScrollView(
+      child: Column(
+        children: <Widget>[
+          ListView.builder(
+            physics: const NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            itemCount: widget.view.alarms.length,
+            itemBuilder: (context, index) {
+              final alarm = widget.view.alarms[index];
+              final handleDelete = _deleteAlarm(alarm);
+
+              final child = (() {
+                switch (alarm.IDENTIFIER) {
+                  case LocationAlarmType.geo:
+                    return GeoLocationAlarmPreview(
+                      view: widget.view,
+                      alarm: alarm as GeoLocationAlarm,
+                      onDelete: handleDelete,
+                    );
+                  case LocationAlarmType.proximity:
+                    return ProximityAlarmPreview(
+                      view: widget.view,
+                      alarm: alarm as ProximityLocationAlarm,
+                      onDelete: handleDelete,
+                    );
+                }
+              })();
+
+              return Padding(
+                padding: const EdgeInsets.only(
+                  bottom: MEDIUM_SPACE,
+                ),
+                child: child,
+              );
+            },
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: MEDIUM_SPACE),
+            child: PlatformElevatedButton(
+              onPressed: _addNewAlarm,
+              material: (_, __) => MaterialElevatedButtonData(
+                icon: const Icon(Icons.add),
+              ),
+              child: Text(l10n.location_manageAlarms_addNewAlarm_actionLabel),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: MEDIUM_SPACE),
+            child: Text(l10n.location_manageAlarms_lastCheck_description(
+                widget.view.lastAlarmCheck)),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -278,50 +359,7 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: MEDIUM_SPACE),
           child: Center(
-            child: widget.view.alarms.isEmpty
-                ? getEmptyState()
-                : SingleChildScrollView(
-                    child: Column(
-                      children: <Widget>[
-                        ListView.builder(
-                          physics: const NeverScrollableScrollPhysics(),
-                          shrinkWrap: true,
-                          itemCount: widget.view.alarms.length,
-                          itemBuilder: (context, index) {
-                            final GeoLocationAlarm alarm =
-                                widget.view.alarms[index]
-                                    as GeoLocationAlarm;
-
-                            return Padding(
-                              padding: const EdgeInsets.only(
-                                bottom: MEDIUM_SPACE,
-                              ),
-                              child: ,
-                            );
-                          },
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: MEDIUM_SPACE),
-                          child: PlatformElevatedButton(
-                            onPressed: _addNewAlarm,
-                            material: (_, __) => MaterialElevatedButtonData(
-                              icon: const Icon(Icons.add),
-                            ),
-                            child: Text(l10n
-                                .location_manageAlarms_addNewAlarm_actionLabel),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: MEDIUM_SPACE),
-                          child: Text(
-                              l10n.location_manageAlarms_lastCheck_description(
-                                  widget.view.lastAlarmCheck)),
-                        ),
-                      ],
-                    ),
-                  ),
+            child: widget.view.alarms.isEmpty ? getEmptyState() : getList(),
           ),
         ),
       ),
