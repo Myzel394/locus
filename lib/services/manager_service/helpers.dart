@@ -9,6 +9,8 @@ import 'package:geolocator/geolocator.dart';
 import 'package:locus/constants/notifications.dart';
 import 'package:locus/constants/values.dart';
 import 'package:locus/models/log.dart';
+import 'package:locus/services/location_alarm_service/ProximityLocationAlarm.dart';
+import 'package:locus/services/location_alarm_service/enums.dart';
 import 'package:locus/services/location_alarm_service/index.dart';
 import 'package:locus/services/location_point_service.dart';
 import 'package:locus/services/log_service.dart';
@@ -112,22 +114,72 @@ Future<void> checkViewAlarms({
   required final ViewService viewService,
   required final LocationPointService userLocation,
 }) async {
+  FlutterLogs.logInfo(
+    LOG_TAG,
+    "Headless Task; Check View Alarms",
+    "Checking ${views.length} views...",
+  );
+
   for (final view in views) {
     await view.checkAlarm(
       userLocation: userLocation,
       onTrigger: (alarm, location, __) async {
-        if (alarm is GeoLocationAlarm) {
-          final flutterLocalNotificationsPlugin =
-              FlutterLocalNotificationsPlugin();
+        final notifications = FlutterLocalNotificationsPlugin();
+        final id = int.parse(
+          "${location.createdAt.millisecond}${location.createdAt.microsecond}",
+        );
 
-          flutterLocalNotificationsPlugin.show(
-            int.parse(
-                "${location.createdAt.millisecond}${location.createdAt.microsecond}"),
+        if (alarm is GeoLocationAlarm) {
+          notifications.show(
+            id,
             StringUtils.truncate(
-              l10n.locationAlarm_radiusBasedRegion_notificationTitle_whenEnter(
-                view.name,
-                "test",
+              alarm.type == LocationRadiusBasedTriggerType.whenEnter
+                  ? l10n
+                      .locationAlarm_radiusBasedRegion_notificationTitle_whenEnter(
+                      view.name,
+                      alarm.zoneName,
+                    )
+                  : l10n
+                      .locationAlarm_radiusBasedRegion_notificationTitle_whenLeave(
+                      view.name,
+                      alarm.zoneName,
+                    ),
+              76,
+            ),
+            l10n.locationAlarm_notification_description,
+            NotificationDetails(
+              android: AndroidNotificationDetails(
+                AndroidChannelIDs.locationAlarms.name,
+                l10n.androidNotificationChannel_locationAlarms_name,
+                channelDescription:
+                    l10n.androidNotificationChannel_locationAlarms_description,
+                importance: Importance.max,
+                priority: Priority.max,
               ),
+            ),
+            payload: jsonEncode({
+              "type": NotificationActionType.openTaskView.index,
+              "taskViewID": view.id,
+            }),
+          );
+          return;
+        }
+
+        if (alarm is ProximityLocationAlarm) {
+          notifications.show(
+            id,
+            StringUtils.truncate(
+              alarm.type == LocationRadiusBasedTriggerType.whenEnter
+                  ? l10n
+                      .locationAlarm_proximityLocation_notificationTitle_whenEnter(
+                      view.name,
+                      alarm.radius.round(),
+                    )
+                  : l10n
+                      .locationAlarm_proximityLocation_notificationTitle_whenLeave(
+                      view.name,
+                      alarm.radius.round(),
+                    ),
               76,
             ),
             l10n.locationAlarm_notification_description,
@@ -148,55 +200,23 @@ Future<void> checkViewAlarms({
           );
         }
       },
-      onMaybeTrigger: (alarm, _, __) async {
-        if (view.lastMaybeTrigger != null &&
-            view.lastMaybeTrigger!.difference(DateTime.now()).abs() <
-                MAYBE_TRIGGER_MINIMUM_TIME_BETWEEN) {
-          return;
-        }
-
-        if (alarm is GeoLocationAlarm) {
-          final flutterLocalNotificationsPlugin =
-              FlutterLocalNotificationsPlugin();
-
-          flutterLocalNotificationsPlugin.show(
-            int.parse(
-                "${DateTime.now().millisecond}${DateTime.now().microsecond}"),
-            StringUtils.truncate(
-              l10n.locationAlarm_radiusBasedRegion_notificationTitle_whenEnter(
-                view.name,
-                alarm.zoneName,
-              ),
-              76,
-            ),
-            l10n.locationAlarm_notification_description,
-            NotificationDetails(
-              android: AndroidNotificationDetails(
-                AndroidChannelIDs.locationAlarms.name,
-                l10n.locationAlarm_radiusBasedRegion_notificationTitle_maybe(
-                  view.name,
-                  alarm.zoneName,
-                ),
-                channelDescription:
-                    l10n.androidNotificationChannel_locationAlarms_description,
-                importance: Importance.max,
-                priority: Priority.max,
-              ),
-            ),
-            payload: jsonEncode({
-              "type": NotificationActionType.openTaskView.index,
-              "taskViewID": view.id,
-            }),
-          );
-
-          view.lastMaybeTrigger = DateTime.now();
-          await viewService.update(view);
-        }
-      },
+      onMaybeTrigger: (alarm, _, __) async {},
     );
   }
 
+  FlutterLogs.logInfo(
+    LOG_TAG,
+    "Headless Task; Check View Alarms",
+    "Checking ${views.length} views... Done! Saving...",
+  );
+
   await viewService.save();
+
+  FlutterLogs.logInfo(
+    LOG_TAG,
+    "Headless Task; Check View Alarms",
+    "Checking ${views.length} views... Done! Saving... Done!",
+  );
 }
 
 Future<void> checkViewAlarmsFromBackground(

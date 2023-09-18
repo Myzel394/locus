@@ -16,6 +16,7 @@ VoidCallback getLocations({
   required void Function(LocationPointService) onLocationFetched,
   required void Function() onEnd,
   final VoidCallback? onEmptyEnd,
+  final VoidCallback? onError,
   int? limit,
   DateTime? from,
   DateTime? until,
@@ -26,7 +27,7 @@ VoidCallback getLocations({
       authors: [nostrPublicKey],
       limit: limit,
       until:
-      until == null ? null : (until.millisecondsSinceEpoch / 1000).floor(),
+          until == null ? null : (until.millisecondsSinceEpoch / 1000).floor(),
       since: from == null ? null : (from.millisecondsSinceEpoch / 1000).floor(),
     ),
   ]);
@@ -44,31 +45,22 @@ VoidCallback getLocations({
         "New message. Decrypting...",
       );
 
-      try {
-        final location = await LocationPointService.fromEncrypted(
-          message.message.content,
-          encryptionPassword,
-        );
+      final location = await LocationPointService.fromEncrypted(
+        message.message.content,
+        encryptionPassword,
+      );
 
-        FlutterLogs.logInfo(
-          LOG_TAG,
-          "GetLocations",
-          "New message. Decrypting... Done!",
-        );
+      FlutterLogs.logInfo(
+        LOG_TAG,
+        "GetLocations",
+        "New message. Decrypting... Done!",
+      );
 
-        onLocationFetched(location);
-      } catch (error) {
-        FlutterLogs.logError(
-          LOG_TAG,
-          "GetLocations",
-          "Error decrypting message: $error",
-        );
-
-        return;
-      }
+      onLocationFetched(location);
     },
     onEnd: onEnd,
     onEmptyEnd: onEmptyEnd,
+    onError: onError,
   );
 }
 
@@ -82,7 +74,28 @@ Future<List<LocationPointService>> getLocationsAsFuture({
 }) async {
   final completer = Completer<List<LocationPointService>>();
 
+  int doneAmount = 0;
   final List<LocationPointService> locations = [];
+
+  final onAnyEnd = () {
+    doneAmount++;
+
+    FlutterLogs.logInfo(
+      LOG_TAG,
+      "GetLocations",
+      "Relay done! $doneAmount / ${relays.length}",
+    );
+
+    if (doneAmount == relays.length) {
+      FlutterLogs.logInfo(
+        LOG_TAG,
+        "GetLocations",
+        "All relays done!",
+      );
+
+      completer.complete(locations);
+    }
+  };
 
   getLocations(
     nostrPublicKey: nostrPublicKey,
@@ -94,9 +107,9 @@ Future<List<LocationPointService>> getLocationsAsFuture({
     onLocationFetched: (final LocationPointService location) {
       locations.add(location);
     },
-    onEnd: () {
-      completer.complete(locations);
-    },
+    onEnd: onAnyEnd,
+    onEmptyEnd: onAnyEnd,
+    onError: onAnyEnd,
   );
 
   return completer.future;

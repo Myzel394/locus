@@ -105,6 +105,7 @@ class NostrFetch {
     required final Future<void> Function(Message message, String relay) onEvent,
     required final void Function() onEnd,
     final void Function()? onEmptyEnd,
+    final VoidCallback? onError,
   }) {
     final List<WebSocket> sockets = [];
 
@@ -136,6 +137,8 @@ class NostrFetch {
           "Nostr Socket",
           "Error for socket: $error",
         );
+
+        onError?.call();
       });
     }
 

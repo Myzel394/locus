@@ -290,13 +290,31 @@ class TaskView extends ChangeNotifier with LocationBase {
         onMaybeTrigger,
     required final LocationPointService userLocation,
   }) async {
+    FlutterLogs.logInfo(
+      LOG_TAG,
+      "Headless Task; Check View Alarms",
+      "Checking view $name from $lastAlarmCheck...",
+    );
+
     final locations = await getLocationsAsFuture(
       from: lastAlarmCheck,
     );
 
     lastAlarmCheck = DateTime.now();
 
+    FlutterLogs.logInfo(
+      LOG_TAG,
+      "Headless Task; Check View Alarms",
+      "Checking view $name... ${locations.length} locations",
+    );
+
     if (locations.isEmpty) {
+      FlutterLogs.logInfo(
+        LOG_TAG,
+        "Headless Task; Check View Alarms",
+        "Checking view $name... No locations",
+      );
+
       return;
     }
 

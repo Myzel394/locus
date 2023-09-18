@@ -22,6 +22,8 @@ import 'package:locus/widgets/ModalSheet.dart';
 import 'package:locus/widgets/ModalSheetContent.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:provider/provider.dart';
+import 'package:locus/services/manager_service/helpers.dart';
+import 'package:locus/services/current_location_service.dart';
 
 import '../../models/log.dart';
 import '../../utils/PageRoute.dart';
@@ -365,10 +367,27 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
               child: Text(l10n.location_manageAlarms_addNewAlarm_actionLabel),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: MEDIUM_SPACE),
-            child: Text(l10n.location_manageAlarms_lastCheck_description(
-                widget.view.lastAlarmCheck)),
+          GestureDetector(
+            onTap: () async {
+              final l10n = AppLocalizations.of(context);
+              final views = context.read<ViewService>();
+              final currentLocation = context.read<CurrentLocationService>();
+
+              checkViewAlarms(
+                l10n: l10n,
+                views: views.viewsWithAlarms,
+                viewService: views,
+                userLocation: await LocationPointService.fromPosition(
+                    currentLocation.currentPosition!),
+              );
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: MEDIUM_SPACE),
+              child: Text(
+                l10n.location_manageAlarms_lastCheck_description(
+                    widget.view.lastAlarmCheck),
+              ),
+            ),
           ),
         ],
       ),
