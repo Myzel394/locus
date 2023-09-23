@@ -62,6 +62,11 @@ abstract class Socket {
 
   void _registerSocket() {
     _socket!.listen((event) {
+      if (!isConnected) {
+        closeConnection();
+        return;
+      }
+
       _resetTimer();
 
       onEvent(event);

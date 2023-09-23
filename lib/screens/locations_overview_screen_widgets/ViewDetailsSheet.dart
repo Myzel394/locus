@@ -4,7 +4,7 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:locus/screens/locations_overview_screen_widgets/ViewDetails.dart';
 import 'package:locus/services/location_point_service.dart';
-import 'package:locus/services/view_service.dart';
+import 'package:locus/services/view_service/index.dart';
 import 'package:locus/widgets/ModalSheet.dart';
 
 import '../../constants/spacing.dart';
@@ -32,16 +32,17 @@ class _ViewDetailsSheetState extends State<ViewDetailsSheet> {
   final containerKey = GlobalKey();
 
   final DraggableScrollableController controller =
-      DraggableScrollableController();
+  DraggableScrollableController();
 
   // Index starting from last element
   int locationIndex = 0;
   TaskView? oldView;
   bool isExpanded = false;
 
-  LocationPointService? get currentLocation => widget.locations == null
-      ? null
-      : widget.locations![widget.locations!.length - 1 - locationIndex];
+  LocationPointService? get currentLocation =>
+      widget.locations == null
+          ? null
+          : widget.locations![widget.locations!.length - 1 - locationIndex];
 
   @override
   void initState() {
@@ -112,103 +113,110 @@ class _ViewDetailsSheetState extends State<ViewDetailsSheet> {
         0.22,
         1,
       ],
-      builder: (context, scrollController) => ModalSheet(
-        miuiIsGapless: true,
-        materialPadding: EdgeInsets.zero,
-        cupertinoPadding: EdgeInsets.zero,
-        sheetController: controller,
-        child: SingleChildScrollView(
-          controller: scrollController,
-          child: Column(
-            children: [
-              const SizedBox(height: MEDIUM_SPACE),
-              if (view != null)
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    Icon(
-                      Icons.circle_rounded,
-                      size: 20,
-                      color: view.color,
-                    ),
-                    const SizedBox(width: SMALL_SPACE),
-                    Text(view.name),
-                  ],
-                ),
-              if (widget.locations != null && widget.locations!.isNotEmpty) ...[
-                const SizedBox(height: MEDIUM_SPACE),
-                SizedBox(
-                  height: 120,
-                  child: PageView.builder(
-                    physics: null,
-                    onPageChanged: (index) {
-                      final location = widget.locations![index];
-
-                      widget.onVisibleLocationChange(location);
-
-                      if (!isExpanded) {
-                        widget.onGoToPosition(location);
-                      }
-
-                      setState(() {
-                        locationIndex = index;
-                      });
-                    },
-                    reverse: true,
-                    itemCount: widget.locations!.length,
-                    itemBuilder: (context, index) => Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(MEDIUM_SPACE),
-                        color: platformThemeData(
-                          context,
-                          material: (data) => data.colorScheme.surfaceVariant,
-                          cupertino: (data) => data.barBackgroundColor,
+      builder: (context, scrollController) =>
+          ModalSheet(
+            miuiIsGapless: true,
+            materialPadding: EdgeInsets.zero,
+            cupertinoPadding: EdgeInsets.zero,
+            sheetController: controller,
+            child: SingleChildScrollView(
+              controller: scrollController,
+              child: Column(
+                children: [
+                  const SizedBox(height: MEDIUM_SPACE),
+                  if (view != null)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: <Widget>[
+                        Icon(
+                          Icons.circle_rounded,
+                          size: 20,
+                          color: view.color,
                         ),
-                      ),
-                      margin:
-                          const EdgeInsets.symmetric(horizontal: MEDIUM_SPACE),
-                      padding: const EdgeInsets.all(MEDIUM_SPACE),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: <Widget>[
-                          const Icon(Icons.drag_indicator_rounded),
-                          const SizedBox(width: SMALL_SPACE),
-                          Flexible(
-                            child: SimpleAddressFetcher(
-                              location: widget.locations![index].asLatLng(),
+                        const SizedBox(width: SMALL_SPACE),
+                        Text(view.name),
+                      ],
+                    ),
+                  if (widget.locations != null &&
+                      widget.locations!.isNotEmpty) ...[
+                    const SizedBox(height: MEDIUM_SPACE),
+                    SizedBox(
+                      height: 120,
+                      child: PageView.builder(
+                        physics: null,
+                        onPageChanged: (index) {
+                          final location = widget.locations![index];
+
+                          widget.onVisibleLocationChange(location);
+
+                          if (!isExpanded) {
+                            widget.onGoToPosition(location);
+                          }
+
+                          setState(() {
+                            locationIndex = index;
+                          });
+                        },
+                        reverse: true,
+                        itemCount: widget.locations!.length,
+                        itemBuilder: (context, index) =>
+                            Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(
+                                    MEDIUM_SPACE),
+                                color: platformThemeData(
+                                  context,
+                                  material: (data) =>
+                                  data.colorScheme.surfaceVariant,
+                                  cupertino: (data) => data.barBackgroundColor,
+                                ),
+                              ),
+                              margin:
+                              const EdgeInsets.symmetric(
+                                  horizontal: MEDIUM_SPACE),
+                              padding: const EdgeInsets.all(MEDIUM_SPACE),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: <Widget>[
+                                  const Icon(Icons.drag_indicator_rounded),
+                                  const SizedBox(width: SMALL_SPACE),
+                                  Flexible(
+                                    child: SimpleAddressFetcher(
+                                      location: widget.locations![index]
+                                          .asLatLng(),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
                       ),
                     ),
-                  ),
-                ),
-                const SizedBox(width: MEDIUM_SPACE),
-                Padding(
-                  padding: const EdgeInsets.all(MEDIUM_SPACE),
-                  child: ViewDetails(
-                    location: currentLocation,
-                    view: widget.view,
-                    onGoToPosition: (position) {
-                      controller.animateTo(
-                        0.22,
-                        duration: const Duration(milliseconds: 150),
-                        curve: Curves.fastLinearToSlowEaseIn,
-                      );
-                      widget.onGoToPosition(position);
-                    },
-                  ),
-                )
-              ] else
-                Text(
-                  l10n.locationFetchEmptyError,
-                )
-            ],
+                    const SizedBox(width: MEDIUM_SPACE),
+                    Padding(
+                      padding: const EdgeInsets.all(MEDIUM_SPACE),
+                      child: ViewDetails(
+                        location: currentLocation,
+                        view: widget.view,
+                        onGoToPosition: (position) {
+                          controller.animateTo(
+                            0.22,
+                            duration: const Duration(milliseconds: 150),
+                            curve: Curves.fastLinearToSlowEaseIn,
+                          );
+                          widget.onGoToPosition(position);
+                        },
+                      ),
+                    )
+                  ] else
+                    Text(
+                      l10n.locationFetchEmptyError,
+                    )
+                ],
+              ),
+            ),
           ),
-        ),
-      ),
     );
   }
 }

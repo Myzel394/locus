@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:locus/screens/locations_overview_screen_widgets/LocationFetchers.dart';
 import 'package:locus/screens/task_detail_screen_widgets/LocationDetails.dart';
-import 'package:locus/services/view_service.dart';
+import 'package:locus/services/view_service/index.dart';
 import 'package:provider/provider.dart';
 
 class LocationPointsList extends StatefulWidget {

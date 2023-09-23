@@ -4,7 +4,7 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/screens/locations_overview_screen_widgets/LocationFetchers.dart';
 import 'package:locus/services/location_alarm_service/index.dart';
-import 'package:locus/services/view_service.dart';
+import 'package:locus/services/view_service/index.dart';
 import 'package:locus/utils/map.dart';
 import 'package:locus/widgets/LocusFlutterMap.dart';
 import 'package:provider/provider.dart';
@@ -25,7 +25,10 @@ class GeoLocationAlarmPreview extends StatelessWidget {
   Widget build(BuildContext context) {
     final locationFetchers = context.watch<LocationFetchers>();
     final lastLocation =
-        locationFetchers.getLocations(view).lastOrNull?.asLatLng();
+    locationFetchers
+        .getLocations(view)
+        .lastOrNull
+        ?.asLatLng();
 
     return Column(
       mainAxisSize: MainAxisSize.min,

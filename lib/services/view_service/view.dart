@@ -7,38 +7,22 @@ import 'package:cryptography/cryptography.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_logs/flutter_logs.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:locus/api/nostr-fetch.dart';
+import 'package:locus/services/location_fetcher_service/Fetcher.dart';
 import 'package:locus/services/task_service/index.dart';
+import 'package:locus/services/view_service/index.dart';
 import 'package:locus/utils/cryptography/decrypt.dart';
+import 'package:locus/utils/nostr_fetcher/LocationPointDecrypter.dart';
 import 'package:nostr/nostr.dart';
 import 'package:uuid/uuid.dart';
 
-import '../api/get-locations.dart' as get_locations_api;
-import '../constants/values.dart';
-import 'location_alarm_service/GeoLocationAlarm.dart';
-import 'location_alarm_service/LocationAlarmServiceBase.dart';
-import 'location_alarm_service/ProximityLocationAlarm.dart';
-import 'location_alarm_service/enums.dart';
-import 'location_point_service.dart';
-import 'task_service/mixins.dart';
-
-const storage = FlutterSecureStorage();
-const KEY = "view_service";
-
-class ViewServiceLinkParameters {
-  final SecretKey password;
-  final String nostrPublicKey;
-  final String nostrMessageID;
-  final List<String> relays;
-
-  const ViewServiceLinkParameters({
-    required this.password,
-    required this.nostrPublicKey,
-    required this.nostrMessageID,
-    required this.relays,
-  });
-}
+import '../../constants/values.dart';
+import '../location_alarm_service/GeoLocationAlarm.dart';
+import '../location_alarm_service/LocationAlarmServiceBase.dart';
+import '../location_alarm_service/ProximityLocationAlarm.dart';
+import '../location_alarm_service/enums.dart';
+import '../location_point_service.dart';
+import '../task_service/mixins.dart';
 
 class TaskView extends ChangeNotifier with LocationBase {
   final SecretKey _encryptionPassword;
@@ -238,39 +222,6 @@ class TaskView extends ChangeNotifier with LocationBase {
   }
 
   @override
-  VoidCallback getLocations({
-    required void Function(LocationPointService) onLocationFetched,
-    required void Function() onEnd,
-    final VoidCallback? onEmptyEnd,
-    int? limit,
-    DateTime? from,
-    DateTime? until,
-  }) =>
-      get_locations_api.getLocations(
-        encryptionPassword: _encryptionPassword,
-        nostrPublicKey: nostrPublicKey,
-        relays: relays,
-        onLocationFetched: onLocationFetched,
-        onEnd: onEnd,
-        onEmptyEnd: onEmptyEnd,
-        from: from,
-        limit: limit,
-        until: until,
-      );
-
-  Future<List<LocationPointService>> getLocationsAsFuture({
-    int? limit,
-    DateTime? from,
-  }) =>
-      get_locations_api.getLocationsAsFuture(
-        encryptionPassword: _encryptionPassword,
-        nostrPublicKey: nostrPublicKey,
-        relays: relays,
-        from: from,
-        limit: limit,
-      );
-
-  @override
   void dispose() {
     _encryptionPassword.destroy();
 
@@ -296,9 +247,9 @@ class TaskView extends ChangeNotifier with LocationBase {
       "Checking view $name from $lastAlarmCheck...",
     );
 
-    final locations = await getLocationsAsFuture(
-      from: lastAlarmCheck,
-    );
+    final fetcher = Fetcher(this);
+    await fetcher.fetchAllLocations();
+    final locations = fetcher.sortedLocations;
 
     lastAlarmCheck = DateTime.now();
 
@@ -353,75 +304,9 @@ class TaskView extends ChangeNotifier with LocationBase {
     alarms.remove(alarm);
     notifyListeners();
   }
-}
 
-class ViewService extends ChangeNotifier {
-  final List<TaskView> _views;
-
-  ViewService({
-    required List<TaskView> views,
-  }) : _views = views;
-
-  UnmodifiableListView<TaskView> get views => UnmodifiableListView(_views);
-
-  UnmodifiableListView<TaskView> get viewsWithAlarms =>
-      UnmodifiableListView(_views.where((view) => view.alarms.isNotEmpty));
-
-  TaskView getViewById(final String id) =>
-      _views.firstWhere((view) => view.id == id);
-
-  static Future<ViewService> restore() async {
-    final rawViews = await storage.read(key: KEY);
-
-    if (rawViews == null) {
-      return ViewService(
-        views: [],
-      );
-    }
-
-    return ViewService(
-      views: List<TaskView>.from(
-        List<Map<String, dynamic>>.from(
-          jsonDecode(rawViews),
-        ).map(
-          TaskView.fromJSON,
-        ),
-      ).toList(),
-    );
-  }
-
-  Future<void> save() async {
-    final data = jsonEncode(
-      List<Map<String, dynamic>>.from(
-        await Future.wait(
-          _views.map(
-            (view) => view.toJSON(),
-          ),
-        ),
-      ),
-    );
-
-    await storage.write(key: KEY, value: data);
-  }
-
-  void add(final TaskView view) {
-    _views.add(view);
-
-    notifyListeners();
-  }
-
-  void remove(final TaskView view) {
-    _views.remove(view);
-
-    notifyListeners();
-  }
-
-  Future<void> update(final TaskView view) async {
-    final index = _views.indexWhere((element) => element.id == view.id);
-
-    _views[index] = view;
-
-    notifyListeners();
-    await save();
-  }
+  Future<LocationPointService> decryptFromNostrMessage(final Message message) =>
+      LocationPointDecrypter(
+        _encryptionPassword,
+      ).decryptFromNostrMessage(message);
 }

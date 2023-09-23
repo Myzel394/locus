@@ -4,6 +4,7 @@ import 'package:flutter_logs/flutter_logs.dart';
 import 'package:locus/constants/values.dart';
 import 'package:locus/services/location_point_service.dart';
 import 'package:locus/services/task_service/index.dart';
+import 'package:locus/services/task_service/mixins.dart';
 import 'package:locus/utils/nostr_fetcher/BasicNostrFetchSocket.dart';
 import 'package:locus/utils/nostr_fetcher/Socket.dart';
 import 'package:nostr/nostr.dart';
@@ -120,7 +121,7 @@ class NostrSocket extends BasicNostrFetchSocket {
       );
 
   static Request createNostrRequestDataFromTask(
-    final Task task, {
+    final LocationBase task, {
     final int? limit,
     final DateTime? from,
     final DateTime? until,

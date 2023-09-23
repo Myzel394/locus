@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
-import 'package:locus/services/view_service.dart';
+import 'package:locus/services/view_service/index.dart';
 import 'package:locus/widgets/Paper.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:locus/widgets/SimpleAddressFetcher.dart';
@@ -35,8 +35,7 @@ class ViewLocationPopup extends StatelessWidget {
       ),
       child: Paper(
         width: null,
-        child:
-        Padding(
+        child: Padding(
           padding: const EdgeInsets.all(MEDIUM_SPACE),
           child: Column(
             mainAxisSize: MainAxisSize.min,

@@ -11,7 +11,7 @@ import 'package:locus/constants/app.dart';
 import 'package:locus/screens/welcome_screen_widgets/TransferReceiverScreen.dart';
 import 'package:locus/services/settings_service/index.dart';
 import 'package:locus/services/task_service/index.dart';
-import 'package:locus/services/view_service.dart';
+import 'package:locus/services/view_service/index.dart';
 import 'package:locus/utils/PageRoute.dart';
 import 'package:locus/widgets/PlatformFlavorWidget.dart';
 
@@ -22,10 +22,10 @@ import '../../widgets/PlatformListTile.dart';
 
 class ImportSheet extends StatefulWidget {
   final void Function(
-    TaskService taskService,
-    ViewService viewService,
-    SettingsService settings,
-  ) onImport;
+      TaskService taskService,
+      ViewService viewService,
+      SettingsService settings,
+      ) onImport;
 
   const ImportSheet({
     required this.onImport,
@@ -44,29 +44,32 @@ class _ImportSheetState extends State<ImportSheet> {
 
     final shouldImport = await showPlatformDialog(
       context: context,
-      builder: (context) => PlatformAlertDialog(
-        material: (context, __) => MaterialAlertDialogData(
-          icon: PlatformFlavorWidget(
-            material: (context, _) => const Icon(Icons.warning_rounded),
-            cupertino: (context, _) =>
-                const Icon(CupertinoIcons.exclamationmark_triangle_fill),
-          ),
-        ),
-        title: Text(l10n.settingsScreen_import_confirmation_title),
-        content: Text(l10n.settingsScreen_import_confirmation_description),
-        actions: createCancellableDialogActions(
-          context,
-          [
-            PlatformDialogAction(
-              material: (context, _) => MaterialDialogActionData(
-                icon: const Icon(Icons.download_rounded),
-              ),
-              child: Text(l10n.settingsScreen_import_confirmation_confirm),
-              onPressed: () => Navigator.pop(context, true),
+      builder: (context) =>
+          PlatformAlertDialog(
+            material: (context, __) =>
+                MaterialAlertDialogData(
+                  icon: PlatformFlavorWidget(
+                    material: (context, _) => const Icon(Icons.warning_rounded),
+                    cupertino: (context, _) =>
+                    const Icon(CupertinoIcons.exclamationmark_triangle_fill),
+                  ),
+                ),
+            title: Text(l10n.settingsScreen_import_confirmation_title),
+            content: Text(l10n.settingsScreen_import_confirmation_description),
+            actions: createCancellableDialogActions(
+              context,
+              [
+                PlatformDialogAction(
+                  material: (context, _) =>
+                      MaterialDialogActionData(
+                        icon: const Icon(Icons.download_rounded),
+                      ),
+                  child: Text(l10n.settingsScreen_import_confirmation_confirm),
+                  onPressed: () => Navigator.pop(context, true),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
     );
 
     if (shouldImport != true || !mounted) {
@@ -150,24 +153,25 @@ class _ImportSheetState extends State<ImportSheet> {
               ),
               Platform.isAndroid && isGMSFlavor
                   ? PlatformListTile(
-                      leading: PlatformWidget(
-                        material: (_, __) =>
-                            const Icon(Icons.phonelink_setup_rounded),
-                        cupertino: (_, __) =>
-                            const Icon(CupertinoIcons.device_phone_portrait),
-                      ),
-                      title: Text(l10n.settingsScreen_import_transfer),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          NativePageRoute(
-                            context: context,
-                            builder: (context) => TransferReceiverScreen(
-                                onContentReceived: importRawData),
-                          ),
-                        );
-                      },
-                    )
+                leading: PlatformWidget(
+                  material: (_, __) =>
+                  const Icon(Icons.phonelink_setup_rounded),
+                  cupertino: (_, __) =>
+                  const Icon(CupertinoIcons.device_phone_portrait),
+                ),
+                title: Text(l10n.settingsScreen_import_transfer),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    NativePageRoute(
+                      context: context,
+                      builder: (context) =>
+                          TransferReceiverScreen(
+                              onContentReceived: importRawData),
+                    ),
+                  );
+                },
+              )
                   : const SizedBox.shrink(),
             ],
           ),

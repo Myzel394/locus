@@ -10,7 +10,7 @@ import 'package:locus/screens/locations_overview_screen_widgets/LocationFetchers
 import 'package:locus/services/current_location_service.dart';
 import 'package:locus/services/location_alarm_service/ProximityLocationAlarm.dart';
 import 'package:locus/services/location_alarm_service/index.dart';
-import 'package:locus/services/view_service.dart';
+import 'package:locus/services/view_service/index.dart';
 import 'package:locus/utils/location/get-fallback-location.dart';
 import 'package:locus/utils/map.dart';
 import 'package:locus/widgets/LocusFlutterMap.dart';
@@ -35,12 +35,15 @@ class ProximityAlarmPreview extends StatelessWidget {
     final centerPosition = currentLocation.currentPosition == null
         ? getFallbackLocation(context)
         : LatLng(
-            currentLocation.currentPosition!.latitude,
-            currentLocation.currentPosition!.longitude,
-          );
+      currentLocation.currentPosition!.latitude,
+      currentLocation.currentPosition!.longitude,
+    );
     final locationFetchers = context.watch<LocationFetchers>();
     final lastLocation =
-        locationFetchers.getLocations(view).lastOrNull?.asLatLng();
+    locationFetchers
+        .getLocations(view)
+        .lastOrNull
+        ?.asLatLng();
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -49,12 +52,12 @@ class ProximityAlarmPreview extends StatelessWidget {
           title: Text(
             alarm.radius > 10000
                 ? l10n.location_addAlarm_radiusBased_radius_kilometers(
-                    double.parse(
-                      (alarm.radius / 1000).toStringAsFixed(1),
-                    ),
-                  )
+              double.parse(
+                (alarm.radius / 1000).toStringAsFixed(1),
+              ),
+            )
                 : l10n.location_addAlarm_radiusBased_radius_meters(
-                    alarm.radius.round()),
+                alarm.radius.round()),
           ),
           leading: getIconForLocationRadiusBasedTrigger(context, alarm.type),
           trailing: PlatformIconButton(

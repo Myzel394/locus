@@ -5,19 +5,16 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart'
     hide PlatformListTile;
 import 'package:locus/screens/view_alarm_screen_widgets/ViewAlarmScreen.dart';
 import 'package:locus/screens/view_details_screen_widgets/LocationPointsList.dart';
-import 'package:locus/services/view_service.dart';
+import 'package:locus/services/view_service/index.dart';
 import 'package:locus/utils/PageRoute.dart';
-import 'package:locus/widgets/OpenInMaps.dart';
 import 'package:locus/widgets/Paper.dart';
 import 'package:locus/widgets/PlatformFlavorWidget.dart';
 import 'package:locus/widgets/PlatformPopup.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
-import 'package:provider/provider.dart';
 
 import '../constants/spacing.dart';
 import '../utils/theme.dart';
 import '../widgets/PlatformListTile.dart';
-import 'locations_overview_screen_widgets/LocationFetchers.dart';
 
 class ViewDetailsScreen extends StatelessWidget {
   final TaskView view;

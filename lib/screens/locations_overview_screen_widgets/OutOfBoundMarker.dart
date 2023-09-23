@@ -12,7 +12,7 @@ import "package:latlong2/latlong.dart";
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/services/location_point_service.dart';
 import 'package:locus/services/settings_service/index.dart';
-import 'package:locus/services/view_service.dart';
+import 'package:locus/services/view_service/index.dart';
 import 'package:provider/provider.dart';
 import 'package:simple_shadow/simple_shadow.dart';
 
@@ -111,7 +111,9 @@ class _OutOfBoundMarkerState extends State<OutOfBoundMarker>
   }
 
   void _updateSizes() {
-    final size = MediaQuery.of(context).size;
+    final size = MediaQuery
+        .of(context)
+        .size;
 
     setState(() {
       this.size = size;
@@ -145,11 +147,11 @@ class _OutOfBoundMarkerState extends State<OutOfBoundMarker>
     }
 
     final xPercentage =
-        ((widget.lastViewLocation.longitude - west) / (east - west))
-            .clamp(1 - xAvailablePercentage, xAvailablePercentage);
+    ((widget.lastViewLocation.longitude - west) / (east - west))
+        .clamp(1 - xAvailablePercentage, xAvailablePercentage);
     final yPercentage =
-        ((widget.lastViewLocation.latitude - north) / (south - north))
-            .clamp(yAvailablePercentageStart, yAvailablePercentageEnd);
+    ((widget.lastViewLocation.latitude - north) / (south - north))
+        .clamp(yAvailablePercentageStart, yAvailablePercentageEnd);
 
     // Calculate the rotation between marker and last location
     final markerLongitude = west + xPercentage * (east - west);
@@ -171,8 +173,8 @@ class _OutOfBoundMarkerState extends State<OutOfBoundMarker>
     final width =
         size.width - OUT_OF_BOUND_MARKER_X_PADDING - OUT_OF_BOUND_MARKER_SIZE;
     final height = usesOpenStreetMap &&
-            (xPercentage * size.width > bottomRightMapActionsHeight &&
-                yPercentage > 0.5)
+        (xPercentage * size.width > bottomRightMapActionsHeight &&
+            yPercentage > 0.5)
         ? size.height - (FAB_SIZE + FAB_MARGIN) * 2
         : size.height;
 

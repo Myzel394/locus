@@ -6,7 +6,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get_time_ago/get_time_ago.dart';
-import 'package:locus/services/view_service.dart';
+import 'package:locus/services/view_service/index.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:locus/utils/date.dart';
 import 'package:locus/utils/navigation.dart';
