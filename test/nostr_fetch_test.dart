@@ -8,8 +8,10 @@ import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:locus/constants/values.dart';
+import 'package:locus/services/location_fetcher_service/Fetcher.dart';
 import 'package:locus/services/location_point_service.dart';
 import 'package:locus/services/task_service/index.dart';
+import 'package:locus/services/view_service/index.dart';
 import 'package:locus/utils/cryptography/utils.dart';
 import 'package:locus/utils/nostr_fetcher/LocationPointDecrypter.dart';
 import 'package:locus/utils/nostr_fetcher/NostrSocket.dart';
@@ -20,6 +22,7 @@ import 'utils.dart';
 const RELAY_URI = "wss://relay.damus.io";
 // DuckDuckGo's headquarter
 final CENTER = LatLng(40.04114, -75.48702);
+final SECOND_LOCATION = LocationPointService.dummyFromLatLng(LatLng(0, 0));
 final LOCATION_POINT = LocationPointService.dummyFromLatLng(CENTER);
 
 void main() {
@@ -67,12 +70,36 @@ void main() {
           NostrSocket.createNostrRequestDataFromTask(task, limit: 1)
               .serialize(),
         );
+        await fetcher.onComplete;
 
         final locations = await fetcher.stream.toList();
 
         expect(locations.length, 1);
         expect(locations[0].latitude, LOCATION_POINT.latitude);
         expect(locations[0].longitude, LOCATION_POINT.longitude);
+      });
+    });
+
+    testWidgets("Fetcher works", (tester) async {
+      setupFlutterLogs(tester);
+
+      await tester.runAsync(() async {
+        // Publish
+        final task = await Task.create("Test", [RELAY_URI]);
+        await task.publisher.publishLocation(LOCATION_POINT);
+        await task.publisher.publishLocation(SECOND_LOCATION);
+
+        // Fetch
+        final view = task.createTaskView_onlyForTesting();
+        final fetcher = Fetcher(view);
+        await fetcher.fetchAllLocations();
+        final locations = fetcher.sortedLocations;
+
+        expect(locations.length, 2);
+        expect(locations[0].latitude, LOCATION_POINT.latitude);
+        expect(locations[0].longitude, LOCATION_POINT.longitude);
+        expect(locations[1].latitude, SECOND_LOCATION.latitude);
+        expect(locations[1].longitude, SECOND_LOCATION.longitude);
       });
     });
   });
