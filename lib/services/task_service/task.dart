@@ -2,12 +2,14 @@ import 'dart:convert';
 
 import 'package:cryptography/cryptography.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:locus/api/nostr-events.dart';
 import 'package:locus/constants/values.dart';
 import 'package:locus/services/location_point_service.dart';
 import 'package:locus/services/task_service/task_cryptography.dart';
 import 'package:locus/services/task_service/task_publisher.dart';
+import 'package:locus/services/view_service/index.dart';
 import 'package:locus/utils/cryptography/encrypt.dart';
 import 'package:locus/utils/cryptography/utils.dart';
 import 'package:locus/utils/location/index.dart';
@@ -53,7 +55,8 @@ class Task extends ChangeNotifier with LocationBase {
     required this.timers,
     Map<LocationPointService, int>? outstandingLocations,
     this.deleteAfterRun = false,
-  })  : _encryptionPassword = encryptionPassword,
+  })
+      : _encryptionPassword = encryptionPassword,
         outstandingLocations = outstandingLocations ?? {};
 
   factory Task.fromJSON(Map<String, dynamic> json) {
@@ -77,10 +80,11 @@ class Task extends ChangeNotifier with LocationBase {
       })),
       outstandingLocations: Map<String, int>.from(json["outstandingLocations"])
           .map<LocationPointService, int>(
-        (rawLocationData, tries) => MapEntry(
-          LocationPointService.fromJSON(jsonDecode(rawLocationData)),
-          tries,
-        ),
+            (rawLocationData, tries) =>
+            MapEntry(
+              LocationPointService.fromJSON(jsonDecode(rawLocationData)),
+              tries,
+            ),
       ),
     );
   }
@@ -103,20 +107,20 @@ class Task extends ChangeNotifier with LocationBase {
       "timers": timers.map((timer) => timer.toJSON()).toList(),
       "deleteAfterRun": deleteAfterRun.toString(),
       "outstandingLocations": outstandingLocations.map(
-        (locationData, tries) => MapEntry(
-          locationData.toJSON(),
-          tries,
-        ),
+            (locationData, tries) =>
+            MapEntry(
+              locationData.toJSON(),
+              tries,
+            ),
       ),
     };
   }
 
-  static Future<Task> create(
-    final String name,
-    final List<String> relays, {
-    List<TaskRuntimeTimer> timers = const [],
-    bool deleteAfterRun = false,
-  }) async {
+  static Future<Task> create(final String name,
+      final List<String> relays, {
+        List<TaskRuntimeTimer> timers = const [],
+        bool deleteAfterRun = false,
+      }) async {
     FlutterLogs.logInfo(
       LOG_TAG,
       "Task",
@@ -129,7 +133,9 @@ class Task extends ChangeNotifier with LocationBase {
       id: uuid.v4(),
       name: name,
       encryptionPassword: secretKey,
-      nostrPrivateKey: Keychain.generate().private,
+      nostrPrivateKey: Keychain
+          .generate()
+          .private,
       relays: relays,
       createdAt: DateTime.now(),
       timers: timers,
@@ -195,7 +201,7 @@ class Task extends ChangeNotifier with LocationBase {
     }
 
     final shouldRunNowBasedOnTimers =
-        timers.any((timer) => timer.shouldRun(DateTime.now()));
+    timers.any((timer) => timer.shouldRun(DateTime.now()));
 
     if (shouldRunNowBasedOnTimers) {
       return true;
@@ -263,7 +269,7 @@ class Task extends ChangeNotifier with LocationBase {
   Future<DateTime?> startScheduleTomorrow() {
     final tomorrow = DateTime.now().add(const Duration(days: 1));
     final nextDate =
-        DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 6, 0, 0);
+    DateTime(tomorrow.year, tomorrow.month, tomorrow.day, 6, 0, 0);
 
     return startSchedule(startDate: nextDate);
   }
@@ -383,4 +389,14 @@ class Task extends ChangeNotifier with LocationBase {
 
     super.dispose();
   }
+
+  TaskView createTaskView_onlyForTesting() =>
+      TaskView(
+        encryptionPassword: _encryptionPassword,
+        nostrPublicKey: nostrPublicKey,
+        color: Colors.red,
+        name: name,
+        relays: relays,
+        id: id,
+      );
 }

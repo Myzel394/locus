@@ -16,10 +16,12 @@ class NostrSocket extends BasicNostrFetchSocket {
     super.timeout,
     required this.decryptMessage,
     final int decryptionParallelProcesses = 4,
-  }) : _decryptionQueue = Queue(parallel: decryptionParallelProcesses);
+  }) : _decryptionQueue =
+  Queue(parallel: decryptionParallelProcesses, timeout: timeout);
 
+  int _processesInQueue = 0;
   final StreamController<LocationPointService> _controller =
-      StreamController<LocationPointService>();
+  StreamController<LocationPointService>();
 
   Stream<LocationPointService> get stream => _controller.stream;
 
@@ -34,10 +36,19 @@ class NostrSocket extends BasicNostrFetchSocket {
       "Closing everything...",
     );
 
-    await _decryptionQueue.onComplete;
+    if (_processesInQueue > 0) {
+      FlutterLogs.logInfo(
+        LOG_TAG,
+        "Nostr Socket",
+        "    -> Waiting for $_processesInQueue decryption processes to finish...",
+      );
+
+      await _decryptionQueue.onComplete;
+    }
 
     _decryptionQueue.dispose();
     _controller.close();
+    closeConnection();
 
     FlutterLogs.logInfo(
       LOG_TAG,
@@ -57,6 +68,7 @@ class NostrSocket extends BasicNostrFetchSocket {
   }
 
   Future<void> _handleDecryption(final Message message) async {
+    _processesInQueue++;
     FlutterLogs.logInfo(
       LOG_TAG,
       "Nostr Socket",
@@ -79,6 +91,8 @@ class NostrSocket extends BasicNostrFetchSocket {
         "Nostr Socket",
         "    -> Decryption failed: $error",
       );
+    } finally {
+      _processesInQueue--;
     }
   }
 
@@ -111,17 +125,20 @@ class NostrSocket extends BasicNostrFetchSocket {
       Request(
         subscriptionID ?? generate64RandomHexChars(),
         [
-          if (kinds != null) Filter(kinds: kinds),
-          if (limit != null) Filter(limit: limit),
-          if (from != null)
-            Filter(since: (from.millisecondsSinceEpoch / 1000).floor()),
-          if (until != null)
-            Filter(until: (until.millisecondsSinceEpoch / 1000).floor()),
+          Filter(
+            kinds: kinds,
+            limit: limit,
+            since: from == null
+                ? null
+                : (from.millisecondsSinceEpoch / 1000).floor(),
+            until: until == null
+                ? null
+                : (until.millisecondsSinceEpoch / 1000).floor(),
+          ),
         ],
       );
 
-  static Request createNostrRequestDataFromTask(
-    final LocationBase task, {
+  static Request createNostrRequestDataFromTask(final LocationBase task, {
     final int? limit,
     final DateTime? from,
     final DateTime? until,
@@ -132,12 +149,14 @@ class NostrSocket extends BasicNostrFetchSocket {
           Filter(
             kinds: [1000],
             authors: [task.nostrPublicKey],
+            limit: limit,
+            since: from == null
+                ? null
+                : (from.millisecondsSinceEpoch / 1000).floor(),
+            until: until == null
+                ? null
+                : (until.millisecondsSinceEpoch / 1000).floor(),
           ),
-          if (limit != null) Filter(limit: limit),
-          if (from != null)
-            Filter(since: (from.millisecondsSinceEpoch / 1000).floor()),
-          if (until != null)
-            Filter(until: (until.millisecondsSinceEpoch / 1000).floor()),
         ],
       );
 }

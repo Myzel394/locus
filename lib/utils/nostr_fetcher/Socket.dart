@@ -21,10 +21,15 @@ abstract class Socket {
 
   Timer? _timeoutTimer;
 
+  final Completer<void> _completeListeners = Completer<void>();
+
+  Future<void> get onComplete => _completeListeners.future;
+
   void closeConnection() {
     _socket?.close();
     _socket = null;
     _timeoutTimer?.cancel();
+    _completeListeners.complete();
   }
 
   void _abort(final dynamic error) {
@@ -55,12 +60,17 @@ abstract class Socket {
 
   void addData(final dynamic data) {
     assert(isConnected,
-        "Socket is not connected. Make sure to call `connect` first.");
+    "Socket is not connected. Make sure to call `connect` first.");
 
     _socket!.add(data);
   }
 
   void _registerSocket() {
+    FlutterLogs.logInfo(
+      LOG_TAG,
+      "Socket",
+      "Socket connected to $uri. Listening now.",
+    );
     _socket!.listen((event) {
       if (!isConnected) {
         closeConnection();

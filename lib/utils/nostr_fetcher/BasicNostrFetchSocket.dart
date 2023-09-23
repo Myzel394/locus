@@ -21,7 +21,11 @@ abstract class BasicNostrFetchSocket extends Socket {
   void onEvent(final event) {
     final message = Message.deserialize(event);
 
-    FlutterLogs.logInfo(LOG_TAG, "Nostr Socket", "New event received");
+    FlutterLogs.logInfo(
+      LOG_TAG,
+      "Nostr Socket",
+      "New event received: ${message.type}",
+    );
 
     switch (message.type) {
       case "EOSE":
