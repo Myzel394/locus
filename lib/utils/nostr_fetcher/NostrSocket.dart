@@ -17,7 +17,7 @@ class NostrSocket extends BasicNostrFetchSocket {
   }) : _decryptionQueue = Queue(parallel: decryptionParallelProcesses);
 
   final StreamController<LocationPointService> _controller =
-  StreamController<LocationPointService>();
+      StreamController<LocationPointService>();
 
   Stream<LocationPointService> get stream => _controller.stream;
 
@@ -98,4 +98,23 @@ class NostrSocket extends BasicNostrFetchSocket {
     _controller.addError(error);
     _controller.close();
   }
+
+  static Request createNostrRequestData({
+    final String? subscriptionID,
+    final List<int>? kinds,
+    final int? limit,
+    final DateTime? from,
+    final DateTime? until,
+  }) =>
+      Request(
+        subscriptionID ?? generate64RandomHexChars(),
+        [
+          if (kinds != null) Filter(kinds: kinds),
+          if (limit != null) Filter(limit: limit),
+          if (from != null)
+            Filter(since: (from.millisecondsSinceEpoch / 1000).floor()),
+          if (until != null)
+            Filter(until: (until.millisecondsSinceEpoch / 1000).floor()),
+        ],
+      );
 }

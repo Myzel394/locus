@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:ui';
 
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:nostr/nostr.dart';
 
@@ -15,6 +16,7 @@ class NostrFetch {
     required this.request,
   });
 
+  // TODO: Refactor all of nostr fetching logic
   Future<WebSocket> _connectToRelay({
     required final String relay,
     required final Future<void> Function(Message message, String relay) onEvent,
@@ -97,6 +99,20 @@ class NostrFetch {
           break;
       }
     });
+
+    socket.timeout(
+      3.seconds,
+      onTimeout: (event) {
+        FlutterLogs.logError(
+          LOG_TAG,
+          "Nostr Socket $relay",
+          "Socket timed out.",
+        );
+
+        socket.close();
+        onEmptyEnd?.call();
+      },
+    );
 
     return socket;
   }

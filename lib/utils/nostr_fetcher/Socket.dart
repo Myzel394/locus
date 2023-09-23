@@ -54,15 +54,14 @@ abstract class Socket {
   }
 
   void addData(final dynamic data) {
-    assert(isConnected, "Socket is not connected.");
+    assert(isConnected,
+        "Socket is not connected. Make sure to call `connect` first.");
 
     _socket!.add(data);
   }
 
-  void _registerSocket(final WebSocket socket) {
-    _socket = socket;
-
-    socket.listen((event) {
+  void _registerSocket() {
+    _socket!.listen((event) {
       _resetTimer();
 
       onEvent(event);
@@ -80,18 +79,15 @@ abstract class Socket {
       return;
     }
 
-    try {
-      _resetTimer();
-      FlutterLogs.logInfo(
-        LOG_TAG,
-        "Socket",
-        "Connecting to $uri...",
-      );
+    _resetTimer();
+    FlutterLogs.logInfo(
+      LOG_TAG,
+      "Socket",
+      "Connecting to $uri...",
+    );
 
-      _registerSocket(await WebSocket.connect(uri));
-    } catch (error) {
-      _abort(error);
-    }
+    _socket = await WebSocket.connect(uri);
+    _registerSocket();
   }
 
   void onError(final dynamic error);
