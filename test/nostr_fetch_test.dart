@@ -15,6 +15,7 @@ import 'package:locus/services/view_service/index.dart';
 import 'package:locus/utils/cryptography/utils.dart';
 import 'package:locus/utils/nostr_fetcher/LocationPointDecrypter.dart';
 import 'package:locus/utils/nostr_fetcher/NostrSocket.dart';
+import 'package:nostr/nostr.dart';
 
 import 'utils.dart';
 
@@ -67,8 +68,12 @@ void main() {
 
         await fetcher.connect();
         fetcher.addData(
-          NostrSocket.createNostrRequestDataFromTask(task, limit: 1)
-              .serialize(),
+          Request(
+            generate64RandomHexChars(),
+            [
+              NostrSocket.createNostrRequestDataFromTask(task, limit: 1),
+            ],
+          ).serialize(),
         );
         await fetcher.onComplete;
 

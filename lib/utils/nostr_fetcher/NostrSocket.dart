@@ -17,11 +17,11 @@ class NostrSocket extends BasicNostrFetchSocket {
     required this.decryptMessage,
     final int decryptionParallelProcesses = 4,
   }) : _decryptionQueue =
-  Queue(parallel: decryptionParallelProcesses, timeout: timeout);
+            Queue(parallel: decryptionParallelProcesses, timeout: timeout);
 
   int _processesInQueue = 0;
   final StreamController<LocationPointService> _controller =
-  StreamController<LocationPointService>();
+      StreamController<LocationPointService>();
 
   Stream<LocationPointService> get stream => _controller.stream;
 
@@ -48,6 +48,7 @@ class NostrSocket extends BasicNostrFetchSocket {
 
     _decryptionQueue.dispose();
     _controller.close();
+
     closeConnection();
 
     FlutterLogs.logInfo(
@@ -115,48 +116,36 @@ class NostrSocket extends BasicNostrFetchSocket {
     _controller.close();
   }
 
-  static Request createNostrRequestData({
-    final String? subscriptionID,
+  static Filter createNostrRequestData({
     final List<int>? kinds,
     final int? limit,
     final DateTime? from,
     final DateTime? until,
   }) =>
-      Request(
-        subscriptionID ?? generate64RandomHexChars(),
-        [
-          Filter(
-            kinds: kinds,
-            limit: limit,
-            since: from == null
-                ? null
-                : (from.millisecondsSinceEpoch / 1000).floor(),
-            until: until == null
-                ? null
-                : (until.millisecondsSinceEpoch / 1000).floor(),
-          ),
-        ],
+      Filter(
+        kinds: kinds,
+        limit: limit,
+        since:
+            from == null ? null : (from.millisecondsSinceEpoch / 1000).floor(),
+        until: until == null
+            ? null
+            : (until.millisecondsSinceEpoch / 1000).floor(),
       );
 
-  static Request createNostrRequestDataFromTask(final LocationBase task, {
+  static Filter createNostrRequestDataFromTask(
+    final LocationBase task, {
     final int? limit,
     final DateTime? from,
     final DateTime? until,
   }) =>
-      Request(
-        generate64RandomHexChars(),
-        [
-          Filter(
-            kinds: [1000],
-            authors: [task.nostrPublicKey],
-            limit: limit,
-            since: from == null
-                ? null
-                : (from.millisecondsSinceEpoch / 1000).floor(),
-            until: until == null
-                ? null
-                : (until.millisecondsSinceEpoch / 1000).floor(),
-          ),
-        ],
+      Filter(
+        kinds: [1000],
+        authors: [task.nostrPublicKey],
+        limit: limit,
+        since:
+            from == null ? null : (from.millisecondsSinceEpoch / 1000).floor(),
+        until: until == null
+            ? null
+            : (until.millisecondsSinceEpoch / 1000).floor(),
       );
 }

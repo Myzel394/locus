@@ -39,8 +39,6 @@ abstract class Socket {
       "Error while fetching events from $uri: $error",
     );
 
-    closeConnection();
-
     onError(error);
   }
 
@@ -60,7 +58,7 @@ abstract class Socket {
 
   void addData(final dynamic data) {
     assert(isConnected,
-    "Socket is not connected. Make sure to call `connect` first.");
+        "Socket is not connected. Make sure to call `connect` first.");
 
     _socket!.add(data);
   }

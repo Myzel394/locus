@@ -1,5 +1,7 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_logs/flutter_logs.dart';
+import 'package:locus/constants/values.dart';
 import 'package:locus/services/location_fetcher_service/Fetcher.dart';
 import 'package:locus/services/location_point_service.dart';
 import 'package:locus/services/view_service/index.dart';
@@ -9,7 +11,9 @@ class LocationFetchers extends ChangeNotifier {
 
   UnmodifiableSetView<Fetcher> get fetchers => UnmodifiableSetView(_fetchers);
 
-  LocationFetchers();
+  LocationFetchers(final List<TaskView> views,) {
+    addAll(views);
+  }
 
   void addLocationUpdatesListener(final VoidCallback callback,) {
     for (final fetcher in _fetchers) {
@@ -47,6 +51,12 @@ class LocationFetchers extends ChangeNotifier {
   }
 
   void fetchPreviewLocations() {
+    FlutterLogs.logInfo(
+      LOG_TAG,
+      "Location Fetchers",
+      "Fetching preview locations for ${_fetchers.length} tasks...",
+    );
+
     for (final fetcher in _fetchers) {
       if (!fetcher.hasFetchedPreviewLocations) {
         fetcher.fetchPreviewLocations();

@@ -66,12 +66,19 @@ class Fetcher extends ChangeNotifier {
   }
 
   Future<void> fetchPreviewLocations() async {
-    await _getLocations(
-      NostrSocket.createNostrRequestDataFromTask(
-        view,
-        from: DateTime.now().subtract(const Duration(hours: 24)),
-      ),
-    );
+    await _getLocations(Request(
+      generate64RandomHexChars(),
+      [
+        NostrSocket.createNostrRequestDataFromTask(
+          view,
+          from: DateTime.now().subtract(const Duration(hours: 24)),
+        ),
+        NostrSocket.createNostrRequestDataFromTask(
+          view,
+          limit: 1,
+        ),
+      ],
+    ));
 
     _hasFetchedPreviewLocations = true;
   }
@@ -82,13 +89,16 @@ class Fetcher extends ChangeNotifier {
     final previousAmount = _locations.locations.length;
     final earliestLocation = _locations.sortedLocations.first;
 
-    await _getLocations(
-      NostrSocket.createNostrRequestDataFromTask(
-        view,
-        limit: limit,
-        until: earliestLocation.createdAt,
-      ),
-    );
+    await _getLocations(Request(
+      generate64RandomHexChars(),
+      [
+        NostrSocket.createNostrRequestDataFromTask(
+          view,
+          limit: limit,
+          until: earliestLocation.createdAt,
+        ),
+      ],
+    ));
 
     final afterAmount = _locations.locations.length;
 
@@ -100,8 +110,13 @@ class Fetcher extends ChangeNotifier {
 
   Future<void> fetchAllLocations() async {
     await _getLocations(
-      NostrSocket.createNostrRequestDataFromTask(
-        view,
+      Request(
+        generate64RandomHexChars(),
+        [
+          NostrSocket.createNostrRequestDataFromTask(
+            view,
+          ),
+        ],
       ),
     );
 

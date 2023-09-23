@@ -87,7 +87,7 @@ void main() async {
         ChangeNotifierProvider<AppUpdateService>(
             create: (_) => appUpdateService),
         ChangeNotifierProvider<LocationFetchers>(
-            create: (_) => LocationFetchers()),
+            create: (_) => LocationFetchers(viewService.views)),
         ChangeNotifierProvider<CurrentLocationService>(
             create: (_) => CurrentLocationService()),
       ],
