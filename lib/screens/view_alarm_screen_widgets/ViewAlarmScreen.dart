@@ -29,6 +29,7 @@ import '../../models/log.dart';
 import '../../utils/PageRoute.dart';
 import '../../widgets/LocusFlutterMap.dart';
 import '../../widgets/PlatformFlavorWidget.dart';
+import '../locations_overview_screen_widgets/LocationFetchers.dart';
 
 class ViewAlarmScreen extends StatefulWidget {
   final TaskView view;
@@ -55,36 +56,35 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
         isScrollControlled: true,
         isDismissible: true,
       ),
-      builder: (context) =>
-          ModalSheet(
-            child: ModalSheetContent(
-              icon: Icons.alarm_rounded,
-              title: l10n.location_addAlarm_selectType_title,
-              description: l10n.location_addAlarm_selectType_description,
-              children: [
-                PlatformListTile(
-                  title: Text(l10n.location_addAlarm_geo_title),
-                  subtitle: Text(l10n.location_addAlarm_geo_description),
-                  leading: const Icon(Icons.circle),
-                  onTap: () {
-                    Navigator.of(context).pop(
-                      LocationAlarmType.geo,
-                    );
-                  },
-                ),
-                PlatformListTile(
-                  title: Text(l10n.location_addAlarm_proximity_title),
-                  subtitle: Text(l10n.location_addAlarm_proximity_description),
-                  leading: const Icon(Icons.location_searching_rounded),
-                  onTap: () {
-                    Navigator.of(context).pop(
-                      LocationAlarmType.proximity,
-                    );
-                  },
-                ),
-              ],
+      builder: (context) => ModalSheet(
+        child: ModalSheetContent(
+          icon: Icons.alarm_rounded,
+          title: l10n.location_addAlarm_selectType_title,
+          description: l10n.location_addAlarm_selectType_description,
+          children: [
+            PlatformListTile(
+              title: Text(l10n.location_addAlarm_geo_title),
+              subtitle: Text(l10n.location_addAlarm_geo_description),
+              leading: const Icon(Icons.circle),
+              onTap: () {
+                Navigator.of(context).pop(
+                  LocationAlarmType.geo,
+                );
+              },
             ),
-          ),
+            PlatformListTile(
+              title: Text(l10n.location_addAlarm_proximity_title),
+              subtitle: Text(l10n.location_addAlarm_proximity_description),
+              leading: const Icon(Icons.location_searching_rounded),
+              onTap: () {
+                Navigator.of(context).pop(
+                  LocationAlarmType.proximity,
+                );
+              },
+            ),
+          ],
+        ),
+      ),
     );
 
     if (!mounted || alarmType == null) {
@@ -98,20 +98,18 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
         return showCupertinoModalBottomSheet(
           context: context,
           backgroundColor: Colors.transparent,
-          builder: (_) =>
-              ViewAlarmSelectRadiusBasedScreen(
-                type: alarmType,
-              ),
+          builder: (_) => ViewAlarmSelectRadiusBasedScreen(
+            type: alarmType,
+          ),
         );
       }
 
       return Navigator.of(context).push(
         NativePageRoute(
           context: context,
-          builder: (context) =>
-              ViewAlarmSelectRadiusBasedScreen(
-                type: alarmType,
-              ),
+          builder: (context) => ViewAlarmSelectRadiusBasedScreen(
+            type: alarmType,
+          ),
         ),
       );
     })()) as LocationAlarmServiceBase?;
@@ -162,10 +160,9 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
         const SizedBox(height: MEDIUM_SPACE),
         PlatformElevatedButton(
           onPressed: _addNewAlarm,
-          material: (_, __) =>
-              MaterialElevatedButtonData(
-                icon: const Icon(Icons.add),
-              ),
+          material: (_, __) => MaterialElevatedButtonData(
+            icon: const Icon(Icons.add),
+          ),
           child: Text(l10n.location_manageAlarms_addNewAlarm_actionLabel),
         )
       ],
@@ -177,20 +174,6 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
     super.initState();
 
     widget.view.addListener(updateView);
-
-    widget.view.getLocations(
-      onLocationFetched: (final location) {
-        if (!mounted) {
-          return;
-        }
-
-        setState(() {
-          lastLocation = location;
-        });
-      },
-      onEnd: () {},
-      limit: 1,
-    );
   }
 
   @override
@@ -245,6 +228,9 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
       );
     }
    */
+    final locationFetchers = context.watch<LocationFetchers>();
+    final lastLocation =
+        locationFetchers.getLocations(widget.view).lastOrNull?.asLatLng();
 
     return LocusFlutterMap(
       options: MapOptions(
@@ -281,28 +267,25 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
       final l10n = AppLocalizations.of(context);
       final shouldDelete = await showPlatformDialog(
         context: context,
-        builder: (context) =>
-            PlatformAlertDialog(
-              material: (context, __) =>
-                  MaterialAlertDialogData(
-                    icon: const Icon(Icons.delete_forever_rounded),
-                  ),
-              title: Text(l10n.location_removeAlarm_title),
-              content: Text(l10n.location_removeAlarm_description),
-              actions: createCancellableDialogActions(
-                context,
-                [
-                  PlatformDialogAction(
-                    material: (context, _) =>
-                        MaterialDialogActionData(
-                          icon: const Icon(Icons.delete_forever_rounded),
-                        ),
-                    child: Text(l10n.location_removeAlarm_confirm),
-                    onPressed: () => Navigator.pop(context, true),
-                  ),
-                ],
+        builder: (context) => PlatformAlertDialog(
+          material: (context, __) => MaterialAlertDialogData(
+            icon: const Icon(Icons.delete_forever_rounded),
+          ),
+          title: Text(l10n.location_removeAlarm_title),
+          content: Text(l10n.location_removeAlarm_description),
+          actions: createCancellableDialogActions(
+            context,
+            [
+              PlatformDialogAction(
+                material: (context, _) => MaterialDialogActionData(
+                  icon: const Icon(Icons.delete_forever_rounded),
+                ),
+                child: Text(l10n.location_removeAlarm_confirm),
+                onPressed: () => Navigator.pop(context, true),
               ),
-            ),
+            ],
+          ),
+        ),
       );
 
       if (!mounted || shouldDelete != true) {
@@ -368,10 +351,9 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
             padding: const EdgeInsets.symmetric(vertical: MEDIUM_SPACE),
             child: PlatformElevatedButton(
               onPressed: _addNewAlarm,
-              material: (_, __) =>
-                  MaterialElevatedButtonData(
-                    icon: const Icon(Icons.add),
-                  ),
+              material: (_, __) => MaterialElevatedButtonData(
+                icon: const Icon(Icons.add),
+              ),
               child: Text(l10n.location_manageAlarms_addNewAlarm_actionLabel),
             ),
           ),
