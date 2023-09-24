@@ -10,6 +10,7 @@ import 'package:flutter_logs/flutter_logs.dart';
 import 'package:locus/api/nostr-fetch.dart';
 import 'package:locus/services/location_fetcher_service/Fetcher.dart';
 import 'package:locus/services/task_service/index.dart';
+import 'package:locus/services/view_service/alarm_handler.dart';
 import 'package:locus/services/view_service/index.dart';
 import 'package:locus/utils/cryptography/decrypt.dart';
 import 'package:locus/utils/nostr_fetcher/LocationPointDecrypter.dart';
@@ -48,17 +49,20 @@ class TaskView extends ChangeNotifier with LocationBase {
     String? id,
     DateTime? lastAlarmCheck,
     List<LocationAlarmServiceBase>? alarms,
-  })  : _encryptionPassword = encryptionPassword,
+  })
+      : _encryptionPassword = encryptionPassword,
         alarms = alarms ?? [],
         lastAlarmCheck = lastAlarmCheck ?? DateTime.now(),
         id = id ?? const Uuid().v4();
+
+  AlarmHandler get alarmHandler => AlarmHandler(this);
 
   static ViewServiceLinkParameters parseLink(final String url) {
     final uri = Uri.parse(url);
     final fragment = uri.fragment;
 
     final rawParameters =
-        const Utf8Decoder().convert(base64Url.decode(fragment));
+    const Utf8Decoder().convert(base64Url.decode(fragment));
     final parameters = jsonDecode(rawParameters);
 
     return ViewServiceLinkParameters(
@@ -72,9 +76,10 @@ class TaskView extends ChangeNotifier with LocationBase {
     );
   }
 
-  factory TaskView.fromJSON(final Map<String, dynamic> json) => TaskView(
+  factory TaskView.fromJSON(final Map<String, dynamic> json) =>
+      TaskView(
         encryptionPassword:
-            SecretKey(List<int>.from(json["encryptionPassword"])),
+        SecretKey(List<int>.from(json["encryptionPassword"])),
         nostrPublicKey: json["nostrPublicKey"],
         relays: List<String>.from(json["relays"]),
         name: json["name"] ?? "Unnamed Task",
@@ -104,10 +109,8 @@ class TaskView extends ChangeNotifier with LocationBase {
             : Colors.primaries[Random().nextInt(Colors.primaries.length)],
       );
 
-  static Future<TaskView> fetchFromNostr(
-    final AppLocalizations l10n,
-    final ViewServiceLinkParameters parameters,
-  ) async {
+  static Future<TaskView> fetchFromNostr(final AppLocalizations l10n,
+      final ViewServiceLinkParameters parameters,) async {
     final completer = Completer<TaskView>();
 
     final request = Request(generate64RandomHexChars(), [
@@ -149,7 +152,7 @@ class TaskView extends ChangeNotifier with LocationBase {
                 relays: List<String>.from(data['relays']),
                 name: l10n.longFormattedDate(DateTime.now()),
                 color:
-                    Colors.primaries[Random().nextInt(Colors.primaries.length)],
+                Colors.primaries[Random().nextInt(Colors.primaries.length)],
               ),
             );
           } catch (error) {
@@ -196,8 +199,7 @@ class TaskView extends ChangeNotifier with LocationBase {
     };
   }
 
-  Future<String?> validate(
-    final AppLocalizations l10n, {
+  Future<String?> validate(final AppLocalizations l10n, {
     required final TaskService taskService,
     required final ViewService viewService,
   }) async {
@@ -206,14 +208,14 @@ class TaskView extends ChangeNotifier with LocationBase {
     }
 
     final sameTask = taskService.tasks.firstWhereOrNull(
-        (element) => element.nostrPublicKey == nostrPublicKey);
+            (element) => element.nostrPublicKey == nostrPublicKey);
 
     if (sameTask != null) {
       return l10n.taskImport_error_sameTask(sameTask.name);
     }
 
     final sameView = viewService.views.firstWhereOrNull(
-        (element) => element.nostrPublicKey == nostrPublicKey);
+            (element) => element.nostrPublicKey == nostrPublicKey);
 
     if (sameView != null) {
       return l10n.taskImport_error_sameView(sameView.name);
@@ -227,81 +229,6 @@ class TaskView extends ChangeNotifier with LocationBase {
     _encryptionPassword.destroy();
 
     super.dispose();
-  }
-
-  Future<void> checkAlarm({
-    required final void Function(
-      LocationAlarmServiceBase alarm,
-      LocationPointService previousLocation,
-      LocationPointService nextLocation,
-    ) onTrigger,
-    required final void Function(
-      LocationAlarmServiceBase alarm,
-      LocationPointService previousLocation,
-      LocationPointService nextLocation,
-    ) onMaybeTrigger,
-    required final LocationPointService userLocation,
-  }) async {
-    FlutterLogs.logInfo(
-      LOG_TAG,
-      "Headless Task; Check View Alarms",
-      "Checking view $name from $lastAlarmCheck...",
-    );
-
-    final fetcher = Fetcher(this);
-    await fetcher.fetchCustom(
-      Request(
-        generate64RandomHexChars(),
-        [
-          NostrSocket.createNostrRequestDataFromTask(this,
-              from: lastAlarmCheck),
-        ],
-      ),
-    );
-    final locations = fetcher.sortedLocations;
-
-    lastAlarmCheck = DateTime.now();
-
-    FlutterLogs.logInfo(
-      LOG_TAG,
-      "Headless Task; Check View Alarms",
-      "Checking view $name... ${locations.length} locations",
-    );
-
-    if (locations.isEmpty) {
-      FlutterLogs.logInfo(
-        LOG_TAG,
-        "Headless Task; Check View Alarms",
-        "Checking view $name... No locations",
-      );
-
-      return;
-    }
-
-    locations.sort((a, b) => a.createdAt.compareTo(b.createdAt));
-
-    LocationPointService oldLocation = locations.first;
-
-    // Iterate over each location but the first one
-    for (final location in locations.skip(1)) {
-      for (final alarm in alarms) {
-        final checkResult = alarm.check(
-          oldLocation,
-          location,
-          userLocation: userLocation,
-        );
-
-        if (checkResult == LocationAlarmTriggerType.yes) {
-          onTrigger(alarm, oldLocation, location);
-          break;
-        } else if (checkResult == LocationAlarmTriggerType.maybe) {
-          onMaybeTrigger(alarm, oldLocation, location);
-          break;
-        }
-      }
-
-      oldLocation = location;
-    }
   }
 
   void addAlarm(final LocationAlarmServiceBase alarm) {

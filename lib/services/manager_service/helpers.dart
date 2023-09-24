@@ -122,87 +122,90 @@ Future<void> checkViewAlarms({
   );
 
   for (final view in views) {
-    await view.checkAlarm(
-      userLocation: userLocation,
-      onTrigger: (alarm, location, _) async {
-        final notifications = FlutterLocalNotificationsPlugin();
-        final id = int.parse(
-          "${location.createdAt.millisecond}${location.createdAt.microsecond}",
-        );
-
-        if (alarm is GeoLocationAlarm) {
-          notifications.show(
-            id,
-            StringUtils.truncate(
-              alarm.type == LocationRadiusBasedTriggerType.whenEnter
-                  ? l10n
-                      .locationAlarm_radiusBasedRegion_notificationTitle_whenEnter(
-                      view.name,
-                      alarm.zoneName,
-                    )
-                  : l10n
-                      .locationAlarm_radiusBasedRegion_notificationTitle_whenLeave(
-                      view.name,
-                      alarm.zoneName,
-                    ),
-              76,
-            ),
-            l10n.locationAlarm_notification_description,
-            NotificationDetails(
-              android: AndroidNotificationDetails(
-                AndroidChannelIDs.locationAlarms.name,
-                l10n.androidNotificationChannel_locationAlarms_name,
-                channelDescription:
-                    l10n.androidNotificationChannel_locationAlarms_description,
-                importance: Importance.high,
-                priority: Priority.high,
-              ),
-            ),
-            payload: jsonEncode({
-              "type": NotificationActionType.openTaskView.index,
-              "taskViewID": view.id,
-            }),
-          );
-          return;
-        }
-
-        if (alarm is ProximityLocationAlarm) {
-          notifications.show(
-            id,
-            StringUtils.truncate(
-              alarm.type == LocationRadiusBasedTriggerType.whenEnter
-                  ? l10n
-                      .locationAlarm_proximityLocation_notificationTitle_whenEnter(
-                      view.name,
-                      alarm.radius.round(),
-                    )
-                  : l10n
-                      .locationAlarm_proximityLocation_notificationTitle_whenLeave(
-                      view.name,
-                      alarm.radius.round(),
-                    ),
-              76,
-            ),
-            l10n.locationAlarm_notification_description,
-            NotificationDetails(
-              android: AndroidNotificationDetails(
-                AndroidChannelIDs.locationAlarms.name,
-                l10n.androidNotificationChannel_locationAlarms_name,
-                channelDescription:
-                    l10n.androidNotificationChannel_locationAlarms_description,
-                importance: Importance.max,
-                priority: Priority.max,
-              ),
-            ),
-            payload: jsonEncode({
-              "type": NotificationActionType.openTaskView.index,
-              "taskViewID": view.id,
-            }),
-          );
-        }
-      },
-      onMaybeTrigger: (alarm, _, __) async {},
+    final data = await view.alarmHandler.checkAlarm(
+      userLocation,
     );
+    final triggerResponse = data.$1;
+    final alarm = data.$2;
+    final location = data.$3;
+
+    if (triggerResponse == LocationAlarmTriggerType.yes) {
+      final notifications = FlutterLocalNotificationsPlugin();
+      final id = int.parse(
+        "${view.id}-${alarm!.id}",
+      );
+
+      if (alarm is GeoLocationAlarm) {
+        notifications.show(
+          id,
+          StringUtils.truncate(
+            alarm.type == LocationRadiusBasedTriggerType.whenEnter
+                ? l10n
+                    .locationAlarm_radiusBasedRegion_notificationTitle_whenEnter(
+                    view.name,
+                    alarm.zoneName,
+                  )
+                : l10n
+                    .locationAlarm_radiusBasedRegion_notificationTitle_whenLeave(
+                    view.name,
+                    alarm.zoneName,
+                  ),
+            76,
+          ),
+          l10n.locationAlarm_notification_description,
+          NotificationDetails(
+            android: AndroidNotificationDetails(
+              AndroidChannelIDs.locationAlarms.name,
+              l10n.androidNotificationChannel_locationAlarms_name,
+              channelDescription:
+                  l10n.androidNotificationChannel_locationAlarms_description,
+              importance: Importance.high,
+              priority: Priority.high,
+            ),
+          ),
+          payload: jsonEncode({
+            "type": NotificationActionType.openTaskView.index,
+            "taskViewID": view.id,
+          }),
+        );
+        return;
+      }
+
+      if (alarm is ProximityLocationAlarm) {
+        notifications.show(
+          id,
+          StringUtils.truncate(
+            alarm.type == LocationRadiusBasedTriggerType.whenEnter
+                ? l10n
+                    .locationAlarm_proximityLocation_notificationTitle_whenEnter(
+                    view.name,
+                    alarm.radius.round(),
+                  )
+                : l10n
+                    .locationAlarm_proximityLocation_notificationTitle_whenLeave(
+                    view.name,
+                    alarm.radius.round(),
+                  ),
+            76,
+          ),
+          l10n.locationAlarm_notification_description,
+          NotificationDetails(
+            android: AndroidNotificationDetails(
+              AndroidChannelIDs.locationAlarms.name,
+              l10n.androidNotificationChannel_locationAlarms_name,
+              channelDescription:
+                  l10n.androidNotificationChannel_locationAlarms_description,
+              importance: Importance.max,
+              priority: Priority.max,
+            ),
+          ),
+          payload: jsonEncode({
+            "type": NotificationActionType.openTaskView.index,
+            "taskViewID": view.id,
+          }),
+        );
+      }
+    }
   }
 
   FlutterLogs.logInfo(
@@ -225,7 +228,6 @@ Future<void> checkViewAlarmsFromBackground(
   required final AppLocalizations l10n,
 }) async {
   final viewService = await ViewService.restore();
-  final settings = await SettingsService.restore();
 
   if (viewService.viewsWithAlarms.isEmpty) {
     return;

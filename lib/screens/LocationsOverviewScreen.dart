@@ -378,8 +378,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
   }
 
   void _initLiveLocationUpdate() {
-    final settings = context.read<SettingsService>();
-
     if (_positionStream != null) {
       return;
     }
