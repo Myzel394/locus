@@ -154,8 +154,8 @@ Future<void> checkViewAlarms({
                 l10n.androidNotificationChannel_locationAlarms_name,
                 channelDescription:
                     l10n.androidNotificationChannel_locationAlarms_description,
-                importance: Importance.max,
-                priority: Priority.max,
+                importance: Importance.high,
+                priority: Priority.high,
               ),
             ),
             payload: jsonEncode({
@@ -221,12 +221,11 @@ Future<void> checkViewAlarms({
 }
 
 Future<void> checkViewAlarmsFromBackground(
-  final LocationPointService userLocation,
-) async {
+  final LocationPointService userLocation, {
+  required final AppLocalizations l10n,
+}) async {
   final viewService = await ViewService.restore();
   final settings = await SettingsService.restore();
-  final locale = Locale(settings.localeName);
-  final l10n = await AppLocalizations.delegate.load(locale);
 
   if (viewService.viewsWithAlarms.isEmpty) {
     return;

@@ -1,9 +1,44 @@
+import 'dart:convert';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_logs/flutter_logs.dart';
+import 'package:locus/constants/notifications.dart';
 import 'package:locus/constants/values.dart';
 import 'package:locus/services/location_point_service.dart';
 import 'package:locus/services/manager_service/helpers.dart';
 import 'package:locus/services/settings_service/index.dart';
 import 'package:locus/utils/device/index.dart';
+import 'package:locus/utils/permissions/has-granted.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+const PERMISSION_MISSING_NOTIFICATION_ID = 394001;
+
+void _showPermissionMissingNotification({
+  required final AppLocalizations l10n,
+}) {
+  final notifications = FlutterLocalNotificationsPlugin();
+
+  notifications.show(
+    PERMISSION_MISSING_NOTIFICATION_ID,
+    l10n.permissionsMissing_title,
+    l10n.permissionsMissing_message,
+    NotificationDetails(
+      android: AndroidNotificationDetails(
+        AndroidChannelIDs.appIssues.name,
+        l10n.androidNotificationChannel_appIssues_name,
+        channelDescription:
+            l10n.androidNotificationChannel_appIssues_description,
+        onlyAlertOnce: true,
+        importance: Importance.max,
+        priority: Priority.max,
+      ),
+    ),
+    payload: jsonEncode({
+      "type": NotificationActionType.openPermissionsSettings.index,
+    }),
+  );
+}
 
 Future<void> runBackgroundTask({
   final LocationPointService? locationData,
@@ -16,6 +51,29 @@ Future<void> runBackgroundTask({
   );
 
   final settings = await SettingsService.restore();
+
+  final locale = Locale(settings.localeName);
+  final l10n = await AppLocalizations.delegate.load(locale);
+
+  FlutterLogs.logInfo(
+    LOG_TAG,
+    "Headless Task",
+    "Checking permission.",
+  );
+
+  final hasPermission = await hasGrantedAlwaysLocationPermission();
+
+  if (!hasPermission) {
+    FlutterLogs.logInfo(
+      LOG_TAG,
+      "Headless Task",
+      "Permission not granted. Headless task will not run. Showing notification.",
+    );
+
+    _showPermissionMissingNotification(l10n: l10n);
+
+    return;
+  }
 
   if (!force) {
     FlutterLogs.logInfo(
@@ -66,7 +124,10 @@ Future<void> runBackgroundTask({
     "Headless Task",
     "Checking View alarms...",
   );
-  await checkViewAlarmsFromBackground(location);
+  await checkViewAlarmsFromBackground(
+    location,
+    l10n: l10n,
+  );
   FlutterLogs.logInfo(
     LOG_TAG,
     "Headless Task",

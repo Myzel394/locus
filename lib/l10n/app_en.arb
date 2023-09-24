@@ -695,6 +695,8 @@
   "locationAlarm_notification_description": "Tap for more information",
   "androidNotificationChannel_locationAlarms_name": "Location Alarms",
   "androidNotificationChannel_locationAlarms_description": "Receive notifications for location alarms",
+  "androidNotificationChannel_appIssues_name": "Important Issues",
+  "androidNotificationChannel_appIssues_description": "Receive notifications for important issues about Locus (when a task is not updating, location can't be updated, etc.)",
   "location_manageAlarms_title": "Manage Alarms",
   "location_manageAlarms_empty_title": "No Alarms",
   "location_manageAlarms_empty_description": "Add alarms to be notified when certain conditions are met",
@@ -851,5 +853,7 @@
     }
   },
   "locations_values_batteryState_description": "Battery state",
-  "locations_values_batteryState_value": "{state, select, full {full} charging {charging} discharging {discharging} other {unknown}}"
+  "locations_values_batteryState_value": "{state, select, full {full} charging {charging} discharging {discharging} other {unknown}}",
+  "permissionsMissing_title": "Permissions missing",
+  "permissionsMissing_message": "Please allow access to your location in the background"
 }
