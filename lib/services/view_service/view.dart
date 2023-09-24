@@ -13,6 +13,7 @@ import 'package:locus/services/task_service/index.dart';
 import 'package:locus/services/view_service/index.dart';
 import 'package:locus/utils/cryptography/decrypt.dart';
 import 'package:locus/utils/nostr_fetcher/LocationPointDecrypter.dart';
+import 'package:locus/utils/nostr_fetcher/NostrSocket.dart';
 import 'package:nostr/nostr.dart';
 import 'package:uuid/uuid.dart';
 
@@ -230,15 +231,15 @@ class TaskView extends ChangeNotifier with LocationBase {
 
   Future<void> checkAlarm({
     required final void Function(
-            LocationAlarmServiceBase alarm,
-            LocationPointService previousLocation,
-            LocationPointService nextLocation)
-        onTrigger,
+      LocationAlarmServiceBase alarm,
+      LocationPointService previousLocation,
+      LocationPointService nextLocation,
+    ) onTrigger,
     required final void Function(
-            LocationAlarmServiceBase alarm,
-            LocationPointService previousLocation,
-            LocationPointService nextLocation)
-        onMaybeTrigger,
+      LocationAlarmServiceBase alarm,
+      LocationPointService previousLocation,
+      LocationPointService nextLocation,
+    ) onMaybeTrigger,
     required final LocationPointService userLocation,
   }) async {
     FlutterLogs.logInfo(
@@ -248,7 +249,15 @@ class TaskView extends ChangeNotifier with LocationBase {
     );
 
     final fetcher = Fetcher(this);
-    await fetcher.fetchAllLocations();
+    await fetcher.fetchCustom(
+      Request(
+        generate64RandomHexChars(),
+        [
+          NostrSocket.createNostrRequestDataFromTask(this,
+              from: lastAlarmCheck),
+        ],
+      ),
+    );
     final locations = fetcher.sortedLocations;
 
     lastAlarmCheck = DateTime.now();

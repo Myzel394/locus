@@ -18,12 +18,13 @@ class LocationPointsList extends StatefulWidget {
 
 class _LocationPointsListState extends State<LocationPointsList> {
   final ScrollController controller = ScrollController();
+  late final LocationFetchers locationFetchers;
 
   @override
   void initState() {
     super.initState();
 
-    final locationFetchers = context.read<LocationFetchers>();
+    locationFetchers = context.read<LocationFetchers>();
     final fetcher = locationFetchers.findFetcher(widget.view)!;
 
     fetcher.addListener(_rebuild);
@@ -50,7 +51,6 @@ class _LocationPointsListState extends State<LocationPointsList> {
 
   @override
   void dispose() {
-    final locationFetchers = context.read<LocationFetchers>();
     final fetcher = locationFetchers.findFetcher(widget.view)!;
 
     fetcher.removeListener(_rebuild);

@@ -32,9 +32,7 @@ class Fetcher extends ChangeNotifier {
 
   Fetcher(this.view);
 
-  Future<void> _getLocations(
-    final Request request,
-  ) async {
+  Future<void> _getLocations(final Request request,) async {
     _isLoading = true;
     notifyListeners();
 
@@ -58,8 +56,7 @@ class Fetcher extends ChangeNotifier {
       }
 
       await Future.wait(_sockets.map((socket) => socket.onComplete));
-    } catch (error) {
-    } finally {
+    } catch (error) {} finally {
       _isLoading = false;
       notifyListeners();
     }
@@ -121,6 +118,10 @@ class Fetcher extends ChangeNotifier {
     );
 
     _hasFetchedAllLocations = true;
+  }
+
+  Future<void> fetchCustom(final Request request) async {
+    await _getLocations(request);
   }
 
   @override

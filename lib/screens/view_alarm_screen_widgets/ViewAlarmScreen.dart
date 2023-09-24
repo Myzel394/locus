@@ -365,7 +365,6 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
 
               checkViewAlarms(
                 l10n: l10n,
-                views: views.viewsWithAlarms,
                 viewService: views,
                 userLocation: await LocationPointService.fromPosition(
                     currentLocation.currentPosition!),

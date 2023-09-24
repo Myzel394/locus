@@ -49,7 +49,9 @@ Future<LocationPointService> getLocationData() async {
   );
 }
 
-Future<void> updateLocation(final LocationPointService locationData,) async {
+Future<void> updateLocation(
+  final LocationPointService locationData,
+) async {
   final taskService = await TaskService.restore();
   final logService = await LogService.restore();
 
@@ -96,11 +98,10 @@ Future<void> updateLocation(final LocationPointService locationData,) async {
       accuracy: locationData.accuracy,
       tasks: List<UpdatedTaskData>.from(
         runningTasks.map(
-              (task) =>
-              UpdatedTaskData(
-                id: task.id,
-                name: task.name,
-              ),
+          (task) => UpdatedTaskData(
+            id: task.id,
+            name: task.name,
+          ),
         ),
       ),
     ),
@@ -109,10 +110,11 @@ Future<void> updateLocation(final LocationPointService locationData,) async {
 
 Future<void> checkViewAlarms({
   required final AppLocalizations l10n,
-  required final Iterable<TaskView> views,
   required final ViewService viewService,
   required final LocationPointService userLocation,
 }) async {
+  final views = viewService.viewsWithAlarms;
+
   FlutterLogs.logInfo(
     LOG_TAG,
     "Headless Task; Check View Alarms",
@@ -122,7 +124,7 @@ Future<void> checkViewAlarms({
   for (final view in views) {
     await view.checkAlarm(
       userLocation: userLocation,
-      onTrigger: (alarm, location, __) async {
+      onTrigger: (alarm, location, _) async {
         final notifications = FlutterLocalNotificationsPlugin();
         final id = int.parse(
           "${location.createdAt.millisecond}${location.createdAt.microsecond}",
@@ -134,15 +136,15 @@ Future<void> checkViewAlarms({
             StringUtils.truncate(
               alarm.type == LocationRadiusBasedTriggerType.whenEnter
                   ? l10n
-                  .locationAlarm_radiusBasedRegion_notificationTitle_whenEnter(
-                view.name,
-                alarm.zoneName,
-              )
+                      .locationAlarm_radiusBasedRegion_notificationTitle_whenEnter(
+                      view.name,
+                      alarm.zoneName,
+                    )
                   : l10n
-                  .locationAlarm_radiusBasedRegion_notificationTitle_whenLeave(
-                view.name,
-                alarm.zoneName,
-              ),
+                      .locationAlarm_radiusBasedRegion_notificationTitle_whenLeave(
+                      view.name,
+                      alarm.zoneName,
+                    ),
               76,
             ),
             l10n.locationAlarm_notification_description,
@@ -151,7 +153,7 @@ Future<void> checkViewAlarms({
                 AndroidChannelIDs.locationAlarms.name,
                 l10n.androidNotificationChannel_locationAlarms_name,
                 channelDescription:
-                l10n.androidNotificationChannel_locationAlarms_description,
+                    l10n.androidNotificationChannel_locationAlarms_description,
                 importance: Importance.max,
                 priority: Priority.max,
               ),
@@ -170,15 +172,15 @@ Future<void> checkViewAlarms({
             StringUtils.truncate(
               alarm.type == LocationRadiusBasedTriggerType.whenEnter
                   ? l10n
-                  .locationAlarm_proximityLocation_notificationTitle_whenEnter(
-                view.name,
-                alarm.radius.round(),
-              )
+                      .locationAlarm_proximityLocation_notificationTitle_whenEnter(
+                      view.name,
+                      alarm.radius.round(),
+                    )
                   : l10n
-                  .locationAlarm_proximityLocation_notificationTitle_whenLeave(
-                view.name,
-                alarm.radius.round(),
-              ),
+                      .locationAlarm_proximityLocation_notificationTitle_whenLeave(
+                      view.name,
+                      alarm.radius.round(),
+                    ),
               76,
             ),
             l10n.locationAlarm_notification_description,
@@ -187,7 +189,7 @@ Future<void> checkViewAlarms({
                 AndroidChannelIDs.locationAlarms.name,
                 l10n.androidNotificationChannel_locationAlarms_name,
                 channelDescription:
-                l10n.androidNotificationChannel_locationAlarms_description,
+                    l10n.androidNotificationChannel_locationAlarms_description,
                 importance: Importance.max,
                 priority: Priority.max,
               ),
@@ -219,20 +221,19 @@ Future<void> checkViewAlarms({
 }
 
 Future<void> checkViewAlarmsFromBackground(
-    final LocationPointService userLocation,) async {
+  final LocationPointService userLocation,
+) async {
   final viewService = await ViewService.restore();
   final settings = await SettingsService.restore();
-  final alarmsViews = viewService.viewsWithAlarms;
   final locale = Locale(settings.localeName);
   final l10n = await AppLocalizations.delegate.load(locale);
 
-  if (alarmsViews.isEmpty) {
+  if (viewService.viewsWithAlarms.isEmpty) {
     return;
   }
 
   checkViewAlarms(
     l10n: l10n,
-    views: alarmsViews,
     viewService: viewService,
     userLocation: userLocation,
   );
