@@ -73,62 +73,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.11.0"
-  audioplayers:
-    dependency: "direct main"
-    description:
-      name: audioplayers
-      sha256: "61583554386721772f9309f509e17712865b38565a903c761f96b1115a979282"
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.1.0"
-  audioplayers_android:
-    dependency: transitive
-    description:
-      name: audioplayers_android
-      sha256: dbdc9b7f2aa2440314c638aa55aadd45c7705e8340d5eddf2e3fb8da32d4ae2c
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.0.2"
-  audioplayers_darwin:
-    dependency: transitive
-    description:
-      name: audioplayers_darwin
-      sha256: "6aea96df1d12f7ad5a71d88c6d1b22a216211a9564219920124c16768e456e9d"
-      url: "https://pub.dev"
-    source: hosted
-    version: "4.1.0"
-  audioplayers_linux:
-    dependency: transitive
-    description:
-      name: audioplayers_linux
-      sha256: "396b62ac62c92dd26c3bc5106583747f57a8b325ebd2b41e5576f840cfc61338"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.1.0"
-  audioplayers_platform_interface:
-    dependency: transitive
-    description:
-      name: audioplayers_platform_interface
-      sha256: f7daaed4659143094151ecf6bacd927d29ab8acffba98c110c59f0b81ae51143
-      url: "https://pub.dev"
-    source: hosted
-    version: "5.0.1"
-  audioplayers_web:
-    dependency: transitive
-    description:
-      name: audioplayers_web
-      sha256: ec84fd46eed1577148ed4113f5998a36a18da4fce7170c37ce3e21b631393339
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.1.0"
-  audioplayers_windows:
-    dependency: transitive
-    description:
-      name: audioplayers_windows
-      sha256: "1d3aaac98a192b8488167711ba1e67d8b96333e8d0572ede4e2912e5bbce69a3"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.2"
   background_fetch:
     dependency: "direct main"
     description:
@@ -149,10 +93,10 @@ packages:
     dependency: "direct main"
     description:
       name: basic_utils
-      sha256: "8815477fcf58499e42326bd858e391442425fa57db9a45e48e15224c62049262"
+      sha256: "5748b8a2e810bba86da623940ac5c39874760a8f7cf02e62b1787a26f42f33bf"
       url: "https://pub.dev"
     source: hosted
-    version: "5.5.4"
+    version: "5.6.0"
   battery_plus:
     dependency: "direct main"
     description:
@@ -506,10 +450,10 @@ packages:
     dependency: transitive
     description:
       name: flutter_compass
-      sha256: "1a0121bff32df95193812b4e0f69e95f45fdec042ebd7a326ba087c0f6ec8304"
+      sha256: be642484f9f6975c1c6edff568281b001f2f1e604de27ecea18d97eebbdef22f
       url: "https://pub.dev"
     source: hosted
-    version: "0.7.0"
+    version: "0.8.0"
   flutter_expandable_fab:
     dependency: "direct main"
     description:
@@ -575,26 +519,26 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_map
-      sha256: "52c65a977daae42f9aae6748418dd1535eaf27186e9bac9bf431843082bc75a3"
+      sha256: "5286f72f87deb132daa1489442d6cc46e986fc105cb727d9ae1b602b35b1d1f3"
       url: "https://pub.dev"
     source: hosted
-    version: "4.0.0"
+    version: "5.0.0"
   flutter_map_location_marker:
     dependency: "direct main"
     description:
       name: flutter_map_location_marker
-      sha256: "9757dceadda71a53d2d4004cff4d53a29210086083bdfebf44a1c4feb07f8eb1"
+      sha256: "84464cf16ddaf089dd35a2b2a5c4be3571799d6307f4a54a7d645ab958ff3132"
       url: "https://pub.dev"
     source: hosted
-    version: "6.0.0"
+    version: "7.0.5"
   flutter_map_marker_popup:
     dependency: "direct main"
     description:
       name: flutter_map_marker_popup
-      sha256: "71457476f91d6174c132577d37c11a78ad9502be65e699b22aa7a745b07414a5"
+      sha256: be209c68b19d4c10d9a2f5911e45f7c579624c43a353adb9bf0f2fec0cf30b8c
       url: "https://pub.dev"
     source: hosted
-    version: "5.1.0"
+    version: "5.2.0"
   flutter_osm_interface:
     dependency: transitive
     description:
@@ -745,50 +689,50 @@ packages:
     dependency: "direct main"
     description:
       name: geolocator
-      sha256: "5c23f3613f50586c0bbb2b8f970240ae66b3bd992088cf60dd5ee2e6f7dde3a8"
+      sha256: e946395fc608842bb2f6c914807e9183f86f3cb787f6b8f832753e5251036f02
       url: "https://pub.dev"
     source: hosted
-    version: "9.0.2"
+    version: "10.1.0"
   geolocator_android:
     dependency: transitive
     description:
       name: geolocator_android
-      sha256: b06c72853c993ae533f482d81a12805d7a441f5231d9668718bc7131d7464082
+      sha256: fb7fc45ce08714a17d1bb097c58b751a10c12255c35c3f64a3c6922222d93be2
       url: "https://pub.dev"
     source: hosted
-    version: "4.2.0"
+    version: "4.3.0"
   geolocator_apple:
     dependency: transitive
     description:
       name: geolocator_apple
-      sha256: "22b60ca3b8c0f58e6a9688ff855ee39ab813ca3f0c0609a48d282f6631266f2e"
+      sha256: "2c0187c84ca04fdb4e2b32a775dbe97448622a53f1c9ecb26d8b6b0df6e72b65"
       url: "https://pub.dev"
     source: hosted
-    version: "2.2.5"
+    version: "2.3.1"
   geolocator_platform_interface:
     dependency: transitive
     description:
       name: geolocator_platform_interface
-      sha256: af4d69231452f9620718588f41acc4cb58312368716bfff2e92e770b46ce6386
+      sha256: b8cc1d3be0ca039a3f2174b0b026feab8af3610e220b8532e42cff8ec6658535
       url: "https://pub.dev"
     source: hosted
-    version: "4.0.7"
+    version: "4.1.0"
   geolocator_web:
     dependency: transitive
     description:
       name: geolocator_web
-      sha256: f68a122da48fcfff68bbc9846bb0b74ef651afe84a1b1f6ec20939de4d6860e1
+      sha256: "59083f7e0871b78299918d92bf930a14377f711d2d1156c558cd5ebae6c20d58"
       url: "https://pub.dev"
     source: hosted
-    version: "2.1.6"
+    version: "2.2.0"
   geolocator_windows:
     dependency: transitive
     description:
       name: geolocator_windows
-      sha256: f5911c88e23f48b598dd506c7c19eff0e001645bdc03bb6fecb9f4549208354d
+      sha256: "8725beaa00db2b52f53d9811584cb4488240b250b04a09763e80945017f65c9c"
       url: "https://pub.dev"
     source: hosted
-    version: "0.1.1"
+    version: "0.2.1"
   get:
     dependency: transitive
     description:
@@ -833,10 +777,10 @@ packages:
     dependency: "direct main"
     description:
       name: http
-      sha256: "5895291c13fa8a3bd82e76d5627f69e0d85ca6a30dcac95c4ea19a5d555879c2"
+      sha256: "759d1a329847dd0f39226c688d3e06a6b8679668e350e2891a6474f8b4bb8525"
       url: "https://pub.dev"
     source: hosted
-    version: "0.13.6"
+    version: "1.1.0"
   http_multi_server:
     dependency: transitive
     description:
@@ -897,10 +841,10 @@ packages:
     dependency: "direct main"
     description:
       name: latlong2
-      sha256: "08ef7282ba9f76e8495e49e2dc4d653015ac929dce5f92b375a415d30b407ea0"
+      sha256: "18712164760cee655bc790122b0fd8f3d5b3c36da2cb7bf94b68a197fbb0811b"
       url: "https://pub.dev"
     source: hosted
-    version: "0.8.2"
+    version: "0.9.0"
   lints:
     dependency: transitive
     description:
@@ -1442,14 +1386,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.0"
-  synchronized:
-    dependency: transitive
-    description:
-      name: synchronized
-      sha256: "5fcbd27688af6082f5abd611af56ee575342c30e87541d0245f7ff99faa02c60"
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.1.0"
   term_glyph:
     dependency: transitive
     description:
@@ -1482,14 +1418,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.1"
-  tuple:
-    dependency: transitive
-    description:
-      name: tuple
-      sha256: a97ce2013f240b2f3807bcbaf218765b6f301c3eff91092bcfa23a039e7dd151
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.2"
   typed_data:
     dependency: transitive
     description:

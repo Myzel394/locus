@@ -40,12 +40,12 @@ dependencies:
   cupertino_icons: ^1.0.5
   flutter_secure_storage: ^8.0.0
   intl: any
-  http: ^0.13.6
+  http: ^1.0.0
   nostr: ^1.3.4
   uuid: ^3.0.7
   provider: ^6.0.5
   logger: ^2.0.2
-  geolocator: ^9.0.2
+  geolocator: ^10.1.0
   flutter_osm_plugin: ^0.53.4+1
   clipboard: ^0.1.3
   uni_links: ^0.5.1
@@ -84,12 +84,11 @@ dependencies:
   version: ^3.0.2
   nearby_connections: ^3.3.0
   english_words: ^4.0.0
-  flutter_map: ^4.0.0
+  flutter_map: ^5.0.0
   flutter_map_marker_popup: ^5.1.0
   material_design_icons_flutter: ^6.0.7096
   easy_debounce: ^2.0.3
   permission_handler: ^10.2.0
-  audioplayers: ^4.1.0
   flutter_logs: ^2.1.11
   vibration: ^1.7.7
   local_auth: ^2.1.6
@@ -97,9 +96,9 @@ dependencies:
   figma_squircle: ^0.5.3
   get_time_ago: ^1.2.2
   flutter_expandable_fab: ^1.8.1
-  flutter_map_location_marker: ^6.0.0
+  flutter_map_location_marker: ^7.0.5
   simple_shadow: ^0.3.1
-  latlong2: ^0.8.2
+  latlong2: ^0.9.0
   collection: ^1.17.1
   background_locator_2: ^2.0.6
   queue: ^3.1.0+2
@@ -161,7 +160,6 @@ flutter:
     - assets/logo.svg
     - assets/location-out-of-bounds-marker.svg
     - assets/honorable-mentions/
-    - assets/bunny.mp3
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

@@ -630,8 +630,6 @@
   "logs_title": "Locus automatically creates logs",
   "logs_description": "Logs are kept for 7 days and are automatically deleted afterwards.",
   "locationPointsScreen_title": "Location Points",
-  "bunny_unavailable": "Sorry, but it seems as if your friend is as lost as this song.",
-  "bunny_unavailable_action": "What's this song?",
   "locationAlarm_radiusBasedRegion_notificationTitle_whenEnter": "{name} entered zone {zone}",
   "@locationAlarm_radiusBasedRegion_notificationTitle_whenEnter": {
     "description": "Notification title when entering a zone; Try to keep this short, will be truncated to 80 characters",

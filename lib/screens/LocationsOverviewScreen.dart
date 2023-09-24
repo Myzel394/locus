@@ -257,6 +257,8 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
       latitude: rawPosition.latitude,
       longitude: rawPosition.longitude,
       accuracy: rawPosition.accuracy,
+      altitudeAccuracy: 0.0,
+      headingAccuracy: 0.0,
       timestamp: DateTime.now(),
       altitude: 0,
       heading: 0,

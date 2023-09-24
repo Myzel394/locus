@@ -41,8 +41,7 @@ class LocationPointService {
     double? batteryLevel,
     this.isCopy = false,
     this.batteryState,
-  })
-      : altitude = altitude == 0.0 ? null : altitude,
+  })  : altitude = altitude == 0.0 ? null : altitude,
         speed = speed == 0.0 ? null : speed,
         speedAccuracy = speedAccuracy == 0.0 ? null : speedAccuracy,
         heading = heading == 0.0 ? null : heading,
@@ -65,7 +64,7 @@ class LocationPointService {
       "${latitude.toStringAsFixed(5)}, ${longitude.toStringAsFixed(5)}";
 
   factory LocationPointService.dummyFromLatLng(final LatLng latLng,
-      {final double accuracy = 10.0}) =>
+          {final double accuracy = 10.0}) =>
       LocationPointService(
         id: uuid.v4(),
         createdAt: DateTime.now(),
@@ -75,9 +74,9 @@ class LocationPointService {
       );
 
   static Future<LocationPointService> fromLocationDto(
-      final LocationDto locationDto, [
-        final bool addBatteryInfo = true,
-      ]) async {
+    final LocationDto locationDto, [
+    final bool addBatteryInfo = true,
+  ]) async {
     BatteryInfo? batteryInfo;
 
     if (addBatteryInfo) {
@@ -125,8 +124,8 @@ class LocationPointService {
       batteryState: json["batteryState"] == null
           ? null
           : BatteryState.values.firstWhere(
-            (value) => value.name == json["batteryState"],
-      ),
+              (value) => value.name == json["batteryState"],
+            ),
     );
   }
 
@@ -148,7 +147,8 @@ class LocationPointService {
   }
 
   static Future<LocationPointService> fromPosition(
-      final Position position,) async {
+    final Position position,
+  ) async {
     BatteryInfo? batteryInfo;
 
     try {
@@ -178,8 +178,7 @@ class LocationPointService {
 
   /// Copies `current` with a new id - mainly used in conjunction with `createUsingCurrentLocation`
   /// in background fetch to avoid fetching the location multiple times.
-  LocationPointService copyWithDifferentId() =>
-      LocationPointService(
+  LocationPointService copyWithDifferentId() => LocationPointService(
         id: uuid.v4(),
         createdAt: DateTime.now(),
         latitude: latitude,
@@ -193,8 +192,10 @@ class LocationPointService {
         batteryState: batteryState,
       );
 
-  static Future<LocationPointService> fromEncrypted(final String cipherText,
-      final SecretKey encryptionPassword,) async {
+  static Future<LocationPointService> fromEncrypted(
+    final String cipherText,
+    final SecretKey encryptionPassword,
+  ) async {
     final message = await decryptUsingAES(
       cipherText,
       encryptionPassword,
@@ -203,11 +204,12 @@ class LocationPointService {
     return LocationPointService.fromJSON(jsonDecode(message));
   }
 
-  Position asPosition() =>
-      Position(
+  Position asPosition() => Position(
         latitude: latitude,
         longitude: longitude,
         altitude: altitude ?? 0.0,
+        headingAccuracy: headingAccuracy ?? 0.0,
+        altitudeAccuracy: 0.0,
         accuracy: accuracy,
         speed: speed ?? 0.0,
         speedAccuracy: speedAccuracy ?? 0.0,
