@@ -1339,7 +1339,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
                     width: null,
                     borderRadius: BorderRadius.circular(HUGE_SPACE),
                     padding: EdgeInsets.zero,
-                    child: IconButton(
+                    child: PlatformIconButton(
                       color: shades[400],
                       icon: Icon(disableShowDetailedLocations
                           ? MdiIcons.mapMarkerMultipleOutline

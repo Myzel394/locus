@@ -1,12 +1,13 @@
+import 'dart:io';
+
 import 'package:disable_battery_optimization/disable_battery_optimization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+import 'package:locus/services/settings_service/index.dart';
 import 'package:locus/utils/repeatedly-check.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-
-import 'package:locus/services/settings_service/index.dart';
 
 mixin RequestBatteryOptimizationsDisabledMixin {
   BuildContext get context;
@@ -14,6 +15,10 @@ mixin RequestBatteryOptimizationsDisabledMixin {
   bool get mounted;
 
   Future<bool> showDisableBatteryOptimizationsDialog() async {
+    if (!Platform.isAndroid) {
+      return true;
+    }
+
     final settings = context.read<SettingsService>();
 
     final status =

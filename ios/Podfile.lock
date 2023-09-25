@@ -2,9 +2,9 @@ PODS:
   - Alamofire (5.6.2)
   - apple_maps_flutter (0.0.1):
     - Flutter
-  - audioplayers_darwin (0.0.1):
-    - Flutter
   - background_fetch (1.1.6):
+    - Flutter
+  - background_locator_2 (0.0.1):
     - Flutter
   - battery_plus (1.0.0):
     - Flutter
@@ -96,8 +96,8 @@ PODS:
 
 DEPENDENCIES:
   - apple_maps_flutter (from `.symlinks/plugins/apple_maps_flutter/ios`)
-  - audioplayers_darwin (from `.symlinks/plugins/audioplayers_darwin/ios`)
   - background_fetch (from `.symlinks/plugins/background_fetch/ios`)
+  - background_locator_2 (from `.symlinks/plugins/background_locator_2/ios`)
   - battery_plus (from `.symlinks/plugins/battery_plus/ios`)
   - clipboard_watcher (from `.symlinks/plugins/clipboard_watcher/ios`)
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
@@ -135,10 +135,10 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   apple_maps_flutter:
     :path: ".symlinks/plugins/apple_maps_flutter/ios"
-  audioplayers_darwin:
-    :path: ".symlinks/plugins/audioplayers_darwin/ios"
   background_fetch:
     :path: ".symlinks/plugins/background_fetch/ios"
+  background_locator_2:
+    :path: ".symlinks/plugins/background_locator_2/ios"
   battery_plus:
     :path: ".symlinks/plugins/battery_plus/ios"
   clipboard_watcher:
@@ -187,8 +187,8 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   Alamofire: d368e1ff8a298e6dde360e35a3e68e6c610e7204
   apple_maps_flutter: c59725efea39e13e703cde52a1d2b14866ad68a8
-  audioplayers_darwin: 877d9a4d06331c5c374595e46e16453ac7eafa40
   background_fetch: bc9b44b0bf8b434e282a2ac9be8662800a0296ed
+  background_locator_2: bc8a422343ab656d5bd98e08694c6f89fef20418
   battery_plus: 9bff772a7e5e4d5381ca3ca92a97373a3d8b2738
   clipboard_watcher: 86fb70421aca6f4944e0591a8292605da7784666
   device_info_plus: 7545d84d8d1b896cb16a4ff98c19f07ec4b298ea
@@ -221,4 +221,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 819f6e738594296500811eae0a41f3dceed5a207
 
-COCOAPODS: 1.11.3
+COCOAPODS: 1.12.1

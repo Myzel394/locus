@@ -307,6 +307,7 @@ class _ViewAlarmSelectRadiusBasedScreenState
               center: alarmCenter,
               radius: radius,
               flutterMapController: flutterMapController,
+              appleMapController: appleMapController,
               onLocationChange: (location) {
                 // Proximity does not need a center
                 if (widget.type == LocationAlarmType.proximity) {
