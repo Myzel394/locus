@@ -32,6 +32,23 @@ class _OpenInMapsState extends State<OpenInMaps> {
   Future<List<AvailableMap>> mapFuture = MapLauncher.installedMaps;
 
   @override
+  void initState() {
+    super.initState();
+
+    mapFuture.then((maps) {
+      if (maps.length == 1) {
+        // No selection to choose from, open directly
+        final map = maps[0];
+        map.showDirections(
+          destination: widget.destination,
+        );
+
+        Navigator.pop(context);
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final settings = context.watch<SettingsService>();
@@ -83,20 +100,22 @@ class _OpenInMapsState extends State<OpenInMaps> {
                     const SizedBox(height: SMALL_SPACE),
                     PlatformListTile(
                       title: Text(
-                        "Lat: ${widget.destination.latitude}, Long: ${widget.destination.longitude}",
+                        "Lat: ${widget.destination.latitude}, Long: ${widget
+                            .destination.longitude}",
                       ),
                       leading: PlatformIconButton(
                         icon: PlatformWidget(
                           material: (_, __) => const Icon(Icons.copy),
                           cupertino: (_, __) =>
-                              const Icon(CupertinoIcons.doc_on_clipboard),
+                          const Icon(CupertinoIcons.doc_on_clipboard),
                         ),
                         onPressed: () {
                           // Copy to clipboard
                           Clipboard.setData(
                             ClipboardData(
                               text:
-                                  "${widget.destination.latitude}, ${widget.destination.longitude}",
+                              "${widget.destination.latitude}, ${widget
+                                  .destination.longitude}",
                             ),
                           );
                         },
