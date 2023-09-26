@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:locus/constants/values.dart';
 import 'package:locus/services/location_point_service.dart';
-import 'package:locus/services/task_service/index.dart';
 import 'package:locus/services/task_service/mixins.dart';
 import 'package:locus/utils/nostr_fetcher/BasicNostrFetchSocket.dart';
 import 'package:locus/utils/nostr_fetcher/Socket.dart';
@@ -121,10 +120,12 @@ class NostrSocket extends BasicNostrFetchSocket {
     final int? limit,
     final DateTime? from,
     final DateTime? until,
+    final List<String>? authors,
   }) =>
       Filter(
         kinds: kinds,
         limit: limit,
+        authors: authors ?? [],
         since:
             from == null ? null : (from.millisecondsSinceEpoch / 1000).floor(),
         until: until == null

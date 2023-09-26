@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_logs/flutter_logs.dart';
@@ -74,6 +75,11 @@ abstract class Socket {
         closeConnection();
         return;
       }
+
+      // Prettify event.content
+      print(
+        jsonDecode(event)[2],
+      );
 
       _resetTimer();
 

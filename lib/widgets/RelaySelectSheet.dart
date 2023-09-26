@@ -5,12 +5,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/constants/values.dart';
+import 'package:locus/services/location_point_service.dart';
 import 'package:locus/utils/load_status.dart';
+import 'package:locus/utils/nostr_fetcher/NostrSocket.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/BottomSheetFilterBuilder.dart';
 import 'package:locus/widgets/ModalSheet.dart';
+import 'package:nostr/nostr.dart';
 
 import '../api/nostr-relays.dart';
 import '../utils/cache.dart';
@@ -134,6 +138,29 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
       if (_sheetController.size <= 0.4) {
         _closeSheet();
       }
+    });
+
+    final socket = NostrSocket(
+      relay: "wss://history.nostr.watch",
+      decryptMessage: (_) async {
+        return LocationPointService.dummyFromLatLng(LatLng(0, 0));
+      },
+    );
+    socket.connect().then((_) {
+      socket.addData(
+        Request(
+          generate64RandomHexChars(),
+          [
+            NostrSocket.createNostrRequestData(
+              kinds: [30304],
+              limit: 10,
+              authors: [
+                "b3b0d247f66bf40c4c9f4ce721abfe1fd3b7529fbc1ea5e64d5f0f8df3a4b6e6"
+              ],
+            ),
+          ],
+        ).serialize(),
+      );
     });
   }
 
