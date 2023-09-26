@@ -19,6 +19,7 @@ import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:locus/api/get-relays-meta.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/screens/ImportTaskSheet.dart';
 import 'package:locus/screens/SettingsScreen.dart';
@@ -194,6 +195,8 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
 
       flutterMapPopupController = PopupController();
     }
+
+    fetchRelaysMeta();
   }
 
   @override

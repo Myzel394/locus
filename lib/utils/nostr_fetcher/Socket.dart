@@ -76,11 +76,6 @@ abstract class Socket {
         return;
       }
 
-      // Prettify event.content
-      print(
-        jsonDecode(event)[2],
-      );
-
       _resetTimer();
 
       onEvent(event);
