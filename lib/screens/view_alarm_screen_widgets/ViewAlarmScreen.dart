@@ -265,6 +265,9 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
                 material: (context, _) => MaterialDialogActionData(
                   icon: const Icon(Icons.delete_forever_rounded),
                 ),
+                cupertino: (context, _) => CupertinoDialogActionData(
+                  isDestructiveAction: true,
+                ),
                 child: Text(l10n.location_removeAlarm_confirm),
                 onPressed: () => Navigator.pop(context, true),
               ),
