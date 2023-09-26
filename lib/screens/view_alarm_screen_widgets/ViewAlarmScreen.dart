@@ -10,23 +10,22 @@ import 'package:locus/constants/spacing.dart';
 import 'package:locus/screens/view_alarm_screen_widgets/GeoLocationAlarmPreview.dart';
 import 'package:locus/screens/view_alarm_screen_widgets/ProximityAlarmPreview.dart';
 import 'package:locus/screens/view_alarm_screen_widgets/ViewAlarmSelectRadiusBasedScreen.dart';
+import 'package:locus/services/current_location_service.dart';
 import 'package:locus/services/location_alarm_service/LocationAlarmServiceBase.dart';
 import 'package:locus/services/location_alarm_service/ProximityLocationAlarm.dart';
 import 'package:locus/services/location_alarm_service/enums.dart';
 import 'package:locus/services/location_alarm_service/index.dart';
 import 'package:locus/services/location_point_service.dart';
 import 'package:locus/services/log_service.dart';
+import 'package:locus/services/manager_service/helpers.dart';
 import 'package:locus/services/view_service/index.dart';
+import 'package:locus/utils/navigation.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/ModalSheet.dart';
 import 'package:locus/widgets/ModalSheetContent.dart';
-import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:provider/provider.dart';
-import 'package:locus/services/manager_service/helpers.dart';
-import 'package:locus/services/current_location_service.dart';
 
 import '../../models/log.dart';
-import '../../utils/PageRoute.dart';
 import '../../widgets/LocusFlutterMap.dart';
 import '../../widgets/PlatformFlavorWidget.dart';
 import '../locations_overview_screen_widgets/LocationFetchers.dart';
@@ -93,26 +92,12 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
 
     final logService = context.read<LogService>();
     final viewService = context.read<ViewService>();
-    final LocationAlarmServiceBase? alarm = (await (() {
-      if (isCupertino(context)) {
-        return showCupertinoModalBottomSheet(
-          context: context,
-          backgroundColor: Colors.transparent,
-          builder: (_) => ViewAlarmSelectRadiusBasedScreen(
-            type: alarmType,
-          ),
-        );
-      }
-
-      return Navigator.of(context).push(
-        NativePageRoute(
-          context: context,
-          builder: (context) => ViewAlarmSelectRadiusBasedScreen(
-            type: alarmType,
-          ),
-        ),
-      );
-    })()) as LocationAlarmServiceBase?;
+    final LocationAlarmServiceBase? alarm = await pushRoute(
+      context,
+      (context) => ViewAlarmSelectRadiusBasedScreen(
+        type: alarmType,
+      ),
+    ) as LocationAlarmServiceBase?;
 
     if (!mounted) {
       return;
@@ -233,18 +218,18 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
         locationFetchers.getLocations(widget.view).lastOrNull?.asLatLng();
 
     return LocusFlutterMap(
-      options: MapOptions(
+      flutterMapOptions: MapOptions(
         center: alarm.center,
         maxZoom: 18,
         // create zoom based of radius
         zoom: 18 - log(alarm.radius / 35) / log(2),
       ),
-      children: [
+      flutterChildren: [
         CircleLayer(
           circles: [
             if (lastLocation != null)
               CircleMarker(
-                point: LatLng(lastLocation!.latitude, lastLocation!.longitude),
+                point: LatLng(lastLocation.latitude, lastLocation.longitude),
                 radius: 5,
                 color: Colors.blue,
               ),

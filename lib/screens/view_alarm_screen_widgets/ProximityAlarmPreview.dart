@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
-import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:locus/constants/spacing.dart';
@@ -35,15 +34,12 @@ class ProximityAlarmPreview extends StatelessWidget {
     final centerPosition = currentLocation.currentPosition == null
         ? getFallbackLocation(context)
         : LatLng(
-      currentLocation.currentPosition!.latitude,
-      currentLocation.currentPosition!.longitude,
-    );
+            currentLocation.currentPosition!.latitude,
+            currentLocation.currentPosition!.longitude,
+          );
     final locationFetchers = context.watch<LocationFetchers>();
     final lastLocation =
-    locationFetchers
-        .getLocations(view)
-        .lastOrNull
-        ?.asLatLng();
+        locationFetchers.getLocations(view).lastOrNull?.asLatLng();
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -52,12 +48,12 @@ class ProximityAlarmPreview extends StatelessWidget {
           title: Text(
             alarm.radius > 10000
                 ? l10n.location_addAlarm_radiusBased_radius_kilometers(
-              double.parse(
-                (alarm.radius / 1000).toStringAsFixed(1),
-              ),
-            )
+                    double.parse(
+                      (alarm.radius / 1000).toStringAsFixed(1),
+                    ),
+                  )
                 : l10n.location_addAlarm_radiusBased_radius_meters(
-                alarm.radius.round()),
+                    alarm.radius.round()),
           ),
           leading: getIconForLocationRadiusBasedTrigger(context, alarm.type),
           trailing: PlatformIconButton(
@@ -73,13 +69,13 @@ class ProximityAlarmPreview extends StatelessWidget {
             child: IgnorePointer(
               ignoring: true,
               child: LocusFlutterMap(
-                options: MapOptions(
+                flutterMapOptions: MapOptions(
                   center: centerPosition,
                   maxZoom: 18,
                   // create zoom based of radius
                   zoom: getZoomLevelForRadius(alarm.radius),
                 ),
-                children: [
+                flutterChildren: [
                   CurrentLocationLayer(
                     positionStream: currentLocation.locationMarkerStream,
                     followOnLocationUpdate: FollowOnLocationUpdate.never,

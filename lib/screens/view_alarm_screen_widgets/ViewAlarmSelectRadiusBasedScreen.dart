@@ -318,6 +318,9 @@ class _ViewAlarmSelectRadiusBasedScreenState
                   alarmCenter = location;
                 });
               },
+              onAppleMapCreated: (controller) {
+                appleMapController = controller;
+              },
               onRadiusChange: (newRadius) {
                 setState(() {
                   radius = newRadius;

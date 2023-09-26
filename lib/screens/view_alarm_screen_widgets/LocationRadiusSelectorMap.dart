@@ -7,8 +7,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:locus/constants/spacing.dart';
-import 'package:locus/constants/values.dart';
-import 'package:locus/utils/location/get-fallback-location.dart';
+import 'package:locus/widgets/LocationsMap.dart';
 import 'package:locus/widgets/LocusFlutterMap.dart';
 import 'package:locus/widgets/MapBanner.dart';
 import 'package:shimmer/shimmer.dart';
@@ -19,6 +18,8 @@ const INITIAL_RADIUS = 50.0;
 class LocationRadiusSelectorMap extends StatefulWidget {
   final MapController? flutterMapController;
   final apple_maps.AppleMapController? appleMapController;
+  final void Function(apple_maps.AppleMapController controller)?
+      onAppleMapCreated;
   final LatLng? center;
   final double? radius;
   final void Function(LatLng)? onLocationChange;
@@ -32,9 +33,10 @@ class LocationRadiusSelectorMap extends StatefulWidget {
     this.appleMapController,
     this.onLocationChange,
     this.onRadiusChange,
-    this.enableRealTimeRadiusUpdate = false,
+    this.onAppleMapCreated,
     this.center,
     this.radius,
+    this.enableRealTimeRadiusUpdate = false,
     this.children = const [],
   });
 
@@ -137,37 +139,35 @@ class _LocationRadiusSelectorMapState extends State<LocationRadiusSelectorMap> {
             child: IgnorePointer(
               ignoring: isInScaleMode,
               child: LocusFlutterMap(
-                mapController: widget.flutterMapController!,
-                options: MapOptions(
-                  onLongPress: (_, __) {
-                    Vibration.vibrate(duration: 100);
+                flutterMapController: widget.flutterMapController,
+                appleMapController: widget.appleMapController,
+                initialZoom: 13.0,
+                onAppleMapCreated: widget.onAppleMapCreated,
+                onTap: (location) {
+                  location = LatLng(
+                    location.latitude,
+                    location.longitude,
+                  );
 
+                  widget.onLocationChange?.call(location);
+
+                  if (radius == null) {
                     setState(() {
-                      isInScaleMode = true;
+                      radius = INITIAL_RADIUS;
+                      center = location;
                     });
-                  },
-                  center: getFallbackLocation(context),
-                  zoom: FALLBACK_LOCATION_ZOOM_LEVEL,
-                  onTap: (tapPosition, location) {
-                    location = LatLng(
-                      location.latitude,
-                      location.longitude,
-                    );
 
-                    widget.onLocationChange?.call(location);
+                    widget.onRadiusChange?.call(INITIAL_RADIUS);
+                  }
+                },
+                onLongPress: (location) {
+                  Vibration.vibrate(duration: 100);
 
-                    if (radius == null) {
-                      setState(() {
-                        radius = INITIAL_RADIUS;
-                        center = location;
-                      });
-
-                      widget.onRadiusChange?.call(INITIAL_RADIUS);
-                    }
-                  },
-                  maxZoom: 18,
-                ),
-                children: [
+                  setState(() {
+                    isInScaleMode = true;
+                  });
+                },
+                flutterChildren: [
                   if (isInScaleMode)
                     Shimmer.fromColors(
                       baseColor: Colors.red,
@@ -180,6 +180,27 @@ class _LocationRadiusSelectorMapState extends State<LocationRadiusSelectorMap> {
                     followOnLocationUpdate: FollowOnLocationUpdate.once,
                   )
                 ],
+                appleMapCircles: {
+                  if (center != null && radius != null)
+                    if (isInScaleMode)
+                      apple_maps.Circle(
+                        circleId: apple_maps.CircleId('radius-$radius-scale'),
+                        center: toAppleMapsCoordinates(center!),
+                        radius: radius!,
+                        fillColor: Colors.orangeAccent.withOpacity(.35),
+                        strokeColor: Colors.orangeAccent,
+                        strokeWidth: 2,
+                      )
+                    else
+                      apple_maps.Circle(
+                        circleId: apple_maps.CircleId('radius-$radius'),
+                        center: toAppleMapsCoordinates(center!),
+                        radius: radius!,
+                        fillColor: Colors.red.withOpacity(.25),
+                        strokeColor: Colors.red,
+                        strokeWidth: 2,
+                      )
+                },
               ),
             ),
           ),

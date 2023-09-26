@@ -8,13 +8,12 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
-
 import 'package:latlong2/latlong.dart';
 import 'package:locus/services/settings_service/index.dart';
 import 'package:locus/utils/location/get-fallback-location.dart';
+import 'package:locus/utils/location/index.dart';
 import 'package:locus/utils/permissions/has-granted.dart';
 import 'package:locus/widgets/Paper.dart';
-import 'package:locus/utils/location/index.dart';
 import 'package:provider/provider.dart';
 
 import '../constants/values.dart';
@@ -367,13 +366,13 @@ class _LocationsMapState extends State<LocationsMap> {
         );
       case MapProvider.openStreetMap:
         return LocusFlutterMap(
-          options: MapOptions(
+          flutterMapOptions: MapOptions(
             center: getInitialPosition() ?? getFallbackLocation(context),
             zoom: widget.initialZoomLevel,
             maxZoom: 18,
           ),
-          mapController: flutterMapController,
-          children: [
+          flutterMapController: flutterMapController,
+          flutterChildren: [
             if (widget.circles.isNotEmpty)
               AnimatedOpacity(
                 duration: const Duration(milliseconds: 300),

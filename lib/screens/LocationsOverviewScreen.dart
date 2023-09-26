@@ -834,14 +834,14 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     final lastCenter = settings.getLastMapLocation()?.toLatLng();
     final colorOpacityMultiplier = selectedViewID == null ? 1.0 : .1;
     return LocusFlutterMap(
-      mapController: flutterMapController,
-      options: MapOptions(
+      flutterMapController: flutterMapController,
+      flutterMapOptions: MapOptions(
         maxZoom: 18,
         minZoom: 2,
         center: lastCenter ?? getFallbackLocation(context),
         zoom: lastCenter == null ? FALLBACK_LOCATION_ZOOM_LEVEL : 13,
       ),
-      children: [
+      flutterChildren: [
         CircleLayer(
           circles: circleLocations
               .map((data) {

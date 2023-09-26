@@ -25,10 +25,7 @@ class GeoLocationAlarmPreview extends StatelessWidget {
   Widget build(BuildContext context) {
     final locationFetchers = context.watch<LocationFetchers>();
     final lastLocation =
-    locationFetchers
-        .getLocations(view)
-        .lastOrNull
-        ?.asLatLng();
+        locationFetchers.getLocations(view).lastOrNull?.asLatLng();
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -49,13 +46,13 @@ class GeoLocationAlarmPreview extends StatelessWidget {
             child: IgnorePointer(
               ignoring: true,
               child: LocusFlutterMap(
-                options: MapOptions(
+                flutterMapOptions: MapOptions(
                   center: alarm.center,
                   maxZoom: 18,
                   // create zoom based of radius
                   zoom: getZoomLevelForRadius(alarm.radius),
                 ),
-                children: [
+                flutterChildren: [
                   CircleLayer(
                     circles: [
                       CircleMarker(
