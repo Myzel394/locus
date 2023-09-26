@@ -8,7 +8,7 @@ import 'package:locus/utils/color.dart';
 import 'package:provider/provider.dart';
 
 import '../../constants/spacing.dart';
-import '../../services/view_service.dart';
+import '../../services/view_service/index.dart';
 import '../../utils/theme.dart';
 import '../../widgets/ModalSheetContent.dart';
 
@@ -72,25 +72,28 @@ class _NameFormState extends State<NameForm> {
               }
 
               if (viewService.views.any(
-                  (element) => element.name.toLowerCase() == lowerCasedName)) {
+                      (element) =>
+                  element.name.toLowerCase() == lowerCasedName)) {
                 return l10n
                     .sharesOverviewScreen_importTask_action_name_errors_sameNameAlreadyExists;
               }
 
               return null;
             },
-            material: (_, __) => MaterialTextFormFieldData(
-              decoration: InputDecoration(
-                labelText:
+            material: (_, __) =>
+                MaterialTextFormFieldData(
+                  decoration: InputDecoration(
+                    labelText:
                     l10n.sharesOverviewScreen_importTask_action_name_label,
-                icon: const Icon(Icons.text_fields_rounded),
-              ),
-            ),
-            cupertino: (_, __) => CupertinoTextFormFieldData(
-              placeholder:
+                    icon: const Icon(Icons.text_fields_rounded),
+                  ),
+                ),
+            cupertino: (_, __) =>
+                CupertinoTextFormFieldData(
+                  placeholder:
                   l10n.sharesOverviewScreen_importTask_action_name_label,
-              prefix: const Icon(CupertinoIcons.textformat),
-            ),
+                  prefix: const Icon(CupertinoIcons.textformat),
+                ),
           ),
           const SizedBox(height: MEDIUM_SPACE),
           Text(
@@ -116,7 +119,7 @@ class _NameFormState extends State<NameForm> {
                   for (final color in Colors.primaries)
                     Padding(
                       padding:
-                          const EdgeInsets.symmetric(horizontal: SMALL_SPACE),
+                      const EdgeInsets.symmetric(horizontal: SMALL_SPACE),
                       child: GestureDetector(
                         onTap: () {
                           setState(() {

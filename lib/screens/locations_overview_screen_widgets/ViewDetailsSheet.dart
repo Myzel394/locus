@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
-import 'package:latlong2/latlong.dart';
 import 'package:locus/screens/locations_overview_screen_widgets/ViewDetails.dart';
 import 'package:locus/services/location_point_service.dart';
-import 'package:locus/services/view_service.dart';
+import 'package:locus/services/view_service/index.dart';
 import 'package:locus/widgets/ModalSheet.dart';
 
 import '../../constants/spacing.dart';
@@ -202,8 +201,11 @@ class _ViewDetailsSheetState extends State<ViewDetailsSheet> {
                   ),
                 )
               ] else
-                Text(
-                  l10n.locationFetchEmptyError,
+                Padding(
+                  padding: const EdgeInsets.all(MEDIUM_SPACE),
+                  child: Text(
+                    l10n.locationFetchEmptyError,
+                  ),
                 )
             ],
           ),

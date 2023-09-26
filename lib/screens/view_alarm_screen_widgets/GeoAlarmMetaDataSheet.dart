@@ -5,31 +5,31 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart'
     hide PlatformListTile;
 import 'package:latlong2/latlong.dart';
 import 'package:locus/constants/spacing.dart';
-import 'package:locus/services/location_alarm_service.dart';
+import 'package:locus/services/location_alarm_service/enums.dart';
+import 'package:locus/services/location_alarm_service/index.dart';
 import 'package:locus/utils/theme.dart';
 
 import '../../widgets/ModalSheet.dart';
 import '../../widgets/PlatformListTile.dart';
 
-class RadiusRegionMetaDataSheet extends StatefulWidget {
+class GeoAlarmMetaDataSheet extends StatefulWidget {
   final LatLng center;
   final double radius;
 
-  const RadiusRegionMetaDataSheet({
+  const GeoAlarmMetaDataSheet({
     required this.center,
     required this.radius,
     super.key,
   });
 
   @override
-  State<RadiusRegionMetaDataSheet> createState() =>
-      _RadiusRegionMetaDataSheetState();
+  State<GeoAlarmMetaDataSheet> createState() => _GeoAlarmMetaDataSheetState();
 }
 
-class _RadiusRegionMetaDataSheetState extends State<RadiusRegionMetaDataSheet> {
+class _GeoAlarmMetaDataSheetState extends State<GeoAlarmMetaDataSheet> {
   final _nameController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  RadiusBasedRegionLocationAlarmType? _type;
+  LocationRadiusBasedTriggerType? _type;
 
   @override
   void dispose() {
@@ -55,7 +55,7 @@ class _RadiusRegionMetaDataSheetState extends State<RadiusRegionMetaDataSheet> {
                 PlatformListTile(
                   onTap: () {
                     setState(() {
-                      _type = RadiusBasedRegionLocationAlarmType.whenEnter;
+                      _type = LocationRadiusBasedTriggerType.whenEnter;
                     });
                   },
                   leading: const Icon(Icons.arrow_circle_right_rounded),
@@ -65,7 +65,7 @@ class _RadiusRegionMetaDataSheetState extends State<RadiusRegionMetaDataSheet> {
                 PlatformListTile(
                   onTap: () {
                     setState(() {
-                      _type = RadiusBasedRegionLocationAlarmType.whenLeave;
+                      _type = LocationRadiusBasedTriggerType.whenLeave;
                     });
                   },
                   leading: const Icon(Icons.arrow_circle_left_rounded),
@@ -75,7 +75,7 @@ class _RadiusRegionMetaDataSheetState extends State<RadiusRegionMetaDataSheet> {
               ]
             : [
                 Text(
-                  l10n.location_addAlarm_radiusBased_name_description,
+                  l10n.location_addAlarm_geo_name_description,
                   style: getSubTitleTextStyle(context),
                 ),
                 const SizedBox(height: MEDIUM_SPACE),
@@ -104,7 +104,7 @@ class _RadiusRegionMetaDataSheetState extends State<RadiusRegionMetaDataSheet> {
                     if (_formKey.currentState!.validate()) {
                       Navigator.pop(
                         context,
-                        RadiusBasedRegionLocationAlarm.create(
+                        GeoLocationAlarm.create(
                           zoneName: _nameController.text,
                           center: widget.center,
                           radius: widget.radius,

@@ -1,15 +1,18 @@
 import 'dart:collection';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:locus/services/location_fetcher_service/Locations.dart';
 import 'package:locus/services/location_point_service.dart';
-import 'package:locus/services/view_service.dart';
+import 'package:locus/services/view_service/index.dart';
+import 'package:locus/utils/nostr_fetcher/NostrSocket.dart';
+import 'package:nostr/nostr.dart';
 
 class Fetcher extends ChangeNotifier {
   final TaskView view;
   final Locations _locations = Locations();
 
-  final List<VoidCallback> _getLocationsUnsubscribers = [];
+  final List<NostrSocket> _sockets = [];
 
   bool _isMounted = true;
   bool _isLoading = false;
@@ -29,109 +32,104 @@ class Fetcher extends ChangeNotifier {
 
   Fetcher(this.view);
 
-  void _getLocations({
-    final DateTime? from,
-    final DateTime? until,
-    final int? limit,
-    final VoidCallback? onEmptyEnd,
-    final VoidCallback? onEnd,
-    final void Function(LocationPointService)? onLocationFetched,
-  }) {
+  Future<void> _getLocations(final Request request,) async {
     _isLoading = true;
-
     notifyListeners();
 
-    final unsubscriber = view.getLocations(
-      limit: limit,
-      until: until,
-      from: from,
-      onLocationFetched: (location) {
-        if (!_isMounted) {
-          return;
+    try {
+      for (final relay in view.relays) {
+        try {
+          final socket = NostrSocket(
+            relay: relay,
+            decryptMessage: view.decryptFromNostrMessage,
+          );
+          socket.stream.listen((location) {
+            _locations.add(location);
+          });
+          await socket.connect();
+          socket.addData(request.serialize());
+
+          _sockets.add(socket);
+        } on SocketException catch (error) {
+          continue;
         }
+      }
 
-        _locations.add(location);
-        onLocationFetched?.call(location);
-      },
-      onEnd: () {
-        if (!_isMounted) {
-          return;
-        }
-
-        _isLoading = false;
-        onEnd?.call();
-        notifyListeners();
-      },
-      onEmptyEnd: () {
-        if (!_isMounted) {
-          return;
-        }
-
-        _isLoading = false;
-        onEmptyEnd?.call();
-        notifyListeners();
-      },
-    );
-
-    _getLocationsUnsubscribers.add(unsubscriber);
+      await Future.wait(_sockets.map((socket) => socket.onComplete));
+    } catch (error) {} finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
-  void fetchPreviewLocations() {
-    _getLocations(
-      from: DateTime.now().subtract(const Duration(hours: 24)),
-      onEnd: () {
-        if (!_isMounted) {
-          return;
-        }
-
-        _hasFetchedPreviewLocations = true;
-      },
-      onEmptyEnd: () {
-        if (!_isMounted) {
-          return;
-        }
-
-        _getLocations(
+  Future<void> fetchPreviewLocations() async {
+    await _getLocations(Request(
+      generate64RandomHexChars(),
+      [
+        NostrSocket.createNostrRequestDataFromTask(
+          view,
+          from: DateTime.now().subtract(const Duration(hours: 24)),
+        ),
+        NostrSocket.createNostrRequestDataFromTask(
+          view,
           limit: 1,
-          onEnd: () {
-            _hasFetchedPreviewLocations = true;
-          },
-          onEmptyEnd: () {
-            _hasFetchedPreviewLocations = true;
-          },
-        );
-      },
-    );
+        ),
+      ],
+    ));
+
+    _hasFetchedPreviewLocations = true;
   }
 
-  void fetchMoreLocations([
+  Future<void> fetchMoreLocations([
     int limit = 50,
-  ]) {
+  ]) async {
+    final previousAmount = _locations.locations.length;
     final earliestLocation = _locations.sortedLocations.first;
 
-    _getLocations(
-      limit: limit,
-      until: earliestLocation.createdAt,
-      onEmptyEnd: () {
-        if (!_isMounted) {
-          return;
-        }
+    await _getLocations(Request(
+      generate64RandomHexChars(),
+      [
+        NostrSocket.createNostrRequestDataFromTask(
+          view,
+          limit: limit,
+          until: earliestLocation.createdAt,
+        ),
+      ],
+    ));
 
-        _hasFetchedAllLocations = true;
-      },
-    );
+    final afterAmount = _locations.locations.length;
+
+    // If amount is same, this means that no more locations are available.
+    if (afterAmount == previousAmount) {
+      _hasFetchedAllLocations = true;
+    }
   }
 
-  void fetchAllLocations() {
-    _getLocations();
+  Future<void> fetchAllLocations() async {
+    await _getLocations(
+      Request(
+        generate64RandomHexChars(),
+        [
+          NostrSocket.createNostrRequestDataFromTask(
+            view,
+          ),
+        ],
+      ),
+    );
+
+    _hasFetchedAllLocations = true;
+  }
+
+  Future<void> fetchCustom(final Request request) async {
+    await _getLocations(request);
   }
 
   @override
   void dispose() {
     _isMounted = false;
 
-    for (final unsubscriber in _getLocationsUnsubscribers) {
-      unsubscriber();
+    for (final socket in _sockets) {
+      socket.closeConnection();
     }
 
     super.dispose();

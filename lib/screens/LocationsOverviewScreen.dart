@@ -28,11 +28,13 @@ import 'package:locus/screens/locations_overview_screen_widgets/LocationFetchers
 import 'package:locus/screens/locations_overview_screen_widgets/OutOfBoundMarker.dart';
 import 'package:locus/screens/locations_overview_screen_widgets/ShareLocationSheet.dart';
 import 'package:locus/screens/locations_overview_screen_widgets/ViewLocationPopup.dart';
+import 'package:locus/services/current_location_service.dart';
 import 'package:locus/services/manager_service/background_locator.dart';
 import 'package:locus/services/manager_service/helpers.dart';
 import 'package:locus/services/settings_service/SettingsMapLocation.dart';
+import 'package:locus/services/settings_service/index.dart';
 import 'package:locus/services/task_service/index.dart';
-import 'package:locus/services/view_service.dart';
+import 'package:locus/services/view_service/index.dart';
 import 'package:locus/utils/location/get-fallback-location.dart';
 import 'package:locus/utils/location/index.dart';
 import 'package:locus/utils/navigation.dart';
@@ -40,15 +42,16 @@ import 'package:locus/utils/permissions/has-granted.dart';
 import 'package:locus/utils/permissions/request.dart';
 import 'package:locus/utils/ui-message/enums.dart';
 import 'package:locus/utils/ui-message/show-message.dart';
+import 'package:locus/widgets/CompassMapAction.dart';
 import 'package:locus/widgets/FABOpenContainer.dart';
 import 'package:locus/widgets/GoToMyLocationMapAction.dart';
 import 'package:locus/widgets/LocationsMap.dart';
 import 'package:locus/widgets/LocusFlutterMap.dart';
-import 'package:locus/widgets/CompassMapAction.dart';
 import 'package:locus/widgets/MapActionsContainer.dart';
 import 'package:locus/widgets/Paper.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 import 'package:uni_links/uni_links.dart';
 
@@ -60,14 +63,12 @@ import '../services/app_update_service.dart';
 import '../services/location_point_service.dart';
 import '../services/log_service.dart';
 import '../services/manager_service/background_fetch.dart';
-import 'package:locus/services/settings_service/index.dart';
 import '../utils/PageRoute.dart';
 import '../utils/color.dart';
 import '../utils/platform.dart';
 import '../utils/theme.dart';
 import 'ViewDetailsScreen.dart';
 import 'locations_overview_screen_widgets/ViewDetailsSheet.dart';
-import 'locations_overview_screen_widgets/constants.dart';
 
 // After this threshold, locations will not be merged together anymore
 const LOCATION_DETAILS_ZOOM_THRESHOLD = 17;
@@ -108,13 +109,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
 
   LocationPointService? visibleLocation;
 
-  // Since we already listen to the latest position, we will pass it
-  // manually to `current_location_layer` to avoid it also registering
-  // extra listeners.
-  final StreamController<LocationMarkerPosition?>
-      _currentLocationPositionStream =
-      StreamController<LocationMarkerPosition?>.broadcast();
-
   Position? lastPosition;
   StreamSubscription<String?>? _uniLinksStream;
   Timer? _viewsAlarmCheckerTimer;
@@ -122,8 +116,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
 
   // Null = all views
   String? selectedViewID;
-
-  final Map<TaskView, List<LocationPointService>> _cachedMergedLocations = {};
 
   TaskView? get selectedView {
     if (selectedViewID == null) {
@@ -160,11 +152,12 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
       ..addObserver(this)
       ..addPostFrameCallback((_) {
         _setLocationFromSettings();
-        _updateBackgroundListeners();
         initQuickActions(context);
         _initUniLinks();
         _updateLocaleToSettings();
+        _updateBackgroundListeners();
         _showUpdateDialogIfRequired();
+        _initLiveLocationUpdate();
         locationFetchers.fetchPreviewLocations();
 
         taskService.checkup(logService);
@@ -249,9 +242,10 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
 
   void _setLocationFromSettings() async {
     final settings = context.read<SettingsService>();
-    final position = settings.getLastMapLocation();
+    final rawPosition = settings.getLastMapLocation();
+    final currentLocation = context.read<CurrentLocationService>();
 
-    if (position == null) {
+    if (rawPosition == null) {
       return;
     }
 
@@ -259,14 +253,21 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
       locationStatus = LocationStatus.stale;
     });
 
-    _currentLocationPositionStream.add(
-      LocationMarkerPosition(
-        latitude: position.latitude,
-        longitude: position.longitude,
-        // Always use a high accuracy, since we are using a cached location
-        accuracy: max(100, position.accuracy),
-      ),
+    final position = Position(
+      latitude: rawPosition.latitude,
+      longitude: rawPosition.longitude,
+      accuracy: rawPosition.accuracy,
+      altitudeAccuracy: 0.0,
+      headingAccuracy: 0.0,
+      timestamp: DateTime.now(),
+      altitude: 0,
+      heading: 0,
+      speed: 0,
+      speedAccuracy: 0,
     );
+
+    await _animateToPosition(position);
+    currentLocation.updateCurrentPosition(position);
   }
 
   List<LocationPointService> mergeLocationsIfRequired(
@@ -347,35 +348,39 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     final settings = context.read<SettingsService>();
     final taskService = context.read<TaskService>();
 
-    if (!(await taskService.hasRunningTasks()) &&
-        !(await taskService.hasScheduledTasks())) {
-      // Nothing needs to be updated
-      return;
-    }
-
-    _initLiveLocationUpdate();
-
-    if (settings.useRealtimeUpdates) {
+    if (settings.useRealtimeUpdates &&
+        ((await taskService.hasRunningTasks()) ||
+            (await taskService.hasScheduledTasks()))) {
       removeBackgroundFetch();
 
       await configureBackgroundLocator();
       await initializeBackgroundLocator(context);
     } else {
       await configureBackgroundFetch();
-
       registerBackgroundFetch();
     }
   }
 
-  void _initLiveLocationUpdate() {
-    if (_positionStream != null) {
+  void _checkViewAlarms(
+    final Position position,
+  ) async {
+    final l10n = AppLocalizations.of(context);
+    final viewService = context.read<ViewService>();
+    final userLocation = await LocationPointService.fromPosition(position);
+
+    if (!mounted) {
       return;
     }
 
-    final settings = context.read<SettingsService>();
+    checkViewAlarms(
+      l10n: l10n,
+      viewService: viewService,
+      userLocation: userLocation,
+    );
+  }
 
-    if (settings.useRealtimeUpdates) {
-      // Live location updates are handled by the background locator already
+  void _initLiveLocationUpdate() {
+    if (_positionStream != null) {
       return;
     }
 
@@ -384,14 +389,12 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     );
 
     _positionStream!.listen((position) async {
-      _currentLocationPositionStream.add(
-        LocationMarkerPosition(
-          latitude: position.latitude,
-          longitude: position.longitude,
-          accuracy: position.accuracy,
-        ),
-      );
+      final taskService = context.read<TaskService>();
+      final currentLocation = context.read<CurrentLocationService>();
 
+      currentLocation.updateCurrentPosition(position);
+
+      _checkViewAlarms(position);
       _updateLocationToSettings(position);
 
       setState(() {
@@ -399,7 +402,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
         locationStatus = LocationStatus.active;
       });
 
-      final taskService = context.read<TaskService>();
       final runningTasks = await taskService.getRunningTasks().toList();
 
       if (runningTasks.isEmpty) {
@@ -480,17 +482,10 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
       const Duration(minutes: 1),
       (_) {
         final viewService = context.read<ViewService>();
-        final l10n = AppLocalizations.of(context);
 
         if (viewService.viewsWithAlarms.isEmpty) {
           return;
         }
-
-        checkViewAlarms(
-          l10n: l10n,
-          views: viewService.viewsWithAlarms,
-          viewService: viewService,
-        );
       },
     );
   }
@@ -520,13 +515,16 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
               ),
             );
             break;
+          case NotificationActionType.openPermissionsSettings:
+            openAppSettings();
+
+            break;
         }
       } catch (error) {
-        FlutterLogs.logErrorTrace(
+        FlutterLogs.logError(
           LOG_TAG,
           "Notification",
-          "Error handling notification.",
-          error as Error,
+          "Error handling notification: $error",
         );
       }
     });
@@ -628,6 +626,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     required final bool goToPosition,
     required final bool showErrorMessage,
   }) async {
+    final currentLocation = context.read<CurrentLocationService>();
     final previousValue = locationStatus;
 
     setState(() {
@@ -652,8 +651,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
       return;
     }
 
-    _initLiveLocationUpdate();
-
     FlutterLogs.logInfo(
       LOG_TAG,
       "LocationOverviewScreen",
@@ -663,13 +660,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     try {
       final latestPosition = await getCurrentPosition();
 
-      _currentLocationPositionStream.add(
-        LocationMarkerPosition(
-          latitude: latestPosition.latitude,
-          longitude: latestPosition.longitude,
-          accuracy: latestPosition.accuracy,
-        ),
-      );
+      currentLocation.updateCurrentPosition(latestPosition);
 
       if (goToPosition) {
         _animateToPosition(latestPosition);
@@ -720,7 +711,8 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     }[locationStatus]!;
 
     return CurrentLocationLayer(
-      positionStream: _currentLocationPositionStream.stream,
+      positionStream:
+          context.read<CurrentLocationService>().locationMarkerStream,
       followOnLocationUpdate: FollowOnLocationUpdate.never,
       style: LocationMarkerStyle(
         marker: DefaultLocationMarker(
@@ -842,14 +834,14 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     final lastCenter = settings.getLastMapLocation()?.toLatLng();
     final colorOpacityMultiplier = selectedViewID == null ? 1.0 : .1;
     return LocusFlutterMap(
-      mapController: flutterMapController,
-      options: MapOptions(
+      flutterMapController: flutterMapController,
+      flutterMapOptions: MapOptions(
         maxZoom: 18,
         minZoom: 2,
         center: lastCenter ?? getFallbackLocation(context),
         zoom: lastCenter == null ? FALLBACK_LOCATION_ZOOM_LEVEL : 13,
       ),
-      children: [
+      flutterChildren: [
         CircleLayer(
           circles: circleLocations
               .map((data) {
@@ -1321,7 +1313,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
   Widget buildMapActions() {
     const margin = 10.0;
     const dimension = 50.0;
-    const diff = FAB_SIZE - dimension;
 
     final l10n = AppLocalizations.of(context);
     final settings = context.watch<SettingsService>();
@@ -1348,7 +1339,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
                     width: null,
                     borderRadius: BorderRadius.circular(HUGE_SPACE),
                     padding: EdgeInsets.zero,
-                    child: IconButton(
+                    child: PlatformIconButton(
                       color: shades[400],
                       icon: Icon(disableShowDetailedLocations
                           ? MdiIcons.mapMarkerMultipleOutline

@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart'
     hide PlatformListTile;
-import 'package:locus/services/view_service.dart';
+import 'package:locus/screens/locations_overview_screen_widgets/LocationFetchers.dart';
+import 'package:locus/services/view_service/index.dart';
+import 'package:provider/provider.dart';
 
 import '../../constants/spacing.dart';
-import '../../services/location_point_service.dart';
 import '../../utils/theme.dart';
 import '../../widgets/LocationsMap.dart';
 import '../../widgets/PlatformListTile.dart';
@@ -25,9 +26,7 @@ class ViewImportOverview extends StatefulWidget {
 }
 
 class _ViewImportOverviewState extends State<ViewImportOverview> {
-  void Function()? _unsubscribeGetLocations;
   final LocationsMapController _controller = LocationsMapController();
-  bool _isLoading = true;
   final bool _isError = false;
 
   double timeOffset = 0;
@@ -36,38 +35,19 @@ class _ViewImportOverviewState extends State<ViewImportOverview> {
   void initState() {
     super.initState();
 
-    addListener();
+    final fetchers = context.read<LocationFetchers>();
+    final lastLocation = fetchers.getLocations(widget.view).lastOrNull;
+
+    if (lastLocation != null) {
+      _controller.add(lastLocation);
+    }
   }
 
   @override
   void dispose() {
-    _unsubscribeGetLocations?.call();
     _controller.dispose();
 
     super.dispose();
-  }
-
-  addListener() async {
-    _unsubscribeGetLocations = widget.view.getLocations(
-      limit: 1,
-      onLocationFetched: (final LocationPointService location) {
-        if (!mounted) {
-          return;
-        }
-
-        _controller.add(location);
-        setState(() {});
-      },
-      onEnd: () {
-        if (!mounted) {
-          return;
-        }
-
-        setState(() {
-          _isLoading = false;
-        });
-      },
-    );
   }
 
   @override
@@ -99,14 +79,7 @@ class _ViewImportOverviewState extends State<ViewImportOverview> {
             ),
           ],
         ),
-        if (_isLoading)
-          const Padding(
-            padding: EdgeInsets.all(MEDIUM_SPACE),
-            child: Center(
-              child: CircularProgressIndicator(),
-            ),
-          )
-        else if (_isError)
+        if (_isError)
           Text(
             l10n.locationsLoadingError,
             style: TextStyle(

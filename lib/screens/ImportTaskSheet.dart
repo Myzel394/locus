@@ -12,7 +12,7 @@ import 'package:locus/screens/import_task_sheet_widgets/ImportSuccess.dart';
 import 'package:locus/screens/import_task_sheet_widgets/NameForm.dart';
 import 'package:locus/screens/import_task_sheet_widgets/URLForm.dart';
 import 'package:locus/screens/import_task_sheet_widgets/ViewImportOverview.dart';
-import 'package:locus/services/view_service.dart';
+import 'package:locus/services/view_service/index.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/ModalSheetContent.dart';
 import 'package:provider/provider.dart';
@@ -291,105 +291,93 @@ class _ImportTaskSheetState extends State<ImportTaskSheet>
                     }
                   },
                 )
-              else
-                if (_screen == ImportScreen.askURL)
-                  URLForm(
-                    isFetching: isLoading,
-                    controller: _urlController,
-                    onImport: _importURL,
-                  )
-                else
-                  if (_screen == ImportScreen.askName)
-                    NameForm(
-                      controller: _nameController,
-                      onSubmitted: (color) {
-                        _taskView!.update(
-                            name: _nameController.text, color: color);
+              else if (_screen == ImportScreen.askURL)
+                URLForm(
+                  isFetching: isLoading,
+                  controller: _urlController,
+                  onImport: _importURL,
+                )
+              else if (_screen == ImportScreen.askName)
+                NameForm(
+                  controller: _nameController,
+                  onSubmitted: (color) {
+                    _taskView!.update(name: _nameController.text, color: color);
 
-                        importView();
-                      },
-                    )
-                  else
-                    if (_screen == ImportScreen.importFile)
-                      ModalSheetContent(
-                        title: l10n
-                            .sharesOverviewScreen_importTask_action_import_isLoading,
-                        children: [
-                          if (isLoading)
-                            const Center(
-                              child: CircularProgressIndicator(),
-                            )
-                          else
-                            if (errorMessage != null)
-                              Text(
-                                errorMessage!,
-                                style: getBodyTextTextStyle(context)
-                                    .copyWith(color: getErrorColor(context)),
-                              ),
-                        ],
+                    importView();
+                  },
+                )
+              else if (_screen == ImportScreen.importFile)
+                ModalSheetContent(
+                  title: l10n
+                      .sharesOverviewScreen_importTask_action_import_isLoading,
+                  children: [
+                    if (isLoading)
+                      const Center(
+                        child: CircularProgressIndicator(),
                       )
-                    else
-                      if (_screen == ImportScreen.bluetoothReceive)
-                        ReceiveViewByBluetooth(
-                          onImport: parseViewData,
-                        )
-                      else
-                        if (_screen == ImportScreen.present)
-                          ViewImportOverview(
-                            view: _taskView!,
-                            onImport: () {
-                              _nameController.text = _taskView!.name;
+                    else if (errorMessage != null)
+                      Text(
+                        errorMessage!,
+                        style: getBodyTextTextStyle(context)
+                            .copyWith(color: getErrorColor(context)),
+                      ),
+                  ],
+                )
+              else if (_screen == ImportScreen.bluetoothReceive)
+                ReceiveViewByBluetooth(
+                  onImport: parseViewData,
+                )
+              else if (_screen == ImportScreen.present)
+                ViewImportOverview(
+                  view: _taskView!,
+                  onImport: () {
+                    _nameController.text = _taskView!.name;
 
-                              setState(() {
-                                _screen = ImportScreen.askName;
-                              });
-                            },
-                          )
-                        else
-                          if (_screen == ImportScreen.done)
-                            ImportSuccess(
-                              onClose: () {
-                                if (!mounted) {
-                                  return;
-                                }
+                    setState(() {
+                      _screen = ImportScreen.askName;
+                    });
+                  },
+                )
+              else if (_screen == ImportScreen.done)
+                ImportSuccess(
+                  onClose: () {
+                    if (!mounted) {
+                      return;
+                    }
 
-                                Navigator.of(context).pop(_taskView!);
-                              },
-                            )
-                          else
-                            if (_screen == ImportScreen.error)
-                              Column(
-                                children: <Widget>[
-                                  Icon(
-                                    context.platformIcons.error,
-                                    size: 64,
-                                    color: getErrorColor(context),
-                                  ),
-                                  const SizedBox(height: MEDIUM_SPACE),
-                                  Text(
-                                    l10n.taskImportError,
-                                    style: getSubTitleTextStyle(context),
-                                  ),
-                                  const SizedBox(height: SMALL_SPACE),
-                                  Text(
-                                    errorMessage!,
-                                    style: getBodyTextTextStyle(context)
-                                        .copyWith(
-                                        color: getErrorColor(context)),
-                                  ),
-                                  const SizedBox(height: LARGE_SPACE),
-                                  PlatformElevatedButton(
-                                    padding: const EdgeInsets.all(MEDIUM_SPACE),
-                                    onPressed: reset,
-                                    material: (_, __) =>
-                                        MaterialElevatedButtonData(
-                                          icon: const Icon(
-                                              Icons.arrow_back_rounded),
-                                        ),
-                                    child: Text(l10n.goBack),
-                                  ),
-                                ],
-                              ),
+                    Navigator.of(context).pop(_taskView!);
+                  },
+                )
+              else if (_screen == ImportScreen.error)
+                Column(
+                  children: <Widget>[
+                    Icon(
+                      context.platformIcons.error,
+                      size: 64,
+                      color: getErrorColor(context),
+                    ),
+                    const SizedBox(height: MEDIUM_SPACE),
+                    Text(
+                      l10n.taskImportError,
+                      style: getSubTitleTextStyle(context),
+                    ),
+                    const SizedBox(height: SMALL_SPACE),
+                    Text(
+                      errorMessage!,
+                      style: getBodyTextTextStyle(context)
+                          .copyWith(color: getErrorColor(context)),
+                    ),
+                    const SizedBox(height: LARGE_SPACE),
+                    PlatformElevatedButton(
+                      padding: const EdgeInsets.all(MEDIUM_SPACE),
+                      onPressed: reset,
+                      material: (_, __) => MaterialElevatedButtonData(
+                        icon: const Icon(Icons.arrow_back_rounded),
+                      ),
+                      child: Text(l10n.goBack),
+                    ),
+                  ],
+                ),
               const SizedBox(height: LARGE_SPACE),
             ],
           ),

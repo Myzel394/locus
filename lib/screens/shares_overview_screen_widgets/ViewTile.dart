@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart'
     hide PlatformListTile;
-import 'package:locus/services/view_service.dart';
+import 'package:locus/services/view_service/index.dart';
 import 'package:locus/utils/PageRoute.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/PlatformPopup.dart';
@@ -38,30 +38,35 @@ class ViewTile extends StatelessWidget {
               final confirmDeletion = await showPlatformDialog(
                 context: context,
                 barrierDismissible: true,
-                builder: (context) => PlatformAlertDialog(
-                  material: (_, __) => MaterialAlertDialogData(
-                    icon: Icon(context.platformIcons.delete),
-                  ),
-                  title: Text(l10n.viewAction_delete_confirm_title(view.name)),
-                  content: Text(l10n.actionNotUndoable),
-                  actions: createCancellableDialogActions(
-                    context,
-                    [
-                      PlatformDialogAction(
-                        onPressed: () {
-                          Navigator.of(context).pop(true);
-                        },
-                        material: (_, __) => MaterialDialogActionData(
-                          icon: Icon(context.platformIcons.delete),
-                        ),
-                        cupertino: (_, __) => CupertinoDialogActionData(
-                          isDestructiveAction: true,
-                        ),
-                        child: Text(l10n.deleteLabel),
+                builder: (context) =>
+                    PlatformAlertDialog(
+                      material: (_, __) =>
+                          MaterialAlertDialogData(
+                            icon: Icon(context.platformIcons.delete),
+                          ),
+                      title: Text(
+                          l10n.viewAction_delete_confirm_title(view.name)),
+                      content: Text(l10n.actionNotUndoable),
+                      actions: createCancellableDialogActions(
+                        context,
+                        [
+                          PlatformDialogAction(
+                            onPressed: () {
+                              Navigator.of(context).pop(true);
+                            },
+                            material: (_, __) =>
+                                MaterialDialogActionData(
+                                  icon: Icon(context.platformIcons.delete),
+                                ),
+                            cupertino: (_, __) =>
+                                CupertinoDialogActionData(
+                                  isDestructiveAction: true,
+                                ),
+                            child: Text(l10n.deleteLabel),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
+                    ),
               );
 
               if (confirmDeletion) {
@@ -76,9 +81,10 @@ class ViewTile extends StatelessWidget {
         Navigator.of(context).push(
           NativePageRoute(
             context: context,
-            builder: (context) => ViewDetailsScreen(
-              view: view,
-            ),
+            builder: (context) =>
+                ViewDetailsScreen(
+                  view: view,
+                ),
           ),
         );
       },

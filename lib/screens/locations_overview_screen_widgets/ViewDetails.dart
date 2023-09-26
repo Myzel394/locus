@@ -2,21 +2,18 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get_time_ago/get_time_ago.dart';
-import 'package:locus/services/view_service.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:locus/utils/date.dart';
-import 'package:locus/utils/navigation.dart';
 import 'package:latlong2/latlong.dart';
-
+import 'package:locus/services/view_service/index.dart';
+import 'package:locus/utils/date.dart';
 import 'package:locus/utils/location/index.dart';
 import 'package:locus/utils/permissions/has-granted.dart';
-import 'package:locus/utils/permissions/request.dart';
 import 'package:locus/widgets/OpenInMaps.dart';
-import 'package:map_launcher/map_launcher.dart';
+
 import '../../constants/spacing.dart';
 import '../../services/location_point_service.dart';
 import '../../utils/icon.dart';
@@ -24,7 +21,6 @@ import '../../utils/theme.dart';
 import '../../widgets/BentoGridElement.dart';
 import '../../widgets/LocusFlutterMap.dart';
 import '../../widgets/RequestLocationPermissionMixin.dart';
-import '../ViewDetailsScreen.dart';
 
 class ViewDetails extends StatefulWidget {
   final TaskView? view;
@@ -54,20 +50,22 @@ class _ViewDetailsState extends State<ViewDetails> {
     oldLastLocation = oldWidget.location;
   }
 
-  Widget buildHeadingMap(final LocationPointService lastLocation,) {
+  Widget buildHeadingMap(
+    final LocationPointService lastLocation,
+  ) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(LARGE_SPACE),
       child: SizedBox(
         height: 200,
         child: LocusFlutterMap(
-          options: MapOptions(
+          flutterMapOptions: MapOptions(
             center: LatLng(
               lastLocation.latitude,
               lastLocation.longitude,
             ),
             zoom: 13,
           ),
-          children: [
+          flutterChildren: [
             MarkerLayer(
               markers: [
                 Marker(
@@ -75,15 +73,14 @@ class _ViewDetailsState extends State<ViewDetails> {
                     lastLocation.latitude,
                     lastLocation.longitude,
                   ),
-                  builder: (context) =>
-                      Transform.rotate(
-                        angle: lastLocation.heading!,
-                        child: Icon(
-                          CupertinoIcons.location_north_fill,
-                          color: getPrimaryColorShades(context)[0],
-                          size: 30,
-                        ),
-                      ),
+                  builder: (context) => Transform.rotate(
+                    angle: lastLocation.heading!,
+                    child: Icon(
+                      CupertinoIcons.location_north_fill,
+                      color: getPrimaryColorShades(context)[0],
+                      size: 30,
+                    ),
+                  ),
                 ),
               ],
             )
@@ -122,8 +119,8 @@ class _ViewDetailsState extends State<ViewDetails> {
               title: lastLocation.altitude == null
                   ? l10n.unknownValue
                   : l10n.locations_values_altitude_m(
-                lastLocation.altitude!.round(),
-              ),
+                      lastLocation.altitude!.round(),
+                    ),
               icon: platformThemeData(
                 context,
                 material: (_) => Icons.height_rounded,
@@ -136,8 +133,8 @@ class _ViewDetailsState extends State<ViewDetails> {
               title: lastLocation.speed == null
                   ? l10n.unknownValue
                   : l10n.locations_values_speed_kmh(
-                (lastLocation.speed! * 3.6).round(),
-              ),
+                      (lastLocation.speed! * 3.6).round(),
+                    ),
               icon: platformThemeData(
                 context,
                 material: (_) => Icons.speed,
@@ -150,8 +147,8 @@ class _ViewDetailsState extends State<ViewDetails> {
               title: lastLocation.batteryLevel == null
                   ? l10n.unknownValue
                   : l10n.locations_values_battery_value(
-                (lastLocation.batteryLevel! * 100).round(),
-              ),
+                      (lastLocation.batteryLevel! * 100).round(),
+                    ),
               icon: getIconDataForBatteryLevel(
                 context,
                 lastLocation.batteryLevel,
@@ -163,8 +160,8 @@ class _ViewDetailsState extends State<ViewDetails> {
               title: lastLocation.batteryState == null
                   ? l10n.unknownValue
                   : l10n.locations_values_batteryState_value(
-                lastLocation.batteryState!.name,
-              ),
+                      lastLocation.batteryState!.name,
+                    ),
               icon: Icons.cable_rounded,
               type: BentoType.tertiary,
               description: l10n.locations_values_batteryState_description,
@@ -242,10 +239,9 @@ class _DistanceBentoElementState extends State<DistanceBentoElement>
         showPlatformModalSheet(
           context: context,
           material: MaterialModalSheetData(),
-          builder: (context) =>
-              OpenInMaps(
-                destination: widget.lastLocation.asCoords(),
-              ),
+          builder: (context) => OpenInMaps(
+            destination: widget.lastLocation.asCoords(),
+          ),
         );
       },
       title: (() {
@@ -342,10 +338,10 @@ class _LastLocationBentoElementState extends State<LastLocationBentoElement> {
       title: showAbsolute
           ? formatDateTimeHumanReadable(widget.lastLocation.createdAt)
           : GetTimeAgo.parse(
-        DateTime.now().subtract(
-          DateTime.now().difference(widget.lastLocation.createdAt),
-        ),
-      ),
+              DateTime.now().subtract(
+                DateTime.now().difference(widget.lastLocation.createdAt),
+              ),
+            ),
       icon: Icons.location_on_rounded,
       description: l10n.locations_values_lastLocation_description,
     );

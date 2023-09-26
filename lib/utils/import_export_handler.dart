@@ -1,13 +1,11 @@
 import 'package:locus/constants/values.dart';
 import 'package:locus/services/settings_service/index.dart';
 import 'package:locus/services/task_service/index.dart';
-import 'package:locus/services/view_service.dart';
+import 'package:locus/services/view_service/index.dart';
 
-Future<Map<String, dynamic>> exportToJSON(
-  final TaskService taskService,
-  final ViewService viewService,
-  final SettingsService settings,
-) async =>
+Future<Map<String, dynamic>> exportToJSON(final TaskService taskService,
+    final ViewService viewService,
+    final SettingsService settings,) async =>
     {
       "version": 1,
       "data": {

@@ -2,22 +2,20 @@ import 'dart:convert';
 
 import 'package:cryptography/cryptography.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:locus/api/nostr-events.dart';
 import 'package:locus/constants/values.dart';
 import 'package:locus/services/location_point_service.dart';
 import 'package:locus/services/task_service/task_cryptography.dart';
 import 'package:locus/services/task_service/task_publisher.dart';
-import 'package:locus/utils/cryptography/encrypt.dart';
+import 'package:locus/services/view_service/index.dart';
 import 'package:locus/utils/cryptography/utils.dart';
-import 'package:locus/utils/location/index.dart';
 import 'package:nostr/nostr.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../api/get-locations.dart' as get_locations_api;
 import '../timers_service.dart';
 import 'constants.dart';
-import 'enums.dart';
 import 'helpers.dart';
 import 'mixins.dart';
 
@@ -353,23 +351,6 @@ class Task extends ChangeNotifier with LocationBase {
     notifyListeners();
   }
 
-  @override
-  VoidCallback getLocations({
-    required void Function(LocationPointService) onLocationFetched,
-    required void Function() onEnd,
-    int? limit,
-    DateTime? from,
-  }) =>
-      get_locations_api.getLocations(
-        encryptionPassword: _encryptionPassword,
-        nostrPublicKey: nostrPublicKey,
-        relays: relays,
-        onLocationFetched: onLocationFetched,
-        onEnd: onEnd,
-        from: from,
-        limit: limit,
-      );
-
   bool get isQuickShare => isInfiniteQuickShare || isFiniteQuickShare;
 
   bool get isInfiniteQuickShare => deleteAfterRun && timers.isEmpty;
@@ -383,4 +364,13 @@ class Task extends ChangeNotifier with LocationBase {
 
     super.dispose();
   }
+
+  TaskView createTaskView_onlyForTesting() => TaskView(
+        encryptionPassword: _encryptionPassword,
+        nostrPublicKey: nostrPublicKey,
+        color: Colors.red,
+        name: name,
+        relays: relays,
+        id: id,
+      );
 }
