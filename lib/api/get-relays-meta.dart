@@ -148,6 +148,7 @@ class RelayMeta {
     // Lower latency = better - Because of this
     // a factor closer to 0 resembles a HIGHER weight
     // We prioritize read latency as we want to be able to provide a fast app
+    // Lower score = better
     return (connectionLatencies.average * 0.9 +
             readLatencies.average * 0.5 +
             writeLatencies.average) +
