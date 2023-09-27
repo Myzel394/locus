@@ -96,34 +96,36 @@ class RelayMeta {
           relay: relay,
           canRead: canRead,
           canWrite: canWrite,
-          name: adnk(content, "info.name") ?? relay,
-          contactInfo: adnk(content, "info.contact") ?? "",
-          description: adnk(content, "info.description") ?? "",
-          connectionLatencies:
-              List<int?>.from(adnk(content, "latency.$worldRegion.0") ?? [])
-                  .where((value) => value != null)
-                  .toList()
-                  .cast<int>(),
+          name: adnk<dynamic>(content, "info.name") ?? relay,
+          contactInfo: adnk<dynamic>(content, "info.contact") ?? "",
+          description: adnk<dynamic>(content, "info.description") ?? "",
+          connectionLatencies: List<int?>.from(
+                  adnk<dynamic>(content, "latency.$worldRegion.0") ?? [])
+              .where((value) => value != null)
+              .toList()
+              .cast<int>(),
           readLatencies:
-              List<int?>.from(adnk(content, "latency.$worldRegion.1") ?? [])
+              List<int?>.from(adnk<dynamic>(content, "latency.$worldRegion.1") ?? [])
                   .where((value) => value != null)
                   .toList()
                   .cast<int>(),
           writeLatencies:
-              List<int?>.from(adnk(content, "latency.$worldRegion.2") ?? [])
+              List<int?>.from(adnk<dynamic>(content, "latency.$worldRegion.2") ?? [])
                   .where((value) => value != null)
                   .toList()
                   .cast<int>(),
           maxContentLength:
-              adnk(content, "info.limitations.max_content_length") ??
+              adnk<dynamic>(content, "info.limitations.max_content_length") ??
                   MIN_LENGTH,
           maxMessageLength:
-              adnk(content, "info.limitations.max_message_length") ??
+              adnk<dynamic>(content, "info.limitations.max_message_length") ??
                   MIN_LENGTH,
           requiresPayment:
-              adnk(content, "info.limitations.payment_required") ?? false,
+              adnk<dynamic>(content, "info.limitations.payment_required") ??
+                  false,
           minPowDifficulty:
-              adnk(content, "info.limitations.min_pow_difficulty") ?? 0);
+              adnk<dynamic>(content, "info.limitations.min_pow_difficulty") ??
+                  0);
 
   bool get isSuitable =>
       canWrite &&
