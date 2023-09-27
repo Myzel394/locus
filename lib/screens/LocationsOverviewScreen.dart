@@ -195,8 +195,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
 
       flutterMapPopupController = PopupController();
     }
-
-    fetchRelaysMeta();
   }
 
   @override

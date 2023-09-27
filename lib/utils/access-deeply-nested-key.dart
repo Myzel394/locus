@@ -2,7 +2,9 @@ T? accessDeeplyNestedKey<T>(final Map<String, dynamic> obj, final String path) {
   dynamic result = obj;
 
   for (final subPath in path.split(".")) {
-    if (result.containsKey(subPath)) {
+    if (result is List
+        ? result[int.parse(subPath)]
+        : result.containsKey(subPath)) {
       result = result[subPath];
     } else {
       return null;

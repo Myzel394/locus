@@ -6,6 +6,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:locus/api/get-relays-meta.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/constants/values.dart';
 import 'package:locus/services/location_point_service.dart';
@@ -73,8 +74,10 @@ class RelaySelectSheet extends StatefulWidget {
 }
 
 class _RelaySelectSheetState extends State<RelaySelectSheet> {
-  List<String> availableRelays = [];
+  final List<String> availableRelays = [];
+  final Map<String, RelayMeta> relayMeta = {};
   LoadStatus loadStatus = LoadStatus.loading;
+
   final _searchController = TextEditingController();
   late final DraggableScrollableController _sheetController;
   String _newValue = '';
@@ -87,7 +90,8 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
   @override
   void initState() {
     super.initState();
-    fetchAvailableRelays();
+    _fetchAvailableRelays();
+    _fetchRelaysMeta();
 
     widget.controller.addListener(rebuild);
     _searchController.addListener(() {
@@ -164,7 +168,55 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
     setState(() {});
   }
 
-  Future<void> fetchAvailableRelays() async {
+  // Filters all relays whether they are suitable
+  void _filterRelaysFromMeta() {
+    if (relayMeta.isEmpty || availableRelays.isEmpty) {
+      return;
+    }
+
+    final suitableRelays = relayMeta.values
+        .where((meta) => meta.isSuitable)
+        .map((meta) => meta.relay)
+        .toSet();
+
+    setState(() {
+      availableRelays.retainWhere(suitableRelays.contains);
+      availableRelays.sort(
+        (a, b) => relayMeta[a]!.score > relayMeta[b]!.score ? -1 : 1,
+      );
+    });
+  }
+
+  Future<void> _fetchRelaysMeta() async {
+    FlutterLogs.logInfo(
+      LOG_TAG,
+      "Relay Select Sheet",
+      "Fetching relays meta...",
+    );
+
+    try {
+      final relaysMetaDataRaw =
+          await withCache(fetchRelaysMeta, "relays-meta")();
+      final relaysMetaData = relaysMetaDataRaw["meta"] as List<RelayMeta>;
+      final newRelays = Map.fromEntries(
+        relaysMetaData.map((meta) => MapEntry(meta.relay, meta)),
+      );
+
+      relayMeta.clear();
+      relayMeta.addAll(newRelays);
+      _filterRelaysFromMeta();
+
+      setState(() {});
+    } catch (error) {
+      FlutterLogs.logError(
+        LOG_TAG,
+        "Relay Select Sheet",
+        "Failed to fetch available relays: $error",
+      );
+    }
+  }
+
+  Future<void> _fetchAvailableRelays() async {
     FlutterLogs.logInfo(
       LOG_TAG,
       "Relay Select Sheet",
@@ -177,10 +229,13 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
 
       relays.shuffle();
 
-      setState(() {
-        availableRelays = relays;
-        loadStatus = LoadStatus.success;
-      });
+      availableRelays
+        ..clear()
+        ..addAll(relays);
+      loadStatus = LoadStatus.success;
+      _filterRelaysFromMeta();
+
+      setState(() {});
     } catch (error) {
       FlutterLogs.logError(
         LOG_TAG,
@@ -247,12 +302,14 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
 
             final index = isValueNew ? rawIndex - 1 : rawIndex;
             final relay = allRelays[index];
+            final meta = relayMeta[relay];
 
             return PlatformWidget(
               material: (context, _) => CheckboxListTile(
                 title: Text(
                   relay.length >= 6 ? relay.substring(6) : relay,
                 ),
+                subtitle: meta == null ? null : Text(meta.score.toString()),
                 value: widget.controller.relays.contains(relay),
                 onChanged: (newValue) {
                   if (newValue == null) {
@@ -270,6 +327,7 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
                 title: Text(
                   relay.length >= 6 ? relay.substring(6) : relay,
                 ),
+                subtitle: meta == null ? null : Text(meta.description),
                 trailing: CupertinoSwitch(
                   value: widget.controller.relays.contains(relay),
                   onChanged: (newValue) {

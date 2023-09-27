@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:collection/collection.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:locus/utils/access-deeply-nested-key.dart';
 import 'package:locus/utils/nostr_fetcher/BasicNostrFetchSocket.dart';
 import 'package:locus/utils/nostr_fetcher/NostrSocket.dart';
@@ -99,24 +100,26 @@ class RelayMeta {
           contactInfo: adnk(content, "info.contact") ?? "",
           description: adnk(content, "info.description") ?? "",
           connectionLatencies:
-              List<int?>.from(adnk(content, "latency$worldRegion.0") ?? [])
+              List<int?>.from(adnk(content, "latency.$worldRegion.0") ?? [])
                   .where((value) => value != null)
                   .toList()
                   .cast<int>(),
           readLatencies:
-              List<int?>.from(adnk(content, "latency$worldRegion.1") ?? [])
+              List<int?>.from(adnk(content, "latency.$worldRegion.1") ?? [])
                   .where((value) => value != null)
                   .toList()
                   .cast<int>(),
           writeLatencies:
-              List<int?>.from(adnk(content, "latency$worldRegion.2") ?? [])
+              List<int?>.from(adnk(content, "latency.$worldRegion.2") ?? [])
                   .where((value) => value != null)
                   .toList()
                   .cast<int>(),
           maxContentLength:
-              adnk(content, "info.limitations.max_content_length") ?? 0,
+              adnk(content, "info.limitations.max_content_length") ??
+                  MIN_LENGTH,
           maxMessageLength:
-              adnk(content, "info.limitations.max_message_length") ?? 0,
+              adnk(content, "info.limitations.max_message_length") ??
+                  MIN_LENGTH,
           requiresPayment:
               adnk(content, "info.limitations.payment_required") ?? false,
           minPowDifficulty:
@@ -150,13 +153,15 @@ class RelayMeta {
   }
 }
 
+// Values taken from https://github.com/dskvr/nostr-watch/blob/develop/src/components/relays/jobs/LoadSeed.vue#L91
 final REQUEST_DATA = NostrSocket.createNostrRequestData(
   kinds: [30304],
-  limit: 10,
+  limit: 1000,
+  from: DateTime.now().subtract(2.hours),
   authors: ["b3b0d247f66bf40c4c9f4ce721abfe1fd3b7529fbc1ea5e64d5f0f8df3a4b6e6"],
 );
 
-Future<void> fetchRelaysMeta() async {
+Future<Map<String, List<RelayMeta>>> fetchRelaysMeta() async {
   final fetcher = RelaysMetaFetcher(
     relay: "wss://history.nostr.watch",
   );
@@ -171,5 +176,7 @@ Future<void> fetchRelaysMeta() async {
   );
   await fetcher.onComplete;
 
-  print(fetcher.meta);
+  return {
+    "meta": fetcher.meta,
+  };
 }
