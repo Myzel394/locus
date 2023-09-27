@@ -268,121 +268,117 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
         final allRelays = List<String>.from(
             [...widget.controller.relays, ...uncheckedFoundRelays]);
 
-        final length = allRelays.length + (isValueNew ? 1 : 0);
-
-        return SingleChildScrollView(
+        return ListView.builder(
           controller: draggableController,
-          child: Column(
-            children: [
-              if (loadStatus == LoadStatus.loading)
-                Padding(
-                  padding: const EdgeInsets.all(MEDIUM_SPACE),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SizedBox.square(
-                        dimension: 20,
-                        child: PlatformCircularProgressIndicator(),
-                      ),
-                      const SizedBox(width: MEDIUM_SPACE),
-                      Text(l10n.relaySelectSheet_loadingRelaysMeta),
-                    ],
+          // Add 2 so we can show <add new value> and <hint> widgets
+          itemCount: allRelays.length + 2,
+          itemBuilder: (context, rawIndex) {
+            if (rawIndex == 0) {
+              if (isValueNew) {
+                return PlatformWidget(
+                  material: (context, _) => ListTile(
+                    title: Text(
+                      l10n.addNewValueLabel(_newValue),
+                    ),
+                    leading: const Icon(
+                      Icons.add,
+                    ),
+                    onTap: () {
+                      widget.controller.add(_searchController.value.text);
+                      _searchController.clear();
+                    },
                   ),
-                )
-              else
-                Padding(
-                  padding: const EdgeInsets.all(MEDIUM_SPACE),
-                  child: Row(
-                    children: [
-                      Icon(
-                        context.platformIcons.info,
-                        color: getCaptionTextStyle(context).color,
-                      ),
-                      const SizedBox(width: MEDIUM_SPACE),
-                      Flexible(
-                        child: Text(
-                          l10n.relaySelectSheet_hint,
-                          style: getCaptionTextStyle(context),
-                        ),
-                      ),
-                    ],
+                  cupertino: (context, _) => CupertinoButton(
+                    child: Text(
+                      l10n.addNewValueLabel(_newValue),
+                    ),
+                    onPressed: () {
+                      widget.controller.add(_searchController.value.text);
+                      _searchController.clear();
+                    },
                   ),
-                ),
-              ListView.builder(
-                physics: const NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                itemCount: length,
-                itemBuilder: (context, rawIndex) {
-                  if (isValueNew && rawIndex == 0) {
-                    return PlatformWidget(
-                      material: (context, _) => ListTile(
-                        title: Text(
-                          l10n.addNewValueLabel(_newValue),
-                        ),
-                        leading: const Icon(
-                          Icons.add,
-                        ),
-                        onTap: () {
-                          widget.controller.add(_searchController.value.text);
-                          _searchController.clear();
-                        },
+                );
+              }
+              return Container();
+            }
+
+            if (rawIndex == 1) {
+              return loadStatus == LoadStatus.loading
+                  ? Padding(
+                      padding: const EdgeInsets.all(MEDIUM_SPACE),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox.square(
+                            dimension: 20,
+                            child: PlatformCircularProgressIndicator(),
+                          ),
+                          const SizedBox(width: MEDIUM_SPACE),
+                          Text(l10n.relaySelectSheet_loadingRelaysMeta),
+                        ],
                       ),
-                      cupertino: (context, _) => CupertinoButton(
-                        child: Text(
-                          l10n.addNewValueLabel(_newValue),
-                        ),
-                        onPressed: () {
-                          widget.controller.add(_searchController.value.text);
-                          _searchController.clear();
-                        },
+                    )
+                  : Padding(
+                      padding: const EdgeInsets.all(MEDIUM_SPACE),
+                      child: Row(
+                        children: [
+                          Icon(
+                            context.platformIcons.info,
+                            color: getCaptionTextStyle(context).color,
+                          ),
+                          const SizedBox(width: MEDIUM_SPACE),
+                          Flexible(
+                            child: Text(
+                              l10n.relaySelectSheet_hint,
+                              style: getCaptionTextStyle(context),
+                            ),
+                          ),
+                        ],
                       ),
                     );
+            }
+
+            final index = rawIndex - 1;
+            final relay = allRelays[index];
+            final meta = relayMeta[relay];
+
+            return PlatformWidget(
+              material: (context, _) => CheckboxListTile(
+                title: Text(
+                  relay.length >= 6 ? relay.substring(6) : relay,
+                ),
+                subtitle: meta == null ? null : Text(meta.description),
+                value: widget.controller.relays.contains(relay),
+                onChanged: (newValue) {
+                  if (newValue == null) {
+                    return;
                   }
 
-                  final index = isValueNew ? rawIndex - 1 : rawIndex;
-                  final relay = allRelays[index];
-                  final meta = relayMeta[relay];
-
-                  return PlatformWidget(
-                    material: (context, _) => CheckboxListTile(
-                      title: Text(
-                        relay.length >= 6 ? relay.substring(6) : relay,
-                      ),
-                      subtitle: meta == null ? null : Text(meta.description),
-                      value: widget.controller.relays.contains(relay),
-                      onChanged: (newValue) {
-                        if (newValue == null) {
-                          return;
-                        }
-
-                        if (newValue) {
-                          widget.controller.add(relay);
-                        } else {
-                          widget.controller.remove(relay);
-                        }
-                      },
-                    ),
-                    cupertino: (context, _) => CupertinoListTile(
-                      title: Text(
-                        relay.length >= 6 ? relay.substring(6) : relay,
-                      ),
-                      subtitle: meta == null ? null : Text(meta.description),
-                      trailing: CupertinoSwitch(
-                        value: widget.controller.relays.contains(relay),
-                        onChanged: (newValue) {
-                          if (newValue) {
-                            widget.controller.add(relay);
-                          } else {
-                            widget.controller.remove(relay);
-                          }
-                        },
-                      ),
-                    ),
-                  );
+                  if (newValue) {
+                    widget.controller.add(relay);
+                  } else {
+                    widget.controller.remove(relay);
+                  }
                 },
               ),
-            ],
-          ),
+              cupertino: (context, _) => CupertinoListTile(
+                title: Text(
+                  relay.length >= 6 ? relay.substring(6) : relay,
+                ),
+                subtitle: meta == null ? null : Text(meta.description),
+                trailing: CupertinoSwitch(
+                  value: widget.controller.relays.contains(relay),
+                  onChanged: (newValue) {
+                    if (newValue) {
+                      widget.controller.add(relay);
+                    } else {
+                      widget.controller.remove(relay);
+                    }
+                  },
+                ),
+              ),
+            );
+          },
         );
       },
     );
