@@ -110,6 +110,8 @@
     }
   },
   "relaySelectSheet_selectRandomRelays": "Select {count} random Nostr Relays",
+  "relaySelectSheet_loadingRelaysMeta": "Loading Nostr Relays information...",
+  "relaySelectSheet_hint": "Relays are sorted from best to worst in ascending order. The best relays are at the top.",
   "taskAction_start": "Start Task",
   "taskAction_started_title": "Task started",
   "taskAction_started_description": "Task started at {date}",

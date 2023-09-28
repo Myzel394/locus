@@ -460,7 +460,7 @@ class _ActiveSharesSheetState extends State<ActiveSharesSheet>
             child: SizedBox.square(),
           ),
         Expanded(
-          flex: 8,
+          flex: 6,
           child: Center(
             child: Text(
               l10n.locationsOverview_activeShares_amount(

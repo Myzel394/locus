@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+import 'package:locus/api/get-relays-meta.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/constants/values.dart';
 import 'package:locus/utils/load_status.dart';
@@ -69,8 +70,10 @@ class RelaySelectSheet extends StatefulWidget {
 }
 
 class _RelaySelectSheetState extends State<RelaySelectSheet> {
-  List<String> availableRelays = [];
+  final List<String> availableRelays = [];
+  final Map<String, RelayMeta> relayMeta = {};
   LoadStatus loadStatus = LoadStatus.loading;
+
   final _searchController = TextEditingController();
   late final DraggableScrollableController _sheetController;
   String _newValue = '';
@@ -83,7 +86,8 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
   @override
   void initState() {
     super.initState();
-    fetchAvailableRelays();
+    _fetchAvailableRelays();
+    _fetchRelaysMeta();
 
     widget.controller.addListener(rebuild);
     _searchController.addListener(() {
@@ -160,7 +164,56 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
     setState(() {});
   }
 
-  Future<void> fetchAvailableRelays() async {
+  // Filters all relays whether they are suitable
+  void _filterRelaysFromMeta() {
+    if (relayMeta.isEmpty || availableRelays.isEmpty) {
+      return;
+    }
+
+    final suitableRelays = relayMeta.values
+        .where((meta) => meta.isSuitable)
+        .map((meta) => meta.relay)
+        .toSet();
+
+    setState(() {
+      availableRelays.retainWhere(suitableRelays.contains);
+      availableRelays.sort(
+        (a, b) => relayMeta[a]!.score > relayMeta[b]!.score ? 1 : -1,
+      );
+      loadStatus = LoadStatus.success;
+    });
+  }
+
+  Future<void> _fetchRelaysMeta() async {
+    FlutterLogs.logInfo(
+      LOG_TAG,
+      "Relay Select Sheet",
+      "Fetching relays meta...",
+    );
+
+    try {
+      final relaysMetaDataRaw =
+          await withCache(fetchRelaysMeta, "relays-meta")();
+      final relaysMetaData = relaysMetaDataRaw["meta"] as List<RelayMeta>;
+      final newRelays = Map.fromEntries(
+        relaysMetaData.map((meta) => MapEntry(meta.relay, meta)),
+      );
+
+      relayMeta.clear();
+      relayMeta.addAll(newRelays);
+      _filterRelaysFromMeta();
+
+      setState(() {});
+    } catch (error) {
+      FlutterLogs.logError(
+        LOG_TAG,
+        "Relay Select Sheet",
+        "Failed to fetch available relays: $error",
+      );
+    }
+  }
+
+  Future<void> _fetchAvailableRelays() async {
     FlutterLogs.logInfo(
       LOG_TAG,
       "Relay Select Sheet",
@@ -173,10 +226,12 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
 
       relays.shuffle();
 
-      setState(() {
-        availableRelays = relays;
-        loadStatus = LoadStatus.success;
-      });
+      availableRelays
+        ..clear()
+        ..addAll(relays);
+      _filterRelaysFromMeta();
+
+      setState(() {});
     } catch (error) {
       FlutterLogs.logError(
         LOG_TAG,
@@ -209,46 +264,86 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
         final allRelays = List<String>.from(
             [...widget.controller.relays, ...uncheckedFoundRelays]);
 
-        final length = allRelays.length + (isValueNew ? 1 : 0);
-
         return ListView.builder(
           controller: draggableController,
-          itemCount: length,
+          // Add 2 so we can show <add new value> and <hint> widgets
+          itemCount: allRelays.length + 2,
           itemBuilder: (context, rawIndex) {
-            if (isValueNew && rawIndex == 0) {
-              return PlatformWidget(
-                material: (context, _) => ListTile(
-                  title: Text(
-                    l10n.addNewValueLabel(_newValue),
+            if (rawIndex == 0) {
+              if (isValueNew) {
+                return PlatformWidget(
+                  material: (context, _) => ListTile(
+                    title: Text(
+                      l10n.addNewValueLabel(_newValue),
+                    ),
+                    leading: const Icon(
+                      Icons.add,
+                    ),
+                    onTap: () {
+                      widget.controller.add(_searchController.value.text);
+                      _searchController.clear();
+                    },
                   ),
-                  leading: const Icon(
-                    Icons.add,
+                  cupertino: (context, _) => CupertinoButton(
+                    child: Text(
+                      l10n.addNewValueLabel(_newValue),
+                    ),
+                    onPressed: () {
+                      widget.controller.add(_searchController.value.text);
+                      _searchController.clear();
+                    },
                   ),
-                  onTap: () {
-                    widget.controller.add(_searchController.value.text);
-                    _searchController.clear();
-                  },
-                ),
-                cupertino: (context, _) => CupertinoButton(
-                  child: Text(
-                    l10n.addNewValueLabel(_newValue),
-                  ),
-                  onPressed: () {
-                    widget.controller.add(_searchController.value.text);
-                    _searchController.clear();
-                  },
-                ),
-              );
+                );
+              }
+              return Container();
             }
 
-            final index = isValueNew ? rawIndex - 1 : rawIndex;
+            if (rawIndex == 1) {
+              return loadStatus == LoadStatus.loading
+                  ? Padding(
+                      padding: const EdgeInsets.all(MEDIUM_SPACE),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          SizedBox.square(
+                            dimension: 20,
+                            child: PlatformCircularProgressIndicator(),
+                          ),
+                          const SizedBox(width: MEDIUM_SPACE),
+                          Text(l10n.relaySelectSheet_loadingRelaysMeta),
+                        ],
+                      ),
+                    )
+                  : Padding(
+                      padding: const EdgeInsets.all(MEDIUM_SPACE),
+                      child: Row(
+                        children: [
+                          Icon(
+                            context.platformIcons.info,
+                            color: getCaptionTextStyle(context).color,
+                          ),
+                          const SizedBox(width: MEDIUM_SPACE),
+                          Flexible(
+                            child: Text(
+                              l10n.relaySelectSheet_hint,
+                              style: getCaptionTextStyle(context),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+            }
+
+            final index = rawIndex - 2;
             final relay = allRelays[index];
+            final meta = relayMeta[relay];
 
             return PlatformWidget(
               material: (context, _) => CheckboxListTile(
                 title: Text(
                   relay.length >= 6 ? relay.substring(6) : relay,
                 ),
+                subtitle: meta == null ? null : Text(meta.description),
                 value: widget.controller.relays.contains(relay),
                 onChanged: (newValue) {
                   if (newValue == null) {
@@ -266,6 +361,7 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
                 title: Text(
                   relay.length >= 6 ? relay.substring(6) : relay,
                 ),
+                subtitle: meta == null ? null : Text(meta.description),
                 trailing: CupertinoSwitch(
                   value: widget.controller.relays.contains(relay),
                   onChanged: (newValue) {
@@ -295,7 +391,7 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
         miuiIsGapless: true,
         child: Column(
           children: <Widget>[
-            if (loadStatus == LoadStatus.loading)
+            if (loadStatus == LoadStatus.loading && availableRelays.isEmpty)
               Expanded(
                 child: Center(
                   child: PlatformCircularProgressIndicator(),
