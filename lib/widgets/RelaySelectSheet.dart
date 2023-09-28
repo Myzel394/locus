@@ -5,17 +5,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
-import 'package:latlong2/latlong.dart';
 import 'package:locus/api/get-relays-meta.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/constants/values.dart';
-import 'package:locus/services/location_point_service.dart';
 import 'package:locus/utils/load_status.dart';
-import 'package:locus/utils/nostr_fetcher/NostrSocket.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/BottomSheetFilterBuilder.dart';
 import 'package:locus/widgets/ModalSheet.dart';
-import 'package:nostr/nostr.dart';
 
 import '../api/nostr-relays.dart';
 import '../utils/cache.dart';
@@ -338,7 +334,7 @@ class _RelaySelectSheetState extends State<RelaySelectSheet> {
                     );
             }
 
-            final index = rawIndex - 1;
+            final index = rawIndex - 2;
             final relay = allRelays[index];
             final meta = relayMeta[relay];
 
