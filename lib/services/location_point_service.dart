@@ -1,11 +1,13 @@
 import 'dart:convert';
 
+import 'package:background_locator_2/location_dto.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:battery_plus/battery_plus.dart';
 import 'package:cryptography/cryptography.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:locus/utils/cryptography/decrypt.dart';
+import 'package:map_launcher/map_launcher.dart';
 import 'package:uuid/uuid.dart';
 
 const uuid = Uuid();
@@ -46,6 +48,18 @@ class LocationPointService {
         headingAccuracy = headingAccuracy == 0.0 ? null : headingAccuracy,
         batteryLevel = batteryLevel == 0.0 ? null : batteryLevel;
 
+  @override
+  int get hashCode => Object.hash(id, 0);
+
+  @override
+  bool operator ==(Object other) {
+    if (other is LocationPointService) {
+      return id == other.id;
+    }
+
+    return false;
+  }
+
   String formatRawAddress() =>
       "${latitude.toStringAsFixed(5)}, ${longitude.toStringAsFixed(5)}";
 
@@ -58,6 +72,41 @@ class LocationPointService {
         longitude: latLng.longitude,
         accuracy: accuracy,
       );
+
+  static Future<LocationPointService> fromLocationDto(
+    final LocationDto locationDto, [
+    final bool addBatteryInfo = true,
+  ]) async {
+    BatteryInfo? batteryInfo;
+
+    if (addBatteryInfo) {
+      try {
+        batteryInfo = await BatteryInfo.fromCurrent();
+      } catch (error) {
+        if (error is PlatformException) {
+          // Battery level is unavailable (probably iOS simulator)
+        } else {
+          rethrow;
+        }
+      }
+    }
+
+    return LocationPointService(
+      id: uuid.v4(),
+      // unix time to DateTime
+      createdAt: DateTime.fromMillisecondsSinceEpoch(locationDto.time.toInt()),
+      accuracy: locationDto.accuracy,
+      latitude: locationDto.latitude,
+      longitude: locationDto.longitude,
+      altitude: locationDto.altitude,
+      speed: locationDto.speed,
+      speedAccuracy: locationDto.speedAccuracy,
+      heading: locationDto.heading,
+      headingAccuracy: null,
+      batteryLevel: batteryInfo?.batteryLevel,
+      batteryState: batteryInfo?.batteryState,
+    );
+  }
 
   static LocationPointService fromJSON(Map<String, dynamic> json) {
     return LocationPointService(
@@ -100,14 +149,10 @@ class LocationPointService {
   static Future<LocationPointService> fromPosition(
     final Position position,
   ) async {
-    double? batteryLevel;
-    BatteryState? batteryState;
+    BatteryInfo? batteryInfo;
 
     try {
-      final battery = Battery();
-
-      batteryLevel = (await battery.batteryLevel) / 100;
-      batteryState = await battery.batteryState;
+      batteryInfo = await BatteryInfo.fromCurrent();
     } catch (error) {
       if (error is PlatformException) {
         // Battery level is unavailable (probably iOS simulator)
@@ -126,8 +171,8 @@ class LocationPointService {
       speed: position.speed,
       speedAccuracy: position.speedAccuracy,
       heading: position.heading,
-      batteryLevel: batteryLevel,
-      batteryState: batteryState,
+      batteryLevel: batteryInfo?.batteryLevel,
+      batteryState: batteryInfo?.batteryState,
     );
   }
 
@@ -163,6 +208,8 @@ class LocationPointService {
         latitude: latitude,
         longitude: longitude,
         altitude: altitude ?? 0.0,
+        headingAccuracy: headingAccuracy ?? 0.0,
+        altitudeAccuracy: 0.0,
         accuracy: accuracy,
         speed: speed ?? 0.0,
         speedAccuracy: speedAccuracy ?? 0.0,
@@ -171,6 +218,8 @@ class LocationPointService {
       );
 
   LatLng asLatLng() => LatLng(latitude, longitude);
+
+  Coords asCoords() => Coords(latitude, longitude);
 
   LocationPointService copyWith({
     final double? latitude,
@@ -199,4 +248,23 @@ class LocationPointService {
         batteryState: batteryState ?? this.batteryState,
         isCopy: true,
       );
+}
+
+class BatteryInfo {
+  final double batteryLevel;
+  final BatteryState batteryState;
+
+  const BatteryInfo({
+    required this.batteryLevel,
+    required this.batteryState,
+  });
+
+  static Future<BatteryInfo> fromCurrent() async {
+    final battery = Battery();
+
+    return BatteryInfo(
+      batteryLevel: (await battery.batteryLevel) / 100,
+      batteryState: (await battery.batteryState),
+    );
+  }
 }

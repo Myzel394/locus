@@ -14,7 +14,7 @@ import 'package:locus/widgets/Paper.dart';
 import 'package:lottie/lottie.dart';
 import 'package:nearby_connections/nearby_connections.dart';
 
-import '../../services/view_service.dart';
+import '../../services/view_service/index.dart';
 import '../../utils/import_export_handler.dart';
 
 class ReceiveViewByBluetooth extends StatefulWidget {
@@ -79,28 +79,32 @@ class _ReceiveViewByBluetoothState extends State<ReceiveViewByBluetooth>
           final acceptConnection = await showPlatformDialog(
             context: context,
             barrierDismissible: false,
-            builder: (context) => PlatformAlertDialog(
-              title: Text(l10n.importTask_bluetooth_receive_request_title),
-              content:
+            builder: (context) =>
+                PlatformAlertDialog(
+                  title: Text(l10n.importTask_bluetooth_receive_request_title),
+                  content:
                   Text(l10n.importTask_bluetooth_receive_request_description),
-              actions: [
-                PlatformDialogAction(
-                  onPressed: () => Navigator.of(context).pop(false),
-                  material: (_, __) => MaterialDialogActionData(
-                    icon: const Icon(Icons.close),
-                  ),
-                  child:
+                  actions: [
+                    PlatformDialogAction(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      material: (_, __) =>
+                          MaterialDialogActionData(
+                            icon: const Icon(Icons.close),
+                          ),
+                      child:
                       Text(l10n.importTask_bluetooth_receive_request_decline),
+                    ),
+                    PlatformDialogAction(
+                      onPressed: () => Navigator.of(context).pop(true),
+                      material: (_, __) =>
+                          MaterialDialogActionData(
+                            icon: const Icon(Icons.check),
+                          ),
+                      child: Text(
+                          l10n.importTask_bluetooth_receive_request_accept),
+                    ),
+                  ],
                 ),
-                PlatformDialogAction(
-                  onPressed: () => Navigator.of(context).pop(true),
-                  material: (_, __) => MaterialDialogActionData(
-                    icon: const Icon(Icons.check),
-                  ),
-                  child: Text(l10n.importTask_bluetooth_receive_request_accept),
-                ),
-              ],
-            ),
           );
 
           if (acceptConnection) {
@@ -123,8 +127,7 @@ class _ReceiveViewByBluetoothState extends State<ReceiveViewByBluetooth>
           } else {
             Nearby().rejectConnection(id);
           }
-        } catch (_) {
-        } finally {
+        } catch (_) {} finally {
           setState(() {
             isConfirmingRequest = false;
           });

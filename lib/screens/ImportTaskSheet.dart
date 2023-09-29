@@ -12,12 +12,12 @@ import 'package:locus/screens/import_task_sheet_widgets/ImportSuccess.dart';
 import 'package:locus/screens/import_task_sheet_widgets/NameForm.dart';
 import 'package:locus/screens/import_task_sheet_widgets/URLForm.dart';
 import 'package:locus/screens/import_task_sheet_widgets/ViewImportOverview.dart';
-import 'package:locus/services/view_service.dart';
+import 'package:locus/services/view_service/index.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/ModalSheetContent.dart';
 import 'package:provider/provider.dart';
 
-import '../services/task_service.dart';
+import '../services/task_service/index.dart';
 import '../widgets/ModalSheet.dart';
 import 'import_task_sheet_widgets/ReceiveViewByBluetooth.dart';
 

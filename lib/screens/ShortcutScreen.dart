@@ -4,7 +4,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/init_quick_actions.dart';
-import 'package:locus/services/task_service.dart';
+import 'package:locus/services/task_service/index.dart';
 import 'package:locus/services/timers_service.dart';
 import 'package:locus/utils/location/index.dart';
 import 'package:locus/utils/platform.dart';
@@ -14,7 +14,7 @@ import 'package:provider/provider.dart';
 import '../models/log.dart';
 import '../services/location_point_service.dart';
 import '../services/log_service.dart';
-import '../services/settings_service.dart';
+import 'package:locus/services/settings_service/index.dart';
 import '../utils/theme.dart';
 
 class ShortcutScreen extends StatefulWidget {
@@ -76,7 +76,7 @@ class _ShortcutScreenState extends State<ShortcutScreen> {
 
           await task.startSchedule(startNowIfNextRunIsUnknown: true);
 
-          final locationPoint = await task.publishCurrentPosition();
+          final locationPoint = await task.publisher.publishCurrentPosition();
 
           await logService.addLog(
             Log.updateLocation(
@@ -102,7 +102,7 @@ class _ShortcutScreenState extends State<ShortcutScreen> {
           );
           await Future.wait(
             tasks.map(
-              (task) => task.publishLocation(
+              (task) => task.publisher.publishLocation(
                 locationPoint.copyWithDifferentId(),
               ),
             ),

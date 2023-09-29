@@ -6,12 +6,12 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/screens/shares_overview_screen_widgets/screens/EmptyScreen.dart';
 import 'package:locus/screens/shares_overview_screen_widgets/screens/TasksOverviewScreen.dart';
-import 'package:locus/services/task_service.dart';
-import 'package:locus/services/view_service.dart';
+import 'package:locus/services/settings_service/index.dart';
+import 'package:locus/services/task_service/index.dart';
+import 'package:locus/services/view_service/index.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:provider/provider.dart';
 
-import '../services/settings_service.dart';
 import 'CreateTaskScreen.dart';
 import 'shares_overview_screen_widgets/values.dart';
 
@@ -26,21 +26,8 @@ class SharesOverviewScreen extends StatefulWidget {
 
 class _SharesOverviewScreenState extends State<SharesOverviewScreen> {
   final listViewKey = GlobalKey();
-  final PageController _tabController = PageController();
   late final TaskService taskService;
   int activeTab = 0;
-
-  void _changeTab(final int newTab) {
-    setState(() {
-      activeTab = newTab;
-    });
-
-    _tabController.animateToPage(
-      newTab,
-      duration: getTransitionDuration(context),
-      curve: Curves.easeInOut,
-    );
-  }
 
   PlatformAppBar? getAppBar() {
     final l10n = AppLocalizations.of(context);
@@ -118,11 +105,11 @@ class _SharesOverviewScreenState extends State<SharesOverviewScreen> {
       // Settings bottomNavBar via cupertino data class does not work
       bottomNavBar: isCupertino(context)
           ? PlatformNavBar(
-              material: (_, __) => MaterialNavBarData(
-                  backgroundColor: Theme.of(context).dialogBackgroundColor,
-                  elevation: 0,
-                  padding: const EdgeInsets.all(0)),
-              itemChanged: _changeTab,
+              itemChanged: (index) {
+                setState(() {
+                  activeTab = index;
+                });
+              },
               currentIndex: activeTab,
               items: [
                 BottomNavigationBarItem(
@@ -136,19 +123,15 @@ class _SharesOverviewScreenState extends State<SharesOverviewScreen> {
               ],
             )
           : null,
-      body: PageView(
-        controller: _tabController,
-        physics: const NeverScrollableScrollPhysics(),
-        children: <Widget>[
-          const TasksOverviewScreen(),
-          if (isCupertino(context))
-            CreateTaskScreen(
+      body: activeTab == 0
+          ? const TasksOverviewScreen()
+          : CreateTaskScreen(
               onCreated: () {
-                _changeTab(0);
+                setState(() {
+                  activeTab = 0;
+                });
               },
             ),
-        ],
-      ),
     );
   }
 }

@@ -110,6 +110,8 @@
     }
   },
   "relaySelectSheet_selectRandomRelays": "Select {count} random Nostr Relays",
+  "relaySelectSheet_loadingRelaysMeta": "Loading Nostr Relays information...",
+  "relaySelectSheet_hint": "Relays are sorted from best to worst in ascending order. The best relays are at the top.",
   "taskAction_start": "Start Task",
   "taskAction_started_title": "Task started",
   "taskAction_started_description": "Task started at {date}",
@@ -167,6 +169,7 @@
   "taskAction_generateLink_process_publishing": "Publishing encrypted data...",
   "taskAction_generateLink_process_creatingURI": "Creating link...",
   "taskAction_generateLink_shareTextSubject": "Here's the link to see my location",
+  "taskAction_showDetails": "Show Details",
   "tasks_action_stopAll": "Stop tasks",
   "tasks_action_startAll": "Start tasks",
   "tasks_examples_weekend": "Weekend Getaway",
@@ -253,10 +256,10 @@
   "sharesOverviewScreen_importTask_importLabel": "Import",
   "locationsOverview_viewSelection_all": "Show all locations",
   "locationsOverview_activeShares_amount": "{count, plural, =0{No active shares} =1{One share active} other{{count} shares active}}",
-  "locationsOverview_mapAction_goToCurrentPosition": "Go to current position",
-  "locationsOverview_mapAction_alignNorth": "Align North",
   "locationsOverview_mapAction_detailedLocations_show": "Show detailed locations",
   "locationsOverview_mapAction_detailedLocations_hide": "Merge nearby locations",
+  "mapAction_goToCurrentPosition": "Go to current position",
+  "mapAction_alignNorth": "Align North",
   "createTask_title": "Define a name for your Share",
   "createTask_fields_name_label": "Name",
   "createTask_sameTaskNameAlreadyExists": "A Share with this name already exists. You can create the Share, but you will have two Shares with the same name.",
@@ -439,6 +442,11 @@
   "settingsScreen_settings_mapProvider_label": "Map Provider",
   "settingsScreen_settings_mapProvider_apple": "Apple Maps",
   "settingsScreen_settings_mapProvider_openStreetMap": "OpenStreetMap",
+  "settingsScreen_settings_useRealtimeUpdates_label": "Update in real-time",
+  "settingsScreen_settings_useRealtimeUpdates_description": "If enabled, Locus will always update your location in real-time. This means that your location will be updated even if you don't have the app open. This will use more battery. However, as a location sharing app, this is strongly recommended. Setting this off, Locus will only occasionally update your location in the background. This setting is only recommended for people who regularly share their location, experience battery drain and only need to know occasional location updates.",
+  "settingsScreen_settings_useRealtimeUpdates_dialog_title": "Are you sure you want to disable real-time updates?",
+  "settingsScreen_settings_useRealtimeUpdates_dialog_message": "It is strongly recommended to keep this setting enabled! Your location will only be occasionally updated if you disable real-time updates!",
+  "settingsScreen_settings_useRealtimeUpdates_dialog_confirm": "Disable",
   "settingsScreen_settings_showHints_label": "Show Hints",
   "settingsScreen_settings_showHints_description": "Show occasional hints on how to get the most out of Locus",
   "settingsScreen_settings_relays_label": "Default Relays",
@@ -550,6 +558,9 @@
   "@backgroundLocationFetch_text": {
     "description": "Keep this very short"
   },
+  "backgroundLocator_title": "Updating location in real-time",
+  "backgroundLocator_text": "Locus is updating your location in real-time.",
+  "backgroundLocator_channelName": "Location Updater",
   "logs_createdAt": "{date}",
   "@logs_createdAt": {
     "placeholders": {
@@ -621,8 +632,6 @@
   "logs_title": "Locus automatically creates logs",
   "logs_description": "Logs are kept for 7 days and are automatically deleted afterwards.",
   "locationPointsScreen_title": "Location Points",
-  "bunny_unavailable": "Sorry, but it seems as if your friend is as lost as this song.",
-  "bunny_unavailable_action": "What's this song?",
   "locationAlarm_radiusBasedRegion_notificationTitle_whenEnter": "{name} entered zone {zone}",
   "@locationAlarm_radiusBasedRegion_notificationTitle_whenEnter": {
     "description": "Notification title when entering a zone; Try to keep this short, will be truncated to 80 characters",
@@ -659,12 +668,38 @@
       }
     }
   },
+  "locationAlarm_proximityLocation_notificationTitle_whenEnter": "{name} is within {proximity}m",
+  "@locationAlarm_proximityLocation_notificationTitle_whenEnter": {
+    "description": "Notification title when entering a proximity location; Try to keep this short, will be truncated to 80 characters",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "proximity": {
+        "type": "int"
+      }
+    }
+  },
+  "locationAlarm_proximityLocation_notificationTitle_whenLeave": "{name} is outside of {proximity}m",
+  "@locationAlarm_proximityLocation_notificationTitle_whenLeave": {
+    "description": "Notification title when leaving a proximity location; Try to keep this short, will be truncated to 80 characters",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "proximity": {
+        "type": "int"
+      }
+    }
+  },
   "locationAlarm_notification_description": "Tap for more information",
   "androidNotificationChannel_locationAlarms_name": "Location Alarms",
   "androidNotificationChannel_locationAlarms_description": "Receive notifications for location alarms",
+  "androidNotificationChannel_appIssues_name": "Important Issues",
+  "androidNotificationChannel_appIssues_description": "Receive notifications for important issues about Locus (when a task is not updating, location can't be updated, etc.)",
   "location_manageAlarms_title": "Manage Alarms",
   "location_manageAlarms_empty_title": "No Alarms",
-  "location_manageAlarms_empty_description": "Add alarms to be notified when certain conditions are met (e.g. when this person enters a certain area).",
+  "location_manageAlarms_empty_description": "Add alarms to be notified when certain conditions are met",
   "location_manageAlarms_addNewAlarm_actionLabel": "Add Alarm",
   "location_manageAlarms_lastCheck_description": "Last checked at {date}",
   "@location_manageAlarms_lastCheck_description": {
@@ -676,18 +711,42 @@
       }
     }
   },
-  "location_addAlarm_radiusBased_title": "Add radius-based Alarm",
+  "location_addAlarm_geo_title": "Add geo-based alarm",
+  "location_addAlarm_geo_description": "Define a region and get notified when your friend enters or leaves this region",
+  "location_addAlarm_geo_name_description": "Please enter a name for this region",
+  "location_addAlarm_geo_help_tapDescription": "Tap on the map to mark the center of your region",
+  "location_addAlarm_proximity_title": "Add proximity alarm",
+  "location_addAlarm_proximity_description": "Get notified when your friend is within a certain distance of you",
+  "location_addAlarm_radiusBased_radius_meters": "Radius: {value} meters",
+  "location_removeAlarm_title": "Remove Alarm",
+  "location_removeAlarm_description": "Are you sure you want to remove this alarm?",
+  "location_removeAlarm_confirm": "Remove",
+  "@location_addAlarm_radiusBased_radius_meters": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      }
+    }
+  },
+  "location_addAlarm_radiusBased_radius_kilometers": "Radius: {value} km",
+  "@location_addAlarm_radiusBased_radius_kilometers": {
+    "placeholders": {
+      "value": {
+        "type": "double"
+      }
+    }
+  },
   "location_addAlarm_radiusBased_isInScaleMode": "You can now scale the radius by pinching and zooming into the map. Tap on the screen to go back to normal mode.",
   "location_addAlarm_radiusBased_addLabel": "Select region",
   "location_addAlarm_radiusBased_help_title": "Radius-based Alarms",
   "location_addAlarm_radiusBased_help_description": "Radius-based alarms are triggered either when leaving or entering a region. After defining your region, you can decide when your alarm should trigger.",
-  "location_addAlarm_radiusBased_help_tapDescription": "Tap on the map to mark the center of your region",
   "location_addAlarm_radiusBased_help_pinchDescription": "Press and hold to enter into scale mode. You can then change the radius by pinching and zooming into the map.",
   "location_addAlarm_radiusBased_trigger_title": "When should your alarm trigger?",
   "location_addAlarm_radiusBased_trigger_whenEnter": "Trigger when entering",
   "location_addAlarm_radiusBased_trigger_whenLeave": "Trigger when leaving",
-  "location_addAlarm_radiusBased_name_description": "Please enter a name for this region",
   "location_addAlarm_actionLabel": "Add Alarm",
+  "location_addAlarm_selectType_title": "Select Alarm Type",
+  "location_addAlarm_selectType_description": "What kind of alarm do you want to add?",
   "permissions_openSettings_label": "Open settings",
   "permissions_openSettings_failed_title": "Settings could not be opened",
   "permissions_location_askPermission_title": "Grant access to your location",
@@ -758,6 +817,15 @@
   "locations_values_lastLocation_description": "Last location update",
   "locations_values_distance_description": "Distance",
   "locations_values_distance_permissionRequired": "Grant permission",
+  "locations_values_distance_nearby": "<10 m",
+  "locations_values_distance_m": "{distance} m",
+  "@locations_values_distance_m": {
+    "placeholders": {
+      "distance": {
+        "type": "String"
+      }
+    }
+  },
   "locations_values_distance_km": "{distance, select, 0 {<1 km} 1 {one km} other {{distance} km}}",
   "@locations_values_distance_km": {
     "placeholders": {
@@ -785,5 +853,7 @@
     }
   },
   "locations_values_batteryState_description": "Battery state",
-  "locations_values_batteryState_value": "{state, select, full {full} charging {charging} discharging {discharging} other {unknown}}"
+  "locations_values_batteryState_value": "{state, select, full {full} charging {charging} discharging {discharging} other {unknown}}",
+  "permissionsMissing_title": "Permissions missing",
+  "permissionsMissing_message": "Please allow access to your location in the background"
 }

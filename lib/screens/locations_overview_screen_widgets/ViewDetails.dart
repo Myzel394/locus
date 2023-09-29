@@ -2,18 +2,18 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get_time_ago/get_time_ago.dart';
-import 'package:locus/services/view_service.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:locus/utils/navigation.dart';
 import 'package:latlong2/latlong.dart';
-
+import 'package:locus/services/view_service/index.dart';
+import 'package:locus/utils/date.dart';
 import 'package:locus/utils/location/index.dart';
 import 'package:locus/utils/permissions/has-granted.dart';
-import 'package:locus/utils/permissions/request.dart';
+import 'package:locus/widgets/OpenInMaps.dart';
+
 import '../../constants/spacing.dart';
 import '../../services/location_point_service.dart';
 import '../../utils/icon.dart';
@@ -21,12 +21,11 @@ import '../../utils/theme.dart';
 import '../../widgets/BentoGridElement.dart';
 import '../../widgets/LocusFlutterMap.dart';
 import '../../widgets/RequestLocationPermissionMixin.dart';
-import '../ViewDetailScreen.dart';
 
 class ViewDetails extends StatefulWidget {
   final TaskView? view;
   final LocationPointService? location;
-  final void Function(LatLng position) onGoToPosition;
+  final void Function(LocationPointService position) onGoToPosition;
 
   const ViewDetails({
     required this.view,
@@ -59,14 +58,14 @@ class _ViewDetailsState extends State<ViewDetails> {
       child: SizedBox(
         height: 200,
         child: LocusFlutterMap(
-          options: MapOptions(
+          flutterMapOptions: MapOptions(
             center: LatLng(
               lastLocation.latitude,
               lastLocation.longitude,
             ),
             zoom: 13,
           ),
-          children: [
+          flutterChildren: [
             MarkerLayer(
               markers: [
                 Marker(
@@ -115,14 +114,6 @@ class _ViewDetailsState extends State<ViewDetails> {
             ),
             DistanceBentoElement(
               lastLocation: lastLocation,
-              onTap: () {
-                widget.onGoToPosition(
-                  LatLng(
-                    lastLocation.latitude,
-                    lastLocation.longitude,
-                  ),
-                );
-              },
             ),
             BentoGridElement(
               title: lastLocation.altitude == null
@@ -188,10 +179,8 @@ class _ViewDetailsState extends State<ViewDetails> {
 
 class DistanceBentoElement extends StatefulWidget {
   final LocationPointService lastLocation;
-  final VoidCallback onTap;
 
   const DistanceBentoElement({
-    required this.onTap,
     required this.lastLocation,
     super.key,
   });
@@ -209,6 +198,10 @@ class _DistanceBentoElementState extends State<DistanceBentoElement>
   void fetchCurrentPosition() async {
     _positionStream = getLastAndCurrentPosition(updateLocation: true)
       ..listen((position) {
+        if (!mounted) {
+          return;
+        }
+
         setState(() {
           currentPosition = position;
         });
@@ -242,19 +235,15 @@ class _DistanceBentoElementState extends State<DistanceBentoElement>
     final l10n = AppLocalizations.of(context);
 
     return BentoGridElement(
-      onTap: hasGrantedPermission == false
-          ? () async {
-              final hasGranted = await requestBasicLocationPermission();
-
-              if (hasGranted) {
-                fetchCurrentPosition();
-
-                setState(() {
-                  hasGrantedPermission = true;
-                });
-              }
-            }
-          : widget.onTap,
+      onTap: () {
+        showPlatformModalSheet(
+          context: context,
+          material: MaterialModalSheetData(),
+          builder: (context) => OpenInMaps(
+            destination: widget.lastLocation.asCoords(),
+          ),
+        );
+      },
       title: (() {
         if (!hasGrantedPermission) {
           return l10n.locations_values_distance_permissionRequired;
@@ -264,16 +253,25 @@ class _DistanceBentoElementState extends State<DistanceBentoElement>
           return l10n.loading;
         }
 
+        final distanceInMeters = Geolocator.distanceBetween(
+          currentPosition!.latitude,
+          currentPosition!.longitude,
+          widget.lastLocation.latitude,
+          widget.lastLocation.longitude,
+        );
+
+        if (distanceInMeters < 10) {
+          return l10n.locations_values_distance_nearby;
+        }
+
+        if (distanceInMeters < 1000) {
+          return l10n.locations_values_distance_m(
+            distanceInMeters.toStringAsFixed(0).toString(),
+          );
+        }
+
         return l10n.locations_values_distance_km(
-          (Geolocator.distanceBetween(
-                    currentPosition!.latitude,
-                    currentPosition!.longitude,
-                    widget.lastLocation.latitude,
-                    widget.lastLocation.longitude,
-                  ) /
-                  1000)
-              .floor()
-              .toString(),
+          (distanceInMeters / 1000).toStringAsFixed(0),
         );
       })(),
       type: hasGrantedPermission && currentPosition != null
@@ -309,6 +307,7 @@ class LastLocationBentoElement extends StatefulWidget {
 
 class _LastLocationBentoElementState extends State<LastLocationBentoElement> {
   late final Timer _timer;
+  bool showAbsolute = false;
 
   @override
   void initState() {
@@ -332,16 +331,17 @@ class _LastLocationBentoElementState extends State<LastLocationBentoElement> {
 
     return BentoGridElement(
       onTap: () {
-        pushRoute(
-          context,
-          (context) => ViewDetailScreen(view: widget.view),
-        );
+        setState(() {
+          showAbsolute = !showAbsolute;
+        });
       },
-      title: GetTimeAgo.parse(
-        DateTime.now().subtract(
-          DateTime.now().difference(widget.lastLocation.createdAt),
-        ),
-      ),
+      title: showAbsolute
+          ? formatDateTimeHumanReadable(widget.lastLocation.createdAt)
+          : GetTimeAgo.parse(
+              DateTime.now().subtract(
+                DateTime.now().difference(widget.lastLocation.createdAt),
+              ),
+            ),
       icon: Icons.location_on_rounded,
       description: l10n.locations_values_lastLocation_description,
     );

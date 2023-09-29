@@ -8,8 +8,8 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/app.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/constants/values.dart';
-import 'package:locus/services/settings_service.dart';
-import 'package:locus/services/task_service.dart';
+import 'package:locus/services/settings_service/index.dart';
+import 'package:locus/services/task_service/index.dart';
 import 'package:locus/utils/import_export_handler.dart';
 import 'package:locus/utils/permissions/mixins.dart';
 import 'package:locus/utils/theme.dart';
@@ -20,7 +20,7 @@ import 'package:nearby_connections/nearby_connections.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 
-import '../../services/view_service.dart';
+import '../../services/view_service/index.dart';
 
 class TransferSenderScreen extends StatefulWidget {
   const TransferSenderScreen({Key? key}) : super(key: key);
@@ -126,8 +126,7 @@ class _TransferSenderScreenState extends State<TransferSenderScreen>
       final data = Uint8List.fromList(content.codeUnits);
 
       await Nearby().sendBytesPayload(connectionID!, data);
-    } catch (_) {
-    } finally {
+    } catch (_) {} finally {
       setState(() {
         isSending = false;
       });

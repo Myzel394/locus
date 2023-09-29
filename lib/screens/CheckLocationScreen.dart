@@ -8,7 +8,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:locus/constants/app.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/constants/values.dart';
-import 'package:locus/services/settings_service.dart';
+import 'package:locus/services/settings_service/index.dart';
 import 'package:locus/utils/helper_sheet.dart';
 import 'package:locus/utils/load_status.dart';
 import 'package:locus/utils/location/index.dart';

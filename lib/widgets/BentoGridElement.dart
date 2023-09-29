@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/extensions/string.dart';
-import 'package:locus/services/settings_service.dart';
+import 'package:locus/services/settings_service/index.dart';
 import 'package:provider/provider.dart';
 
 enum BentoType {

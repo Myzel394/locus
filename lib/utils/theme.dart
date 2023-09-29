@@ -4,7 +4,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:locus/constants/colors.dart';
 import 'package:locus/constants/spacing.dart';
-import 'package:locus/services/settings_service.dart';
+import 'package:locus/services/settings_service/index.dart';
 import 'package:locus/utils/PageRoute.dart';
 import 'package:provider/provider.dart';
 

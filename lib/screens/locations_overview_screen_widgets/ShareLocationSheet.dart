@@ -6,6 +6,7 @@ import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:locus/constants/values.dart';
+import 'package:locus/services/settings_service/index.dart';
 import 'package:locus/services/timers_service.dart';
 import 'package:locus/utils/date.dart';
 import 'package:locus/utils/theme.dart';
@@ -15,10 +16,11 @@ import 'package:locus/widgets/ModalSheet.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:locus/widgets/ModalSheetContent.dart';
 import 'package:locus/widgets/PlatformRadioTile.dart';
+import 'package:locus/widgets/RequestBatteryOptimizationsDisabledMixin.dart';
+import 'package:locus/widgets/RequestLocationPermissionMixin.dart';
 import 'package:provider/provider.dart';
 
-import '../../services/settings_service.dart';
-import '../../services/task_service.dart';
+import '../../services/task_service/index.dart';
 
 enum ShareType {
   untilTurnOff,
@@ -32,7 +34,10 @@ class ShareLocationSheet extends StatefulWidget {
   State<ShareLocationSheet> createState() => _ShareLocationSheetState();
 }
 
-class _ShareLocationSheetState extends State<ShareLocationSheet> {
+class _ShareLocationSheetState extends State<ShareLocationSheet>
+    with
+        RequestLocationPermissionMixin,
+        RequestBatteryOptimizationsDisabledMixin {
   final hoursFormKey = GlobalKey<FormState>();
   final hoursController = TextEditingController(text: "1");
 
@@ -65,6 +70,34 @@ class _ShareLocationSheetState extends State<ShareLocationSheet> {
     setState(() {
       isLoading = true;
     });
+
+    FlutterLogs.logInfo(
+      LOG_TAG,
+      "Quick Location Share",
+      "Checking permission",
+    );
+
+    if (!await showLocationPermissionDialog(askForAlways: true)) {
+      FlutterLogs.logInfo(
+        LOG_TAG,
+        "Quick Location Share",
+        "Permission not granted. Aborting.",
+      );
+
+      setState(() {
+        isLoading = false;
+      });
+
+      return;
+    }
+
+    FlutterLogs.logInfo(
+      LOG_TAG,
+      "Quick Location Share",
+      "Checking battery saver",
+    );
+
+    await showDisableBatteryOptimizationsDialog();
 
     FlutterLogs.logInfo(
       LOG_TAG,

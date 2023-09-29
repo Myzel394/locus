@@ -18,7 +18,9 @@ import 'package:locus/screens/settings_screen_widgets/ImportSheet.dart';
 import 'package:locus/screens/settings_screen_widgets/MentionTile.dart';
 import 'package:locus/screens/settings_screen_widgets/ServerOriginSheet.dart';
 import 'package:locus/screens/settings_screen_widgets/TransferSenderScreen.dart';
-import 'package:locus/services/task_service.dart';
+import 'package:locus/screens/settings_screen_widgets/UseRealtimeUpdatesTile.dart';
+import 'package:locus/services/manager_service/task.dart';
+import 'package:locus/services/task_service/index.dart';
 import 'package:locus/utils/PageRoute.dart';
 import 'package:locus/utils/import_export_handler.dart';
 import 'package:locus/utils/theme.dart';
@@ -35,14 +37,15 @@ import 'package:settings_ui/settings_ui.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../services/settings_service.dart';
-import '../services/view_service.dart';
+import 'package:locus/services/settings_service/index.dart';
+import '../services/view_service/index.dart';
 import '../utils/file.dart';
 import '../utils/platform.dart';
 import '../widgets/PlatformListTile.dart';
 import '../widgets/RelaySelectSheet.dart';
 
 const storage = FlutterSecureStorage();
+const OFF_OPACITY = 0.4;
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({
@@ -146,12 +149,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         settingsSectionBackground: platformThemeData(
           context,
-          material: (data) => settings.isMIUI()
+          material: (data) =>
+          settings.isMIUI()
               ? data.scaffoldBackgroundColor
               : data.dialogBackgroundColor,
-          cupertino: (data) => HSLColor.fromColor(data.barBackgroundColor)
-              .withLightness(.2)
-              .toColor(),
+          cupertino: (data) =>
+              HSLColor.fromColor(data.barBackgroundColor)
+                  .withLightness(.2)
+                  .toColor(),
         ),
         titleTextColor: platformThemeData(
           context,
@@ -164,7 +169,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           cupertino: (data) => data.textTheme.navTitleTextStyle.color,
         ),
         tileDescriptionTextColor:
-            settings.isMIUI() ? const Color(0xFF808080) : null,
+        settings.isMIUI() ? const Color(0xFF808080) : null,
       );
     }
 
@@ -192,452 +197,475 @@ class _SettingsScreenState extends State<SettingsScreen> {
           child: Column(
             children: <Widget>[
               SettingsList(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  lightTheme: getTheme(),
-                  darkTheme: getTheme(),
-                  sections: [
-                    SettingsSection(
-                      title: Text(l10n.settingsScreen_section_design),
-                      tiles: [
-                        SettingsColorPicker(
-                          title: l10n.settingsScreen_setting_primaryColor_label,
-                          value: settings.primaryColor,
-                          leading: PlatformWidget(
-                            material: (_, __) =>
-                                const Icon(Icons.color_lens_rounded),
-                            cupertino: (_, __) =>
-                                const Icon(CupertinoIcons.color_filter),
-                          ),
-                          onUpdate: (value) {
-                            settings.setPrimaryColor(value);
-                            settings.save();
-                          },
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                lightTheme: getTheme(),
+                darkTheme: getTheme(),
+                sections: [
+                  SettingsSection(
+                    title: Text(l10n.settingsScreen_section_design),
+                    tiles: [
+                      SettingsColorPicker(
+                        title: l10n.settingsScreen_setting_primaryColor_label,
+                        value: settings.primaryColor,
+                        leading: PlatformWidget(
+                          material: (_, __) =>
+                          const Icon(Icons.color_lens_rounded),
+                          cupertino: (_, __) =>
+                          const Icon(CupertinoIcons.color_filter),
                         ),
-                        if (Platform.isAndroid)
-                          SettingsDropdownTile(
-                            title: Text(
-                              l10n.settingsScreen_settings_androidTheme_label,
-                            ),
-                            values: AndroidTheme.values,
-                            value: settings.androidTheme,
-                            leading: const Icon(Icons.design_services_rounded),
-                            textMapping: {
-                              AndroidTheme.materialYou: l10n
-                                  .settingsScreen_settings_androidTheme_materialYou,
-                              AndroidTheme.miui: l10n
-                                  .settingsScreen_settings_androidTheme_miui,
-                            },
-                            onUpdate: (newValue) {
-                              settings.setAndroidTheme(newValue);
-                              settings.save();
-                            },
-                          ),
-                      ],
-                    ),
-                    SettingsSection(
-                      title: Text(l10n.settingsScreen_section_privacy),
-                      tiles: [
-                        SettingsTile.switchTile(
-                          initialValue: settings.automaticallyLookupAddresses,
-                          onToggle: (newValue) {
-                            settings.setAutomaticallyLookupAddresses(newValue);
-                            settings.save();
-                          },
-                          title: Text(l10n
-                              .settingsScreen_setting_lookupAddresses_label),
-                          description: Text(l10n
-                              .settingsScreen_setting_lookupAddresses_description),
-                        ),
+                        onUpdate: (value) {
+                          settings.setPrimaryColor(value);
+                          settings.save();
+                        },
+                      ),
+                      if (Platform.isAndroid)
                         SettingsDropdownTile(
                           title: Text(
-                            l10n.settingsScreen_settings_geocoderProvider_label,
+                            l10n.settingsScreen_settings_androidTheme_label,
                           ),
-                          values: SettingsService.isSystemGeocoderAvailable()
-                              ? GeocoderProvider.values
-                              : GeocoderProvider.values
-                                  .where((element) =>
-                                      element != GeocoderProvider.system)
-                                  .toList(),
+                          values: AndroidTheme.values,
+                          value: settings.androidTheme,
+                          leading: const Icon(Icons.design_services_rounded),
                           textMapping: {
-                            GeocoderProvider.system: l10n
-                                .settingsScreen_settings_geocoderProvider_system,
-                            GeocoderProvider.geocodeMapsCo: l10n
-                                .settingsScreen_settings_geocoderProvider_geocodeMapsCo,
-                            GeocoderProvider.nominatim: l10n
-                                .settingsScreen_settings_geocoderProvider_nominatim,
+                            AndroidTheme.materialYou: l10n
+                                .settingsScreen_settings_androidTheme_materialYou,
+                            AndroidTheme.miui:
+                            l10n.settingsScreen_settings_androidTheme_miui,
                           },
-                          value: settings.geocoderProvider,
-                          leading: Icon(context.platformIcons.search),
                           onUpdate: (newValue) {
-                            settings.setGeocoderProvider(newValue);
+                            settings.setAndroidTheme(newValue);
                             settings.save();
                           },
                         ),
-                        if (isPlatformApple())
-                          SettingsDropdownTile(
-                            title: Text(
-                              l10n.settingsScreen_settings_mapProvider_label,
-                            ),
-                            values: MapProvider.values,
-                            textMapping: {
-                              MapProvider.apple: l10n
-                                  .settingsScreen_settings_mapProvider_apple,
-                              MapProvider.openStreetMap: l10n
-                                  .settingsScreen_settings_mapProvider_openStreetMap,
-                            },
-                            leading: PlatformFlavorWidget(
-                              material: (_, __) =>
-                                  const Icon(Icons.map_rounded),
-                              cupertino: (_, __) =>
-                                  const Icon(CupertinoIcons.map),
-                            ),
-                            value: settings.mapProvider,
-                            onUpdate: (newValue) {
-                              settings.setMapProvider(newValue);
-                              settings.save();
-                            },
+                    ],
+                  ),
+                  SettingsSection(
+                    title: Text(l10n.settingsScreen_section_privacy),
+                    tiles: [
+                      SettingsTile.switchTile(
+                        initialValue: settings.automaticallyLookupAddresses,
+                        onToggle: (newValue) {
+                          settings.setAutomaticallyLookupAddresses(newValue);
+                          settings.save();
+                        },
+                        title: Text(
+                            l10n.settingsScreen_setting_lookupAddresses_label),
+                        description: Text(l10n
+                            .settingsScreen_setting_lookupAddresses_description),
+                      ),
+                      SettingsDropdownTile(
+                        title: Text(
+                          l10n.settingsScreen_settings_geocoderProvider_label,
+                        ),
+                        values: SettingsService.isSystemGeocoderAvailable()
+                            ? GeocoderProvider.values
+                            : GeocoderProvider.values
+                            .where((element) =>
+                        element != GeocoderProvider.system)
+                            .toList(),
+                        textMapping: {
+                          GeocoderProvider.system: l10n
+                              .settingsScreen_settings_geocoderProvider_system,
+                          GeocoderProvider.geocodeMapsCo: l10n
+                              .settingsScreen_settings_geocoderProvider_geocodeMapsCo,
+                          GeocoderProvider.nominatim: l10n
+                              .settingsScreen_settings_geocoderProvider_nominatim,
+                        },
+                        value: settings.geocoderProvider,
+                        leading: Icon(context.platformIcons.search),
+                        onUpdate: (newValue) {
+                          settings.setGeocoderProvider(newValue);
+                          settings.save();
+                        },
+                      ),
+                      if (isPlatformApple())
+                        SettingsDropdownTile(
+                          title: Text(
+                            l10n.settingsScreen_settings_mapProvider_label,
                           ),
-                        if (hasBiometricsAvailable)
-                          SettingsTile.switchTile(
-                            initialValue:
-                                settings.requireBiometricAuthenticationOnStart,
-                            onToggle: (newValue) async {
-                              final auth = LocalAuthentication();
+                          values: MapProvider.values,
+                          textMapping: {
+                            MapProvider.apple:
+                            l10n.settingsScreen_settings_mapProvider_apple,
+                            MapProvider.openStreetMap: l10n
+                                .settingsScreen_settings_mapProvider_openStreetMap,
+                          },
+                          leading: PlatformFlavorWidget(
+                            material: (_, __) => const Icon(Icons.map_rounded),
+                            cupertino: (_, __) =>
+                            const Icon(CupertinoIcons.map),
+                          ),
+                          value: settings.mapProvider,
+                          onUpdate: (newValue) {
+                            settings.setMapProvider(newValue);
+                            settings.save();
+                          },
+                        ),
+                      if (hasBiometricsAvailable)
+                        SettingsTile.switchTile(
+                          initialValue:
+                          settings.requireBiometricAuthenticationOnStart,
+                          onToggle: (newValue) async {
+                            final auth = LocalAuthentication();
 
-                              try {
-                                final hasAuthenticated =
-                                    await auth.authenticate(
-                                  localizedReason: l10n
-                                      .settingsScreen_setting_requireBiometricAuth_requireNowReason,
-                                  options: const AuthenticationOptions(
-                                    stickyAuth: true,
-                                    biometricOnly: true,
-                                  ),
-                                );
-
-                                if (!hasAuthenticated) {
-                                  throw Exception(
-                                    "Authenticated failed.",
-                                  );
-                                }
-
-                                settings
-                                    .setRequireBiometricAuthenticationOnStart(
-                                        newValue);
-                                await settings.save();
-                              } catch (error) {
-                                FlutterLogs.logInfo(
-                                  LOG_TAG,
-                                  "Settings",
-                                  "Error while authenticating biometrics: $error",
-                                );
-
-                                if (!mounted) {
-                                  return;
-                                }
-
-                                showMessage(
-                                  context,
-                                  l10n.unknownError,
-                                  type: MessageType.error,
-                                );
-                              }
-                            },
-                            title: Text(l10n
-                                .settingsScreen_setting_requireBiometricAuth_label),
-                            description: Text(l10n
-                                .settingsScreen_setting_requireBiometricAuth_description),
-                            leading: PlatformFlavorWidget(
-                              material: (_, __) =>
-                                  const Icon(Icons.fingerprint_rounded),
-                              cupertino: (_, __) => const Icon(
-                                  CupertinoIcons.shield_lefthalf_fill),
-                            ),
-                          )
-                      ],
-                    ),
-                    SettingsSection(
-                      title: Text(l10n.settingsScreen_section_defaults),
-                      tiles: [
-                        SettingsTile(
-                          title:
-                              Text(l10n.settingsScreen_settings_relays_label),
-                          trailing: PlatformTextButton(
-                            child: Text(
-                              l10n.settingsScreen_settings_relays_selectLabel(
-                                _relayController.relays.length,
-                              ),
-                            ),
-                            material: (_, __) => MaterialTextButtonData(
-                              icon: const Icon(Icons.dns_rounded),
-                            ),
-                            onPressed: () async {
-                              await showPlatformModalSheet(
-                                context: context,
-                                material: MaterialModalSheetData(
-                                  isScrollControlled: true,
-                                  isDismissible: true,
-                                  backgroundColor: Colors.transparent,
-                                ),
-                                builder: (_) => RelaySelectSheet(
-                                  controller: _relayController,
+                            try {
+                              final hasAuthenticated = await auth.authenticate(
+                                localizedReason: l10n
+                                    .settingsScreen_setting_requireBiometricAuth_requireNowReason,
+                                options: const AuthenticationOptions(
+                                  stickyAuth: true,
+                                  biometricOnly: true,
                                 ),
                               );
-                            },
+
+                              if (!hasAuthenticated) {
+                                throw Exception(
+                                  "Authenticated failed.",
+                                );
+                              }
+
+                              settings.setRequireBiometricAuthenticationOnStart(
+                                  newValue);
+                              await settings.save();
+                            } catch (error) {
+                              FlutterLogs.logInfo(
+                                LOG_TAG,
+                                "Settings",
+                                "Error while authenticating biometrics: $error",
+                              );
+
+                              if (!mounted) {
+                                return;
+                              }
+
+                              showMessage(
+                                context,
+                                l10n.unknownError,
+                                type: MessageType.error,
+                              );
+                            }
+                          },
+                          title: Text(l10n
+                              .settingsScreen_setting_requireBiometricAuth_label),
+                          description: Text(l10n
+                              .settingsScreen_setting_requireBiometricAuth_description),
+                          leading: PlatformFlavorWidget(
+                            material: (_, __) =>
+                            const Icon(Icons.fingerprint_rounded),
+                            cupertino: (_, __) =>
+                            const Icon(CupertinoIcons.shield_lefthalf_fill),
                           ),
-                        ),
-                        SettingsTile(
-                          title: Text(
-                            l10n.settingsScreen_settings_serverOrigin_label,
+                        )
+                    ],
+                  ),
+                  SettingsSection(
+                    title: Text(l10n.settingsScreen_section_defaults),
+                    tiles: [
+                      SettingsTile(
+                        title: Text(l10n.settingsScreen_settings_relays_label),
+                        trailing: PlatformTextButton(
+                          child: Text(
+                            l10n.settingsScreen_settings_relays_selectLabel(
+                              _relayController.relays.length,
+                            ),
                           ),
-                          description: Text(
-                            l10n.settingsScreen_settings_serverOrigin_description,
-                          ),
-                          trailing: Text(settings.serverOrigin),
-                          onPressed: (_) async {
-                            final newHostName = await showPlatformModalSheet(
+                          material: (_, __) =>
+                              MaterialTextButtonData(
+                                icon: const Icon(Icons.dns_rounded),
+                              ),
+                          onPressed: () async {
+                            await showPlatformModalSheet(
                               context: context,
                               material: MaterialModalSheetData(
                                 isScrollControlled: true,
                                 isDismissible: true,
                                 backgroundColor: Colors.transparent,
                               ),
-                              builder: (_) => const ServerOriginSheet(),
+                              builder: (_) =>
+                                  RelaySelectSheet(
+                                    controller: _relayController,
+                                  ),
                             );
-
-                            if (newHostName != null) {
-                              settings.serverServerOrigin(newHostName);
-                              settings.save();
-                            }
-                          },
-                        )
-                      ],
-                    ),
-                    SettingsSection(
-                      title: Text(l10n.settingsScreen_sections_misc),
-                      tiles: [
-                        SettingsTile.switchTile(
-                          initialValue: settings.showHints,
-                          onToggle: (newValue) {
-                            settings.setShowHints(newValue);
-                            settings.save();
-                          },
-                          title: Text(
-                            l10n.settingsScreen_settings_showHints_label,
-                          ),
-                          description: Text(
-                            l10n.settingsScreen_settings_showHints_description,
-                          ),
-                          leading: Icon(context.platformIcons.info),
-                        ),
-                        SettingsTile.switchTile(
-                          initialValue: settings.alwaysUseBatterySaveMode,
-                          onToggle: (newValue) {
-                            settings.setAlwaysUseBatterySaveMode(newValue);
-                            settings.save();
-                          },
-                          title: Text(
-                            l10n.settingsScreen_settings_alwaysUseBatterySaveMode_label,
-                          ),
-                          description: Text(
-                            l10n.settingsScreen_settings_alwaysUseBatterySaveMode_description,
-                          ),
-                        ),
-                        SettingsTile.navigation(
-                          title: Text(
-                            l10n.settingsScreen_settings_importExport_exportFile,
-                          ),
-                          leading: PlatformWidget(
-                            material: (_, __) => const Icon(Icons.file_open),
-                            cupertino: (_, __) =>
-                                const Icon(CupertinoIcons.doc),
-                          ),
-                          trailing: const SettingsCaretIcon(),
-                          onPressed: (_) async {
-                            final taskService = context.read<TaskService>();
-                            final viewService = context.read<ViewService>();
-                            final settings = context.read<SettingsService>();
-
-                            final shouldSave = await showPlatformDialog(
-                              context: context,
-                              builder: (context) => PlatformAlertDialog(
-                                title: Text(l10n
-                                    .settingsScreen_settings_importExport_exportFile),
-                                content: Text(l10n
-                                    .settingsScreen_settings_importExport_exportFile_description),
-                                actions: createCancellableDialogActions(
-                                  context,
-                                  [
-                                    PlatformDialogAction(
-                                      material: (_, __) =>
-                                          MaterialDialogActionData(
-                                        icon: const Icon(Icons.save),
-                                      ),
-                                      onPressed: () {
-                                        Navigator.pop(context, true);
-                                      },
-                                      child: Text(l10n
-                                          .settingsScreen_settings_importExport_exportFile_save),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-
-                            if (shouldSave) {
-                              final rawData = jsonEncode(
-                                await exportToJSON(
-                                    taskService, viewService, settings),
-                              );
-
-                              final file = XFile(
-                                (await createTempFile(
-                                  const Utf8Encoder().convert(rawData),
-                                  name: "export.locus.json",
-                                ))
-                                    .path,
-                              );
-
-                              await Share.shareXFiles(
-                                [file],
-                                text: "Locus view key",
-                                subject:
-                                    l10n.shareLocation_actions_shareFile_text,
-                              );
-                            }
                           },
                         ),
-                        if (Platform.isAndroid && isGMSFlavor)
-                          SettingsTile.navigation(
-                            title: Text(l10n
-                                .settingsScreen_settings_importExport_transfer),
-                            leading: PlatformWidget(
-                              material: (_, __) =>
-                                  const Icon(Icons.phonelink_setup_rounded),
-                              cupertino: (_, __) => const Icon(
-                                  CupertinoIcons.device_phone_portrait),
+                      ),
+                      SettingsTile(
+                        title: Text(
+                          l10n.settingsScreen_settings_serverOrigin_label,
+                        ),
+                        description: Text(
+                          l10n.settingsScreen_settings_serverOrigin_description,
+                        ),
+                        trailing: Text(settings.serverOrigin),
+                        onPressed: (_) async {
+                          final newHostName = await showPlatformModalSheet(
+                            context: context,
+                            material: MaterialModalSheetData(
+                              isScrollControlled: true,
+                              isDismissible: true,
+                              backgroundColor: Colors.transparent,
                             ),
-                            trailing: const SettingsCaretIcon(),
-                            onPressed: (_) {
-                              Navigator.push(
-                                context,
-                                NativePageRoute(
-                                  context: context,
-                                  builder: (context) =>
-                                      const TransferSenderScreen(),
-                                ),
-                              );
-                            },
+                            builder: (_) => const ServerOriginSheet(),
+                          );
+
+                          if (newHostName != null) {
+                            settings.serverServerOrigin(newHostName);
+                            settings.save();
+                          }
+                        },
+                      )
+                    ],
+                  ),
+                  SettingsSection(
+                    title: Text(l10n.settingsScreen_sections_misc),
+                    tiles: [
+                      SettingsTile.switchTile(
+                        initialValue: settings.showHints,
+                        onToggle: (newValue) {
+                          settings.setShowHints(newValue);
+                          settings.save();
+                        },
+                        title: Text(
+                          l10n.settingsScreen_settings_showHints_label,
+                        ),
+                        description: Text(
+                          l10n.settingsScreen_settings_showHints_description,
+                        ),
+                        leading: Icon(context.platformIcons.info),
+                      ),
+                      const UseRealtimeUpdatesTile(),
+                      SettingsTile.switchTile(
+                        initialValue: settings.alwaysUseBatterySaveMode,
+                        onToggle: settings.useRealtimeUpdates
+                            ? null
+                            : (newValue) {
+                          settings.setAlwaysUseBatterySaveMode(newValue);
+                          settings.save();
+                        },
+                        title: Opacity(
+                          opacity:
+                          settings.useRealtimeUpdates ? OFF_OPACITY : 1,
+                          child: Text(
+                            l10n
+                                .settingsScreen_settings_alwaysUseBatterySaveMode_label,
                           ),
+                        ),
+                        description: Opacity(
+                          opacity:
+                          settings.useRealtimeUpdates ? OFF_OPACITY : 1,
+                          child: Text(
+                            l10n
+                                .settingsScreen_settings_alwaysUseBatterySaveMode_description,
+                          ),
+                        ),
+                      ),
+                      SettingsTile.navigation(
+                        title: Text(
+                          l10n.settingsScreen_settings_importExport_exportFile,
+                        ),
+                        leading: PlatformWidget(
+                          material: (_, __) => const Icon(Icons.file_open),
+                          cupertino: (_, __) => const Icon(CupertinoIcons.doc),
+                        ),
+                        trailing: const SettingsCaretIcon(),
+                        onPressed: (_) async {
+                          final taskService = context.read<TaskService>();
+                          final viewService = context.read<ViewService>();
+                          final settings = context.read<SettingsService>();
+
+                          final shouldSave = await showPlatformDialog(
+                            context: context,
+                            builder: (context) =>
+                                PlatformAlertDialog(
+                                  title: Text(l10n
+                                      .settingsScreen_settings_importExport_exportFile),
+                                  content: Text(l10n
+                                      .settingsScreen_settings_importExport_exportFile_description),
+                                  actions: createCancellableDialogActions(
+                                    context,
+                                    [
+                                      PlatformDialogAction(
+                                        material: (_, __) =>
+                                            MaterialDialogActionData(
+                                              icon: const Icon(Icons.save),
+                                            ),
+                                        onPressed: () {
+                                          Navigator.pop(context, true);
+                                        },
+                                        child: Text(l10n
+                                            .settingsScreen_settings_importExport_exportFile_save),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                          );
+
+                          if (shouldSave) {
+                            final rawData = jsonEncode(
+                              await exportToJSON(
+                                  taskService, viewService, settings),
+                            );
+
+                            final file = XFile(
+                              (await createTempFile(
+                                const Utf8Encoder().convert(rawData),
+                                name: "export.locus.json",
+                              ))
+                                  .path,
+                            );
+
+                            await Share.shareXFiles(
+                              [file],
+                              text: "Locus view key",
+                              subject:
+                              l10n.shareLocation_actions_shareFile_text,
+                            );
+                          }
+                        },
+                      ),
+                      if (Platform.isAndroid && isGMSFlavor)
                         SettingsTile.navigation(
                           title: Text(l10n
-                              .settingsScreen_settings_importExport_importLabel),
+                              .settingsScreen_settings_importExport_transfer),
                           leading: PlatformWidget(
                             material: (_, __) =>
-                                const Icon(Icons.file_download),
+                            const Icon(Icons.phonelink_setup_rounded),
                             cupertino: (_, __) =>
-                                const Icon(CupertinoIcons.tray_arrow_down_fill),
+                            const Icon(
+                                CupertinoIcons.device_phone_portrait),
                           ),
                           trailing: const SettingsCaretIcon(),
-                          onPressed: (_) async {
-                            final shouldPopContext =
-                                await showPlatformModalSheet(
-                              context: context,
-                              material: MaterialModalSheetData(
-                                backgroundColor: Colors.transparent,
-                              ),
-                              builder: (context) => ImportSheet(
-                                onImport: (
-                                  final taskService,
-                                  final viewService,
-                                  final settings,
-                                ) async {
-                                  await Future.wait([
-                                    taskService.save(),
-                                    viewService.save(),
-                                    settings.save(),
-                                  ]);
-
-                                  if (context.mounted) {
-                                    final shouldClose =
-                                        await showPlatformDialog(
-                                      context: context,
-                                      barrierDismissible: !Platform.isAndroid,
-                                      builder: (context) => PlatformAlertDialog(
-                                        title: Text(l10n
-                                            .settingsScreen_import_restart_title),
-                                        content: Text(l10n
-                                            .settingsScreen_import_restart_description),
-                                        actions: [
-                                          PlatformDialogAction(
-                                            child: Text(l10n.closeApp),
-                                            onPressed: () => Navigator.pop(
-                                                context, Platform.isAndroid),
-                                          ),
-                                        ],
-                                      ),
-                                    );
-
-                                    if (!mounted) {
-                                      return;
-                                    }
-
-                                    if (shouldClose != true) {
-                                      Navigator.pop(context);
-                                      return;
-                                    }
-
-                                    exit(0);
-                                  }
-                                },
-                              ),
-                            );
-
-                            if (shouldPopContext && mounted) {
-                              Navigator.pop(context);
-                            }
-                          },
-                        ),
-                        SettingsTile.navigation(
-                          title: Text(l10n.checkLocation_title),
-                          description:
-                              Text(l10n.checkLocation_shortDescription),
-                          trailing: const SettingsCaretIcon(),
-                          leading: PlatformFlavorWidget(
-                            material: (_, __) =>
-                                const Icon(Icons.edit_location_alt),
-                            cupertino: (_, __) =>
-                                const Icon(CupertinoIcons.location_fill),
-                          ),
                           onPressed: (_) {
                             Navigator.push(
                               context,
                               NativePageRoute(
                                 context: context,
                                 builder: (context) =>
-                                    const CheckLocationScreen(),
+                                const TransferSenderScreen(),
                               ),
                             );
+                          },
+                        ),
+                      SettingsTile.navigation(
+                        title: Text(l10n
+                            .settingsScreen_settings_importExport_importLabel),
+                        leading: PlatformWidget(
+                          material: (_, __) => const Icon(Icons.file_download),
+                          cupertino: (_, __) =>
+                          const Icon(CupertinoIcons.tray_arrow_down_fill),
+                        ),
+                        trailing: const SettingsCaretIcon(),
+                        onPressed: (_) async {
+                          final shouldPopContext = await showPlatformModalSheet(
+                            context: context,
+                            material: MaterialModalSheetData(
+                              backgroundColor: Colors.transparent,
+                            ),
+                            builder: (context) =>
+                                ImportSheet(
+                                  onImport: (final taskService,
+                                      final viewService,
+                                      final settings,) async {
+                                    await Future.wait([
+                                      taskService.save(),
+                                      viewService.save(),
+                                      settings.save(),
+                                    ]);
+
+                                    if (context.mounted) {
+                                      final shouldClose = await showPlatformDialog(
+                                        context: context,
+                                        barrierDismissible: !Platform.isAndroid,
+                                        builder: (context) =>
+                                            PlatformAlertDialog(
+                                              title: Text(l10n
+                                                  .settingsScreen_import_restart_title),
+                                              content: Text(l10n
+                                                  .settingsScreen_import_restart_description),
+                                              actions: [
+                                                PlatformDialogAction(
+                                                  child: Text(l10n.closeApp),
+                                                  onPressed: () =>
+                                                      Navigator.pop(
+                                                          context,
+                                                          Platform.isAndroid),
+                                                ),
+                                              ],
+                                            ),
+                                      );
+
+                                      if (!mounted) {
+                                        return;
+                                      }
+
+                                      if (shouldClose != true) {
+                                        Navigator.pop(context);
+                                        return;
+                                      }
+
+                                      exit(0);
+                                    }
+                                  },
+                                ),
+                          );
+
+                          if (shouldPopContext && mounted) {
+                            Navigator.pop(context);
+                          }
+                        },
+                      ),
+                      SettingsTile.navigation(
+                        title: Text(l10n.checkLocation_title),
+                        description: Text(l10n.checkLocation_shortDescription),
+                        trailing: const SettingsCaretIcon(),
+                        leading: PlatformFlavorWidget(
+                          material: (_, __) =>
+                          const Icon(Icons.edit_location_alt),
+                          cupertino: (_, __) =>
+                          const Icon(CupertinoIcons.location_fill),
+                        ),
+                        onPressed: (_) {
+                          Navigator.push(
+                            context,
+                            NativePageRoute(
+                              context: context,
+                              builder: (context) => const CheckLocationScreen(),
+                            ),
+                          );
+                        },
+                      )
+                    ],
+                  ),
+                  if (kDebugMode)
+                    SettingsSection(
+                      title: const Text("Debug"),
+                      tiles: [
+                        SettingsTile(
+                          title: const Text("Reset App"),
+                          onPressed: (_) async {
+                            storage.deleteAll();
+
+                            exit(0);
+                          },
+                        ),
+                        SettingsTile(
+                          title: const Text("Run Background Location Task"),
+                          onPressed: (_) async {
+                            await runBackgroundTask();
+                          },
+                        ),
+                        SettingsTile(
+                          title: const Text(
+                              "Run Background Location Task - Forced"),
+                          onPressed: (_) async {
+                            await runBackgroundTask(force: true);
                           },
                         )
                       ],
                     ),
-                    if (kDebugMode)
-                      SettingsSection(
-                        title: const Text("Debug"),
-                        tiles: [
-                          SettingsTile(
-                            title: const Text("Reset App"),
-                            onPressed: (_) async {
-                              storage.deleteAll();
-
-                              exit(0);
-                            },
-                          )
-                        ],
-                      ),
-                  ]),
+                ],
+              ),
               const SizedBox(height: MEDIUM_SPACE),
               Padding(
                 padding: const EdgeInsets.all(MEDIUM_SPACE),
@@ -667,7 +695,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           leading: const Icon(Icons.code),
                           title: Text(l10n.support_options_develop),
                           subtitle:
-                              Text(l10n.support_options_develop_description),
+                          Text(l10n.support_options_develop_description),
                           onTap: () {
                             launchUrl(
                               Uri.parse(REPOSITORY_URL),
@@ -679,7 +707,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           leading: const Icon(Icons.translate_rounded),
                           title: Text(l10n.support_options_translate),
                           subtitle:
-                              Text(l10n.support_options_translate_description),
+                          Text(l10n.support_options_translate_description),
                           onTap: () {
                             launchUrl(
                               Uri.parse(TRANSLATION_HELP_URL),
@@ -690,13 +718,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         PlatformListTile(
                           leading: PlatformWidget(
                             material: (_, __) =>
-                                const Icon(Icons.attach_money_rounded),
+                            const Icon(Icons.attach_money_rounded),
                             cupertino: (_, __) =>
-                                const Icon(CupertinoIcons.money_euro),
+                            const Icon(CupertinoIcons.money_euro),
                           ),
                           title: Text(l10n.support_options_donate),
                           subtitle:
-                              Text(l10n.support_options_donate_description),
+                          Text(l10n.support_options_donate_description),
                           onTap: () {
                             launchUrl(
                               Uri.parse(DONATION_URL),
@@ -756,14 +784,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         MentionTile(
                           title: l10n.honorableMentions_values_session,
                           description:
-                              l10n.honorableMentions_values_session_description,
+                          l10n.honorableMentions_values_session_description,
                           iconName: "session.png",
                           url: "https://getsession.org/",
                         ),
                         MentionTile(
                           title: l10n.honorableMentions_values_odysee,
                           description:
-                              l10n.honorableMentions_values_odysee_description,
+                          l10n.honorableMentions_values_odysee_description,
                           iconName: "odysee.png",
                           url: "https://odysee.com/",
                         ),

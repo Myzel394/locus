@@ -7,19 +7,21 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:locus/App.dart';
+import 'package:locus/api/get-relays-meta.dart';
+import 'package:locus/screens/locations_overview_screen_widgets/LocationFetchers.dart';
 import 'package:locus/services/app_update_service.dart';
+import 'package:locus/services/current_location_service.dart';
 import 'package:locus/services/log_service.dart';
-import 'package:locus/services/manager_service.dart';
-import 'package:locus/services/settings_service.dart';
-import 'package:locus/services/task_service.dart';
-import 'package:locus/services/view_service.dart';
+import 'package:locus/services/manager_service/background_fetch.dart';
+import 'package:locus/services/settings_service/index.dart';
+import 'package:locus/services/task_service/index.dart';
+import 'package:locus/services/view_service/index.dart';
 import 'package:provider/provider.dart';
 
 const storage = FlutterSecureStorage();
 
-final StreamController<
-    NotificationResponse> selectedNotificationsStream = StreamController
-    .broadcast();
+final StreamController<NotificationResponse> selectedNotificationsStream =
+    StreamController.broadcast();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -46,7 +48,8 @@ void main() async {
     isDebuggable: kDebugMode,
   );
 
-  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
   const initializationSettings = InitializationSettings(
     android: AndroidInitializationSettings("ic_launcher_foreground"),
     iOS: DarwinInitializationSettings(),
@@ -84,10 +87,12 @@ void main() async {
         ChangeNotifierProvider<LogService>(create: (_) => logService),
         ChangeNotifierProvider<AppUpdateService>(
             create: (_) => appUpdateService),
+        ChangeNotifierProvider<LocationFetchers>(
+            create: (_) => LocationFetchers(viewService.views)),
+        ChangeNotifierProvider<CurrentLocationService>(
+            create: (_) => CurrentLocationService()),
       ],
       child: const App(),
     ),
   );
-
-  registerBackgroundFetch();
 }
