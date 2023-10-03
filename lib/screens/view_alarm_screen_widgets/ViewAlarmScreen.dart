@@ -313,6 +313,7 @@ class _ViewAlarmScreenState extends State<ViewAlarmScreen> {
               final child = (() {
                 switch (alarm.IDENTIFIER) {
                   case LocationAlarmType.geo:
+                  case LocationAlarmType.radiusBasedRegion:
                     return GeoLocationAlarmPreview(
                       view: widget.view,
                       alarm: alarm as GeoLocationAlarm,

@@ -7,6 +7,8 @@ enum LocationAlarmTriggerType {
 enum LocationAlarmType {
   geo,
   proximity,
+  // Required for migration, same as `geo`
+  radiusBasedRegion,
 }
 
 enum LocationRadiusBasedTriggerType {

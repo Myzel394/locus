@@ -73,8 +73,9 @@ class Task extends ChangeNotifier with LocationBase {
             throw Exception("Unknown timer type");
         }
       })),
-      outstandingLocations: Map<String, int>.from(json["outstandingLocations"])
-          .map<LocationPointService, int>(
+      outstandingLocations:
+          Map<String, int>.from(json["outstandingLocations"] ?? {})
+              .map<LocationPointService, int>(
         (rawLocationData, tries) => MapEntry(
           LocationPointService.fromJSON(jsonDecode(rawLocationData)),
           tries,
