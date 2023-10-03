@@ -216,6 +216,7 @@ class _ViewAlarmSelectRadiusBasedScreenState
 
     switch (widget.type) {
       case LocationAlarmType.geo:
+      case LocationAlarmType.radiusBasedRegion:
         alarm = await showPlatformModalSheet(
           context: context,
           material: MaterialModalSheetData(

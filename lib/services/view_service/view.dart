@@ -49,8 +49,7 @@ class TaskView extends ChangeNotifier with LocationBase {
     String? id,
     DateTime? lastAlarmCheck,
     List<LocationAlarmServiceBase>? alarms,
-  })
-      : _encryptionPassword = encryptionPassword,
+  })  : _encryptionPassword = encryptionPassword,
         alarms = alarms ?? [],
         lastAlarmCheck = lastAlarmCheck ?? DateTime.now(),
         id = id ?? const Uuid().v4();
@@ -62,7 +61,7 @@ class TaskView extends ChangeNotifier with LocationBase {
     final fragment = uri.fragment;
 
     final rawParameters =
-    const Utf8Decoder().convert(base64Url.decode(fragment));
+        const Utf8Decoder().convert(base64Url.decode(fragment));
     final parameters = jsonDecode(rawParameters);
 
     return ViewServiceLinkParameters(
@@ -76,10 +75,9 @@ class TaskView extends ChangeNotifier with LocationBase {
     );
   }
 
-  factory TaskView.fromJSON(final Map<String, dynamic> json) =>
-      TaskView(
+  factory TaskView.fromJSON(final Map<String, dynamic> json) => TaskView(
         encryptionPassword:
-        SecretKey(List<int>.from(json["encryptionPassword"])),
+            SecretKey(List<int>.from(json["encryptionPassword"])),
         nostrPublicKey: json["nostrPublicKey"],
         relays: List<String>.from(json["relays"]),
         name: json["name"] ?? "Unnamed Task",
@@ -92,6 +90,7 @@ class TaskView extends ChangeNotifier with LocationBase {
 
             switch (identifier) {
               case LocationAlarmType.geo:
+              case LocationAlarmType.radiusBasedRegion:
                 return GeoLocationAlarm.fromJSON(alarm);
               case LocationAlarmType.proximity:
                 return ProximityLocationAlarm.fromJSON(alarm);
@@ -109,8 +108,10 @@ class TaskView extends ChangeNotifier with LocationBase {
             : Colors.primaries[Random().nextInt(Colors.primaries.length)],
       );
 
-  static Future<TaskView> fetchFromNostr(final AppLocalizations l10n,
-      final ViewServiceLinkParameters parameters,) async {
+  static Future<TaskView> fetchFromNostr(
+    final AppLocalizations l10n,
+    final ViewServiceLinkParameters parameters,
+  ) async {
     final completer = Completer<TaskView>();
 
     final request = Request(generate64RandomHexChars(), [
@@ -152,7 +153,7 @@ class TaskView extends ChangeNotifier with LocationBase {
                 relays: List<String>.from(data['relays']),
                 name: l10n.longFormattedDate(DateTime.now()),
                 color:
-                Colors.primaries[Random().nextInt(Colors.primaries.length)],
+                    Colors.primaries[Random().nextInt(Colors.primaries.length)],
               ),
             );
           } catch (error) {
@@ -199,7 +200,8 @@ class TaskView extends ChangeNotifier with LocationBase {
     };
   }
 
-  Future<String?> validate(final AppLocalizations l10n, {
+  Future<String?> validate(
+    final AppLocalizations l10n, {
     required final TaskService taskService,
     required final ViewService viewService,
   }) async {
@@ -208,14 +210,14 @@ class TaskView extends ChangeNotifier with LocationBase {
     }
 
     final sameTask = taskService.tasks.firstWhereOrNull(
-            (element) => element.nostrPublicKey == nostrPublicKey);
+        (element) => element.nostrPublicKey == nostrPublicKey);
 
     if (sameTask != null) {
       return l10n.taskImport_error_sameTask(sameTask.name);
     }
 
     final sameView = viewService.views.firstWhereOrNull(
-            (element) => element.nostrPublicKey == nostrPublicKey);
+        (element) => element.nostrPublicKey == nostrPublicKey);
 
     if (sameView != null) {
       return l10n.taskImport_error_sameView(sameView.name);
