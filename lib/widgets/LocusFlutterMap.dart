@@ -4,6 +4,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:locus/constants/values.dart';
 import 'package:locus/services/current_location_service.dart';
+import 'package:locus/services/settings_service/index.dart';
 import 'package:locus/utils/location/get-fallback-location.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:locus/widgets/LocationsMap.dart';
@@ -42,9 +43,9 @@ class LocusFlutterMap extends StatelessWidget {
     return currentLocation.currentPosition == null
         ? getFallbackLocation(context)
         : LatLng(
-            currentLocation.currentPosition!.latitude,
-            currentLocation.currentPosition!.longitude,
-          );
+      currentLocation.currentPosition!.latitude,
+      currentLocation.currentPosition!.longitude,
+    );
   }
 
   double getInitialZoom(final BuildContext context) {
@@ -109,14 +110,16 @@ class LocusFlutterMap extends StatelessWidget {
         zoom: getInitialZoom(context),
       ),
       compassEnabled: true,
-      onTap: (location) => onTap?.call(LatLng(
-        location.latitude,
-        location.longitude,
-      )),
-      onLongPress: (location) => onLongPress?.call(LatLng(
-        location.latitude,
-        location.longitude,
-      )),
+      onTap: (location) =>
+          onTap?.call(LatLng(
+            location.latitude,
+            location.longitude,
+          )),
+      onLongPress: (location) =>
+          onLongPress?.call(LatLng(
+            location.latitude,
+            location.longitude,
+          )),
       onMapCreated: onAppleMapCreated,
       circles: appleMapCircles,
     );
@@ -124,10 +127,12 @@ class LocusFlutterMap extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (flutterMapController != null) {
-      return buildFlutterMaps(context);
-    } else {
+    final settings = context.watch<SettingsService>();
+
+    if (settings.getMapProvider() == MapProvider.apple) {
       return buildAppleMaps(context);
     }
+
+    return buildFlutterMaps(context);
   }
 }
