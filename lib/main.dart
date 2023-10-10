@@ -7,12 +7,12 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:locus/App.dart';
-import 'package:locus/api/get-relays-meta.dart';
+import 'package:locus/app_wrappers/LocationHistoryUpdater.dart';
 import 'package:locus/screens/locations_overview_screen_widgets/LocationFetchers.dart';
 import 'package:locus/services/app_update_service.dart';
 import 'package:locus/services/current_location_service.dart';
+import 'package:locus/services/location_history_service/index.dart';
 import 'package:locus/services/log_service.dart';
-import 'package:locus/services/manager_service/background_fetch.dart';
 import 'package:locus/services/settings_service/index.dart';
 import 'package:locus/services/task_service/index.dart';
 import 'package:locus/services/view_service/index.dart';
@@ -67,12 +67,14 @@ void main() async {
     SettingsService.restore(),
     LogService.restore(),
     AppUpdateService.restore(),
+    LocationHistory.restore(),
   ]);
   final TaskService taskService = futures[0];
   final ViewService viewService = futures[1];
   final SettingsService settingsService = futures[2];
   final LogService logService = futures[3];
   final AppUpdateService appUpdateService = futures[4];
+  final LocationHistory locationHistory = futures[5];
 
   await logService.deleteOldLogs();
 
@@ -91,8 +93,14 @@ void main() async {
             create: (_) => LocationFetchers(viewService.views)),
         ChangeNotifierProvider<CurrentLocationService>(
             create: (_) => CurrentLocationService()),
+        ChangeNotifierProvider<LocationHistory>(create: (_) => locationHistory),
       ],
-      child: const App(),
+      child: const Stack(
+        children: [
+          LocationHistoryUpdater(),
+          App(),
+        ],
+      ),
     ),
   );
 }
