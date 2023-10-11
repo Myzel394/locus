@@ -123,7 +123,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     final viewService = context.read<ViewService>();
     final logService = context.read<LogService>();
     final settings = context.read<SettingsService>();
-    final appUpdateService = context.read<AppUpdateService>();
     final locationFetchers = context.read<LocationFetchers>();
 
     _handleViewAlarmChecker();
@@ -136,13 +135,11 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
       ..addObserver(this)
       ..addPostFrameCallback((_) {
         _setLocationFromSettings();
-        _showUpdateDialogIfRequired();
         _initLiveLocationUpdate();
         locationFetchers.fetchPreviewLocations();
 
         taskService.checkup(logService);
 
-        appUpdateService.addListener(_rebuild);
         viewService.addListener(_handleViewServiceChange);
 
         Geolocator.checkPermission().then((status) {
@@ -178,7 +175,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
 
   @override
   dispose() {
-    final appUpdateService = context.read<AppUpdateService>();
     final locationFetchers = context.read<LocationFetchers>();
 
     flutterMapController?.dispose();
@@ -190,7 +186,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
 
     WidgetsBinding.instance.removeObserver(this);
 
-    appUpdateService.removeListener(_rebuild);
     locationFetchers.removeLocationUpdatesListener(_rebuild);
 
     super.dispose();
@@ -348,55 +343,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
         }
       },
     );
-  }
-
-  void _showUpdateDialogIfRequired() async {
-    final l10n = AppLocalizations.of(context);
-    final appUpdateService = context.read<AppUpdateService>();
-
-    if (appUpdateService.shouldShowDialogue() &&
-        !appUpdateService.hasShownDialogue &&
-        mounted) {
-      await showPlatformDialog(
-        context: context,
-        barrierDismissible: false,
-        material: MaterialDialogData(
-          barrierColor: Colors.black,
-        ),
-        builder: (context) => PlatformAlertDialog(
-          title: Text(l10n.updateAvailable_android_title),
-          content: Text(l10n.updateAvailable_android_description),
-          actions: [
-            PlatformDialogAction(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              material: (context, _) => MaterialDialogActionData(
-                  icon: const Icon(Icons.watch_later_rounded)),
-              child: Text(l10n.updateAvailable_android_remindLater),
-            ),
-            PlatformDialogAction(
-              onPressed: () {
-                appUpdateService.doNotShowDialogueAgain();
-
-                Navigator.of(context).pop();
-              },
-              material: (context, _) =>
-                  MaterialDialogActionData(icon: const Icon(Icons.block)),
-              child: Text(l10n.updateAvailable_android_ignore),
-            ),
-            PlatformDialogAction(
-              onPressed: appUpdateService.openStoreForUpdate,
-              material: (context, _) =>
-                  MaterialDialogActionData(icon: const Icon(Icons.download)),
-              child: Text(l10n.updateAvailable_android_download),
-            ),
-          ],
-        ),
-      );
-
-      appUpdateService.setHasShownDialogue();
-    }
   }
 
   Future<void> _animateToPosition(
