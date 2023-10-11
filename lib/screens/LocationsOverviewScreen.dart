@@ -28,7 +28,6 @@ import 'package:locus/screens/locations_overview_screen_widgets/OutOfBoundMarker
 import 'package:locus/screens/locations_overview_screen_widgets/ShareLocationSheet.dart';
 import 'package:locus/screens/locations_overview_screen_widgets/ViewLocationPopup.dart';
 import 'package:locus/services/current_location_service.dart';
-import 'package:locus/services/manager_service/helpers.dart';
 import 'package:locus/services/settings_service/index.dart';
 import 'package:locus/services/task_service/index.dart';
 import 'package:locus/services/view_service/index.dart';
@@ -51,7 +50,6 @@ import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:provider/provider.dart';
 
 import '../constants/values.dart';
-import '../init_quick_actions.dart';
 import '../services/app_update_service.dart';
 import '../services/location_point_service.dart';
 import '../services/log_service.dart';
@@ -138,7 +136,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
       ..addObserver(this)
       ..addPostFrameCallback((_) {
         _setLocationFromSettings();
-        initQuickActions(context);
         _showUpdateDialogIfRequired();
         _initLiveLocationUpdate();
         locationFetchers.fetchPreviewLocations();
