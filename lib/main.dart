@@ -11,6 +11,7 @@ import 'package:locus/app_wrappers/LocationHistoryUpdater.dart';
 import 'package:locus/app_wrappers/RegisterBackgroundListeners.dart';
 import 'package:locus/app_wrappers/UniLinksHandler.dart';
 import 'package:locus/app_wrappers/UpdateLastLocationToSettings.dart';
+import 'package:locus/app_wrappers/UpdateLocaleToSettings.dart';
 import 'package:locus/screens/locations_overview_screen_widgets/LocationFetchers.dart';
 import 'package:locus/services/app_update_service.dart';
 import 'package:locus/services/current_location_service.dart';
@@ -104,6 +105,7 @@ void main() async {
           UniLinksHandler(),
           UpdateLastLocationToSettings(),
           RegisterBackgroundListeners(),
+          UpdateLocaleToSettings(),
           App(),
         ],
       ),

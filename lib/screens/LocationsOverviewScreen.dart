@@ -148,7 +148,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
       ..addPostFrameCallback((_) {
         _setLocationFromSettings();
         initQuickActions(context);
-        _updateLocaleToSettings();
         _showUpdateDialogIfRequired();
         _initLiveLocationUpdate();
         locationFetchers.fetchPreviewLocations();
@@ -436,13 +435,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
         );
       }
     });
-  }
-
-  void _updateLocaleToSettings() {
-    final settingsService = context.read<SettingsService>();
-
-    settingsService.localeName = AppLocalizations.of(context).localeName;
-    settingsService.save();
   }
 
   void _showUpdateDialogIfRequired() async {
