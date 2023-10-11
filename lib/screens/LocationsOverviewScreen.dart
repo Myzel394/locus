@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:core';
 import 'dart:io';
 import 'dart:math';
@@ -29,7 +28,6 @@ import 'package:locus/screens/locations_overview_screen_widgets/OutOfBoundMarker
 import 'package:locus/screens/locations_overview_screen_widgets/ShareLocationSheet.dart';
 import 'package:locus/screens/locations_overview_screen_widgets/ViewLocationPopup.dart';
 import 'package:locus/services/current_location_service.dart';
-import 'package:locus/services/manager_service/background_locator.dart';
 import 'package:locus/services/manager_service/helpers.dart';
 import 'package:locus/services/settings_service/index.dart';
 import 'package:locus/services/task_service/index.dart';
@@ -50,22 +48,16 @@ import 'package:locus/widgets/MapActionsContainer.dart';
 import 'package:locus/widgets/Paper.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
-import '../constants/notifications.dart';
 import '../constants/values.dart';
 import '../init_quick_actions.dart';
-import '../main.dart';
 import '../services/app_update_service.dart';
 import '../services/location_point_service.dart';
 import '../services/log_service.dart';
-import '../services/manager_service/background_fetch.dart';
-import '../utils/PageRoute.dart';
 import '../utils/color.dart';
 import '../utils/platform.dart';
 import '../utils/theme.dart';
-import 'ViewDetailsScreen.dart';
 import 'locations_overview_screen_widgets/ViewDetailsSheet.dart';
 
 // After this threshold, locations will not be merged together anymore
@@ -137,7 +129,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     final locationFetchers = context.read<LocationFetchers>();
 
     _handleViewAlarmChecker();
-    _handleNotifications();
 
     locationFetchers.addAll(viewService.views);
 
@@ -395,46 +386,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
         }
       },
     );
-  }
-
-  void _handleNotifications() {
-    selectedNotificationsStream.stream.listen((notification) {
-      FlutterLogs.logInfo(
-        LOG_TAG,
-        "Notification",
-        "Notification received: ${notification.payload}",
-      );
-
-      try {
-        final data = jsonDecode(notification.payload ?? "{}");
-        final type = NotificationActionType.values[data["type"]];
-
-        switch (type) {
-          case NotificationActionType.openTaskView:
-            final viewService = context.read<ViewService>();
-
-            Navigator.of(context).push(
-              NativePageRoute(
-                context: context,
-                builder: (_) => ViewDetailsScreen(
-                  view: viewService.getViewById(data["taskViewID"]),
-                ),
-              ),
-            );
-            break;
-          case NotificationActionType.openPermissionsSettings:
-            openAppSettings();
-
-            break;
-        }
-      } catch (error) {
-        FlutterLogs.logError(
-          LOG_TAG,
-          "Notification",
-          "Error handling notification: $error",
-        );
-      }
-    });
   }
 
   void _showUpdateDialogIfRequired() async {
