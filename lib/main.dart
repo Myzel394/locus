@@ -9,6 +9,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:locus/App.dart';
 import 'package:locus/app_wrappers/CheckViewAlarmsLive.dart';
 import 'package:locus/app_wrappers/HandleNotifications.dart';
+import 'package:locus/app_wrappers/InitCurrentLocationFromSettings.dart';
 import 'package:locus/app_wrappers/LocationHistoryUpdater.dart';
 import 'package:locus/app_wrappers/RegisterBackgroundListeners.dart';
 import 'package:locus/app_wrappers/ManageQuickActions.dart';
@@ -28,7 +29,7 @@ import 'package:provider/provider.dart';
 const storage = FlutterSecureStorage();
 
 final StreamController<NotificationResponse> selectedNotificationsStream =
-StreamController.broadcast();
+    StreamController.broadcast();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -56,7 +57,7 @@ void main() async {
   );
 
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-  FlutterLocalNotificationsPlugin();
+      FlutterLocalNotificationsPlugin();
   const initializationSettings = InitializationSettings(
     android: AndroidInitializationSettings("ic_launcher_foreground"),
     iOS: DarwinInitializationSettings(),
@@ -112,6 +113,7 @@ void main() async {
           HandleNotifications(),
           CheckViewAlarmsLive(),
           ManageQuickActions(),
+          InitCurrentLocationFromSettings(),
           App(),
         ],
       ),

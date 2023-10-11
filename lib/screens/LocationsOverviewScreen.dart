@@ -221,10 +221,9 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
 
   void _setLocationFromSettings() async {
     final settings = context.read<SettingsService>();
-    final rawPosition = settings.getLastMapLocation();
-    final currentLocation = context.read<CurrentLocationService>();
+    final rawLocation = settings.getLastMapLocation();
 
-    if (rawPosition == null) {
+    if (rawLocation == null) {
       return;
     }
 
@@ -232,21 +231,7 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
       locationStatus = LocationStatus.stale;
     });
 
-    final position = Position(
-      latitude: rawPosition.latitude,
-      longitude: rawPosition.longitude,
-      accuracy: rawPosition.accuracy,
-      altitudeAccuracy: 0.0,
-      headingAccuracy: 0.0,
-      timestamp: DateTime.now(),
-      altitude: 0,
-      heading: 0,
-      speed: 0,
-      speedAccuracy: 0,
-    );
-
-    await _animateToPosition(position);
-    currentLocation.updateCurrentPosition(position);
+    await _animateToPosition(rawLocation.asPosition());
   }
 
   List<LocationPointService> mergeLocationsIfRequired(
