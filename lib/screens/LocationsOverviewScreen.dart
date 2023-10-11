@@ -31,7 +31,6 @@ import 'package:locus/screens/locations_overview_screen_widgets/ViewLocationPopu
 import 'package:locus/services/current_location_service.dart';
 import 'package:locus/services/manager_service/background_locator.dart';
 import 'package:locus/services/manager_service/helpers.dart';
-import 'package:locus/services/settings_service/SettingsMapLocation.dart';
 import 'package:locus/services/settings_service/index.dart';
 import 'package:locus/services/task_service/index.dart';
 import 'package:locus/services/view_service/index.dart';
@@ -327,19 +326,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     );
   }
 
-  void _updateLocationToSettings(final Position position) async {
-    final settings = context.read<SettingsService>();
-
-    settings.setLastMapLocation(
-      SettingsLastMapLocation(
-        latitude: position.latitude,
-        longitude: position.longitude,
-        accuracy: position.accuracy,
-      ),
-    );
-    await settings.save();
-  }
-
   void _updateBackgroundListeners() async {
     final settings = context.read<SettingsService>();
     final taskService = context.read<TaskService>();
@@ -391,7 +377,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
       currentLocation.updateCurrentPosition(position);
 
       _checkViewAlarms(position);
-      _updateLocationToSettings(position);
 
       setState(() {
         lastPosition = position;
