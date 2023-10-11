@@ -313,24 +313,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     );
   }
 
-  void _checkViewAlarms(
-    final Position position,
-  ) async {
-    final l10n = AppLocalizations.of(context);
-    final viewService = context.read<ViewService>();
-    final userLocation = await LocationPointService.fromPosition(position);
-
-    if (!mounted) {
-      return;
-    }
-
-    checkViewAlarms(
-      l10n: l10n,
-      viewService: viewService,
-      userLocation: userLocation,
-    );
-  }
-
   void _initLiveLocationUpdate() {
     if (_positionStream != null) {
       return;
@@ -345,8 +327,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
       final currentLocation = context.read<CurrentLocationService>();
 
       currentLocation.updateCurrentPosition(position);
-
-      _checkViewAlarms(position);
 
       setState(() {
         lastPosition = position;
