@@ -19,7 +19,6 @@ import 'package:flutter_map_marker_popup/flutter_map_marker_popup.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
-import 'package:locus/api/get-relays-meta.dart';
 import 'package:locus/constants/spacing.dart';
 import 'package:locus/screens/ImportTaskSheet.dart';
 import 'package:locus/screens/SettingsScreen.dart';
@@ -54,7 +53,6 @@ import 'package:material_design_icons_flutter/material_design_icons_flutter.dart
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
-import 'package:uni_links/uni_links.dart';
 
 import '../constants/notifications.dart';
 import '../constants/values.dart';
@@ -111,7 +109,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
   LocationPointService? visibleLocation;
 
   Position? lastPosition;
-  StreamSubscription<String?>? _uniLinksStream;
   Timer? _viewsAlarmCheckerTimer;
   LocationStatus locationStatus = LocationStatus.stale;
 
@@ -154,7 +151,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
       ..addPostFrameCallback((_) {
         _setLocationFromSettings();
         initQuickActions(context);
-        _initUniLinks();
         _updateLocaleToSettings();
         _updateBackgroundListeners();
         _showUpdateDialogIfRequired();
@@ -205,7 +201,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     flutterMapController?.dispose();
 
     _viewsAlarmCheckerTimer?.cancel();
-    _uniLinksStream?.cancel();
     mapEventStream.close();
 
     _removeLiveLocationUpdate();
@@ -423,59 +418,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
   void _removeLiveLocationUpdate() {
     _positionStream?.drain();
     _positionStream = null;
-  }
-
-  Future<void> _importUniLink(final String url) => showPlatformModalSheet(
-        context: context,
-        material: MaterialModalSheetData(
-          isScrollControlled: true,
-          isDismissible: true,
-          backgroundColor: Colors.transparent,
-        ),
-        builder: (context) => ImportTaskSheet(initialURL: url),
-      );
-
-  Future<void> _initUniLinks() async {
-    final l10n = AppLocalizations.of(context);
-
-    FlutterLogs.logInfo(LOG_TAG, "Uni Links", "Initiating uni links...");
-
-    _uniLinksStream = linkStream.listen((final String? link) {
-      if (link != null) {
-        _importUniLink(link);
-      }
-    });
-
-    try {
-      // Only fired when the app was in background
-      final initialLink = await getInitialLink();
-
-      if (initialLink != null) {
-        await _importUniLink(initialLink);
-      }
-    } on PlatformException catch (error) {
-      FlutterLogs.logError(
-        LOG_TAG,
-        "Uni Links",
-        "Error initializing uni links: $error",
-      );
-
-      showPlatformDialog(
-        context: context,
-        builder: (_) => PlatformAlertDialog(
-          title: Text(l10n.uniLinksOpenError),
-          content: Text(error.message ?? l10n.unknownError),
-          actions: [
-            PlatformDialogAction(
-              child: Text(l10n.closeNeutralAction),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-          ],
-        ),
-      );
-    }
   }
 
   void _handleViewAlarmChecker() {

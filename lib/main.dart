@@ -8,6 +8,7 @@ import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:locus/App.dart';
 import 'package:locus/app_wrappers/LocationHistoryUpdater.dart';
+import 'package:locus/app_wrappers/UniLinksHandler.dart';
 import 'package:locus/screens/locations_overview_screen_widgets/LocationFetchers.dart';
 import 'package:locus/services/app_update_service.dart';
 import 'package:locus/services/current_location_service.dart';
@@ -98,6 +99,7 @@ void main() async {
       child: const Stack(
         children: [
           LocationHistoryUpdater(),
+          UniLinksHandler(),
           App(),
         ],
       ),
