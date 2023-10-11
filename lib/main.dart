@@ -8,6 +8,7 @@ import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:locus/App.dart';
 import 'package:locus/app_wrappers/LocationHistoryUpdater.dart';
+import 'package:locus/app_wrappers/RegisterBackgroundListeners.dart';
 import 'package:locus/app_wrappers/UniLinksHandler.dart';
 import 'package:locus/app_wrappers/UpdateLastLocationToSettings.dart';
 import 'package:locus/screens/locations_overview_screen_widgets/LocationFetchers.dart';
@@ -102,6 +103,7 @@ void main() async {
           LocationHistoryUpdater(),
           UniLinksHandler(),
           UpdateLastLocationToSettings(),
+          RegisterBackgroundListeners(),
           App(),
         ],
       ),

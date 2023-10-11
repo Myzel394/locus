@@ -141,8 +141,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
 
     locationFetchers.addAll(viewService.views);
 
-    settings.addListener(_updateBackgroundListeners);
-    taskService.addListener(_updateBackgroundListeners);
     locationFetchers.addLocationUpdatesListener(_rebuild);
 
     WidgetsBinding.instance
@@ -151,7 +149,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
         _setLocationFromSettings();
         initQuickActions(context);
         _updateLocaleToSettings();
-        _updateBackgroundListeners();
         _showUpdateDialogIfRequired();
         _initLiveLocationUpdate();
         locationFetchers.fetchPreviewLocations();
@@ -324,23 +321,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
       timeLimit: LOCATION_FETCH_TIME_LIMIT,
       accuracy: LocationAccuracy.best,
     );
-  }
-
-  void _updateBackgroundListeners() async {
-    final settings = context.read<SettingsService>();
-    final taskService = context.read<TaskService>();
-
-    if (settings.useRealtimeUpdates &&
-        ((await taskService.hasRunningTasks()) ||
-            (await taskService.hasScheduledTasks()))) {
-      removeBackgroundFetch();
-
-      await configureBackgroundLocator();
-      await initializeBackgroundLocator(context);
-    } else {
-      await configureBackgroundFetch();
-      registerBackgroundFetch();
-    }
   }
 
   void _checkViewAlarms(

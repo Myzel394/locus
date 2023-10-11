@@ -68,7 +68,7 @@ Future<void> configureBackgroundLocator() {
   return BackgroundLocator.initialize();
 }
 
-Future<void> initializeBackgroundLocator(final BuildContext context,) {
+Future<void> registerBackgroundLocator(final BuildContext context,) {
   final l10n = AppLocalizations.of(context);
 
   FlutterLogs.logInfo(
