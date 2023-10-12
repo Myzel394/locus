@@ -42,6 +42,10 @@ class _RegisterBackgroundListenersState
   }
 
   void _updateListeners() async {
+    if (!_settings.userHasSeenWelcomeScreen) {
+      return;
+    }
+
     FlutterLogs.logInfo(
       LOG_TAG,
       "Register Background Listeners",

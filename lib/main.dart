@@ -11,6 +11,7 @@ import 'package:locus/app_wrappers/CheckViewAlarmsLive.dart';
 import 'package:locus/app_wrappers/HandleNotifications.dart';
 import 'package:locus/app_wrappers/InitCurrentLocationFromSettings.dart';
 import 'package:locus/app_wrappers/LocationHistoryUpdater.dart';
+import 'package:locus/app_wrappers/PublishTaskPositionsOnUpdate.dart';
 import 'package:locus/app_wrappers/RegisterBackgroundListeners.dart';
 import 'package:locus/app_wrappers/ManageQuickActions.dart';
 import 'package:locus/app_wrappers/ShowUpdateDialog.dart';
@@ -116,6 +117,7 @@ void main() async {
           ManageQuickActions(),
           InitCurrentLocationFromSettings(),
           ShowUpdateDialog(),
+          PublishTaskPositionsOnUpdate(),
           App(),
         ],
       ),

@@ -300,7 +300,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
     );
 
     _positionStream!.listen((position) async {
-      final taskService = context.read<TaskService>();
       final currentLocation = context.read<CurrentLocationService>();
 
       currentLocation.updateCurrentPosition(position);
@@ -309,21 +308,6 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
         lastPosition = position;
         locationStatus = LocationStatus.active;
       });
-
-      final runningTasks = await taskService.getRunningTasks().toList();
-
-      if (runningTasks.isEmpty) {
-        return;
-      }
-
-      final locationData = await LocationPointService.fromPosition(position);
-
-      for (final task in runningTasks) {
-        await task.publisher.publishOutstandingPositions();
-        await task.publisher.publishLocation(
-          locationData.copyWithDifferentId(),
-        );
-      }
     });
   }
 
