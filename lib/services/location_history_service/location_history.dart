@@ -32,7 +32,7 @@ class LocationHistory extends ChangeNotifier {
       return LocationHistory(null);
     }
 
-    return LocationHistory.fromJSON(data as Map<String, dynamic>);
+    return LocationHistory.fromJSON(jsonDecode(data) as Map<String, dynamic>);
   }
 
   // To avoid too many crumbled locations, we only save locations that are at

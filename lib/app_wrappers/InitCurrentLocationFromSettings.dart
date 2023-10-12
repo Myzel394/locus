@@ -21,12 +21,15 @@ class _InitCurrentLocationFromSettingsState
     super.initState();
 
     _currentLocation = context.read<CurrentLocationService>();
-    final settings = context.read<SettingsService>();
-    final lastLocation = settings.getLastMapLocation();
 
-    if (lastLocation != null) {
-      _setLocation(lastLocation);
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final settings = context.read<SettingsService>();
+      final lastLocation = settings.getLastMapLocation();
+
+      if (lastLocation != null) {
+        _setLocation(lastLocation);
+      }
+    });
   }
 
   void _setLocation(final SettingsLastMapLocation rawLocation) {

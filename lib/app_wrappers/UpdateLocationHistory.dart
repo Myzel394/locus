@@ -15,16 +15,15 @@ class UpdateLocationHistory extends StatefulWidget {
 }
 
 class _UpdateLocationHistoryState extends State<UpdateLocationHistory> {
-  late final CurrentLocationService _currentLocation;
   late final StreamSubscription _subscription;
-  late final LocationHistory _locationHistory;
 
   @override
   void initState() {
     super.initState();
 
-    _currentLocation = context.read<CurrentLocationService>();
-    _subscription = _currentLocation.stream.listen(_locationHistory.add);
+    final currentLocation = context.read<CurrentLocationService>();
+    final locationHistory = context.read<LocationHistory>();
+    _subscription = currentLocation.stream.listen(locationHistory.add);
   }
 
   @override

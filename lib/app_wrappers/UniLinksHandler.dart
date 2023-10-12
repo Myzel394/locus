@@ -37,7 +37,9 @@ class _UniLinksHandlerState extends State<UniLinksHandler> {
       }
     });
 
-    _initInitialLink();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initInitialLink();
+    });
   }
 
   @override
@@ -96,18 +98,19 @@ class _UniLinksHandlerState extends State<UniLinksHandler> {
 
       showPlatformDialog(
         context: context,
-        builder: (_) => PlatformAlertDialog(
-          title: Text(l10n.uniLinksOpenError),
-          content: Text(error.message ?? l10n.unknownError),
-          actions: [
-            PlatformDialogAction(
-              child: Text(l10n.closeNeutralAction),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+        builder: (_) =>
+            PlatformAlertDialog(
+              title: Text(l10n.uniLinksOpenError),
+              content: Text(error.message ?? l10n.unknownError),
+              actions: [
+                PlatformDialogAction(
+                  child: Text(l10n.closeNeutralAction),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
             ),
-          ],
-        ),
       );
     }
   }

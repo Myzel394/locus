@@ -19,14 +19,14 @@ class CheckViewAlarmsLive extends StatefulWidget {
 }
 
 class _CheckViewAlarmsLiveState extends State<CheckViewAlarmsLive> {
-  late final CurrentLocationService _currentLocation;
   late final StreamSubscription<Position> _subscription;
 
   @override
   void initState() {
     super.initState();
 
-    _subscription = _currentLocation.stream.listen((position) async {
+    final currentLocation = context.read<CurrentLocationService>();
+    _subscription = currentLocation.stream.listen((position) async {
       final l10n = AppLocalizations.of(context);
       final viewService = context.read<ViewService>();
       final userLocation = await LocationPointService.fromPosition(position);

@@ -36,13 +36,15 @@ class _ManageQuickActionsState extends State<ManageQuickActions> {
   void initState() {
     super.initState();
 
-    final settings = context.read<SettingsService>();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final settings = context.read<SettingsService>();
 
-    if (settings.userHasSeenWelcomeScreen) {
-      _registerActions();
-    } else {
-      _removeActions();
-    }
+      if (settings.userHasSeenWelcomeScreen) {
+        _registerActions();
+      } else {
+        _removeActions();
+      }
+    });
   }
 
   void _registerActions() {
@@ -62,24 +64,22 @@ class _ManageQuickActionsState extends State<ManageQuickActions> {
         showCupertinoModalBottomSheet(
           context: context,
           backgroundColor: Colors.transparent,
-          builder: (_) =>
-              ShortcutScreen(
-                type: ShortcutType.values.firstWhere(
-                      (element) => element.name == type,
-                ),
-              ),
+          builder: (_) => ShortcutScreen(
+            type: ShortcutType.values.firstWhere(
+              (element) => element.name == type,
+            ),
+          ),
         );
       } else {
         Navigator.push(
           context,
           NativePageRoute(
             context: context,
-            builder: (_) =>
-                ShortcutScreen(
-                  type: ShortcutType.values.firstWhere(
-                        (element) => element.name == type,
-                  ),
-                ),
+            builder: (_) => ShortcutScreen(
+              type: ShortcutType.values.firstWhere(
+                (element) => element.name == type,
+              ),
+            ),
           ),
         );
       }

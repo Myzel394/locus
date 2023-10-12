@@ -105,22 +105,7 @@ void main() async {
             create: (_) => CurrentLocationService()),
         ChangeNotifierProvider<LocationHistory>(create: (_) => locationHistory),
       ],
-      child: const Column(
-        children: [
-          UpdateLocationHistory(),
-          UniLinksHandler(),
-          UpdateLastLocationToSettings(),
-          RegisterBackgroundListeners(),
-          UpdateLocaleToSettings(),
-          HandleNotifications(),
-          CheckViewAlarmsLive(),
-          ManageQuickActions(),
-          InitCurrentLocationFromSettings(),
-          ShowUpdateDialog(),
-          PublishTaskPositionsOnUpdate(),
-          App(),
-        ],
-      ),
+      child: const App(),
     ),
   );
 }

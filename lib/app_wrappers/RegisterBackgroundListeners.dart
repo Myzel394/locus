@@ -27,10 +27,12 @@ class _RegisterBackgroundListenersState
     _settings = context.read<SettingsService>();
     _taskService = context.read<TaskService>();
 
-    _settings.addListener(_updateListeners);
-    _taskService.addListener(_updateListeners);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _settings.addListener(_updateListeners);
+      _taskService.addListener(_updateListeners);
 
-    _updateListeners();
+      _updateListeners();
+    });
   }
 
   @override
