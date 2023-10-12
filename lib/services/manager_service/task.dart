@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_logs/flutter_logs.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:locus/constants/notifications.dart';
 import 'package:locus/constants/values.dart';
+import 'package:locus/services/location_history_service/index.dart';
 import 'package:locus/services/location_point_service.dart';
 import 'package:locus/services/manager_service/helpers.dart';
 import 'package:locus/services/settings_service/index.dart';
@@ -37,6 +39,38 @@ void _showPermissionMissingNotification({
     payload: jsonEncode({
       "type": NotificationActionType.openPermissionsSettings.index,
     }),
+  );
+}
+
+void _updateLocation(final Position position) async {
+  FlutterLogs.logInfo(
+    LOG_TAG,
+    "Headless Task",
+    "Updating Location History; Restoring...",
+  );
+
+  final locationHistory = await LocationHistory.restore();
+
+  FlutterLogs.logInfo(
+    LOG_TAG,
+    "Headless Task",
+    "Updating Location History; Adding position.",
+  );
+
+  locationHistory.add(position);
+
+  FlutterLogs.logInfo(
+    LOG_TAG,
+    "Headless Task",
+    "Updating Location History; Saving...",
+  );
+
+  await locationHistory.save();
+
+  FlutterLogs.logInfo(
+    LOG_TAG,
+    "Headless Task",
+    "Updating Location History; Done!",
   );
 }
 
@@ -75,6 +109,18 @@ Future<void> runBackgroundTask({
     return;
   }
 
+  final location = locationData ?? await getLocationData();
+
+  try {
+    _updateLocation(location.asPosition());
+  } catch (error) {
+    FlutterLogs.logError(
+      LOG_TAG,
+      "Headless Task",
+      "Error while updating location history: $error",
+    );
+  }
+
   if (!force) {
     FlutterLogs.logInfo(
       LOG_TAG,
@@ -107,8 +153,6 @@ Future<void> runBackgroundTask({
     "Headless Task",
     "Executing headless task now.",
   );
-
-  final location = locationData ?? await getLocationData();
 
   FlutterLogs.logInfo(
     LOG_TAG,

@@ -31,7 +31,7 @@ import 'package:provider/provider.dart';
 const storage = FlutterSecureStorage();
 
 final StreamController<NotificationResponse> selectedNotificationsStream =
-StreamController.broadcast();
+    StreamController.broadcast();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -59,7 +59,7 @@ void main() async {
   );
 
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-  FlutterLocalNotificationsPlugin();
+      FlutterLocalNotificationsPlugin();
   const initializationSettings = InitializationSettings(
     android: AndroidInitializationSettings("ic_launcher_foreground"),
     iOS: DarwinInitializationSettings(),
@@ -105,7 +105,7 @@ void main() async {
             create: (_) => CurrentLocationService()),
         ChangeNotifierProvider<LocationHistory>(create: (_) => locationHistory),
       ],
-      child: const Stack(
+      child: const Column(
         children: [
           UpdateLocationHistory(),
           UniLinksHandler(),

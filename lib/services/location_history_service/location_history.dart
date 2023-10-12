@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:geolocator/geolocator.dart';
 
@@ -65,7 +67,14 @@ class LocationHistory extends ChangeNotifier {
     notifyListeners();
   }
 
-  void toJSON() => {
+  Map<String, dynamic> toJSON() => {
         "locations": locations.map((location) => location.toJson()).toList(),
       };
+
+  Future<void> save() async {
+    await storage.write(
+      key: KEY,
+      value: jsonEncode(toJSON()),
+    );
+  }
 }
