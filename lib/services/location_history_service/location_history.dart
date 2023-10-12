@@ -1,21 +1,23 @@
 import 'package:flutter/cupertino.dart';
+import 'package:geolocator/geolocator.dart';
 
 import "./constants.dart";
 import '../location_point_service.dart';
 
 class LocationHistory extends ChangeNotifier {
-  late final List<LocationPointService> locations;
+  late final List<Position> locations;
 
   LocationHistory(
-    final List<LocationPointService>? locations,
+    final List<Position>? locations,
   ) : locations = locations ?? [];
 
   factory LocationHistory.fromJSON(final Map<String, dynamic> data) =>
       LocationHistory(
         data["locations"] != null
-            ? List<LocationPointService>.from(
+            ? List<Position>.from(
                 data["locations"].map(
-                  (location) => LocationPointService.fromJSON(location),
+                  (location) =>
+                      Position.fromMap(location as Map<String, dynamic>),
                 ),
               )
             : null,
@@ -33,24 +35,28 @@ class LocationHistory extends ChangeNotifier {
 
   // To avoid too many crumbled locations, we only save locations that are at
   // least one minute apart
-  bool _canAdd(final LocationPointService location) {
+  bool _canAdd(final Position position) {
+    if (position.timestamp == null) {
+      return false;
+    }
+
     if (locations.isEmpty) {
       return true;
     }
 
-    return locations.last.createdAt
-            .difference(location.createdAt)
+    return locations.last.timestamp!
+            .difference(position.timestamp!)
             .inMinutes
             .abs() >
         1;
   }
 
-  void add(final LocationPointService location) {
-    if (!_canAdd(location)) {
+  void add(final Position position) {
+    if (!_canAdd(position)) {
       return;
     }
 
-    locations.add(location);
+    locations.add(position);
     notifyListeners();
   }
 
@@ -60,6 +66,6 @@ class LocationHistory extends ChangeNotifier {
   }
 
   void toJSON() => {
-        "locations": locations.map((location) => location.toJSON()).toList(),
+        "locations": locations.map((location) => location.toJson()).toList(),
       };
 }
