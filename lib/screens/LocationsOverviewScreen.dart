@@ -28,6 +28,7 @@ import 'package:locus/screens/locations_overview_screen_widgets/OutOfBoundMarker
 import 'package:locus/screens/locations_overview_screen_widgets/ShareLocationSheet.dart';
 import 'package:locus/screens/locations_overview_screen_widgets/ViewLocationPopup.dart';
 import 'package:locus/services/current_location_service.dart';
+import 'package:locus/services/location_history_service/index.dart';
 import 'package:locus/services/settings_service/index.dart';
 import 'package:locus/services/task_service/index.dart';
 import 'package:locus/services/view_service/index.dart';
@@ -488,6 +489,12 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
                 )
                 .expand((element) => element)
                 .map((location) => (selectedView!, location));
+    final ownLocations = context.watch<LocationHistory>().previewLocations.map(
+          (location) => LatLng(
+            location.latitude,
+            location.longitude,
+          ),
+        );
 
     if (settings.getMapProvider() == MapProvider.apple) {
       return apple_maps.AppleMap(
@@ -653,6 +660,20 @@ class _LocationsOverviewScreenState extends State<LocationsOverviewScreen>
           ),
         ),
         _buildUserMarkerLayer(),
+        if (ownLocations.isNotEmpty)
+          PolylineLayer(
+            polylines: [
+              Polyline(
+                strokeWidth: 10,
+                strokeJoin: StrokeJoin.round,
+                gradientColors: ownLocations
+                    .mapIndexed((index, _) => Colors.cyanAccent
+                        .withOpacity(index / ownLocations.length))
+                    .toList(),
+                points: ownLocations.toList(),
+              ),
+            ],
+          ),
         PopupMarkerLayer(
           options: PopupMarkerLayerOptions(
             markerTapBehavior: MarkerTapBehavior.togglePopupAndHideRest(),
