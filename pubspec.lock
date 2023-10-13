@@ -17,6 +17,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.5.1"
+  airplane_mode_checker:
+    dependency: "direct main"
+    description:
+      name: airplane_mode_checker
+      sha256: "16d7de1125056d6f7a9c5c1dc0056afe78c36a9e8fc39768ef9f9c21b07c0d5e"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
   analyzer:
     dependency: transitive
     description:
@@ -645,6 +653,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  fluttertoast:
+    dependency: transitive
+    description:
+      name: fluttertoast
+      sha256: "474f7d506230897a3cd28c965ec21c5328ae5605fc9c400cd330e9e9d6ac175c"
+      url: "https://pub.dev"
+    source: hosted
+    version: "8.2.2"
   frontend_server_client:
     dependency: transitive
     description:

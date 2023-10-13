@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:airplane_mode_checker/airplane_mode_checker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -30,7 +31,7 @@ void _showPermissionMissingNotification({
         AndroidChannelIDs.appIssues.name,
         l10n.androidNotificationChannel_appIssues_name,
         channelDescription:
-            l10n.androidNotificationChannel_appIssues_description,
+        l10n.androidNotificationChannel_appIssues_description,
         onlyAlertOnce: true,
         importance: Importance.max,
         priority: Priority.max,
@@ -78,6 +79,23 @@ Future<void> runBackgroundTask({
   final LocationPointService? locationData,
   final bool force = false,
 }) async {
+  FlutterLogs.logInfo(
+    LOG_TAG,
+    "Headless Task",
+    "Checking Airplane mode",
+  );
+
+  final status = await AirplaneModeChecker.checkAirplaneMode();
+
+  if (status == AirplaneModeStatus.on) {
+    FlutterLogs.logInfo(
+      LOG_TAG,
+      "Headless Task",
+      "----> Airplane mode is on. Skipping headless task.",
+    );
+    return;
+  }
+
   FlutterLogs.logInfo(
     LOG_TAG,
     "Headless Task",
