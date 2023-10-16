@@ -13,6 +13,17 @@ import 'package:locus/widgets/DismissKeyboard.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:provider/provider.dart';
 
+import 'app_wrappers/CheckViewAlarmsLive.dart';
+import 'app_wrappers/HandleNotifications.dart';
+import 'app_wrappers/InitCurrentLocationFromSettings.dart';
+import 'app_wrappers/ManageQuickActions.dart';
+import 'app_wrappers/PublishTaskPositionsOnUpdate.dart';
+import 'app_wrappers/RegisterBackgroundListeners.dart';
+import 'app_wrappers/ShowUpdateDialog.dart';
+import 'app_wrappers/UniLinksHandler.dart';
+import 'app_wrappers/UpdateLastLocationToSettings.dart';
+import 'app_wrappers/UpdateLocaleToSettings.dart';
+import 'app_wrappers/UpdateLocationHistory.dart';
 import 'constants/themes.dart';
 
 ColorScheme createColorScheme(
@@ -184,6 +195,22 @@ class App extends StatelessWidget {
           ),
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
+          builder: (context, child) => Stack(
+            children: [
+              const UpdateLocationHistory(),
+              const UniLinksHandler(),
+              const UpdateLastLocationToSettings(),
+              const RegisterBackgroundListeners(),
+              const UpdateLocaleToSettings(),
+              const HandleNotifications(),
+              const CheckViewAlarmsLive(),
+              const ManageQuickActions(),
+              const InitCurrentLocationFromSettings(),
+              const ShowUpdateDialog(),
+              const PublishTaskPositionsOnUpdate(),
+              if (child != null) child,
+            ],
+          ),
           onGenerateRoute: (routeSettings) {
             final screen = (() {
               if (settings.getRequireBiometricAuthenticationOnStart()) {

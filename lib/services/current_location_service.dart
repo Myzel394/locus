@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_map_location_marker/flutter_map_location_marker.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:locus/screens/LocationsOverviewScreen.dart';
 
 class CurrentLocationService extends ChangeNotifier {
   final StreamController<Position> _positionStreamController =
@@ -11,6 +12,7 @@ class CurrentLocationService extends ChangeNotifier {
   final StreamController<LocationMarkerPosition>
       _locationMarkerStreamController = StreamController.broadcast();
   Position? currentPosition;
+  LocationStatus locationStatus = LocationStatus.stale;
 
   Stream<Position> get stream => _positionStreamController.stream;
 

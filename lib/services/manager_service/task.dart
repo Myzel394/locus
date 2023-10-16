@@ -1,11 +1,14 @@
 import 'dart:convert';
 
+import 'package:airplane_mode_checker/airplane_mode_checker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_logs/flutter_logs.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:locus/constants/notifications.dart';
 import 'package:locus/constants/values.dart';
+import 'package:locus/services/location_history_service/index.dart';
 import 'package:locus/services/location_point_service.dart';
 import 'package:locus/services/manager_service/helpers.dart';
 import 'package:locus/services/settings_service/index.dart';
@@ -40,10 +43,59 @@ void _showPermissionMissingNotification({
   );
 }
 
+void _updateLocation(final Position position) async {
+  FlutterLogs.logInfo(
+    LOG_TAG,
+    "Headless Task",
+    "Updating Location History; Restoring...",
+  );
+
+  final locationHistory = await LocationHistory.restore();
+
+  FlutterLogs.logInfo(
+    LOG_TAG,
+    "Headless Task",
+    "Updating Location History; Adding position.",
+  );
+
+  locationHistory.add(position);
+
+  FlutterLogs.logInfo(
+    LOG_TAG,
+    "Headless Task",
+    "Updating Location History; Saving...",
+  );
+
+  await locationHistory.save();
+
+  FlutterLogs.logInfo(
+    LOG_TAG,
+    "Headless Task",
+    "Updating Location History; Done!",
+  );
+}
+
 Future<void> runBackgroundTask({
   final LocationPointService? locationData,
   final bool force = false,
 }) async {
+  FlutterLogs.logInfo(
+    LOG_TAG,
+    "Headless Task",
+    "Checking Airplane mode",
+  );
+
+  final status = await AirplaneModeChecker.checkAirplaneMode();
+
+  if (status == AirplaneModeStatus.on) {
+    FlutterLogs.logInfo(
+      LOG_TAG,
+      "Headless Task",
+      "----> Airplane mode is on. Skipping headless task.",
+    );
+    return;
+  }
+
   FlutterLogs.logInfo(
     LOG_TAG,
     "Headless Task",
@@ -75,6 +127,18 @@ Future<void> runBackgroundTask({
     return;
   }
 
+  final location = locationData ?? await getLocationData();
+
+  try {
+    _updateLocation(location.asPosition());
+  } catch (error) {
+    FlutterLogs.logError(
+      LOG_TAG,
+      "Headless Task",
+      "Error while updating location history: $error",
+    );
+  }
+
   if (!force) {
     FlutterLogs.logInfo(
       LOG_TAG,
@@ -89,7 +153,7 @@ Future<void> runBackgroundTask({
         DateTime.now().difference(settings.lastHeadlessRun!).abs() >
             BATTERY_SAVER_ENABLED_MINIMUM_TIME_BETWEEN_HEADLESS_RUNS;
 
-    if (shouldRunBasedOnBatterySaver && shouldRunBasedOnLastRun) {
+    if (!shouldRunBasedOnBatterySaver && !shouldRunBasedOnLastRun) {
       // We don't want to run the headless task too often when the battery saver is enabled.
       FlutterLogs.logInfo(
         LOG_TAG,
@@ -107,8 +171,6 @@ Future<void> runBackgroundTask({
     "Headless Task",
     "Executing headless task now.",
   );
-
-  final location = locationData ?? await getLocationData();
 
   FlutterLogs.logInfo(
     LOG_TAG,

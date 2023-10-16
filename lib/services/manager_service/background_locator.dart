@@ -68,7 +68,7 @@ Future<void> configureBackgroundLocator() {
   return BackgroundLocator.initialize();
 }
 
-Future<void> initializeBackgroundLocator(final BuildContext context,) {
+Future<void> registerBackgroundLocator(final BuildContext context) {
   final l10n = AppLocalizations.of(context);
 
   FlutterLogs.logInfo(
@@ -83,7 +83,7 @@ Future<void> initializeBackgroundLocator(final BuildContext context,) {
     androidSettings: AndroidSettings(
       accuracy: LocationAccuracy.HIGH,
       distanceFilter:
-      BACKGROUND_LOCATION_UPDATES_MINIMUM_DISTANCE_FILTER.toDouble(),
+          BACKGROUND_LOCATION_UPDATES_MINIMUM_DISTANCE_FILTER.toDouble(),
       client: isGMSFlavor ? LocationClient.google : LocationClient.android,
       androidNotificationSettings: AndroidNotificationSettings(
         notificationTitle: l10n.backgroundLocator_title,
@@ -95,7 +95,7 @@ Future<void> initializeBackgroundLocator(final BuildContext context,) {
     ),
     iosSettings: IOSSettings(
       distanceFilter:
-      BACKGROUND_LOCATION_UPDATES_MINIMUM_DISTANCE_FILTER.toDouble(),
+          BACKGROUND_LOCATION_UPDATES_MINIMUM_DISTANCE_FILTER.toDouble(),
       accuracy: LocationAccuracy.HIGH,
       showsBackgroundLocationIndicator: true,
       stopWithTerminate: false,

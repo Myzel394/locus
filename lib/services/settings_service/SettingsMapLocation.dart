@@ -1,3 +1,4 @@
+import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart';
 
 class SettingsLastMapLocation {
@@ -26,4 +27,18 @@ class SettingsLastMapLocation {
       };
 
   LatLng toLatLng() => LatLng(latitude, longitude);
+
+  Position asPosition() =>
+      Position(
+        latitude: latitude,
+        longitude: longitude,
+        accuracy: accuracy,
+        altitudeAccuracy: 0.0,
+        headingAccuracy: 0.0,
+        timestamp: DateTime.now(),
+        altitude: 0,
+        heading: 0,
+        speed: 0,
+        speedAccuracy: 0,
+      );
 }

@@ -6,7 +6,6 @@ import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:locus/constants/spacing.dart';
-import 'package:locus/init_quick_actions.dart';
 import 'package:locus/screens/LocationsOverviewScreen.dart';
 import 'package:locus/screens/welcome_screen_widgets/SimpleContinuePage.dart';
 import 'package:locus/services/settings_service/index.dart';
@@ -29,14 +28,6 @@ class WelcomeScreen extends StatefulWidget {
 
 class _WelcomeScreenState extends State<WelcomeScreen> {
   final PageController _controller = PageController();
-
-  @override
-  void initState() {
-    super.initState();
-
-    // Reset
-    actions.clearShortcutItems();
-  }
 
   @override
   void dispose() {
