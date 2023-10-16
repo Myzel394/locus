@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart'
     hide PlatformListTile;
 import 'package:intl/intl.dart';
 import 'package:locus/screens/TaskDetailScreen.dart';
+import 'package:locus/screens/locations_overview_screen_widgets/TaskChangeNameDialog.dart';
 import 'package:locus/services/task_service/index.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:locus/services/timers_service.dart';
 import 'package:locus/utils/date.dart';
 import 'package:locus/utils/navigation.dart';
@@ -70,6 +71,23 @@ class _TaskTileState extends State<TaskTile> with TaskLinkGenerationMixin {
     setState(() {});
   }
 
+  void _showChangeNameDialog() async => showPlatformDialog(
+        context: context,
+        builder: (context) => TaskChangeNameDialog(
+          initialName: widget.task.name,
+          onNameChanged: (newName) {
+            final taskService = context.read<TaskService>();
+
+            widget.task.name = newName;
+
+            taskService.save();
+            taskService.update(widget.task);
+
+            Navigator.of(context).pop();
+          },
+        ),
+      );
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -131,6 +149,7 @@ class _TaskTileState extends State<TaskTile> with TaskLinkGenerationMixin {
               : null,
         ),
       ),
+      onTap: _showChangeNameDialog,
     );
   }
 }
