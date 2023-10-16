@@ -2,6 +2,8 @@ import 'dart:math';
 
 import 'package:basic_utils/basic_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
 import 'package:intl/intl.dart';
@@ -13,7 +15,6 @@ import 'package:locus/utils/theme.dart';
 import 'package:locus/utils/ui-message/enums.dart';
 import 'package:locus/utils/ui-message/show-message.dart';
 import 'package:locus/widgets/ModalSheet.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:locus/widgets/ModalSheetContent.dart';
 import 'package:locus/widgets/PlatformRadioTile.dart';
 import 'package:locus/widgets/RequestBatteryOptimizationsDisabledMixin.dart';
@@ -174,9 +175,15 @@ class _ShareLocationSheetState extends State<ShareLocationSheet>
     return endDate;
   }
 
-  String formatEndDate(final DateTime date) => date.isSameDay(DateTime.now())
-      ? DateFormat.Hm().format(date)
-      : DateFormat.yMd().add_Hm().format(date);
+  String formatEndDate(final DateTime date) {
+    if (date.isSameDay(DateTime.now())) {
+      return DateFormat.Hm().format(date);
+    } else if (date.isSameDay(DateTime.now().add(1.days))) {
+      return DateFormat.EEEE().add_Hm().format(date);
+    } else {
+      return DateFormat.MMMEd().add_Hm().format(date);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
