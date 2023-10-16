@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_logs/flutter_logs.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart'
     hide PlatformListTile;
-import 'package:locus/screens/locations_overview_screen_widgets/LocationFetchers.dart';
+import 'package:locus/constants/values.dart';
+import 'package:locus/services/location_fetcher_service/Fetcher.dart';
+import 'package:locus/services/location_point_service.dart';
 import 'package:locus/services/view_service/index.dart';
-import 'package:provider/provider.dart';
+import 'package:locus/utils/load_status.dart';
 
 import '../../constants/spacing.dart';
 import '../../utils/theme.dart';
@@ -27,7 +30,8 @@ class ViewImportOverview extends StatefulWidget {
 
 class _ViewImportOverviewState extends State<ViewImportOverview> {
   final LocationsMapController _controller = LocationsMapController();
-  final bool _isError = false;
+
+  LoadStatus loadStatus = LoadStatus.loading;
 
   double timeOffset = 0;
 
@@ -35,12 +39,7 @@ class _ViewImportOverviewState extends State<ViewImportOverview> {
   void initState() {
     super.initState();
 
-    final fetchers = context.read<LocationFetchers>();
-    final lastLocation = fetchers.getLocations(widget.view).lastOrNull;
-
-    if (lastLocation != null) {
-      _controller.add(lastLocation);
-    }
+    _fetchLocation().then(_updateMap);
   }
 
   @override
@@ -48,6 +47,48 @@ class _ViewImportOverviewState extends State<ViewImportOverview> {
     _controller.dispose();
 
     super.dispose();
+  }
+
+  void _updateMap(final LocationPointService location) {
+    _controller.add(location);
+  }
+
+  Future<LocationPointService> _fetchLocation() async {
+    FlutterLogs.logInfo(
+      LOG_TAG,
+      "ViewImportOverview",
+      "Fetching new locations...",
+    );
+
+    try {
+      final fetcher = Fetcher(widget.view);
+
+      await fetcher.fetchPreviewLocations();
+
+      FlutterLogs.logInfo(
+        LOG_TAG,
+        "ViewImportOverview",
+        "Fetched locations successfully!",
+      );
+
+      setState(() {
+        loadStatus = LoadStatus.success;
+      });
+
+      return fetcher.sortedLocations.last;
+    } catch (error) {
+      FlutterLogs.logError(
+        LOG_TAG,
+        "ViewImportOverview",
+        "Error while fetching locations: $error",
+      );
+
+      setState(() {
+        loadStatus = LoadStatus.error;
+      });
+
+      rethrow;
+    }
   }
 
   @override
@@ -79,7 +120,8 @@ class _ViewImportOverviewState extends State<ViewImportOverview> {
             ),
           ],
         ),
-        if (_isError)
+        const SizedBox(height: MEDIUM_SPACE),
+        if (loadStatus == LoadStatus.error)
           Text(
             l10n.locationsLoadingError,
             style: TextStyle(
@@ -92,17 +134,22 @@ class _ViewImportOverviewState extends State<ViewImportOverview> {
             textAlign: TextAlign.center,
             style: getSubTitleTextStyle(context),
           ),
-          const SizedBox(height: MEDIUM_SPACE),
-          SizedBox(
-            width: double.infinity,
-            height: 200,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(MEDIUM_SPACE),
-              child: LocationsMap(
-                controller: _controller,
+          const SizedBox(height: SMALL_SPACE),
+          if (loadStatus == LoadStatus.loading)
+            const Center(
+              child: CircularProgressIndicator(),
+            )
+          else
+            SizedBox(
+              width: double.infinity,
+              height: 200,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(MEDIUM_SPACE),
+                child: LocationsMap(
+                  controller: _controller,
+                ),
               ),
             ),
-          ),
         ],
         const SizedBox(height: MEDIUM_SPACE),
         PlatformElevatedButton(
