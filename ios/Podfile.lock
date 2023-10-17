@@ -1,4 +1,6 @@
 PODS:
+  - airplane_mode_checker (0.0.1):
+    - Flutter
   - Alamofire (5.6.2)
   - apple_maps_flutter (0.0.1):
     - Flutter
@@ -61,6 +63,9 @@ PODS:
     - Tangram-es
   - flutter_secure_storage (6.0.0):
     - Flutter
+  - fluttertoast (0.0.2):
+    - Flutter
+    - Toast
   - geocoding_ios (1.0.5):
     - Flutter
   - geolocator_apple (1.2.0):
@@ -84,6 +89,7 @@ PODS:
     - Flutter
   - SwiftyGif (5.4.4)
   - Tangram-es (0.17.1)
+  - Toast (4.0.0)
   - uni_links (0.0.1):
     - Flutter
   - url_launcher_ios (0.0.1):
@@ -95,6 +101,7 @@ PODS:
   - ZIPFoundation (0.9.15)
 
 DEPENDENCIES:
+  - airplane_mode_checker (from `.symlinks/plugins/airplane_mode_checker/ios`)
   - apple_maps_flutter (from `.symlinks/plugins/apple_maps_flutter/ios`)
   - background_fetch (from `.symlinks/plugins/background_fetch/ios`)
   - background_locator_2 (from `.symlinks/plugins/background_locator_2/ios`)
@@ -108,6 +115,7 @@ DEPENDENCIES:
   - flutter_logs (from `.symlinks/plugins/flutter_logs/ios`)
   - flutter_osm_plugin (from `.symlinks/plugins/flutter_osm_plugin/ios`)
   - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
+  - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
   - geocoding_ios (from `.symlinks/plugins/geocoding_ios/ios`)
   - geolocator_apple (from `.symlinks/plugins/geolocator_apple/ios`)
   - local_auth_ios (from `.symlinks/plugins/local_auth_ios/ios`)
@@ -130,9 +138,12 @@ SPEC REPOS:
     - SDWebImage
     - SwiftyGif
     - Tangram-es
+    - Toast
     - ZIPFoundation
 
 EXTERNAL SOURCES:
+  airplane_mode_checker:
+    :path: ".symlinks/plugins/airplane_mode_checker/ios"
   apple_maps_flutter:
     :path: ".symlinks/plugins/apple_maps_flutter/ios"
   background_fetch:
@@ -159,6 +170,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_osm_plugin/ios"
   flutter_secure_storage:
     :path: ".symlinks/plugins/flutter_secure_storage/ios"
+  fluttertoast:
+    :path: ".symlinks/plugins/fluttertoast/ios"
   geocoding_ios:
     :path: ".symlinks/plugins/geocoding_ios/ios"
   geolocator_apple:
@@ -185,6 +198,7 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/wakelock/ios"
 
 SPEC CHECKSUMS:
+  airplane_mode_checker: 9b8bad217c83930f615c116da57127646d123471
   Alamofire: d368e1ff8a298e6dde360e35a3e68e6c610e7204
   apple_maps_flutter: c59725efea39e13e703cde52a1d2b14866ad68a8
   background_fetch: bc9b44b0bf8b434e282a2ac9be8662800a0296ed
@@ -201,6 +215,7 @@ SPEC CHECKSUMS:
   flutter_logs: 5d0dca26963e0f30b11a995a764744ef77d5d428
   flutter_osm_plugin: 029b14f54485ced3190bb2c4444616b76e10c6a8
   flutter_secure_storage: 23fc622d89d073675f2eaa109381aefbcf5a49be
+  fluttertoast: fafc4fa4d01a6a9e4f772ecd190ffa525e9e2d9c
   geocoding_ios: a389ea40f6f548de6e63006a2e31bf66ff80769a
   geolocator_apple: cc556e6844d508c95df1e87e3ea6fa4e58c50401
   local_auth_ios: c6cf091ded637a88f24f86a8875d8b0f526e2605
@@ -213,6 +228,7 @@ SPEC CHECKSUMS:
   share_plus: 599aa54e4ea31d4b4c0e9c911bcc26c55e791028
   SwiftyGif: 93a1cc87bf3a51916001cf8f3d63835fb64c819f
   Tangram-es: 628b634f7fc09d2217469b9914de00d9de49ff9d
+  Toast: 91b396c56ee72a5790816f40d3a94dd357abc196
   uni_links: d97da20c7701486ba192624d99bffaaffcfc298a
   url_launcher_ios: 08a3dfac5fb39e8759aeb0abbd5d9480f30fc8b4
   vibration: 7d883d141656a1c1a6d8d238616b2042a51a1241
