@@ -171,7 +171,7 @@
   "taskAction_generateLink_process_creatingURI": "Creating link...",
   "taskAction_generateLink_shareTextSubject": "Here's the link to see my location",
   "taskAction_showDetails": "Show Details",
-  "taskAction_changeName": "Change the Name of your Share",
+  "taskAction_changeName": "Change name",
   "taskAction_changeName_field_label": "Name",
   "tasks_action_stopAll": "Stop tasks",
   "tasks_action_startAll": "Start tasks",

@@ -126,6 +126,13 @@ class _TaskTileState extends State<TaskTile> with TaskLinkGenerationMixin {
                       ),
                     );
                   },
+                ),
+                PlatformPopupMenuItem(
+                  label: PlatformListTile(
+                    leading: Icon(context.platformIcons.edit),
+                    title: Text(l10n.taskAction_changeName),
+                  ),
+                  onPressed: _showChangeNameDialog,
                 )
               ],
             ),
@@ -149,7 +156,6 @@ class _TaskTileState extends State<TaskTile> with TaskLinkGenerationMixin {
               : null,
         ),
       ),
-      onTap: _showChangeNameDialog,
     );
   }
 }

@@ -94,6 +94,9 @@ class _TaskChangeNameDialogState extends State<TaskChangeNameDialog> {
           textInputAction: TextInputAction.done,
           keyboardType: TextInputType.name,
           maxLines: 1,
+          cupertino: (_, __) => CupertinoTextFormFieldData(
+            placeholder: l10n.taskAction_changeName_field_label,
+          ),
           material: (_, __) => MaterialTextFormFieldData(
             decoration: InputDecoration(
               filled: false,
