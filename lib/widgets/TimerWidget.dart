@@ -65,12 +65,14 @@ class TimerController extends ChangeNotifier {
 
 class TimerWidget extends StatefulWidget {
   final TimerController? controller;
+  final ScrollController? scrollController;
   final List<TaskRuntimeTimer> timers;
   final bool allowEdit;
   final ScrollPhysics? physics;
 
   const TimerWidget({
     this.controller,
+    this.scrollController,
     this.timers = const [],
     this.allowEdit = true,
     this.physics,
@@ -126,6 +128,7 @@ class _TimerWidgetState extends State<TimerWidget> {
   Widget build(BuildContext context) {
     return ListView.builder(
       shrinkWrap: true,
+      controller: widget.scrollController,
       physics: widget.physics,
       itemCount: _controller.timers.length,
       itemBuilder: (_, index) {
