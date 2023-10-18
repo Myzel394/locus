@@ -52,8 +52,8 @@ class _TimerWidgetSheetState extends State<TimerWidgetSheet> {
     final l10n = AppLocalizations.of(context);
 
     return DraggableScrollableSheet(
-      initialChildSize: 0.6,
-      minChildSize: 0.6,
+      initialChildSize: 0.5,
+      minChildSize: 0.5,
       maxChildSize: 1,
       expand: false,
       builder: (context, controller) => ModalSheet(
@@ -90,50 +90,31 @@ class _TimerWidgetSheetState extends State<TimerWidgetSheet> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
-                  PlatformPopup<String>(
-                    type: PlatformPopupType.longPress,
-                    items: List<PlatformPopupMenuItem<String>>.from(
-                      WEEKDAY_TIMERS.entries.map(
-                        (entry) => PlatformPopupMenuItem<String>(
-                          label: Text(entry.value["name"] as String),
-                          onPressed: () {
-                            widget.controller.clear();
-
-                            final timers =
-                                entry.value["timers"] as List<WeekdayTimer>;
-                            widget.controller.addAll(timers);
-
-                            Navigator.pop(context);
-                          },
-                        ),
-                      ),
+                  PlatformTextButton(
+                    child: Text(l10n.timer_addWeekday),
+                    material: (_, __) => MaterialTextButtonData(
+                      icon: const Icon(Icons.date_range_rounded),
                     ),
-                    child: PlatformTextButton(
-                      child: Text(l10n.timer_addWeekday),
-                      material: (_, __) => MaterialTextButtonData(
-                        icon: const Icon(Icons.date_range_rounded),
-                      ),
-                      onPressed: () async {
-                        final data = await showPlatformDialog(
-                          context: context,
-                          builder: (_) => const WeekdaySelection(),
+                    onPressed: () async {
+                      final data = await showPlatformDialog(
+                        context: context,
+                        builder: (_) => const WeekdaySelection(),
+                      );
+
+                      if (!mounted) {
+                        return;
+                      }
+
+                      if (data != null) {
+                        widget.controller.add(
+                          WeekdayTimer(
+                            day: data["weekday"] as int,
+                            startTime: data["startTime"] as TimeOfDay,
+                            endTime: data["endTime"] as TimeOfDay,
+                          ),
                         );
-
-                        if (!mounted) {
-                          return;
-                        }
-
-                        if (data != null) {
-                          widget.controller.add(
-                            WeekdayTimer(
-                              day: data["weekday"] as int,
-                              startTime: data["startTime"] as TimeOfDay,
-                              endTime: data["endTime"] as TimeOfDay,
-                            ),
-                          );
-                        }
-                      },
-                    ),
+                      }
+                    },
                   ),
                   PlatformTextButton(
                     child: Text(l10n.timer_addDuration),
