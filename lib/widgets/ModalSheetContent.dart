@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_platform_widgets/flutter_platform_widgets.dart';
+import 'package:locus/services/settings_service/index.dart';
 import 'package:locus/utils/theme.dart';
 import 'package:provider/provider.dart';
 
 import '../constants/spacing.dart';
-import 'package:locus/services/settings_service/index.dart';
 
 class ModalSheetContent extends StatelessWidget {
   final String title;
@@ -61,7 +61,7 @@ class ModalSheetContent extends StatelessWidget {
             style: getCaptionTextStyle(context),
           ),
         ],
-        const SizedBox(height: LARGE_SPACE),
+        if (isMaterial(context)) const SizedBox(height: LARGE_SPACE),
         ...children,
         if (submitLabel != null) ...[
           const SizedBox(height: LARGE_SPACE),

@@ -59,10 +59,15 @@ class _SharesOverviewScreenState extends State<SharesOverviewScreen> {
           floatingActionButton: OpenContainer(
         transitionDuration: const Duration(milliseconds: 500),
         transitionType: ContainerTransitionType.fadeThrough,
-        openBuilder: (_, action) => CreateTaskScreen(
-          onCreated: () {
-            Navigator.pop(context);
-          },
+        openBuilder: (_, action) => Scaffold(
+          appBar: AppBar(
+            title: Text(l10n.sharesOverviewScreen_createTask_action_create),
+          ),
+          body: CreateTaskScreen(
+            onCreated: () {
+              Navigator.pop(context);
+            },
+          ),
         ),
         closedBuilder: (context, action) => InkWell(
           onTap: action,
