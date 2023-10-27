@@ -79,10 +79,16 @@ class _EmptyScreenState extends State<EmptyScreen> {
                   OpenContainer(
                     transitionDuration: const Duration(milliseconds: 700),
                     transitionType: ContainerTransitionType.fade,
-                    openBuilder: (context, action) => CreateTaskScreen(
-                      onCreated: () {
-                        Navigator.pop(context);
-                      },
+                    openBuilder: (context, action) => PlatformScaffold(
+                      appBar: PlatformAppBar(
+                        title: Text(
+                            l10n.sharesOverviewScreen_createTask_action_create),
+                      ),
+                      body: CreateTaskScreen(
+                        onCreated: () {
+                          Navigator.pop(context);
+                        },
+                      ),
                     ),
                     closedShape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(
