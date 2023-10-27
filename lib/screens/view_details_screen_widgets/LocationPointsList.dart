@@ -67,8 +67,8 @@ class _LocationPointsListState extends State<LocationPointsList> {
     final locationFetchers = context.watch<LocationFetchers>();
     final fetcher = locationFetchers.findFetcher(widget.view)!;
     final locations = fetcher.isLoading
-        ? fetcher.sortedLocations
-        : fetcher.locations.toList();
+        ? fetcher.locations.toList()
+        : fetcher.sortedLocations.toList();
 
     return ListView.builder(
       shrinkWrap: true,
