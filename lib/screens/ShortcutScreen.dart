@@ -102,9 +102,10 @@ class _ShortcutScreenState extends State<ShortcutScreen> {
           );
           await Future.wait(
             tasks.map(
-              (task) => task.publisher.publishLocation(
-                locationPoint.copyWithDifferentId(),
-              ),
+                  (task) =>
+                  task.publisher.publishLocation(
+                    locationPoint.copyWithDifferentId(),
+                  ),
             ),
           );
 
@@ -116,10 +117,11 @@ class _ShortcutScreenState extends State<ShortcutScreen> {
               accuracy: locationPoint.accuracy,
               tasks: List<UpdatedTaskData>.from(
                 tasks.map(
-                  (task) => UpdatedTaskData(
-                    id: task.id,
-                    name: task.name,
-                  ),
+                      (task) =>
+                      UpdatedTaskData(
+                        id: task.id,
+                        name: task.name,
+                      ),
                 ),
               ),
             ),
@@ -141,11 +143,7 @@ class _ShortcutScreenState extends State<ShortcutScreen> {
         return;
       }
 
-      if (isPlatformApple()) {
-        Navigator.of(context).pop();
-      } else {
-        SystemNavigator.pop();
-      }
+      Navigator.of(context).pop();
     } catch (_) {
       if (!mounted) {
         return;
