@@ -72,6 +72,4 @@ You can donate via:
 
 * [GitHub Sponsors](https://github.com/sponsors/Myzel394)
 * Bitcoin: `bc1qw054829yj8e2u8glxnfcg3w22dkek577mjt5x6`
-*
-
-Monero: `83dm5wyuckG4aPbuMREHCEgLNwVn5i7963SKBhECaA7Ueb7DKBTy639R3QfMtb3DsFHMp8u6WGiCFgbdRDBBcz5sLduUtm8`
+* Monero: `83dm5wyuckG4aPbuMREHCEgLNwVn5i7963SKBhECaA7Ueb7DKBTy639R3QfMtb3DsFHMp8u6WGiCFgbdRDBBcz5sLduUtm8`
