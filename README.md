@@ -36,7 +36,7 @@ locked to a service. No authentication required.
 
 # Download
 
-**iOS currently does not have a release. You will need to build and install the app yourself.**
+A community member has provided Locus builds for iOS [here](https://jbmagination.com/locus-ios).
 
 Locus comes in two variants for Android:
 
