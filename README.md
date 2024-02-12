@@ -36,14 +36,14 @@ locked to a service. No authentication required.
 
 # Download
 
-A community member has provided Locus builds for iOS [here](https://jbmagination.com/locus-ios).
-
 Locus comes in two variants for Android:
 
 * GMS: This variant uses Google Play Services to get your location. **If you have Google Play Services
   installed**, you **must use** this variant. F-Droid uses this version
 * FLOSS: This variant is completely libre and does not use any proprietary software. If you have **NO
   Google Play Services installed**, you **must use** this variant.
+
+A community member has provided Locus builds for iOS [here](https://jbmagination.com/locus-ios).
 
 When downloading from GitHub, you can choose from both options.
 
