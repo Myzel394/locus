@@ -61,6 +61,9 @@ Add a new feature or fix bugs.
 ## Add translations
 
 Translate Locus into your language so that other people can use it more easily.
+- [x] en 
+- [ ] pt *translating file*
+- [x] tr
 
 ## Donate
 
