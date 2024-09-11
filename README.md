@@ -1,3 +1,5 @@
+# Locus is no longer maintained. See [#160](https://github.com/Myzel394/locus/issues/160) for more info
+
 # Locus
 
 <p float="left" align="center">
